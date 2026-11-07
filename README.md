@@ -11,7 +11,7 @@
 
 ## 현재 상태
 
-현재 버전은 **개발 규격 초안 v0.1**입니다. 실행되는 웹앱이나 실제 최적화 엔진은 아직 구현하지 않았습니다.
+현재 계약은 **개발 규격 초안 v0.1**입니다. 엔진의 첫 단계인 **B0 원안 진단과 B1 마감순 배치**를 구현했습니다. 웹앱·독립 일정 검사·승인과 B2/B3 최적화는 아직 구현하지 않았습니다.
 
 | 구분 | 상태 |
 |---|---|
@@ -20,11 +20,14 @@
 | DB | SQLite 기준 16개 테이블·133개 필드, 실행 가능한 초기 스키마 |
 | 예제 | 모의 입력·설명용 결과·오류 사례·CSV 제공 |
 | 검수 | 계약·예제 검사 29건, DB 검사 32건 통과 |
-| 웹앱·최적화 엔진·인증 | 구현 예정 |
+| 엔진 첫 구현 | B0/B1 로컬 실행·엔진 테스트 43건. B2/B3 미구현 |
+| 웹앱·독립 일정 검사·승인·인증 | 구현 예정 |
 | 외부 API 연동·실제 운송 자료 | 권한·표본 확인 필요 |
 | 최종 대회 보고서·발표자료 | 준비 중 |
 
-검수 통과는 **명세·저장 구조·제공 예제**에 대한 결과입니다. 현장 성능이나 실제 최적화 효과를 검증했다는 뜻은 아닙니다.
+검수는 **명세·저장 구조·예제와 B0/B1 동작**을 대상으로 합니다. 실제 운송 자료의 효과나 최적성 검증은 아닙니다.
+
+[엔진 실행·연결 안내](backend/engine/README.md) · [모의 예제의 실계산 결과](docs/experiments/engine-b0-b1/README.md) · [API 담당 인계](docs/team/handoffs/2026-11-07-unknownamed-engine-b0-b1.md)
 
 ## 팀원이 처음 작업할 때
 
@@ -95,11 +98,12 @@ Python 백엔드 하나 안에서 모듈을 나누는 방향입니다. 프론트
 ## 검수 재실행
 
 Python 3.12 기준입니다. 별도 가상환경에서 아래 명령을 실행합니다.
-이 명령은 계약·예제와 메모리 DB를 검사하며 웹앱이나 외부 API를 실행하지 않습니다.
+아래 명령은 계약·예제·메모리 DB와 엔진을 검사하며 웹앱이나 외부 API를 실행하지 않습니다.
 
 ```sh
 python -m pip install -r "docs/development/v0.1/검수/requirements-validation.txt"
 python tools/check_development.py
+python -m unittest discover -s tests/engine -v
 ```
 
 원본을 보존하도록 임시 복사본에서 검사합니다. PR과 `main` 변경 시 GitHub Actions도 같은 검사를 수행합니다.
@@ -118,7 +122,7 @@ python tools/check_development.py
 
 프로젝트 저장소: **https://github.com/unknownamed/banipmatch**
 
-현재 보관된 산출물은 위 개발 문서와 규격·모의 예제입니다.
+현재 보관된 산출물은 위 개발 문서·규격·모의 예제와 B0/B1 코드·계산 결과입니다.
 최종 대회 보고서와 발표자료는 완성 후 [문서 목록](docs/README.md)에 추가합니다.
 보고서 제출 시에는 해당 시점의 커밋 또는 태그 주소를 함께 적어, 어떤 버전을 사용했는지 확인할 수 있게 할 예정입니다.
 
@@ -135,9 +139,12 @@ CONTRIBUTING.md        # 도구별 시작·PR·검수·인계
 .github/               # Copilot 안내·CODEOWNERS·PR 양식·CI
 .cursor/rules/         # Cursor에서 공통 기준 읽기
 tools/                 # 원본을 보존하는 검수 실행 도구
+backend/engine/        # B0/B1 계산·진단·지표·로컬 실행
+tests/engine/          # 엔진 동작·실패 경계 검증
 docs/
   README.md
   team/                # 역할·현재 상태·인계 양식
+  experiments/         # 모의 실계산 결과와 해석
   development/v0.1/
     공통 개발 규격 PDF
     담당별 문서/       # 프론트·데이터·최적화·API·통합
