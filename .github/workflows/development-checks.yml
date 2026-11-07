@@ -45,5 +45,5 @@ jobs:
           python-version: '3.12'
       - name: Install backend test dependencies
         run: python -m pip install -r requirements-dev.txt -r backend/data/requirements.txt
-      - name: Test data inputs, API, persistence, and B0/B1 engine
+      - name: Test data inputs, API, persistence, and B0-B3 engine
         run: python -m pytest -q

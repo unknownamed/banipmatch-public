@@ -7,7 +7,7 @@ from time import monotonic
 from .context import Context, EngineInputError, issue, minute, stamp
 from .metrics import MissingTravelTimeError, calculate_metrics
 
-ENGINE_VERSION = "0.1.2-b0-b1"
+ENGINE_VERSION = "0.2.0-b0-b3"
 
 
 def _job_issues(c: Context, a: dict) -> list[dict]:
@@ -242,12 +242,58 @@ def _unassigned_issue(c: Context, jid: str, timed_out: bool, missing_paths: set[
     return [issue(jid, "SEARCH_LIMIT", "시간 예산 내 삽입 탐색이 끝나지 않았습니다." if timed_out else "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.", "not_proven", c.refs(jid))]
 
 
+def _insert(c: Context, deadline: float):
+    """Shared B1 construction, also used as an in-budget optimization seed."""
+    timed_out = False
+    routes = {vid: [a["job_id"] for a in sorted(c.base.values(), key=lambda a: a["sequence"])
+                    if a["vehicle_id"] == vid and c.jobs[a["job_id"]]["frozen"]]
+              for vid in sorted(c.vehicles)}
+    schedules = {vid: [copy.deepcopy(c.base[jid]) for jid in ids] for vid, ids in routes.items()}
+    ordered = sorted((jid for jid, j in c.jobs.items() if not j["frozen"]),
+                     key=lambda jid: (minute(c.window(jid)["closes_at"]), jid))
+    unassigned = []
+    missing_paths_by_job = {jid: set() for jid in ordered}
+    for idx, jid in enumerate(ordered):
+        best = None
+        for vid, route in routes.items():
+            for pos in range(len(route) + 1):
+                if monotonic() >= deadline:
+                    timed_out = True
+                    break
+                candidate_ids = route[:pos] + [jid] + route[pos:]
+                candidate = _schedule(c, vid, candidate_ids, missing_paths_by_job[jid])
+                if candidate is None:
+                    continue
+                # Fixed lexical tie-break; no future data or random advantage.
+                added = next(a for a in candidate if a["job_id"] == jid)
+                key = (minute(added["gate_arrival_at"]), vid, pos)
+                if best is None or key < best[0]:
+                    best = (key, vid, candidate_ids, candidate)
+            if timed_out:
+                break
+        if best is not None:
+            _, vid, routes[vid], schedules[vid] = best
+        else:
+            unassigned.append(jid)
+        if timed_out:
+            unassigned.extend(ordered[idx + 1:])
+            break
+    assignments = [a for vid in sorted(schedules) for a in schedules[vid]]
+    issues = _diagnose(c, assignments)
+    for jid in unassigned:
+        issues.extend(_unassigned_issue(c, jid, timed_out, missing_paths_by_job[jid]))
+    return assignments, unassigned, issues, timed_out
+
+
 def solve(snapshot: dict, method: str = "B0", config: dict | None = None) -> dict:
     """Return one v0.1 MethodResult. External validation/approval remains separate."""
-    if method in ("B2", "B3"):
-        raise NotImplementedError("B2/B3 사전식 최적화는 후속 구현입니다. B1을 최적해로 바꿔 표시하지 않습니다.")
-    if method not in ("B0", "B1"):
+    if method not in ("B0", "B1", "B2", "B3"):
         raise ValueError(f"Unknown method: {method}")
+    if method in ("B2", "B3"):
+        from .optimization import solve_optimized
+        # Dependency loading is setup, not one method's optimization budget.
+        config = dict(seed=0, time_limit_seconds=10) if config is None else config
+        return solve_optimized(snapshot, method, config, monotonic(), ENGINE_VERSION)
     started = monotonic()
     config = dict(seed=0, time_limit_seconds=10) if config is None else config
     c = Context(snapshot, config)
@@ -260,43 +306,7 @@ def solve(snapshot: dict, method: str = "B0", config: dict | None = None) -> dic
             issues.extend(c.missing_job(jid))
         status = "BASELINE"
     else:
-        routes = {vid: [a["job_id"] for a in sorted(c.base.values(), key=lambda a: a["sequence"])
-                        if a["vehicle_id"] == vid and c.jobs[a["job_id"]]["frozen"]]
-                  for vid in sorted(c.vehicles)}
-        schedules = {vid: [copy.deepcopy(c.base[jid]) for jid in ids] for vid, ids in routes.items()}
-        ordered = sorted((jid for jid, j in c.jobs.items() if not j["frozen"]),
-                         key=lambda jid: (minute(c.window(jid)["closes_at"]), jid))
-        unassigned = []
-        missing_paths_by_job = {jid: set() for jid in ordered}
-        for idx, jid in enumerate(ordered):
-            best = None
-            for vid, route in routes.items():
-                for pos in range(len(route) + 1):
-                    if monotonic() - started >= config["time_limit_seconds"]:
-                        timed_out = True
-                        break
-                    candidate_ids = route[:pos] + [jid] + route[pos:]
-                    candidate = _schedule(c, vid, candidate_ids, missing_paths_by_job[jid])
-                    if candidate is None:
-                        continue
-                    # Fixed lexical tie-break; no future data or random advantage.
-                    added = next(a for a in candidate if a["job_id"] == jid)
-                    key = (minute(added["gate_arrival_at"]), vid, pos)
-                    if best is None or key < best[0]:
-                        best = (key, vid, candidate_ids, candidate)
-                if timed_out:
-                    break
-            if best is not None:
-                _, vid, routes[vid], schedules[vid] = best
-            else:
-                unassigned.append(jid)
-            if timed_out:
-                unassigned.extend(ordered[idx + 1:])
-                break
-        assignments = [a for vid in sorted(schedules) for a in schedules[vid]]
-        issues = _diagnose(c, assignments)
-        for jid in unassigned:
-            issues.extend(_unassigned_issue(c, jid, timed_out, missing_paths_by_job[jid]))
+        assignments, unassigned, issues, timed_out = _insert(c, started + config["time_limit_seconds"])
         status = "HEURISTIC"
     if any(i["code"] in ("INPUT_MISSING", "WINDOW_UNCONFIRMED") for i in issues):
         status = "INPUT_INCOMPLETE"

@@ -1,0 +1,5228 @@
+{
+  "data_mode": "simulated",
+  "config_per_method": {
+    "seed": 0,
+    "time_limit_seconds": 3
+  },
+  "python": "3.12.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "external_warm_start": false,
+  "records": [
+    {
+      "input_file": "01_common.json",
+      "input_sha256": "1f6b7ea4e54e0e289d6aeda289e3edaf803c566e6657cd2101a1f618e8c76010",
+      "scenario_id": "DEMO-01_common",
+      "job_count": 4,
+      "vehicle_count": 2,
+      "results": [
+        {
+          "method": "B0",
+          "result_origin": "computed",
+          "solution_status": "BASELINE",
+          "assignments": [
+            {
+              "job_id": "J0",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-06T23:50:00Z",
+              "gate_arrival_at": "2026-11-07T00:20:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:10:00Z",
+              "gate_arrival_at": "2026-11-07T01:40:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            },
+            {
+              "job_id": "J2",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:30:00Z"
+            },
+            {
+              "job_id": "J3",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T02:00:00Z",
+              "gate_arrival_at": "2026-11-07T02:30:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [
+            {
+              "job_id": "J1",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T01:50:00Z > 마감 2026-11-07T01:30:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J3",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 2,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 150,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "baseline-diagnosis",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B1",
+          "result_origin": "computed",
+          "solution_status": "HEURISTIC",
+          "assignments": [
+            {
+              "job_id": "J0",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-06T23:50:00Z",
+              "gate_arrival_at": "2026-11-07T00:20:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J2",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:10:00Z",
+              "gate_arrival_at": "2026-11-07T01:40:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            },
+            {
+              "job_id": "J1",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:10:00Z",
+              "gate_arrival_at": "2026-11-07T00:40:00Z",
+              "return_at": "2026-11-07T01:20:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J3"
+          ],
+          "issues": [
+            {
+              "job_id": "J3",
+              "code": "READY_TOO_LATE",
+              "explanation": "준비 2026-11-07T02:00:00Z + 적재 30분 + 여유 10분 = 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 1,
+            "feasible_movable_count": 2,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "vehicle_changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "movable_travel_minutes": 100,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "deadline-insertion",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B2",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J0",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-06T23:50:00Z",
+              "gate_arrival_at": "2026-11-07T00:20:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J2",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:10:00Z",
+              "gate_arrival_at": "2026-11-07T01:40:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            },
+            {
+              "job_id": "J1",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:10:00Z",
+              "gate_arrival_at": "2026-11-07T00:40:00Z",
+              "return_at": "2026-11-07T01:20:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J3"
+          ],
+          "issues": [
+            {
+              "job_id": "J3",
+              "code": "READY_TOO_LATE",
+              "explanation": "준비 2026-11-07T02:00:00Z + 적재 30분 + 여유 10분 = 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 1,
+            "feasible_movable_count": 2,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "vehicle_changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "movable_travel_minutes": 100,
+            "elapsed_ms": 16,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 1,
+              "best_bound": 1.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 100,
+              "best_bound": 100.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B3",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J0",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-06T23:50:00Z",
+              "gate_arrival_at": "2026-11-07T00:20:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J2",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:10:00Z",
+              "gate_arrival_at": "2026-11-07T01:40:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            },
+            {
+              "job_id": "J1",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:10:00Z",
+              "gate_arrival_at": "2026-11-07T00:40:00Z",
+              "return_at": "2026-11-07T01:20:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J3"
+          ],
+          "issues": [
+            {
+              "job_id": "J3",
+              "code": "READY_TOO_LATE",
+              "explanation": "준비 2026-11-07T02:00:00Z + 적재 30분 + 여유 10분 = 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 1,
+            "feasible_movable_count": 2,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "vehicle_changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1",
+              "J2"
+            ],
+            "movable_travel_minutes": 100,
+            "elapsed_ms": 15,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 1,
+              "best_bound": 1.0
+            },
+            {
+              "objective": "changed",
+              "status": "OPTIMAL",
+              "value": 2,
+              "best_bound": 2.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 100,
+              "best_bound": 100.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        }
+      ]
+    },
+    {
+      "input_file": "02_change_travel_tradeoff.json",
+      "input_sha256": "765eca8825a037f1a7ba6d4dbcd9c144efa08a48de8445b3d97fccf37f035d22",
+      "scenario_id": "DEMO-02_change_travel_tradeoff",
+      "job_count": 1,
+      "vehicle_count": 2,
+      "results": [
+        {
+          "method": "B0",
+          "result_origin": "computed",
+          "solution_status": "BASELINE",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "baseline-diagnosis",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B1",
+          "result_origin": "computed",
+          "solution_status": "HEURISTIC",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:00:00Z",
+              "gate_arrival_at": "2026-11-07T00:30:00Z",
+              "return_at": "2026-11-07T00:40:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1"
+            ],
+            "vehicle_changed_job_ids": [
+              "J1"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1"
+            ],
+            "movable_travel_minutes": 40,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "deadline-insertion",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B2",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:26:00Z",
+              "gate_arrival_at": "2026-11-07T00:56:00Z",
+              "return_at": "2026-11-07T01:06:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1"
+            ],
+            "vehicle_changed_job_ids": [
+              "J1"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1"
+            ],
+            "movable_travel_minutes": 40,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 40,
+              "best_bound": 40.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B3",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "changed",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 60,
+              "best_bound": 60.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        }
+      ]
+    },
+    {
+      "input_file": "03_keep_departure.json",
+      "input_sha256": "a46b48fa7af6ccef77056eaac35110c0e538a8960e8dfb6cd3a6be7c10b00d7f",
+      "scenario_id": "DEMO-03_keep_departure",
+      "job_count": 1,
+      "vehicle_count": 1,
+      "results": [
+        {
+          "method": "B0",
+          "result_origin": "computed",
+          "solution_status": "BASELINE",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T01:00:00Z",
+              "gate_arrival_at": "2026-11-07T01:30:00Z",
+              "return_at": "2026-11-07T01:40:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 15,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "baseline-diagnosis",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B1",
+          "result_origin": "computed",
+          "solution_status": "HEURISTIC",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1"
+            ],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1"
+            ],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "deadline-insertion",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B2",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T01:06:00Z",
+              "gate_arrival_at": "2026-11-07T01:36:00Z",
+              "return_at": "2026-11-07T01:46:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1"
+            ],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1"
+            ],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 60,
+              "best_bound": 60.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B3",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:55:00Z",
+              "gate_arrival_at": "2026-11-07T01:25:00Z",
+              "return_at": "2026-11-07T01:35:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "changed",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 60,
+              "best_bound": 60.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        }
+      ]
+    },
+    {
+      "input_file": "04_serve_before_change.json",
+      "input_sha256": "b9c990004cf476422ff3dc7492d4d06cd13e8680d12dada189bc1a6d470eb10b",
+      "scenario_id": "DEMO-04_serve_before_change",
+      "job_count": 2,
+      "vehicle_count": 2,
+      "results": [
+        {
+          "method": "B0",
+          "result_origin": "computed",
+          "solution_status": "BASELINE",
+          "assignments": [
+            {
+              "job_id": "JA",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:00:00Z",
+              "gate_arrival_at": "2026-11-07T00:30:00Z",
+              "return_at": "2026-11-07T00:40:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "JB"
+          ],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 1,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 40,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "baseline-diagnosis",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B1",
+          "result_origin": "computed",
+          "solution_status": "HEURISTIC",
+          "assignments": [
+            {
+              "job_id": "JA",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:00:00Z",
+              "gate_arrival_at": "2026-11-07T00:30:00Z",
+              "return_at": "2026-11-07T00:40:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "JB"
+          ],
+          "issues": [
+            {
+              "job_id": "JB",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 1,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 40,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "deadline-insertion",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B2",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "JB",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:00:00Z",
+              "gate_arrival_at": "2026-11-07T00:30:00Z",
+              "return_at": "2026-11-07T00:40:00Z"
+            },
+            {
+              "job_id": "JA",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:00:00Z",
+              "gate_arrival_at": "2026-11-07T00:30:00Z",
+              "return_at": "2026-11-07T00:40:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 2,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "JA",
+              "JB"
+            ],
+            "vehicle_changed_job_ids": [
+              "JA"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 80,
+            "elapsed_ms": 16,
+            "newly_assigned_job_ids": [
+              "JB"
+            ]
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 80,
+              "best_bound": 80.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B3",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "JB",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:00:00Z",
+              "gate_arrival_at": "2026-11-07T00:30:00Z",
+              "return_at": "2026-11-07T00:40:00Z"
+            },
+            {
+              "job_id": "JA",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:00:00Z",
+              "gate_arrival_at": "2026-11-07T00:30:00Z",
+              "return_at": "2026-11-07T00:40:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 2,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "JA",
+              "JB"
+            ],
+            "vehicle_changed_job_ids": [
+              "JA"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 80,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": [
+              "JB"
+            ]
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "changed",
+              "status": "OPTIMAL",
+              "value": 2,
+              "best_bound": 2.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 80,
+              "best_bound": 80.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        }
+      ]
+    },
+    {
+      "input_file": "05_fixed_reservation.json",
+      "input_sha256": "3dddad77e42b9c7bfe6022f3631aef26d867a86531a2e062eaead6f618c82a1a",
+      "scenario_id": "DEMO-05_fixed_reservation",
+      "job_count": 2,
+      "vehicle_count": 1,
+      "results": [
+        {
+          "method": "B0",
+          "result_origin": "computed",
+          "solution_status": "BASELINE",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "JF",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T01:40:00Z",
+              "gate_arrival_at": "2026-11-07T02:10:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "baseline-diagnosis",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B1",
+          "result_origin": "computed",
+          "solution_status": "HEURISTIC",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "JF",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T01:40:00Z",
+              "gate_arrival_at": "2026-11-07T02:10:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "deadline-insertion",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B2",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:26:00Z",
+              "gate_arrival_at": "2026-11-07T00:56:00Z",
+              "return_at": "2026-11-07T01:06:00Z"
+            },
+            {
+              "job_id": "JF",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T01:40:00Z",
+              "gate_arrival_at": "2026-11-07T02:10:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J1"
+            ],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J1"
+            ],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 15,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 60,
+              "best_bound": 60.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B3",
+          "result_origin": "computed",
+          "solution_status": "OPTIMAL",
+          "assignments": [
+            {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "JF",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T01:40:00Z",
+              "gate_arrival_at": "2026-11-07T02:10:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 1,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 60,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": true,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "changed",
+              "status": "OPTIMAL",
+              "value": 0,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "OPTIMAL",
+              "value": 60,
+              "best_bound": 60.0
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": false,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        }
+      ]
+    },
+    {
+      "input_file": "20_jobs_4_vehicles.json",
+      "input_sha256": "3c328453e773820c93df05e31b656f5b2133fe54ec22873688ddfdd0e57b7503",
+      "scenario_id": "DEMO-20_jobs_4_vehicles",
+      "job_count": 20,
+      "vehicle_count": 4,
+      "results": [
+        {
+          "method": "B0",
+          "result_origin": "computed",
+          "solution_status": "BASELINE",
+          "assignments": [
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J003",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J013",
+              "vehicle_id": "T1",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J014",
+              "vehicle_id": "T2",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J015",
+              "vehicle_id": "T3",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J016",
+              "vehicle_id": "T4",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J017",
+              "vehicle_id": "T1",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J018",
+              "vehicle_id": "T2",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J019",
+              "vehicle_id": "T3",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J020",
+              "vehicle_id": "T4",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [
+            {
+              "job_id": "J003",
+              "code": "READY_TOO_LATE",
+              "explanation": "출발 2026-11-07T00:20:00Z < 준비 2026-11-07T00:30:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J004",
+              "code": "READY_TOO_LATE",
+              "explanation": "출발 2026-11-07T00:20:00Z < 준비 2026-11-07T00:45:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J013",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J014",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J015",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J016",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J017",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J017",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J018",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J018",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J019",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J019",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J020",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J020",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 10,
+            "movable_violation_count": 10,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 1200,
+            "elapsed_ms": 0,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "baseline-diagnosis",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B1",
+          "result_origin": "computed",
+          "solution_status": "HEURISTIC",
+          "assignments": [
+            {
+              "job_id": "J003",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J013",
+            "J014",
+            "J015",
+            "J016",
+            "J017",
+            "J018",
+            "J019",
+            "J020"
+          ],
+          "issues": [
+            {
+              "job_id": "J013",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J014",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J015",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J016",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J017",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J018",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J019",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J020",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 8,
+            "feasible_movable_count": 12,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012"
+            ],
+            "vehicle_changed_job_ids": [
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J008",
+              "J009",
+              "J010",
+              "J011"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J006",
+              "J007",
+              "J009",
+              "J010",
+              "J011",
+              "J012"
+            ],
+            "movable_travel_minutes": 720,
+            "elapsed_ms": 15,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "deadline-insertion",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B2",
+          "result_origin": "computed",
+          "solution_status": "FEASIBLE",
+          "assignments": [
+            {
+              "job_id": "J003",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J013",
+            "J014",
+            "J015",
+            "J016",
+            "J017",
+            "J018",
+            "J019",
+            "J020"
+          ],
+          "issues": [
+            {
+              "job_id": "J013",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J014",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J015",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J016",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J017",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J018",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J019",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J020",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 8,
+            "feasible_movable_count": 12,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012"
+            ],
+            "vehicle_changed_job_ids": [
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J008",
+              "J009",
+              "J010",
+              "J011"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J006",
+              "J007",
+              "J009",
+              "J010",
+              "J011",
+              "J012"
+            ],
+            "movable_travel_minutes": 720,
+            "elapsed_ms": 3016,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "FEASIBLE",
+              "value": 8,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "travel",
+              "status": "NOT_RUN",
+              "value": null,
+              "best_bound": null
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": true,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B3",
+          "result_origin": "computed",
+          "solution_status": "FEASIBLE",
+          "assignments": [
+            {
+              "job_id": "J003",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J013",
+            "J014",
+            "J015",
+            "J016",
+            "J017",
+            "J018",
+            "J019",
+            "J020"
+          ],
+          "issues": [
+            {
+              "job_id": "J013",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J014",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J015",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J016",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J017",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J018",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J019",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J020",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 8,
+            "feasible_movable_count": 12,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012"
+            ],
+            "vehicle_changed_job_ids": [
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J008",
+              "J009",
+              "J010",
+              "J011"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J006",
+              "J007",
+              "J009",
+              "J010",
+              "J011",
+              "J012"
+            ],
+            "movable_travel_minutes": 720,
+            "elapsed_ms": 3000,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "FEASIBLE",
+              "value": 8,
+              "best_bound": 0.0
+            },
+            {
+              "objective": "changed",
+              "status": "NOT_RUN",
+              "value": null,
+              "best_bound": null
+            },
+            {
+              "objective": "travel",
+              "status": "NOT_RUN",
+              "value": null,
+              "best_bound": null
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": true,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        }
+      ]
+    },
+    {
+      "input_file": "50_jobs_8_vehicles.json",
+      "input_sha256": "2ca815fafd6cd77ee0b69a6e300a603e180702a2be775cd6015d4697b1987414",
+      "scenario_id": "DEMO-50_jobs_8_vehicles",
+      "job_count": 50,
+      "vehicle_count": 8,
+      "results": [
+        {
+          "method": "B0",
+          "result_origin": "computed",
+          "solution_status": "BASELINE",
+          "assignments": [
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J003",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T5",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T6",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T7",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T8",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J013",
+              "vehicle_id": "T5",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J014",
+              "vehicle_id": "T6",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J015",
+              "vehicle_id": "T7",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J016",
+              "vehicle_id": "T8",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J017",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J018",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J019",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J020",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J021",
+              "vehicle_id": "T5",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J022",
+              "vehicle_id": "T6",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J023",
+              "vehicle_id": "T7",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J024",
+              "vehicle_id": "T8",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J025",
+              "vehicle_id": "T1",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J026",
+              "vehicle_id": "T2",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J027",
+              "vehicle_id": "T3",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J028",
+              "vehicle_id": "T4",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J029",
+              "vehicle_id": "T5",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J030",
+              "vehicle_id": "T6",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J031",
+              "vehicle_id": "T7",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J032",
+              "vehicle_id": "T8",
+              "sequence": 4,
+              "pickup_departure_at": "2026-11-07T03:20:00Z",
+              "gate_arrival_at": "2026-11-07T03:50:00Z",
+              "return_at": "2026-11-07T04:00:00Z"
+            },
+            {
+              "job_id": "J033",
+              "vehicle_id": "T1",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J034",
+              "vehicle_id": "T2",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J035",
+              "vehicle_id": "T3",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J036",
+              "vehicle_id": "T4",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J037",
+              "vehicle_id": "T5",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J038",
+              "vehicle_id": "T6",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J039",
+              "vehicle_id": "T7",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J040",
+              "vehicle_id": "T8",
+              "sequence": 5,
+              "pickup_departure_at": "2026-11-07T04:20:00Z",
+              "gate_arrival_at": "2026-11-07T04:50:00Z",
+              "return_at": "2026-11-07T05:00:00Z"
+            },
+            {
+              "job_id": "J041",
+              "vehicle_id": "T1",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J042",
+              "vehicle_id": "T2",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J043",
+              "vehicle_id": "T3",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J044",
+              "vehicle_id": "T4",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J045",
+              "vehicle_id": "T5",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J046",
+              "vehicle_id": "T6",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J047",
+              "vehicle_id": "T7",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J048",
+              "vehicle_id": "T8",
+              "sequence": 6,
+              "pickup_departure_at": "2026-11-07T05:20:00Z",
+              "gate_arrival_at": "2026-11-07T05:50:00Z",
+              "return_at": "2026-11-07T06:00:00Z"
+            },
+            {
+              "job_id": "J049",
+              "vehicle_id": "T1",
+              "sequence": 7,
+              "pickup_departure_at": "2026-11-07T06:20:00Z",
+              "gate_arrival_at": "2026-11-07T06:50:00Z",
+              "return_at": "2026-11-07T07:00:00Z"
+            },
+            {
+              "job_id": "J050",
+              "vehicle_id": "T2",
+              "sequence": 7,
+              "pickup_departure_at": "2026-11-07T06:20:00Z",
+              "gate_arrival_at": "2026-11-07T06:50:00Z",
+              "return_at": "2026-11-07T07:00:00Z"
+            }
+          ],
+          "unassigned_job_ids": [],
+          "issues": [
+            {
+              "job_id": "J003",
+              "code": "READY_TOO_LATE",
+              "explanation": "출발 2026-11-07T00:20:00Z < 준비 2026-11-07T00:30:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J004",
+              "code": "READY_TOO_LATE",
+              "explanation": "출발 2026-11-07T00:20:00Z < 준비 2026-11-07T00:45:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J007",
+              "code": "READY_TOO_LATE",
+              "explanation": "출발 2026-11-07T00:20:00Z < 준비 2026-11-07T00:30:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J008",
+              "code": "READY_TOO_LATE",
+              "explanation": "출발 2026-11-07T00:20:00Z < 준비 2026-11-07T00:45:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J025",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J026",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J027",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J028",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J029",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J030",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J031",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J032",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T03:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J033",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J033",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J034",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J034",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J035",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J035",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J036",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J036",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J037",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J037",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J038",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J038",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J039",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J039",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J040",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T04:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J040",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T05:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J041",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J041",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J042",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J042",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J043",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J043",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J044",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J044",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J045",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J045",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J046",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J046",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J047",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J047",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J048",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T05:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J048",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T06:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J049",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T06:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J049",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T07:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J050",
+              "code": "CUTOFF_EXCEEDED",
+              "explanation": "도착+여유 2026-11-07T06:50:00Z > 마감 2026-11-07T03:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J050",
+              "code": "SHIFT_EXCEEDED",
+              "explanation": "복귀 2026-11-07T07:00:00Z > 근무 종료 2026-11-07T04:00:00Z",
+              "proof_level": "constraint_check",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 0,
+            "feasible_movable_count": 20,
+            "movable_violation_count": 30,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [],
+            "vehicle_changed_job_ids": [],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [],
+            "movable_travel_minutes": 3000,
+            "elapsed_ms": 14,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "baseline-diagnosis",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B1",
+          "result_origin": "computed",
+          "solution_status": "HEURISTIC",
+          "assignments": [
+            {
+              "job_id": "J003",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J013",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J015",
+              "vehicle_id": "T5",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J014",
+              "vehicle_id": "T5",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T5",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J018",
+              "vehicle_id": "T6",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J017",
+              "vehicle_id": "T6",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J016",
+              "vehicle_id": "T6",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J021",
+              "vehicle_id": "T7",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J020",
+              "vehicle_id": "T7",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J019",
+              "vehicle_id": "T7",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J023",
+              "vehicle_id": "T8",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J024",
+              "vehicle_id": "T8",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J022",
+              "vehicle_id": "T8",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J025",
+            "J026",
+            "J027",
+            "J028",
+            "J029",
+            "J030",
+            "J031",
+            "J032",
+            "J033",
+            "J034",
+            "J035",
+            "J036",
+            "J037",
+            "J038",
+            "J039",
+            "J040",
+            "J041",
+            "J042",
+            "J043",
+            "J044",
+            "J045",
+            "J046",
+            "J047",
+            "J048",
+            "J049",
+            "J050"
+          ],
+          "issues": [
+            {
+              "job_id": "J025",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J026",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J027",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J028",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J029",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J030",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J031",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J032",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J033",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J034",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J035",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J036",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J037",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J038",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J039",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J040",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J041",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J042",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J043",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J044",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J045",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J046",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J047",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J048",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J049",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J050",
+              "code": "SEARCH_LIMIT",
+              "explanation": "현재 삽입 순서에서 실행 가능한 자리를 찾지 못했습니다. 차량 경쟁·고정 예약·시간/근무 조건·정수 순서 슬롯을 확인해야 하며, 전체 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 26,
+            "feasible_movable_count": 24,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J019",
+              "J020",
+              "J021",
+              "J022",
+              "J023",
+              "J024"
+            ],
+            "vehicle_changed_job_ids": [
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J019",
+              "J020",
+              "J021",
+              "J022",
+              "J023"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J020",
+              "J021",
+              "J022",
+              "J023",
+              "J024"
+            ],
+            "movable_travel_minutes": 1440,
+            "elapsed_ms": 47,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": null,
+          "objective_stages": [],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "seed": 0,
+              "seed_used": false,
+              "time_limit_seconds": 3,
+              "algorithm": "deadline-insertion",
+              "tie_break": "arrival, vehicle_id, insertion_position",
+              "time_limit_reached": false
+            },
+            "initial_solution_ref": "snapshot.baseline_assignments",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B2",
+          "result_origin": "computed",
+          "solution_status": "FEASIBLE",
+          "assignments": [
+            {
+              "job_id": "J003",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J013",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J015",
+              "vehicle_id": "T5",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J014",
+              "vehicle_id": "T5",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T5",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J018",
+              "vehicle_id": "T6",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J017",
+              "vehicle_id": "T6",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J016",
+              "vehicle_id": "T6",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J021",
+              "vehicle_id": "T7",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J020",
+              "vehicle_id": "T7",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J019",
+              "vehicle_id": "T7",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J023",
+              "vehicle_id": "T8",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J024",
+              "vehicle_id": "T8",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J022",
+              "vehicle_id": "T8",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J025",
+            "J026",
+            "J027",
+            "J028",
+            "J029",
+            "J030",
+            "J031",
+            "J032",
+            "J033",
+            "J034",
+            "J035",
+            "J036",
+            "J037",
+            "J038",
+            "J039",
+            "J040",
+            "J041",
+            "J042",
+            "J043",
+            "J044",
+            "J045",
+            "J046",
+            "J047",
+            "J048",
+            "J049",
+            "J050"
+          ],
+          "issues": [
+            {
+              "job_id": "J025",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J026",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J027",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J028",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J029",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J030",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J031",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J032",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J033",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J034",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J035",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J036",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J037",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J038",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J039",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J040",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J041",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J042",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J043",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J044",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J045",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J046",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J047",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J048",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J049",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J050",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 26,
+            "feasible_movable_count": 24,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J019",
+              "J020",
+              "J021",
+              "J022",
+              "J023",
+              "J024"
+            ],
+            "vehicle_changed_job_ids": [
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J019",
+              "J020",
+              "J021",
+              "J022",
+              "J023"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J020",
+              "J021",
+              "J022",
+              "J023",
+              "J024"
+            ],
+            "movable_travel_minutes": 1440,
+            "elapsed_ms": 2327,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "UNKNOWN",
+              "value": null,
+              "best_bound": null
+            },
+            {
+              "objective": "travel",
+              "status": "NOT_RUN",
+              "value": null,
+              "best_bound": null
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": true,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        },
+        {
+          "method": "B3",
+          "result_origin": "computed",
+          "solution_status": "FEASIBLE",
+          "assignments": [
+            {
+              "job_id": "J003",
+              "vehicle_id": "T1",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J002",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J001",
+              "vehicle_id": "T1",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J006",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J005",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J004",
+              "vehicle_id": "T2",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J009",
+              "vehicle_id": "T3",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J008",
+              "vehicle_id": "T3",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J007",
+              "vehicle_id": "T3",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J013",
+              "vehicle_id": "T4",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J011",
+              "vehicle_id": "T4",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J010",
+              "vehicle_id": "T4",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J015",
+              "vehicle_id": "T5",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J014",
+              "vehicle_id": "T5",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J012",
+              "vehicle_id": "T5",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            {
+              "job_id": "J018",
+              "vehicle_id": "T6",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J017",
+              "vehicle_id": "T6",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J016",
+              "vehicle_id": "T6",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J021",
+              "vehicle_id": "T7",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:00:00Z"
+            },
+            {
+              "job_id": "J020",
+              "vehicle_id": "T7",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:20:00Z",
+              "gate_arrival_at": "2026-11-07T01:50:00Z",
+              "return_at": "2026-11-07T02:00:00Z"
+            },
+            {
+              "job_id": "J019",
+              "vehicle_id": "T7",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:20:00Z",
+              "gate_arrival_at": "2026-11-07T02:50:00Z",
+              "return_at": "2026-11-07T03:00:00Z"
+            },
+            {
+              "job_id": "J023",
+              "vehicle_id": "T8",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:30:00Z",
+              "gate_arrival_at": "2026-11-07T01:00:00Z",
+              "return_at": "2026-11-07T01:10:00Z"
+            },
+            {
+              "job_id": "J024",
+              "vehicle_id": "T8",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:30:00Z",
+              "gate_arrival_at": "2026-11-07T02:00:00Z",
+              "return_at": "2026-11-07T02:10:00Z"
+            },
+            {
+              "job_id": "J022",
+              "vehicle_id": "T8",
+              "sequence": 3,
+              "pickup_departure_at": "2026-11-07T02:30:00Z",
+              "gate_arrival_at": "2026-11-07T03:00:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            }
+          ],
+          "unassigned_job_ids": [
+            "J025",
+            "J026",
+            "J027",
+            "J028",
+            "J029",
+            "J030",
+            "J031",
+            "J032",
+            "J033",
+            "J034",
+            "J035",
+            "J036",
+            "J037",
+            "J038",
+            "J039",
+            "J040",
+            "J041",
+            "J042",
+            "J043",
+            "J044",
+            "J045",
+            "J046",
+            "J047",
+            "J048",
+            "J049",
+            "J050"
+          ],
+          "issues": [
+            {
+              "job_id": "J025",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J026",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J027",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J028",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J029",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J030",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J031",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J032",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J033",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J034",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J035",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J036",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J037",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J038",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J039",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J040",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J041",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J042",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J043",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J044",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J045",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J046",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J047",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J048",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J049",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            },
+            {
+              "job_id": "J050",
+              "code": "SEARCH_LIMIT",
+              "explanation": "제한 시간 또는 현재 확인된 입력 범위에서 배정을 확정하지 못했습니다. 이 작업의 불가능을 증명한 것은 아닙니다.",
+              "proof_level": "not_proven",
+              "evidence_refs": [
+                "fixture:scenario_001"
+              ]
+            }
+          ],
+          "metrics": {
+            "unassigned_count": 26,
+            "feasible_movable_count": 24,
+            "movable_violation_count": 0,
+            "fixed_risk_count": 0,
+            "changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J019",
+              "J020",
+              "J021",
+              "J022",
+              "J023",
+              "J024"
+            ],
+            "vehicle_changed_job_ids": [
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J006",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J011",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J019",
+              "J020",
+              "J021",
+              "J022",
+              "J023"
+            ],
+            "order_changed_job_ids": [],
+            "time_changed_job_ids": [
+              "J001",
+              "J002",
+              "J003",
+              "J004",
+              "J005",
+              "J007",
+              "J008",
+              "J009",
+              "J010",
+              "J012",
+              "J013",
+              "J014",
+              "J015",
+              "J016",
+              "J017",
+              "J018",
+              "J020",
+              "J021",
+              "J022",
+              "J023",
+              "J024"
+            ],
+            "movable_travel_minutes": 1440,
+            "elapsed_ms": 2344,
+            "newly_assigned_job_ids": []
+          },
+          "objective_proven": false,
+          "approval_eligible": false,
+          "engine_version": "0.2.0-b0-b3",
+          "solver_version": "OR-Tools 9.15.6755",
+          "objective_stages": [
+            {
+              "objective": "unassigned",
+              "status": "UNKNOWN",
+              "value": null,
+              "best_bound": null
+            },
+            {
+              "objective": "changed",
+              "status": "NOT_RUN",
+              "value": null,
+              "best_bound": null
+            },
+            {
+              "objective": "travel",
+              "status": "NOT_RUN",
+              "value": null,
+              "best_bound": null
+            }
+          ],
+          "validation_status": "not_run",
+          "execution_metadata": {
+            "solver_settings": {
+              "algorithm": "cp-sat-lexicographic",
+              "seed": 0,
+              "effective_seed": 0,
+              "seed_used": true,
+              "time_limit_seconds": 3,
+              "time_limit_reached": true,
+              "budget_scope": "input/model/all objective stages",
+              "proof_scope": "known-input v0.1 integer sequence model",
+              "external_warm_start": false,
+              "warm_start_budget_seconds": 1,
+              "warm_start_valid": true
+            },
+            "initial_solution_ref": "internal:B1-same-input-within-total-budget",
+            "worker_count": 1
+          }
+        }
+      ]
+    }
+  ]
+}
