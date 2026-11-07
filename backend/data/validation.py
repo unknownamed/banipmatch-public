@@ -21,6 +21,7 @@ MINUTE_FIELDS = frozenset({
     "as_of", "available_at", "shift_end_at", "ready_at", "opens_at",
     "closes_at", "pickup_departure_at", "gate_arrival_at", "return_at",
     "previous_opens_at", "previous_closes_at", "input_valid_until",
+    "confirmed_at", "observed_at", "received_at",
 })
 
 
@@ -98,13 +99,17 @@ def validate_snapshot(value: Any, *, source: str | None = None) -> InputReport:
                     parsed = _time(item)
                     fraction = item[20:-1] if len(item) > 20 and item[19] == "." else ""
                     if parsed.second or any(digit != "0" for digit in fraction):
-                        issue("TIME_PRECISION", child, "계산 시각은 분 경계여야 합니다.")
+                        issue("TIME_PRECISION", child, "v0.1 입력 시각은 분 경계여야 합니다. 임의 반올림하지 않습니다.")
                 check_minutes(item, child)
         elif isinstance(node, list):
             for index, item in enumerate(node):
                 check_minutes(item, path + f"/{index}")
 
     check_minutes(snapshot)
+    as_of = _time(snapshot["as_of"])
+    if _time(snapshot["policy"]["input_valid_until"]) < as_of:
+        issue("INPUT_EXPIRED_AT_SNAPSHOT", "/policy/input_valid_until",
+              "입력 기준시각이 입력 유효기간 이후입니다.")
     for group, key in (("locations", "location_id"), ("vehicles", "vehicle_id"),
                        ("jobs", "job_id"), ("windows", "window_id")):
         seen: set[str] = set()
@@ -139,6 +144,9 @@ def validate_snapshot(value: Any, *, source: str | None = None) -> InputReport:
             issue("WINDOW_UNCONFIRMED", path + "/verification", "반입시간 변경 또는 시간창이 미확인입니다.")
         elif not item["confirmed_by"] or not item["confirmed_by"].strip() or item["confirmed_at"] is None:
             issue("CONFIRMATION_MISSING", path, "확인자와 확인시각이 필요합니다.")
+        elif _time(item["confirmed_at"]) > as_of:
+            issue("CONFIRMATION_AFTER_SNAPSHOT", path + "/confirmed_at",
+                  "입력 기준시각 이후에 확인된 정보를 사용할 수 없습니다.")
 
     for index, window in enumerate(snapshot["windows"]):
         path = f"/windows/{index}"
@@ -187,6 +195,20 @@ def validate_snapshot(value: Any, *, source: str | None = None) -> InputReport:
             issue("DUPLICATE_ROUTE", path, "같은 방향의 이동시간이 중복됩니다.")
         routes.add(pair)
 
+    # The confirmed vehicle start follows the final departed assignment, not
+    # every earlier return location. Keep the original sequence authoritative.
+    last_departed: dict[str, dict] = {}
+    for job in snapshot["jobs"]:
+        baseline = assignments.get(job["job_id"])
+        if job["state"] == "departed" and job["frozen"] and baseline is not None:
+            previous = last_departed.get(baseline["vehicle_id"])
+            if previous is None or baseline["sequence"] > previous["sequence"]:
+                last_departed[baseline["vehicle_id"]] = baseline
+    travel_minutes = {
+        (row["from_location_id"], row["to_location_id"]): row["minutes"]
+        for row in snapshot["travel_times"]
+    }
+
     for index, job in enumerate(snapshot["jobs"]):
         path = f"/jobs/{index}"
         for key in ("origin_id", "terminal_id", "return_location_id"):
@@ -208,10 +230,22 @@ def validate_snapshot(value: Any, *, source: str | None = None) -> InputReport:
                 issue("INPUT_MISSING", path, "고정 작업의 도착·복귀 시각이 미확인입니다.")
             elif job["state"] == "departed" and baseline["vehicle_id"] in vehicles:
                 vehicle = vehicles[baseline["vehicle_id"]]
-                if (vehicle["available_at"] is not None
-                        and (_time(vehicle["available_at"]) < _time(baseline["return_at"])
-                             or vehicle["start_location_id"] != job["return_location_id"])):
-                    issue("FIXED_AVAILABILITY_CONFLICT", path, "차량 가용시각·시작위치가 출발 작업의 복귀 기록과 모순됩니다.")
+                if vehicle["available_at"] is not None:
+                    available = _time(vehicle["available_at"])
+                    returned = _time(baseline["return_at"])
+                    if available < returned:
+                        issue("FIXED_AVAILABILITY_CONFLICT", path, "차량 가용시각이 출발 작업의 복귀시각보다 빠릅니다.")
+                    elif last_departed[baseline["vehicle_id"]]["job_id"] == job["job_id"]:
+                        origin, destination = job["return_location_id"], vehicle["start_location_id"]
+                        if origin != destination:
+                            if returned > _time(snapshot["as_of"]):
+                                issue("FIXED_AVAILABILITY_CONFLICT", path, "진행 작업의 복귀 위치와 차량 가용 시작 위치가 다릅니다.")
+                            else:
+                                reposition = travel_minutes.get((origin, destination))
+                                if reposition is None:
+                                    issue("TRAVEL_TIME_MISSING", path, f"마지막 복귀 후 가용 위치까지 이동경로 {origin} → {destination}가 없습니다.")
+                                elif (available - returned).total_seconds() / 60 < reposition:
+                                    issue("FIXED_AVAILABILITY_CONFLICT", path, "마지막 복귀 후 가용 시작 위치까지 이동할 시간이 부족합니다.")
         required_routes = {(job["origin_id"], job["terminal_id"]),
                            (job["terminal_id"], job["return_location_id"])}
         if not job["frozen"]:

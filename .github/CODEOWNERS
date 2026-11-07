@@ -1,20 +1,6 @@
-# 리뷰 담당 안내. 자동 요청은 요금제·쓰기 권한·초대 수락 조건에 따라 적용됩니다.
-# 별도 브랜치 보호 설정 없이는 이 파일만으로 승인이나 병합을 강제하지 않습니다.
-# 아래 코드 경로는 현재 계획이며 실제 구현 경로가 바뀌면 함께 갱신합니다.
-/frontend/ @choigilung
-/backend/data/ @S-minjun
-/backend/engine/ @unknownamed @He6venly
-/backend/api/ @He6venly
-/backend/db/ @He6venly
-/backend/validation/ @He6venly @unknownamed
-/backend/shared/ @unknownamed @choigilung @S-minjun @He6venly
-/tests/ @unknownamed @choigilung @S-minjun @He6venly
-/docs/development/ @unknownamed @choigilung @S-minjun @He6venly
-/docs/team/ @unknownamed @choigilung @S-minjun @He6venly
-/README.md @unknownamed @choigilung @S-minjun @He6venly
-/AGENTS.md @unknownamed @choigilung @S-minjun @He6venly
-/CONTRIBUTING.md @unknownamed @choigilung @S-minjun @He6venly
-/CLAUDE.md @unknownamed @He6venly
-/.cursor/ @unknownamed @He6venly
-/.github/ @unknownamed @He6venly
-/tools/ @unknownamed @He6venly
+# 2026-11-07: 필요한 변경만 관련자가 1회 검토합니다.
+# 경로만으로 모든 PR에 리뷰를 요청하지 않도록 활성 패턴을 두지 않습니다.
+# 담당·코드 경로: docs/team/roles.md
+# 리뷰 필요 판단·요청 대상·수정 후 병합: docs/team/review-policy.md
+# 필요한 경우 PR에서 관련자에게 수동 요청합니다. 기존 요청을 자동 취소하지는 않습니다.
+# 브랜치 보호·필수 검사 설정을 변경하거나 우회하는 파일이 아닙니다.

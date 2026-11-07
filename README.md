@@ -11,7 +11,7 @@
 
 ## 현재 상태
 
-현재 기본 브랜치에는 **개발 규격 초안 v0.1**과 협업 기준이 있습니다. 실행 웹앱은 아직 없으며, B0/B1 엔진 첫 구현은 별도 [PR #1](https://github.com/unknownamed/banipmatch/pull/1)에서 검토 중입니다. 아래 표는 기본 브랜치 기준이고, PR 브랜치의 구현·검증 기록은 해당 PR에서 확인합니다.
+현재 계약은 **개발 규격 초안 v0.1**입니다. **B0 원안 진단과 B1 마감순 배치**([PR #1](https://github.com/unknownamed/banipmatch/pull/1))와 **설명용 예제 비교 화면**([PR #4](https://github.com/unknownamed/banipmatch/pull/4))이 있습니다. 입력 저장·실행 상태·설명용 결과 조회용 **로컬 API**([PR #3](https://github.com/unknownamed/banipmatch/pull/3))도 포함합니다. #1·#4는 main에 병합됐고 #3의 실제 병합 상태는 링크에서 확인할 수 있습니다. API의 실제 엔진 연결·화면 전체 연결·독립 일정 검사·승인, B2/B3 최적화는 후속 작업입니다.
 
 | 구분 | 상태 |
 |---|---|
@@ -20,11 +20,19 @@
 | DB | SQLite 기준 16개 테이블·133개 필드, 실행 가능한 초기 스키마 |
 | 예제 | 모의 입력·설명용 결과·오류 사례·CSV 제공 |
 | 검수 | 계약·예제 검사 29건, DB 검사 32건 통과 |
-| 웹앱·엔진·인증 | 기본 브랜치에 미포함. B0/B1 엔진은 PR #1 검토 중 |
+| 데이터 첫 구현 | [CSV·JSON 입력 검증](backend/data/README.md), 오류의 필드·출처·행 반환. API 실행 경로 연결은 후속 작업 |
+| 로컬 API 1차 | 입력 등록·조회, SQLite 저장, 실행 상태·설명용 B0/B3 결과 조회, 승인 차단. API 테스트 45건 |
+| 엔진 첫 구현 | B0/B1 로컬 실행·엔진 테스트 51건. B2/B3 미구현 |
+| 프론트 첫 구현 | React·TypeScript 예제 비교 화면, 테스트 16건·타입 검사·빌드 통과. 실제 서버 연결은 미검증 |
+| 실제 앱 통합·독립 일정 검사·승인·인증 | 구현 예정 |
 | 외부 API 연동·실제 운송 자료 | 권한·표본 확인 필요 |
 | 최종 대회 보고서·발표자료 | 준비 중 |
 
-검수 통과는 **명세·저장 구조·제공 예제**에 대한 결과입니다. 현장 성능이나 실제 최적화 효과를 검증했다는 뜻은 아닙니다.
+검수는 **명세·저장 구조·예제와 B0/B1 동작**을 대상으로 합니다. 실제 운송 자료의 효과나 최적성 검증은 아닙니다.
+
+[엔진 실행·연결 안내](backend/engine/README.md) · [모의 예제의 실계산 결과](docs/experiments/engine-b0-b1/README.md) · [API 담당 인계](docs/team/handoffs/2026-11-07-unknownamed-engine-b0-b1.md)
+
+로컬 API 실행·프론트 연결·검증 방법은 [백엔드 안내](backend/README.md)에 있습니다. 현재 서버는 모의 입력과 설명용 결과만 다루며 승인 요청은 차단합니다.
 
 ## 팀원이 처음 작업할 때
 
@@ -92,10 +100,12 @@ ChatGPT·Claude 등 특정 구독으로 통일하지 않습니다. Codex·Claude
 
 공통 개발 규격 00은 네 명 모두 읽습니다. [역할표](docs/team/roles.md)에 첫 작업·산출물·담당 경계가 있습니다.
 배포 PDF의 담당 미정 문구는 작성 당시 상태이며 현재 담당은 위 표와 역할표를 따릅니다.
-Python 백엔드 하나 안에서 모듈을 나누는 방향입니다. 프론트 도구는 첫 구현에서 팀이 정합니다.
+Python 백엔드 하나 안에서 모듈을 나누며, 프론트 첫 구현은 React·TypeScript·Vite를 사용합니다.
 최적화 조건은 공동 검토하고, 각자 자기 파트 연결·검증·보고서 부분을 작성합니다.
 
 ## 팀
+
+**[리뷰·병합 기준](docs/team/review-policy.md):** 작은 변경은 작성자가 검사 후 병합합니다. 큰 기능·파트 연결·중요한 공통 변경만 관련자가 1회 검토하고, 피드백 수정·검사 후에는 재검토나 추가 승인을 기다리지 않습니다. 담당은 역할표에서 확인하며 자동 전체 리뷰 요청은 사용하지 않습니다.
 
 **반입맞춤 · 국립창원대학교 컴퓨터공학과**
 
@@ -109,11 +119,12 @@ Python 백엔드 하나 안에서 모듈을 나누는 방향입니다. 프론트
 ## 검수 재실행
 
 Python 3.12 기준입니다. 별도 가상환경에서 아래 명령을 실행합니다.
-이 명령은 계약·예제와 메모리 DB를 검사하며 웹앱이나 외부 API를 실행하지 않습니다.
+아래 명령은 계약·예제·메모리 DB와 데이터 입력·로컬 API·엔진을 검사합니다. 프론트 검사는 `frontend/README.md`를 따릅니다. 외부 API는 호출하지 않습니다.
 
 ```sh
-python -m pip install -r "docs/development/v0.1/검수/requirements-validation.txt"
+python -m pip install -r requirements-dev.txt
 python tools/check_development.py
+python -m pytest -q
 ```
 
 원본을 보존하도록 임시 복사본에서 검사합니다. PR과 `main` 변경 시 GitHub Actions도 같은 검사를 수행합니다.
@@ -132,7 +143,7 @@ python tools/check_development.py
 
 프로젝트 저장소: **https://github.com/unknownamed/banipmatch**
 
-현재 보관된 산출물은 위 개발 문서와 규격·모의 예제입니다.
+현재 보관된 산출물은 개발 문서·규격·모의 예제, 로컬 API·저장 코드, B0/B1 코드·계산 결과, 프론트 설명용 비교 화면입니다.
 최종 대회 보고서와 발표자료는 완성 후 [문서 목록](docs/README.md)에 추가합니다.
 보고서 제출 시에는 해당 시점의 커밋 또는 태그 주소를 함께 적어, 어떤 버전을 사용했는지 확인할 수 있게 할 예정입니다.
 
@@ -149,9 +160,15 @@ CONTRIBUTING.md        # 도구별 시작·PR·검수·인계
 .github/               # Copilot 안내·CODEOWNERS·PR 양식·CI
 .cursor/rules/         # Cursor에서 공통 기준 읽기
 tools/                 # 원본을 보존하는 검수 실행 도구
+backend/               # API·DB 로컬 모의 구현과 B0/B1 엔진
+frontend/              # 설명용 비교 화면·상태 표시
+tests/                 # API·DB·엔진 동작과 실패 경계 검증
+requirements.txt       # API 실행 의존성
+requirements-dev.txt   # 개발·검수 의존성
 docs/
   README.md
   team/                # 역할·현재 상태·인계 양식
+  experiments/         # 모의 실계산 결과와 해석
   development/v0.1/
     공통 개발 규격 PDF
     담당별 문서/       # 프론트·데이터·최적화·API·통합
