@@ -1,0 +1,25 @@
+{
+  "disclaimer": "전부 수작업으로 구성한 모의 계약 예시. 엔진 실행/현장 성능/최적성 결과가 아니다. illustrative_fixture는 내부 승인 대상에서 제외.",
+  "cases": [
+    {
+      "file": "01_snapshot.json",
+      "schema": "Snapshot",
+      "expected": "구조/연결 유효. B0 이동가능 작업2건 마감위반, B3설명안은 J1/J2조정·J3미처리·J0유지."
+    },
+    {
+      "file": "07_snapshot_입력누락.json",
+      "schema": "Snapshot",
+      "expected": "JSON구조 유효, J1은INPUT_MISSING, 추천확정차단/별도확인; null을0으로채우지않음."
+    },
+    {
+      "file": "08_snapshot_미확인변경.json",
+      "schema": "Snapshot",
+      "expected": "JSON구조 유효, WINDOW_UNCONFIRMED, 변경적용계산과승인차단."
+    },
+    {
+      "file": "05_approval_request.json",
+      "schema": "ApprovalRequest",
+      "expected": "구조만유효. fixture결과이므로실제승인은422 RESULT_NOT_COMPUTED."
+    }
+  ]
+}

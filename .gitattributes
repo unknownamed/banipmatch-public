@@ -1,0 +1,10 @@
+* text=auto
+*.md text eol=lf
+*.py text eol=lf
+*.sql text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.pdf binary
+
+# Preserve the versioned artifact bundle and its checksums byte-for-byte.
+docs/development/v0.1/** -text

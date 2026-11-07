@@ -1,0 +1,215 @@
+{
+  "checked_at_utc": "2026-11-07T05:15:31.649149+00:00",
+  "sqlite_version": "3.53.1",
+  "schema_sha256": "2b2dba6a861251c81c997976d8b84b42d3c081b6e04977863c2d8ececfebd728",
+  "contract_sha256": "b589c9c889f3a5fc391ef24878c398a158f7b47a855d7654ae054d38f2ada5d7",
+  "fixture_sha256": {
+    "01_snapshot.json": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e",
+    "02_run_request.json": "d000e482a0957baac588f31aa4854470294cef8c9a94d2e169117c3bcd2baf1a",
+    "03_run_status.json": "138d4bc0584a18441d6f547c7ee986d72a7d01cbc2abe3e9943e3413b948c974",
+    "04_results_설명용.json": "a445a1c8ab7868c4c2099e641134183cdc420298eecb3844942fbbd0ed4bb2e5",
+    "05_approval_request.json": "01e8756c428ec459c7ddd2486f41ec955bc5ca53c5d37cb50256a3eb7452d55b",
+    "06_error_version_conflict.json": "f424fde0249ec3ff5f9624e6786f2cc7dfa46684f358d362ea2744220b47ef38",
+    "07_snapshot_입력누락.json": "946542bfe43b5c1a1f3d2a332718d6190fd57bc1c045bd886ead88482c43a3c0",
+    "08_snapshot_미확인변경.json": "d33f6e975032deb44bdf73a4c5cdbb35764dd2b771c5eab0f1867873c306afa0",
+    "예제_기대결과.json": "c9cf810be9925bee18e35dfe51b9472987e035b84530096dfe802bc9a2620724"
+  },
+  "storage": "in-memory only; no production DB created",
+  "passed": true,
+  "test_count": 32,
+  "passed_count": 32,
+  "table_count": 16,
+  "dictionary_field_count": 133,
+  "fixture_counts": {
+    "scenarios": 3,
+    "locations": 9,
+    "vehicles": 6,
+    "jobs": 12,
+    "windows": 6,
+    "travel_times": 27,
+    "baseline_assignments": 12,
+    "baseline_unassigned": 0,
+    "plans": 1,
+    "assignments": 4,
+    "runs": 1,
+    "method_results": 2,
+    "approvals": 0
+  },
+  "tests": [
+    {
+      "name": "schema_and_fixture_import",
+      "passed": true,
+      "detail": "SQLite 3.53.1; initial deferred FK cycle committed"
+    },
+    {
+      "name": "fixture_input_hash_matches_results",
+      "passed": true,
+      "detail": "설명용 결과의 input_sha256와 정규 JSON 해시 일치"
+    },
+    {
+      "name": "snapshot_json_roundtrip",
+      "passed": true,
+      "detail": "권위 JSON 입력을 손실 없이 복원"
+    },
+    {
+      "name": "input_revisions_and_incomplete_values",
+      "passed": true,
+      "detail": "같은 P001/version 1에 S001·S002·S003 공존; NULL/미확인 보존, 활성 입력 S003"
+    },
+    {
+      "name": "unknown_job_fk_rejected",
+      "passed": true,
+      "detail": "FOREIGN KEY constraint failed"
+    },
+    {
+      "name": "negative_duration_rejected",
+      "passed": true,
+      "detail": "CHECK constraint failed: minutes>=0"
+    },
+    {
+      "name": "negative_capacity_rejected",
+      "passed": true,
+      "detail": "CHECK constraint failed: capacity_kg>0"
+    },
+    {
+      "name": "duplicate_job_assignment_rejected",
+      "passed": true,
+      "detail": "UNIQUE constraint failed: baseline_assignments.scenario_id, baseline_assignments.vehicle_id, baseline_assignments.sequence"
+    },
+    {
+      "name": "zero_sequence_rejected",
+      "passed": true,
+      "detail": "CHECK constraint failed: sequence>=1"
+    },
+    {
+      "name": "cross_scenario_plan_assignment_rejected",
+      "passed": true,
+      "detail": "FOREIGN KEY constraint failed"
+    },
+    {
+      "name": "run_snapshot_hash_mismatch_rejected",
+      "passed": true,
+      "detail": "FOREIGN KEY constraint failed"
+    },
+    {
+      "name": "run_plan_version_mismatch_rejected",
+      "passed": true,
+      "detail": "FOREIGN KEY constraint failed"
+    },
+    {
+      "name": "result_run_scenario_mismatch_rejected",
+      "passed": true,
+      "detail": "FOREIGN KEY constraint failed"
+    },
+    {
+      "name": "snapshot_update_blocked",
+      "passed": true,
+      "detail": "scenarios rows are immutable; insert a new revision"
+    },
+    {
+      "name": "normalized_input_update_blocked",
+      "passed": true,
+      "detail": "jobs rows are immutable; insert a new revision"
+    },
+    {
+      "name": "plan_version_update_blocked",
+      "passed": true,
+      "detail": "plans rows are immutable; insert a new revision"
+    },
+    {
+      "name": "assignment_delete_blocked",
+      "passed": true,
+      "detail": "assignments rows are immutable audit records"
+    },
+    {
+      "name": "replace_cannot_overwrite_snapshot",
+      "passed": true,
+      "detail": "scenarios rows are immutable audit records"
+    },
+    {
+      "name": "run_input_identity_update_blocked",
+      "passed": true,
+      "detail": "run input identity is immutable"
+    },
+    {
+      "name": "run_status_is_mutable",
+      "passed": true,
+      "detail": "상태 갱신 가능, 입력 identity 갱신 차단은 별도 검증"
+    },
+    {
+      "name": "illustrative_result_cannot_be_approved",
+      "passed": true,
+      "detail": "approval requires an eligible computed result"
+    },
+    {
+      "name": "stale_input_same_version_cas_rejected",
+      "passed": true,
+      "detail": "버전이 1로 같아도 활성 입력 S003 != 실행 입력 S001이면 CAS 0행; API는 409"
+    },
+    {
+      "name": "baseline_partition_gap_rejected_by_api_guard",
+      "passed": true,
+      "detail": "baseline assigned/unassigned must partition all jobs"
+    },
+    {
+      "name": "baseline_partition_overlap_rejected_by_api_guard",
+      "passed": true,
+      "detail": "baseline assigned/unassigned must partition all jobs"
+    },
+    {
+      "name": "frozen_baseline_unassigned_rejected_by_api_guard",
+      "passed": true,
+      "detail": "frozen baseline job cannot be unassigned"
+    },
+    {
+      "name": "baseline_unassigned_overlap_db_rejected",
+      "passed": true,
+      "detail": "baseline unassigned job must be movable and not assigned"
+    },
+    {
+      "name": "change_voyage_window_fk_rejected",
+      "passed": true,
+      "detail": "FOREIGN KEY constraint failed"
+    },
+    {
+      "name": "new_snapshot_must_match_current_plan_api_guard",
+      "passed": true,
+      "detail": "new snapshot baseline differs from current plan"
+    },
+    {
+      "name": "duplicate_vehicle_sequence_rejected",
+      "passed": true,
+      "detail": "UNIQUE constraint failed: baseline_assignments.scenario_id, baseline_assignments.vehicle_id, baseline_assignments.sequence"
+    },
+    {
+      "name": "deferred_initial_fk_checked_at_commit",
+      "passed": true,
+      "detail": "FOREIGN KEY constraint failed"
+    },
+    {
+      "name": "atomic_approval_storage_and_unassigned_carryover",
+      "passed": true,
+      "detail": {
+        "note": "테스트용 computed 형태만 사용; 실제 알고리즘 계산·승인 아님",
+        "approval_version": 2,
+        "new_input_carries_unassigned": [
+          "J3"
+        ],
+        "duplicate_idempotency_rejection": "UNIQUE constraint failed: idempotency_records.actor_id, idempotency_records.route, idempotency_records.idempotency_key"
+      }
+    },
+    {
+      "name": "final_sqlite_integrity",
+      "passed": true,
+      "detail": "integrity_check=ok; foreign_key_check=0"
+    }
+  ],
+  "not_validated_by_db": [
+    "전체 JSON Schema/정규화 원본 일치·완전성, 해시 계산과 RFC3339 형식 전체",
+    "일정 실행 가능성·차량 공차 이동·차량 적합성·변경 최소성·실제 최적화 성과",
+    "사용자 인증·운송사 범위·신선도·근거 확인·실제 외부 처리 권한",
+    "plan_heads CAS SQL 선택과 rowcount 검사 및 트랜잭션 경계는 API 책임",
+    "중첩 result_json/plan_json의 모든 작업 참조·집계 일치·미처리 분할합집합은 API 검증",
+    "검색 projection INSERT 완전성은 API 등록/승인 트랜잭션에서 검사; JSON이 권위 원본"
+  ]
+}

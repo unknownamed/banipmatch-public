@@ -1,0 +1,1352 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "반입맞춤 공통 계약 v0.1.0",
+  "$defs": {
+    "Evidence": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "observed",
+            "simulated",
+            "assumed",
+            "inferred",
+            "manual_verified"
+          ]
+        },
+        "source_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        }
+      },
+      "required": [
+        "kind",
+        "source_ref",
+        "observed_at",
+        "received_at"
+      ],
+      "additionalProperties": false
+    },
+    "Location": {
+      "type": "object",
+      "properties": {
+        "location_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "depot",
+            "origin",
+            "terminal"
+          ]
+        },
+        "latitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "location_id",
+        "name",
+        "kind",
+        "latitude",
+        "longitude",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "Vehicle": {
+      "type": "object",
+      "properties": {
+        "vehicle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "start_location_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "available_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shift_end_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "capacity_kg": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "equipment_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "DRY20",
+              "DRY40"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "vehicle_id",
+        "start_location_id",
+        "available_at",
+        "shift_end_at",
+        "capacity_kg",
+        "equipment_types",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "Job": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "voyage_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "origin_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "terminal_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "return_location_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "ready_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gross_weight_kg": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "equipment_type": {
+          "type": "string",
+          "enum": [
+            "DRY20",
+            "DRY40"
+          ]
+        },
+        "service_minutes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "planned",
+            "departed"
+          ]
+        },
+        "frozen": {
+          "type": "boolean"
+        },
+        "freeze_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "job_id",
+        "voyage_id",
+        "origin_id",
+        "terminal_id",
+        "return_location_id",
+        "ready_at",
+        "gross_weight_kg",
+        "equipment_type",
+        "service_minutes",
+        "state",
+        "frozen",
+        "freeze_reason",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "Window": {
+      "type": "object",
+      "properties": {
+        "window_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "voyage_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "terminal_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "opens_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "closes_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "verification": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "unconfirmed",
+            "conflict"
+          ]
+        },
+        "confirmed_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "window_id",
+        "voyage_id",
+        "terminal_id",
+        "opens_at",
+        "closes_at",
+        "verification",
+        "confirmed_by",
+        "confirmed_at",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "TravelTime": {
+      "type": "object",
+      "properties": {
+        "from_location_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "to_location_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "from_location_id",
+        "to_location_id",
+        "minutes",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "Assignment": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "vehicle_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pickup_departure_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "gate_arrival_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "return_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "job_id",
+        "vehicle_id",
+        "sequence",
+        "pickup_departure_at",
+        "gate_arrival_at",
+        "return_at"
+      ],
+      "additionalProperties": false
+    },
+    "Change": {
+      "type": "object",
+      "properties": {
+        "change_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "voyage_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "terminal_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "previous_opens_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "previous_closes_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "new_window_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "verification": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "unconfirmed",
+            "conflict"
+          ]
+        },
+        "confirmed_by": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "change_id",
+        "voyage_id",
+        "terminal_id",
+        "previous_opens_at",
+        "previous_closes_at",
+        "new_window_id",
+        "verification",
+        "confirmed_by",
+        "confirmed_at",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "Policy": {
+      "type": "object",
+      "properties": {
+        "buffer_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_change_tolerance_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input_valid_until": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "allow_wait_before_open": {
+          "const": false
+        },
+        "external_actions_enabled": {
+          "const": false
+        }
+      },
+      "required": [
+        "buffer_minutes",
+        "time_change_tolerance_minutes",
+        "input_valid_until",
+        "allow_wait_before_open",
+        "external_actions_enabled"
+      ],
+      "additionalProperties": false
+    },
+    "Snapshot": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "const": "0.1.0"
+        },
+        "scenario_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "base_plan_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "data_mode": {
+          "type": "string",
+          "enum": [
+            "simulated",
+            "observed",
+            "mixed"
+          ]
+        },
+        "as_of": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Location"
+          },
+          "minItems": 1
+        },
+        "vehicles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Vehicle"
+          },
+          "minItems": 1
+        },
+        "jobs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Job"
+          },
+          "minItems": 1
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Window"
+          },
+          "minItems": 1
+        },
+        "travel_times": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TravelTime"
+          },
+          "minItems": 1
+        },
+        "baseline_assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Assignment"
+          }
+        },
+        "change": {
+          "$ref": "#/$defs/Change"
+        },
+        "policy": {
+          "$ref": "#/$defs/Policy"
+        },
+        "baseline_unassigned_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "schema_version",
+        "scenario_id",
+        "plan_id",
+        "base_plan_version",
+        "data_mode",
+        "as_of",
+        "locations",
+        "vehicles",
+        "jobs",
+        "windows",
+        "travel_times",
+        "baseline_assignments",
+        "change",
+        "policy",
+        "baseline_unassigned_job_ids"
+      ],
+      "additionalProperties": false
+    },
+    "RunRequest": {
+      "type": "object",
+      "properties": {
+        "scenario_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "base_plan_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "B0",
+              "B1",
+              "B2",
+              "B3"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "time_limit_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "scenario_id",
+        "base_plan_version",
+        "methods",
+        "time_limit_seconds",
+        "seed"
+      ],
+      "additionalProperties": false
+    },
+    "Run": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "scenario_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "base_plan_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "running",
+            "completed",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "Z$",
+              "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "B0",
+              "B1",
+              "B2",
+              "B3"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "time_limit_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 120
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "time_limit_seconds",
+            "seed"
+          ],
+          "additionalProperties": false
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Error"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "run_id",
+        "scenario_id",
+        "plan_id",
+        "base_plan_version",
+        "status",
+        "created_at",
+        "started_at",
+        "finished_at",
+        "methods",
+        "config",
+        "error"
+      ],
+      "additionalProperties": false
+    },
+    "Issue": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "INPUT_MISSING",
+            "OUT_OF_SCOPE",
+            "WINDOW_UNCONFIRMED",
+            "EARLY_ARRIVAL",
+            "CUTOFF_EXCEEDED",
+            "READY_TOO_LATE",
+            "VEHICLE_UNAVAILABLE",
+            "INCOMPATIBLE_EQUIPMENT",
+            "CAPACITY_EXCEEDED",
+            "SHIFT_EXCEEDED",
+            "FIXED_RESIDUAL_RISK",
+            "SEARCH_LIMIT",
+            "MODEL_INVALID"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proof_level": {
+          "type": "string",
+          "enum": [
+            "input_validation",
+            "constraint_check",
+            "solver_proven",
+            "not_proven"
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "required": [
+        "job_id",
+        "code",
+        "explanation",
+        "proof_level",
+        "evidence_refs"
+      ],
+      "additionalProperties": false
+    },
+    "Metrics": {
+      "type": "object",
+      "properties": {
+        "unassigned_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "feasible_movable_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "movable_violation_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fixed_risk_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "changed_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        },
+        "vehicle_changed_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        },
+        "order_changed_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        },
+        "time_changed_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        },
+        "movable_travel_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "elapsed_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "newly_assigned_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "unassigned_count",
+        "feasible_movable_count",
+        "movable_violation_count",
+        "fixed_risk_count",
+        "changed_job_ids",
+        "vehicle_changed_job_ids",
+        "order_changed_job_ids",
+        "time_changed_job_ids",
+        "movable_travel_minutes",
+        "elapsed_ms",
+        "newly_assigned_job_ids"
+      ],
+      "additionalProperties": false
+    },
+    "MethodResult": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "B0",
+            "B1",
+            "B2",
+            "B3"
+          ]
+        },
+        "result_origin": {
+          "type": "string",
+          "enum": [
+            "illustrative_fixture",
+            "computed"
+          ]
+        },
+        "solution_status": {
+          "type": "string",
+          "enum": [
+            "BASELINE",
+            "HEURISTIC",
+            "OPTIMAL",
+            "FEASIBLE",
+            "INFEASIBLE",
+            "UNKNOWN",
+            "MODEL_INVALID",
+            "INPUT_INCOMPLETE"
+          ]
+        },
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Assignment"
+          }
+        },
+        "unassigned_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Issue"
+          }
+        },
+        "metrics": {
+          "$ref": "#/$defs/Metrics"
+        },
+        "objective_proven": {
+          "type": "boolean"
+        },
+        "approval_eligible": {
+          "type": "boolean"
+        },
+        "engine_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "solver_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "objective_stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "objective": {
+                "type": "string",
+                "enum": [
+                  "unassigned",
+                  "changed",
+                  "travel"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "OPTIMAL",
+                  "FEASIBLE",
+                  "UNKNOWN",
+                  "NOT_RUN"
+                ]
+              },
+              "value": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "best_bound": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "objective",
+              "status",
+              "value",
+              "best_bound"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "validation_status": {
+          "type": "string",
+          "enum": [
+            "passed",
+            "failed",
+            "not_run"
+          ]
+        },
+        "execution_metadata": {
+          "type": "object",
+          "properties": {
+            "solver_settings": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "initial_solution_ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "worker_count": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            }
+          },
+          "required": [
+            "solver_settings",
+            "initial_solution_ref",
+            "worker_count"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "method",
+        "result_origin",
+        "solution_status",
+        "assignments",
+        "unassigned_job_ids",
+        "issues",
+        "metrics",
+        "objective_proven",
+        "approval_eligible",
+        "engine_version",
+        "solver_version",
+        "objective_stages",
+        "validation_status",
+        "execution_metadata"
+      ],
+      "additionalProperties": false
+    },
+    "Results": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "scenario_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "base_plan_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "input_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MethodResult"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "run_id",
+        "scenario_id",
+        "base_plan_version",
+        "input_sha256",
+        "results"
+      ],
+      "additionalProperties": false
+    },
+    "ApprovalRequest": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "B1",
+            "B2",
+            "B3"
+          ]
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "acknowledged_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "run_id",
+        "method",
+        "expected_version",
+        "acknowledged_job_ids"
+      ],
+      "additionalProperties": false
+    },
+    "Approval": {
+      "type": "object",
+      "properties": {
+        "approval_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "B1",
+            "B2",
+            "B3"
+          ]
+        },
+        "approved_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$",
+          "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+        },
+        "external_actions_performed": {
+          "const": false
+        }
+      },
+      "required": [
+        "approval_id",
+        "plan_id",
+        "version",
+        "run_id",
+        "method",
+        "approved_by",
+        "approved_at",
+        "external_actions_performed"
+      ],
+      "additionalProperties": false
+    },
+    "Plan": {
+      "type": "object",
+      "properties": {
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "scenario_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Assignment"
+          }
+        },
+        "unassigned_job_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "uniqueItems": true
+        },
+        "approval_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "plan_id",
+        "version",
+        "scenario_id",
+        "assignments",
+        "unassigned_job_ids",
+        "approval_id"
+      ],
+      "additionalProperties": false
+    },
+    "RegisteredScenario": {
+      "type": "object",
+      "properties": {
+        "scenario_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "plan_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "base_plan_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "input_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "plan_id",
+        "base_plan_version",
+        "input_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "path",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "request_id",
+        "code",
+        "message",
+        "details"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$ref": "#/$defs/Snapshot"
+}

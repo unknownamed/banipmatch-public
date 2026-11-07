@@ -1,0 +1,6 @@
+첨부 JSON은 2026-11-06 공식 공개 스케줄 조회 당시의 요약과 예시 1행입니다. 전체 응답 원본이나 승인된 개발용 API 표본이 아닙니다. 조회 당시 일부 필드의 존재를 확인하는 근거이며 현재 이용 권한·호출한도·지속 수집 허용을 증명하지 않습니다.
+공식 규격: https://spec.openapis.org/oas/v3.1.1.html
+FastAPI: https://fastapi.tiangolo.com/features/
+OR-Tools: https://developers.google.com/optimization/cp/cp_solver
+SQLite: https://www.sqlite.org/foreignkeys.html
+확인일: 2026-11-07

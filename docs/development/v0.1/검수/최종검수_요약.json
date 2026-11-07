@@ -1,0 +1,20 @@
+{
+  "checked_at_utc": "2026-11-07T05:19:05.944382+00:00",
+  "pdf_files": 5,
+  "pages": 18,
+  "visual_review": "18쪽 렌더 검토, 수정한 데이터1/프론트2/API1쪽 최종 렌더 재확인. 겹침·잘림 없음.",
+  "minimum_body_font_points": 10.4,
+  "out_of_bounds": 0,
+  "contract_checks": 29,
+  "contract_passed": true,
+  "database_checks": 32,
+  "database_passed": true,
+  "schema_tables": 16,
+  "schema_fields": 133,
+  "limitations": [
+    "실제 웹앱/엔진/인증 미구현",
+    "결과 예제는 수작업 모의 자료",
+    "외부 API 인증 호출·승인·연계 검증 없음",
+    "테스트는 명세·저장구조·예제 검증이며 실제 현장 타당성이나 성능검증 아님"
+  ]
+}

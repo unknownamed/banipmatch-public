@@ -1,0 +1,8 @@
+{
+  "run_id": "R001",
+  "method": "B3",
+  "expected_version": 1,
+  "acknowledged_job_ids": [
+    "J3"
+  ]
+}

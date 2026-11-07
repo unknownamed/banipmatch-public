@@ -1,0 +1,5 @@
+﻿job_id,voyage_id,origin_id,terminal_id,return_location_id,ready_at,gross_weight_kg,equipment_type,service_minutes,state,frozen,freeze_reason
+J0,V1,O,HJNC,D,2026-11-06T23:30:00Z,24000,DRY40,20,departed,True,ALREADY_DEPARTED
+J1,V1,O,HJNC,D,2026-11-07T00:00:00Z,24000,DRY40,20,planned,False,
+J2,V2,O,HJNC,D,2026-11-07T00:20:00Z,24000,DRY40,20,planned,False,
+J3,V1,O,HJNC,D,2026-11-07T02:00:00Z,24000,DRY40,20,planned,False,

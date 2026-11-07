@@ -1,0 +1,81 @@
+반입맞춤 의미 검증 규칙 v0.1.0
+이 규칙은 구현 계약이다. validate_contracts.py는 제공 사례의 일부 규칙을
+검사하며 아래 모든 경우를 구현한 운영 검증기가 아니다.
+
+1. 시각/키/입력
+- 시각은 UTC Z, 분 경계(초=0)로 정규화한다. 원본 시간대/정밀도를 모르면
+  임의 추정하지 않고 입력을 보류한다. null과0을 구분한다.
+- ID는 배열 안에서 유일해야 한다. 모든 참조는 같은 scenario의 대상이어야 한다.
+- terminal_id/origin_id/return_location_id/start_location_id는 location_id 참조.
+- 한 voyage_id+terminal_id에 적용되는 현재 시간창은 하나이며 open<=close.
+- change.new_window_id는 change와 동일 항차/터미널의 현재 창을 참조한다.
+- change와 적용 window가 confirmed이고 확인자/시각/출처가 있어야 계산에 적용.
+  observed/assumed/inferred/실제 ETA 갱신만으로 confirmed를 생성하지 않는다.
+  모의 시나리오의 confirmed는 시나리오 내부 확정이며 현장 확인을 뜻하지 않는다.
+- 원안의 배정과 baseline_unassigned_job_ids는 작업 전체를 정확히 분할한다.
+  원안 미처리는 다음 검토에 이월할 수 있다. 고정/출발 작업은 배정에 있어야 한다.
+- departed인데 frozen=false이면 입력 의미 오류로 거절한다. 이동 가능으로
+  해석하지 않는다. frozen 작업은 이유와 원안 배정이 필요하다.
+- ready_at/중량/처리/필요 이동경로/가용 미확인은 별도 표시한다. 일부 모의
+  비교를 하더라도 INPUT_INCOMPLETE 결과는 확정 승인할 수 없다.
+
+2. 시간과 용량
+- 준비시각은 상차가 끝난 뒤 픽업지를 출발할 수 있는 시각이다.
+- 첫 픽업 출발 >= max(as_of, vehicle.available_at) + 공차 접근시간.
+- 이후 픽업 출발 >= 앞 작업 복귀 + 다음 픽업지 접근시간, 또한 ready_at 이후.
+- gate_arrival = pickup_departure + 적재 이동시간.
+- gate_arrival >= opens_at, gate_arrival+buffer <= closes_at. 시작 전 대기 불허.
+- return_at = gate_arrival + buffer + service_minutes + 지정 복귀지 이동시간.
+- 이동행렬은 방향성이 있다. 같은 지점 0분도 명시하며 누락을0으로 채우지 않음.
+- buffer는 가정한 계획 여유. 관측 대기시간/실제 차량 위치로 표현하지 않음.
+- 차량/샤시의 장비 호환, 컨테이너 총중량 허용값, 근무 종료 내 복귀를 검사.
+  실제 도로·차량 법적 중량 판정 구현은 별도 근거 확인 전 범위 밖이다.
+- 현재 진행 작업의 복귀/가용값이 미확정 또는 모순이면 신규 배정을 차단한다.
+- 이미 출발/고정된 배정은 시각과 순서를 보존한다. 새 창 위반 위험은 별도로
+  보고하고 삭제/미처리로 바꾸지 않는다. 미래 고정 예약 점유와도 충돌 금지.
+
+3. 결과·지표
+- 결과 배정과 unassigned_job_ids는 전체 작업을 분할하고 고정 작업을 보존.
+- B0는 원안 그대로 진단. 위반 배정도 남기며 위험 개수와 실행가능 개수를 구분.
+- B1은 실행가능 마감순 삽입; B2는 전체 미처리→이동; B3는 전체 미처리→변경→이동.
+- time_limit_seconds는 방법별 총 예산이고 사전식 여러 단계가 공유한다.
+- 상위 목표 최적성 미증명 시 하위목표까지 전역 최적이라고 주장하지 않는다.
+  objective_stages에는 단계 값·상태·경계를 기록하고 미제공 경계는 null로 둔다.
+- changed_job_ids는 양쪽에 배정된 작업의 차량 변경, 출발시각 차이가 허용폭을
+  초과한 작업, 같은 차량에 남은 작업쌍의 상대순서 역전에 참여한 작업, 원안
+  미처리에서 신규 배정된 작업의 합집합. 신규배정은 newly_assigned_job_ids에도 표시.
+  작업 삭제로 행 번호만 당겨진 경우는 순서 변경이 아니다.
+- unassigned_count는 결과 전체 미처리 수. 원안 배정에서 새로 빠진 작업은 별도
+  집합 차이로 보여준다. 원안에 미처리였던 작업이 남아도 전체 미처리에 포함한다.
+- movable_travel_minutes는 조정가능 배정 작업의 접근+적재이동+복귀 합.
+  고정 작업은 공통 상수로 제외. 처리 작업 수가 다른 두 안의 이동량만으로
+  성능 우위를 주장하지 않는다. 일관된 집계구간으로 비교한다.
+- queued/running/completed/failed/cancelled는 실행 상태. 해 상태와 별개다.
+  INFEASIBLE/UNKNOWN는 정상 계산으로 얻을 수 있으며 자동으로 run failed가 아님.
+- 엔진 실행 예외는 Run.error에 실패 방법과 함께 기록한다. v0.1에서는 한 방법의
+  실행 예외라도 run을 failed로 두고 부분 결과는 승인하지 않는다. failed run의
+  results 조회는503 RUN_EXECUTION_FAILED이며 내부 진단 기록은 유지한다.
+  시간 제한/모형 오류를 단일 작업 원인으로 단정하지 않는다.
+- engine_version은 알고리즘/모형 수정 식별값이다. solver_version과 실제 적용
+  설정·초기해/쓰레드 조건을 execution_metadata에 보존한다. 동일 시드만으로 시간 제한
+  병렬 계산의 결과가 완전히 같다고 보장하지 않는다.
+
+4. 승인·동시성
+- illustrative_fixture는 승인 불가. computed+독립검증 passed 및 승인적격 결과만 대상.
+- 승인자의 조직·역할은 서버 인증 맥락에서 판정하며 body 값으로 권한을 만들지 않음.
+- unassigned_job_ids와 고정 잔여 위험 작업 ID의 합집합을 acknowledged_job_ids로 확인.
+- 버전, run.scenario_id==현재 active_scenario_id, input_valid_until 및 필수 근거를
+  승인 트랜잭션 안에서 재확인한다. 서버 현재시각을 쓰며 재생시간으로 우회하지 않음.
+- 새 snapshot은 같은 plan_id에 등록할 수 있고 base version 및 원안(미처리 포함)이
+  현재 서버 계획과 일치해야 한다. 새 입력 등록 자체가 이전 결과 승인을 무효화한다.
+- head 조건부 갱신과 새 계획/배정/미처리/승인/멱등 응답을 원자적으로 저장.
+- 동일 사용자/운송사/경로/Idempotency-Key와 같은 요청은 기존 응답, 다른 본문은409.
+- 내부 승인 완료는 외부 예약·COPINO·기사 전달 완료가 아니다. 외부 행동은 false.
+
+5. 원본/확장
+- scenario JSON은 불변 원본이며 검색 테이블은 동일 트랜잭션에서 만든 사본.
+  입력 해시는 서버의 JSON 직렬화(UTF-8,키정렬,공백제거) 기준으로 계산한다.
+- VSL_NM와 ETB는 현재 Snapshot 필드가 아니다. 원본 보관/확장 선박·항차 메타데이터
+  후보로 유지하며 additionalProperties:false 객체에 임의로 끼워 넣지 않는다.
+- 위치·AIS·입출차·알림용 API/테이블은 이번 핵심 계약 밖이다. 외부 표본과 권한을
+  확인하고 별도 버전으로 확장한다. 번호판/선명만으로 자동 병합하지 않는다.

@@ -1,0 +1,30 @@
+# Local environments and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Generated runtime data and local-only materials
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+data/private/
+data/raw/
+local/
+tmp/
+logs/
+secrets/
+credentials/
+*.log
+Thumbs.db
+.DS_Store

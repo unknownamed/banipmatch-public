@@ -1,0 +1,134 @@
+﻿테이블	필드	SQLite형	NULL허용	기본키순서	기본값	외래키	설명
+approvals	approval_id	TEXT	아니오	1			승인 감사 기록 ID; 최초 원안은 NULL
+approvals	plan_id	TEXT	아니오	0		method_results.plan_id (FK#0:3) | plans.plan_id (FK#1:0)	운송사 내부 배차 계획 ID; 승인 revision을 묶는 키
+approvals	version	INTEGER	아니오	0		plans.version (FK#1:1)	이 승인 계획의 revision
+approvals	scenario_id	TEXT	아니오	0		method_results.scenario_id (FK#0:2) | plans.scenario_id (FK#1:2)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+approvals	run_id	TEXT	아니오	0		method_results.run_id (FK#0:0)	비교 계산 실행 ID
+approvals	method	TEXT	아니오	0		method_results.method (FK#0:1)	B0/B1/B2/B3 방식
+approvals	expected_version	INTEGER	아니오	0		method_results.base_plan_version (FK#0:4)	승인 요청이 기대한 현재 계획 버전
+approvals	approved_by	TEXT	아니오	0			서버 인증에서 얻은 승인자 ID
+approvals	approved_at	TEXT	아니오	0			내부 승인 시각
+approvals	acknowledged_job_ids_json	TEXT	아니오	0			요청자가 확인한 미처리/위험 작업 ID 배열
+approvals	external_actions_performed	INTEGER	아니오	0	0		v0.1은 항상 0; 외부 연락·예약 미수행
+assignments	plan_id	TEXT	아니오	1		plans.plan_id (FK#2:0)	운송사 내부 배차 계획 ID; 승인 revision을 묶는 키
+assignments	version	INTEGER	아니오	2		plans.version (FK#2:1)	이 승인 계획의 revision
+assignments	scenario_id	TEXT	아니오	0		vehicles.scenario_id (FK#0:0) | jobs.scenario_id (FK#1:0) | plans.scenario_id (FK#2:2)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+assignments	job_id	TEXT	아니오	3		jobs.job_id (FK#1:1)	입력 안에서의 작업 ID
+assignments	vehicle_id	TEXT	아니오	0		vehicles.vehicle_id (FK#0:1)	입력 안에서의 차량 ID
+assignments	sequence	INTEGER	아니오	0			차량 내 실행 순서; 1부터 시작
+assignments	pickup_departure_at	TEXT	아니오	0			상차지 출발 시각
+assignments	gate_arrival_at	TEXT	예	0			게이트 도착 시각; 불명 NULL
+assignments	return_at	TEXT	예	0			복귀 완료 시각; 불명 NULL
+baseline_assignments	scenario_id	TEXT	아니오	1		vehicles.scenario_id (FK#0:0) | jobs.scenario_id (FK#1:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+baseline_assignments	job_id	TEXT	아니오	2		jobs.job_id (FK#1:1)	입력 안에서의 작업 ID
+baseline_assignments	vehicle_id	TEXT	아니오	0		vehicles.vehicle_id (FK#0:1)	입력 안에서의 차량 ID
+baseline_assignments	sequence	INTEGER	아니오	0			차량 내 실행 순서; 1부터 시작
+baseline_assignments	pickup_departure_at	TEXT	아니오	0			상차지 출발 시각
+baseline_assignments	gate_arrival_at	TEXT	예	0			게이트 도착 시각; 불명 NULL
+baseline_assignments	return_at	TEXT	예	0			복귀 완료 시각; 불명 NULL
+baseline_unassigned	scenario_id	TEXT	아니오	1		jobs.scenario_id (FK#0:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+baseline_unassigned	job_id	TEXT	아니오	2		jobs.job_id (FK#0:1)	입력 안에서의 작업 ID
+changes	scenario_id	TEXT	아니오	1		windows.scenario_id (FK#0:0) | scenarios.scenario_id (FK#1:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+changes	change_id	TEXT	아니오	0			반입시간 변경 이벤트 ID
+changes	voyage_id	TEXT	아니오	0		windows.voyage_id (FK#0:2)	내부 항차 ID; 외부 선명/ETB와 별개
+changes	terminal_id	TEXT	아니오	0		windows.terminal_id (FK#0:3)	반입 터미널 장소 ID
+changes	previous_opens_at	TEXT	아니오	0			변경 전 반입 시작
+changes	previous_closes_at	TEXT	아니오	0			변경 전 반입 마감
+changes	new_window_id	TEXT	아니오	0		windows.window_id (FK#0:1)	변경 후 반입시간창
+changes	verification	TEXT	아니오	0			확인·미확인·충돌 상태
+changes	confirmed_by	TEXT	예	0			확인자 식별자; 미확인시 NULL 가능
+changes	confirmed_at	TEXT	예	0			확인 시각; 미확인시 NULL 가능
+changes	evidence_json	TEXT	아니오	0			출처·관측/수신 시각·모의 여부
+idempotency_records	actor_id	TEXT	아니오	1			인증된 요청자 ID; 요청 body로 신뢰 금지
+idempotency_records	route	TEXT	아니오	2			HTTP 메서드+구체 경로; 멱등키 범위
+idempotency_records	idempotency_key	TEXT	아니오	3			동일 요청 재시도 식별자
+idempotency_records	request_sha256	TEXT	아니오	0			요청 body 해시; 다른 body 재사용은 API 409
+idempotency_records	response_status	INTEGER	아니오	0			저장된 응답 HTTP 상태
+idempotency_records	response_json	TEXT	아니오	0			재시도에 반환할 완료 응답 JSON
+idempotency_records	created_at	TEXT	아니오	0			생성 시각(UTC)
+jobs	scenario_id	TEXT	아니오	1		windows.scenario_id (FK#0:0) | locations.scenario_id (FK#1:0) | locations.scenario_id (FK#2:0) | locations.scenario_id (FK#3:0) | scenarios.scenario_id (FK#4:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+jobs	job_id	TEXT	아니오	2			입력 안에서의 작업 ID
+jobs	voyage_id	TEXT	아니오	0		windows.voyage_id (FK#0:1)	내부 항차 ID; 외부 선명/ETB와 별개
+jobs	origin_id	TEXT	아니오	0		locations.location_id (FK#3:1)	상차지 장소 ID
+jobs	terminal_id	TEXT	아니오	0		windows.terminal_id (FK#0:2) | locations.location_id (FK#2:1)	반입 터미널 장소 ID
+jobs	return_location_id	TEXT	아니오	0		locations.location_id (FK#1:1)	작업 후 복귀 장소 ID
+jobs	ready_at	TEXT	예	0			화물 준비 시각; 미확보 NULL
+jobs	gross_weight_kg	INTEGER	예	0			총중량 kg; 미확보 NULL
+jobs	equipment_type	TEXT	아니오	0			DRY20/DRY40
+jobs	service_minutes	INTEGER	예	0			터미널 처리 분; 미확보 NULL
+jobs	state	TEXT	아니오	0			계획 또는 이미 출발 상태
+jobs	frozen	INTEGER	아니오	0			고정 작업 여부 0/1
+jobs	freeze_reason	TEXT	예	0			고정 이유
+jobs	evidence_json	TEXT	아니오	0			출처·관측/수신 시각·모의 여부
+locations	scenario_id	TEXT	아니오	1		scenarios.scenario_id (FK#0:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+locations	location_id	TEXT	아니오	2			입력 안에서의 장소 ID
+locations	name	TEXT	아니오	0			장소 표시명
+locations	kind	TEXT	아니오	0			장소 종류
+locations	latitude	REAL	예	0			위도; 미확보 NULL
+locations	longitude	REAL	예	0			경도; 미확보 NULL
+locations	evidence_json	TEXT	아니오	0			출처·관측/수신 시각·모의 여부
+method_results	run_id	TEXT	아니오	1		runs.run_id (FK#0:0)	비교 계산 실행 ID
+method_results	method	TEXT	아니오	2			B0/B1/B2/B3 방식
+method_results	scenario_id	TEXT	아니오	0		runs.scenario_id (FK#0:1)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+method_results	plan_id	TEXT	아니오	0		runs.plan_id (FK#0:2)	운송사 내부 배차 계획 ID; 승인 revision을 묶는 키
+method_results	base_plan_version	INTEGER	아니오	0		runs.base_plan_version (FK#0:3)	이 입력/실행이 기준으로 삼은 승인 계획 버전
+method_results	result_origin	TEXT	아니오	0			설명용 예제 또는 계산 결과
+method_results	solution_status	TEXT	아니오	0			계산/검사 상태; 최적성 의미는 별도 확인
+method_results	objective_proven	INTEGER	아니오	0			목적함수 최적성 입증 여부 0/1
+method_results	approval_eligible	INTEGER	아니오	0			현재 결과의 승인 후보 자격 0/1; 승인 그 자체 아님
+method_results	result_json	TEXT	아니오	0			해당 방식의 결과 전체; 입력/계획과 연결
+plan_heads	plan_id	TEXT	아니오	1		scenarios.plan_id (FK#0:1) | plans.plan_id (FK#1:0)	운송사 내부 배차 계획 ID; 승인 revision을 묶는 키
+plan_heads	current_version	INTEGER	아니오	0		plans.version (FK#1:1)	현재 승인 계획 버전; CAS 대상
+plan_heads	active_scenario_id	TEXT	아니오	0		scenarios.scenario_id (FK#0:0)	현재 활성 입력 revision; 버전과 함께 CAS
+plan_heads	updated_at	TEXT	아니오	0			head 최종 갱신 시각
+plans	plan_id	TEXT	아니오	1		approvals.plan_id (FK#0:1) | scenarios.plan_id (FK#1:1)	운송사 내부 배차 계획 ID; 승인 revision을 묶는 키
+plans	version	INTEGER	아니오	2		approvals.version (FK#0:2)	이 승인 계획의 revision
+plans	scenario_id	TEXT	아니오	0		approvals.scenario_id (FK#0:3) | scenarios.scenario_id (FK#1:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+plans	approval_id	TEXT	예	0		approvals.approval_id (FK#0:0)	승인 감사 기록 ID; 최초 원안은 NULL
+plans	plan_json	TEXT	아니오	0			권위 계획 버전 JSON; 배정/미처리 포함
+plans	created_at	TEXT	아니오	0			생성 시각(UTC)
+runs	run_id	TEXT	아니오	1			비교 계산 실행 ID
+runs	scenario_id	TEXT	아니오	0		scenarios.scenario_id (FK#1:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+runs	plan_id	TEXT	아니오	0		plans.plan_id (FK#0:0) | scenarios.plan_id (FK#1:1)	운송사 내부 배차 계획 ID; 승인 revision을 묶는 키
+runs	base_plan_version	INTEGER	아니오	0		plans.version (FK#0:1) | scenarios.base_plan_version (FK#1:2)	이 입력/실행이 기준으로 삼은 승인 계획 버전
+runs	input_sha256	TEXT	아니오	0		scenarios.input_sha256 (FK#1:3)	정규 JSON 입력 SHA-256; API가 계산
+runs	status	TEXT	아니오	0			실행 대기·진행·완료·실패·취소
+runs	created_at	TEXT	아니오	0			생성 시각(UTC)
+runs	started_at	TEXT	예	0			실행 시작 시각; 미시작 NULL
+runs	finished_at	TEXT	예	0			실행 종료 시각; 미종료 NULL
+runs	methods_json	TEXT	아니오	0			요청한 B0~B3 배열
+runs	time_limit_seconds	INTEGER	아니오	0			계산 시간 제한; 1~120초
+runs	seed	INTEGER	아니오	0			재현용 난수 seed
+runs	error_json	TEXT	예	0			실행 실패 상세 Error JSON; 오류 없으면 NULL
+scenarios	scenario_id	TEXT	아니오	1			불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+scenarios	plan_id	TEXT	아니오	0		plans.plan_id (FK#0:0)	운송사 내부 배차 계획 ID; 승인 revision을 묶는 키
+scenarios	base_plan_version	INTEGER	아니오	0		plans.version (FK#0:1)	이 입력/실행이 기준으로 삼은 승인 계획 버전
+scenarios	schema_version	TEXT	아니오	0			JSON 계약 버전
+scenarios	data_mode	TEXT	아니오	0			모의·관측·혼합 구분
+scenarios	as_of	TEXT	아니오	0			시나리오 판단 기준 시각(UTC)
+scenarios	input_sha256	TEXT	아니오	0			정규 JSON 입력 SHA-256; API가 계산
+scenarios	snapshot_json	TEXT	아니오	0			권위 입력 JSON 전체; 변경 불가
+scenarios	created_at	TEXT	아니오	0			생성 시각(UTC)
+travel_times	scenario_id	TEXT	아니오	1		locations.scenario_id (FK#0:0) | locations.scenario_id (FK#1:0) | scenarios.scenario_id (FK#2:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+travel_times	from_location_id	TEXT	아니오	2		locations.location_id (FK#1:1)	이동 출발 장소
+travel_times	to_location_id	TEXT	아니오	3		locations.location_id (FK#0:1)	이동 도착 장소
+travel_times	minutes	INTEGER	아니오	0			이동 소요 분; 음수 불가
+travel_times	evidence_json	TEXT	아니오	0			출처·관측/수신 시각·모의 여부
+vehicles	scenario_id	TEXT	아니오	1		locations.scenario_id (FK#0:0) | scenarios.scenario_id (FK#1:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+vehicles	vehicle_id	TEXT	아니오	2			입력 안에서의 차량 ID
+vehicles	start_location_id	TEXT	아니오	0		locations.location_id (FK#0:1)	차량 시작 장소
+vehicles	available_at	TEXT	예	0			차량 다음 사용 가능 시각; 불명 NULL
+vehicles	shift_end_at	TEXT	아니오	0			근무 종료 시각
+vehicles	capacity_kg	INTEGER	아니오	0			차량 허용 중량 kg
+vehicles	equipment_types_json	TEXT	아니오	0			차량 지원 컨테이너 종류 배열
+vehicles	evidence_json	TEXT	아니오	0			출처·관측/수신 시각·모의 여부
+windows	scenario_id	TEXT	아니오	1		locations.scenario_id (FK#0:0) | scenarios.scenario_id (FK#1:0)	불변 입력 revision ID; 같은 plan에 여러 입력을 보존
+windows	window_id	TEXT	아니오	2			반입시간창 ID
+windows	voyage_id	TEXT	아니오	0			내부 항차 ID; 외부 선명/ETB와 별개
+windows	terminal_id	TEXT	아니오	0		locations.location_id (FK#0:1)	반입 터미널 장소 ID
+windows	opens_at	TEXT	아니오	0			반입 시작 시각
+windows	closes_at	TEXT	아니오	0			반입 마감 시각; ETB와 별개
+windows	verification	TEXT	아니오	0			확인·미확인·충돌 상태
+windows	confirmed_by	TEXT	예	0			확인자 식별자; 미확인시 NULL 가능
+windows	confirmed_at	TEXT	예	0			확인 시각; 미확인시 NULL 가능
+windows	evidence_json	TEXT	아니오	0			출처·관측/수신 시각·모의 여부

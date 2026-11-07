@@ -1,0 +1,24 @@
+{
+  "official": {
+    "source_url": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT/data?startDate=2026-11-01&endDate=2026-11-15&sort=ETB&dateType=&route=&oper=&amount=100&page=1",
+    "retrieved_kst": "2026-11-06T09:37:45+09:00",
+    "raw_response_sha256": "c80d043726fa2e04b5042e83416e9f4983b06a3aab4f507e845d92543a781c5e"
+  },
+  "response_rows": 51,
+  "scoped_rows": 48,
+  "unique_voyages": 48,
+  "valid_window_count": 48,
+  "window_hours_min": 62.0,
+  "window_hours_max": 83.0,
+  "has_next": false,
+  "examples": [
+    {
+      "VOY_NO": "WILM-2026-0004",
+      "VSL_NM": "WILLIAM",
+      "YARD_OPEN": "2026-11-07 00:00",
+      "YARD_CLOSE": "2026-11-09 20:00",
+      "ETB": "2026-11-10 06:00"
+    }
+  ],
+  "third_party_refresh": "Timed out; no new historical change verification. Prior saved comparison is timestamp-specific."
+}

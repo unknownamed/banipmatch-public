@@ -1,0 +1,19 @@
+{
+  "run_id": "R001",
+  "scenario_id": "S001",
+  "plan_id": "P001",
+  "base_plan_version": 1,
+  "status": "completed",
+  "created_at": "2026-11-07T00:00:00Z",
+  "started_at": "2026-11-07T00:00:00Z",
+  "finished_at": "2026-11-07T00:00:00Z",
+  "methods": [
+    "B0",
+    "B3"
+  ],
+  "config": {
+    "time_limit_seconds": 10,
+    "seed": 42
+  },
+  "error": null
+}

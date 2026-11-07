@@ -1,0 +1,201 @@
+{
+  "version": "0.1.0",
+  "created_at_utc": "2026-11-07T05:19:05.944382+00:00",
+  "files": [
+    {
+      "path": "00_반입맞춤_공통개발규격_v0.1.pdf",
+      "bytes": 148466,
+      "sha256": "cf987b057bd44075de020366f194a2f124d91d61e251c7f4c66b856d423b2374"
+    },
+    {
+      "path": "검수/DB검증.json",
+      "bytes": 7847,
+      "sha256": "6c655b7cce8c3b8f5460d6a6bbc07664ad38351621a40a40fb16cdc660bf63dc"
+    },
+    {
+      "path": "검수/PDF_문자경계.json",
+      "bytes": 2556,
+      "sha256": "61507896b649f60a7bab11855c9caecfdfc713fe7d7aeceda92446fd4f791fdf"
+    },
+    {
+      "path": "검수/requirements-validation.txt",
+      "bytes": 49,
+      "sha256": "e58bb9bd78e102871d5b97a96a1ab4aeefddf9e3763d9cbc7d3b7f22405f4492"
+    },
+    {
+      "path": "검수/validate_contracts.py",
+      "bytes": 8351,
+      "sha256": "ed4ffdbc1a6f69784da9a04333565664e5156260eecce80ff37aa497e67cff6b"
+    },
+    {
+      "path": "검수/validate_db.py",
+      "bytes": 29063,
+      "sha256": "9e9818416d2309b0ca6cc74437b4d285b9f77d0e2e65e027dffde3fac2465867"
+    },
+    {
+      "path": "검수/계약_예제_검증.json",
+      "bytes": 3300,
+      "sha256": "abecf7bb0dbcf48e3735b341a03be586f94651e18b677045022dda191bda47e5"
+    },
+    {
+      "path": "검수/레이아웃_계산.json",
+      "bytes": 2529,
+      "sha256": "25e8bc76243dee3348ca9f6c82ac68417643f9d172d3a39f9a93239d4dfe2bd5"
+    },
+    {
+      "path": "검수/예제_독립검토.txt",
+      "bytes": 6437,
+      "sha256": "6060c3ba8032185d3d342a14340add37b53054def7911d7f0bfcc6274aaf4954"
+    },
+    {
+      "path": "검수/최종검수_요약.json",
+      "bytes": 740,
+      "sha256": "774d235dc73c2cfdbe7f0974b0e7c20c28395c61f9585d33cdebeda8af1dad5b"
+    },
+    {
+      "path": "공통 규격/api_pages.json",
+      "bytes": 8779,
+      "sha256": "03ee0f036ef144b78928a307ef2c883a1b0adcde87f1c35233fea1aa2457b74c"
+    },
+    {
+      "path": "공통 규격/common_pages.json",
+      "bytes": 17092,
+      "sha256": "490ba1de0d937c95781529b2da52287ee6abd889ef23939fe5d9313c51d7b7bd"
+    },
+    {
+      "path": "공통 규격/contracts.schema.json",
+      "bytes": 33616,
+      "sha256": "b589c9c889f3a5fc391ef24878c398a158f7b47a855d7654ae054d38f2ada5d7"
+    },
+    {
+      "path": "공통 규격/data_pages.json",
+      "bytes": 7897,
+      "sha256": "0e2cba7bb3ea2d900716fd19b843878e637668b172aa8d395706be2effb9c039"
+    },
+    {
+      "path": "공통 규격/DB_모델설명.txt",
+      "bytes": 1042,
+      "sha256": "971e2aabd7d7ad7affc090b08479b217aee2724b9db5b5367cc7760e575e5eec"
+    },
+    {
+      "path": "공통 규격/DB_필드사전.tsv",
+      "bytes": 12932,
+      "sha256": "b7903b609bd315239d1b210176f294404ea41bbb6db935726b387f8e96622197"
+    },
+    {
+      "path": "공통 규격/engine_pages.json",
+      "bytes": 11028,
+      "sha256": "6ec627d1d7a2d1234a26953542b22e5be4592279a789c7243c335a7a6baeef27"
+    },
+    {
+      "path": "공통 규격/frontend_pages.json",
+      "bytes": 8361,
+      "sha256": "71c868d9e42a74b7bb56ee682abc3764ff862678f8922cafd2141b6c39355ae4"
+    },
+    {
+      "path": "공통 규격/openapi.json",
+      "bytes": 58672,
+      "sha256": "985017c92b31c4821eb6c4b8b91a072041091882750972760ef4ba13cb643910"
+    },
+    {
+      "path": "공통 규격/openapi.yaml",
+      "bytes": 40214,
+      "sha256": "725416b7779aba384ef3f17baa99a0f007bd9c23fd9063c0bf9b7a55040b2082"
+    },
+    {
+      "path": "공통 규격/schema.sql",
+      "bytes": 24083,
+      "sha256": "2b2dba6a861251c81c997976d8b84b42d3c081b6e04977863c2d8ececfebd728"
+    },
+    {
+      "path": "공통 규격/의미검증_규칙.txt",
+      "bytes": 7093,
+      "sha256": "bcca8e01d5d5f537ca3d260aec643680400bd081ad1581b2677fb2fd1f25e805"
+    },
+    {
+      "path": "담당별 문서/01_프론트_작업명세_v0.1.pdf",
+      "bytes": 119375,
+      "sha256": "e8c4d2f7189f62767a68b0e9b8288fb526ef6b368f8d19f8d9ce2b73b2643e09"
+    },
+    {
+      "path": "담당별 문서/02_데이터_작업명세_v0.1.pdf",
+      "bytes": 110316,
+      "sha256": "61a7130181240189ba0d40174dae3bb10364b74925630df1dc7f726b777b6ffa"
+    },
+    {
+      "path": "담당별 문서/03_최적화엔진_작업명세_v0.1.pdf",
+      "bytes": 134675,
+      "sha256": "c8cd0e8a675d53b97ac96c0e99f8a2dfab6cdd5afa3362c4a0a8800185463d6d"
+    },
+    {
+      "path": "담당별 문서/04_API통합_작업명세_v0.1.pdf",
+      "bytes": 123219,
+      "sha256": "960757634a0f42ad36f53a9ace33d1cab06365797594f664f9ac2adaee519262"
+    },
+    {
+      "path": "먼저_읽기.txt",
+      "bytes": 2911,
+      "sha256": "8738996c15224e767dbd23e480cc7ad44766626f5a94802672946edf26e85819"
+    },
+    {
+      "path": "예제 데이터/01_snapshot.json",
+      "bytes": 9745,
+      "sha256": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e"
+    },
+    {
+      "path": "예제 데이터/02_run_request.json",
+      "bytes": 145,
+      "sha256": "d000e482a0957baac588f31aa4854470294cef8c9a94d2e169117c3bcd2baf1a"
+    },
+    {
+      "path": "예제 데이터/03_run_status.json",
+      "bytes": 380,
+      "sha256": "138d4bc0584a18441d6f547c7ee986d72a7d01cbc2abe3e9943e3413b948c974"
+    },
+    {
+      "path": "예제 데이터/04_results_설명용.json",
+      "bytes": 5125,
+      "sha256": "a445a1c8ab7868c4c2099e641134183cdc420298eecb3844942fbbd0ed4bb2e5"
+    },
+    {
+      "path": "예제 데이터/05_approval_request.json",
+      "bytes": 116,
+      "sha256": "01e8756c428ec459c7ddd2486f41ec955bc5ca53c5d37cb50256a3eb7452d55b"
+    },
+    {
+      "path": "예제 데이터/06_error_version_conflict.json",
+      "bytes": 286,
+      "sha256": "f424fde0249ec3ff5f9624e6786f2cc7dfa46684f358d362ea2744220b47ef38"
+    },
+    {
+      "path": "예제 데이터/07_snapshot_입력누락.json",
+      "bytes": 9727,
+      "sha256": "946542bfe43b5c1a1f3d2a332718d6190fd57bc1c045bd886ead88482c43a3c0"
+    },
+    {
+      "path": "예제 데이터/08_snapshot_미확인변경.json",
+      "bytes": 9716,
+      "sha256": "d33f6e975032deb44bdf73a4c5cdbb35764dd2b771c5eab0f1867873c306afa0"
+    },
+    {
+      "path": "예제 데이터/jobs_template.csv",
+      "bytes": 429,
+      "sha256": "3f517017b8fcb9aecfb85ac33003354686c68e9b2c85cd955508217d927fdf4a"
+    },
+    {
+      "path": "예제 데이터/예제_기대결과.json",
+      "bytes": 1031,
+      "sha256": "c9cf810be9925bee18e35dfe51b9472987e035b84530096dfe802bc9a2620724"
+    },
+    {
+      "path": "참고 근거/HJNC_공개스케줄_조회요약_2026-11-06.json",
+      "bytes": 858,
+      "sha256": "e0c111004e033c83366d81d341c787f43aee93059416043bb12c03e9adc5ac47"
+    },
+    {
+      "path": "참고 근거/근거_설명.txt",
+      "bytes": 575,
+      "sha256": "7238ee860ff37196aeb2ee1e7a26b5b65021003347da4c4aceaf8fee3af2651e"
+    }
+  ]
+}

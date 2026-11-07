@@ -1,0 +1,11 @@
+{
+  "request_id": "REQ001",
+  "code": "PLAN_VERSION_CONFLICT",
+  "message": "검토 중 원안이 변경되었습니다. 최신 계획으로 다시 계산하세요.",
+  "details": [
+    {
+      "path": "expected_version",
+      "reason": "요청1, 서버현재2"
+    }
+  ]
+}

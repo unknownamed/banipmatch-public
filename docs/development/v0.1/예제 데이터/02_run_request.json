@@ -1,0 +1,10 @@
+{
+  "scenario_id": "S001",
+  "base_plan_version": 1,
+  "methods": [
+    "B0",
+    "B3"
+  ],
+  "time_limit_seconds": 10,
+  "seed": 42
+}

@@ -1,0 +1,151 @@
+{
+  "scope": "명세/예제 검사. API서버·실제최적화·실제승인 실행시험 아님.",
+  "checks": [
+    {
+      "name": "JSON Schema 구문",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "OpenAPI 3.1 문서 검증",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "OpenAPI/공통 객체 동일",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 01_snapshot.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 02_run_request.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 03_run_status.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 04_results_설명용.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 05_approval_request.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 06_error_version_conflict.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 07_snapshot_입력누락.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "예제 구조 08_snapshot_미확인변경.json",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "입력 해시 일치",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "요청/실행/결과 방법 일치",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "실행 설정 보존",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "기준 입력 관계 검증",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "준비 미확인 검출",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "미확인 변경 검출",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "B0 위반 작업 정확히 J1/J3",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "B3 배정 시간·호환·중량·근무 준수",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "고정 작업 그대로 유지",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "입력 작업 보존",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "가용·공차접근 J2",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "가용·공차접근 J1",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "변경 합집합 정확히 J1/J2",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "J3 단독 최초도착으로도 불가",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "fixture 실계산·최적성 오인 차단",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "음수 시간 예산 거절",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "정의 밖 필드 거절",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "출발 작업 잠금 모순 검출",
+      "passed": true,
+      "details": ""
+    }
+  ],
+  "passed": true
+}
