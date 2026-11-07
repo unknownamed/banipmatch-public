@@ -22,12 +22,13 @@
 | 개발 예제 | v0.1 모의 입력과 수작업 설명용 결과는 원본 보존 |
 | 엔진 실계산 예제 | [B0/B1 결과](../experiments/engine-b0-b1/README.md). 모의 입력으로 실제 코드 실행 |
 | 기존 검수 | 계약·예제 29건 + 메모리 DB 32건 |
+| 데이터 입력 | [PR #5](https://github.com/unknownamed/banipmatch/pull/5) CSV·JSON 변환·입력 관계 검사·필드/출처/행 오류 반환. 시간 관계·정밀도·복귀 후 차량 가용 검사 보완. API 실행 경로 연결은 후속 작업 |
 | 엔진 | B0 원안 진단·B1 마감순 삽입, 지표 계산, 로컬 CLI, 테스트 51건. [PR #1](https://github.com/unknownamed/banipmatch/pull/1) main 병합, 지적 2건 수정·검사 완료. B2/B3 미구현 |
 | 프론트 | [PR #4](https://github.com/unknownamed/banipmatch/pull/4) main 병합. 설명용 예제 비교 화면·고정 작업/승인 차단 표시, 테스트 16건·타입 검사·빌드 통과. 실제 서버 연결은 미검증 |
 | 실제 앱 통합·독립 일정 검사·승인·인증 | 미구현 |
 | 외부 API·실배차·GPS | 승인·실표본·운송사 협조 미확보. 이용 가능하다고 가정하지 않음 |
 | AI 협업 | 공통 지침·도구별 진입점·담당표·PR/인계 양식. [필요한 변경만 관련자 1회 검토](review-policy.md), 피드백 수정·검사 후 재승인 대기 없음 |
-| CI | 계약·예제·DB 검사 + API·엔진 전체 Python 검사. 개별 실행 성공 여부는 GitHub Checks/Actions 참조 |
+| CI | 계약·예제·DB 검사 + 데이터·API·엔진 전체 Python 검사. 개별 실행 성공 여부는 GitHub Checks/Actions 참조 |
 | 강제 병합 제한 | 이번 작업에서 브랜치 보호·필수 승인 설정하지 않음 |
 
 ## 바로 할 일
@@ -38,6 +39,7 @@
 2. 설명용 결과로 연결한 화면에는 모의 표시를 유지하고 승인을 막습니다.
 3. [첫 엔진 인계](handoffs/2026-11-07-unknownamed-engine-b0-b1.md)에 따라 `solve()`를 연결하고 독립 일정 검사와 승인 충돌을 구현합니다. 현재 엔진 결과는 모두 `validation_status=not_run`, `approval_eligible=false`입니다.
 4. 엔진 담당은 B2/B3 최적화와 더 큰 시나리오 실험을 이어갑니다. 지금 B1을 최적해로 표시하지 않습니다.
+5. 데이터·API 담당은 [입력 검증 인계](handoffs/2026-11-07-s-minjun-input-validation.md)를 읽고 실행 전 점검에 연결합니다. 누락·미확인 입력도 등록·보관하는 API 정책은 유지하며, `InputReport.valid`를 일정 독립 검증·승인 성공으로 사용하지 않습니다.
 
 첫 통합에서 J0 고정, J1/J2 조정, J3 미처리 이유가 일치해야 합니다. 과거 자료의 단순 시간슬롯 데모를 현재 엔진 완성본으로 취급하지 않습니다.
 

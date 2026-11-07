@@ -58,7 +58,9 @@ def validate_shape(snapshot: dict, config: dict) -> None:
             for key, value in obj.items():
                 if (key.endswith("_at") or key in ("as_of", "input_valid_until")) and isinstance(value, str):
                     dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
-                    if dt.second or dt.microsecond:
+                    # datetime truncates fractions beyond microseconds; inspect the source too.
+                    fraction = value[20:-1] if len(value) > 20 and value[19] == "." else ""
+                    if dt.second or any(digit != "0" for digit in fraction):
                         raise EngineInputError([issue(None, "MODEL_INVALID", f"{path}.{key}: v0.1 입력 시각은 UTC 분 경계여야 합니다. 임의 반올림하지 않습니다.")])
                 walk(value, f"{path}.{key}")
         elif isinstance(obj, list):

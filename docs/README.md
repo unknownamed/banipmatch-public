@@ -32,6 +32,7 @@
 - 최종 보고서: 준비 중
 - 최종 발표자료: 준비 중
 - [로컬 API 실행 안내](../backend/README.md): 입력 저장·설명용 응답. 실제 엔진·독립 검증 연결은 후속 작업
+- [데이터 입력 검증 안내](../backend/data/README.md): CSV·JSON 입력과 행별 오류, API 연결 시 지킬 경계
 - [프론트 실행 안내](../frontend/README.md): 설명용 예제 비교 화면, 실제 서버 전체 연결은 미검증
 - [B0/B1 엔진 실행 안내](../backend/engine/README.md) · [모의 실계산 결과](experiments/engine-b0-b1/README.md): 첫 구현이며 B2/B3·현장 검증은 남음
 
