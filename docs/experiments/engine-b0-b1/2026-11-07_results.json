@@ -1,0 +1,184 @@
+{
+  "run_id": "local-8840e50f163956a3",
+  "scenario_id": "S001",
+  "base_plan_version": 1,
+  "input_sha256": "8840e50f163956a31c609c4a20e65a02261dfe446cfb56a0e6812d00f09f7a9c",
+  "results": [
+    {
+      "method": "B0",
+      "result_origin": "computed",
+      "solution_status": "BASELINE",
+      "assignments": [
+        {
+          "job_id": "J0",
+          "vehicle_id": "T1",
+          "sequence": 1,
+          "pickup_departure_at": "2026-11-06T23:50:00Z",
+          "gate_arrival_at": "2026-11-07T00:20:00Z",
+          "return_at": "2026-11-07T01:00:00Z"
+        },
+        {
+          "job_id": "J1",
+          "vehicle_id": "T1",
+          "sequence": 2,
+          "pickup_departure_at": "2026-11-07T01:10:00Z",
+          "gate_arrival_at": "2026-11-07T01:40:00Z",
+          "return_at": "2026-11-07T02:20:00Z"
+        },
+        {
+          "job_id": "J2",
+          "vehicle_id": "T2",
+          "sequence": 1,
+          "pickup_departure_at": "2026-11-07T00:20:00Z",
+          "gate_arrival_at": "2026-11-07T00:50:00Z",
+          "return_at": "2026-11-07T01:30:00Z"
+        },
+        {
+          "job_id": "J3",
+          "vehicle_id": "T2",
+          "sequence": 2,
+          "pickup_departure_at": "2026-11-07T02:00:00Z",
+          "gate_arrival_at": "2026-11-07T02:30:00Z",
+          "return_at": "2026-11-07T03:10:00Z"
+        }
+      ],
+      "unassigned_job_ids": [],
+      "issues": [
+        {
+          "job_id": "J1",
+          "code": "CUTOFF_EXCEEDED",
+          "explanation": "도착+여유 2026-11-07T01:50:00Z > 마감 2026-11-07T01:30:00Z",
+          "proof_level": "constraint_check",
+          "evidence_refs": [
+            "fixture:scenario_001"
+          ]
+        },
+        {
+          "job_id": "J3",
+          "code": "CUTOFF_EXCEEDED",
+          "explanation": "도착+여유 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z",
+          "proof_level": "constraint_check",
+          "evidence_refs": [
+            "fixture:scenario_001"
+          ]
+        }
+      ],
+      "metrics": {
+        "unassigned_count": 0,
+        "feasible_movable_count": 1,
+        "movable_violation_count": 2,
+        "fixed_risk_count": 0,
+        "changed_job_ids": [],
+        "vehicle_changed_job_ids": [],
+        "order_changed_job_ids": [],
+        "time_changed_job_ids": [],
+        "movable_travel_minutes": 150,
+        "elapsed_ms": 0,
+        "newly_assigned_job_ids": []
+      },
+      "objective_proven": false,
+      "approval_eligible": false,
+      "engine_version": "0.1.0-b0-b1",
+      "solver_version": null,
+      "objective_stages": [],
+      "validation_status": "not_run",
+      "execution_metadata": {
+        "solver_settings": {
+          "seed": 0,
+          "seed_used": false,
+          "time_limit_seconds": 10,
+          "algorithm": "baseline-diagnosis",
+          "tie_break": "arrival, vehicle_id, insertion_position",
+          "time_limit_reached": false
+        },
+        "initial_solution_ref": "snapshot.baseline_assignments",
+        "worker_count": 1
+      }
+    },
+    {
+      "method": "B1",
+      "result_origin": "computed",
+      "solution_status": "HEURISTIC",
+      "assignments": [
+        {
+          "job_id": "J0",
+          "vehicle_id": "T1",
+          "sequence": 1,
+          "pickup_departure_at": "2026-11-06T23:50:00Z",
+          "gate_arrival_at": "2026-11-07T00:20:00Z",
+          "return_at": "2026-11-07T01:00:00Z"
+        },
+        {
+          "job_id": "J2",
+          "vehicle_id": "T1",
+          "sequence": 2,
+          "pickup_departure_at": "2026-11-07T01:10:00Z",
+          "gate_arrival_at": "2026-11-07T01:40:00Z",
+          "return_at": "2026-11-07T02:20:00Z"
+        },
+        {
+          "job_id": "J1",
+          "vehicle_id": "T2",
+          "sequence": 1,
+          "pickup_departure_at": "2026-11-07T00:10:00Z",
+          "gate_arrival_at": "2026-11-07T00:40:00Z",
+          "return_at": "2026-11-07T01:20:00Z"
+        }
+      ],
+      "unassigned_job_ids": [
+        "J3"
+      ],
+      "issues": [
+        {
+          "job_id": "J3",
+          "code": "READY_TOO_LATE",
+          "explanation": "준비 2026-11-07T02:00:00Z + 적재 30분 + 여유 10분 = 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.",
+          "proof_level": "constraint_check",
+          "evidence_refs": [
+            "fixture:scenario_001"
+          ]
+        }
+      ],
+      "metrics": {
+        "unassigned_count": 1,
+        "feasible_movable_count": 2,
+        "movable_violation_count": 0,
+        "fixed_risk_count": 0,
+        "changed_job_ids": [
+          "J1",
+          "J2"
+        ],
+        "vehicle_changed_job_ids": [
+          "J1",
+          "J2"
+        ],
+        "order_changed_job_ids": [],
+        "time_changed_job_ids": [
+          "J1",
+          "J2"
+        ],
+        "movable_travel_minutes": 100,
+        "elapsed_ms": 0,
+        "newly_assigned_job_ids": []
+      },
+      "objective_proven": false,
+      "approval_eligible": false,
+      "engine_version": "0.1.0-b0-b1",
+      "solver_version": null,
+      "objective_stages": [],
+      "validation_status": "not_run",
+      "execution_metadata": {
+        "solver_settings": {
+          "seed": 0,
+          "seed_used": false,
+          "time_limit_seconds": 10,
+          "algorithm": "deadline-insertion",
+          "tie_break": "arrival, vehicle_id, insertion_position",
+          "time_limit_reached": false
+        },
+        "initial_solution_ref": "snapshot.baseline_assignments",
+        "worker_count": 1
+      }
+    }
+  ]
+}
