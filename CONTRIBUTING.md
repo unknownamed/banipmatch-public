@@ -8,6 +8,7 @@ ChatGPT·Claude 등 특정 구독으로 통일하지 않습니다. 같은 저장
 2. [README](README.md), [공통 AI 지침](AGENTS.md), [역할표](docs/team/roles.md), [현재 상태](docs/team/status.md)를 읽습니다.
 3. 개발 PDF 00과 자신의 01~04 담당 문서, 관련 규격·예제를 AI에도 전달합니다. PDF를 읽지 못하면 역할표에 연결된 동일 본문 JSON을 사용합니다.
 4. 먼저 작은 예제 한 건을 연결합니다. 실제 외부 API 승인이나 키를 기다리며 개발 전체를 멈출 필요는 없습니다.
+5. [API 신청 안내](docs/team/api-onboarding.md)에서 본인 담당 A/B 준비를 병행하고 [진행표](docs/team/api-access-status.md)에 상태·근거·다음 확인일을 남깁니다. C 후보도 조건은 미리 확인하되 기간제 체험·과금·발송은 정해진 단계에서 진행합니다.
 
 ## 도구별로 지침 전달하기
 
@@ -27,6 +28,8 @@ ChatGPT·Claude 등 특정 구독으로 통일하지 않습니다. 같은 저장
 나는 반입맞춤 팀의 [이름]이고 [파트]를 맡고 있어.
 이 저장소의 AGENTS.md, README.md, docs/team/roles.md,
 docs/team/status.md와 관련 인계 기록을 읽어줘.
+외부 API 준비는 docs/team/api-onboarding.md와 api-access-status.md에서
+내 담당·이미 신청한 상태·다음 확인할 일을 먼저 확인해줘.
 공통 개발 규격 00과 내 담당 명세, 같은 버전의 규격·예제도 확인해줘.
 읽은 파일, 내 담당 범위, 현재 구현 상태와 첫 작업을 짧게 정리한 뒤
 [이번에 만들 기능]을 구현하고 확인해줘.

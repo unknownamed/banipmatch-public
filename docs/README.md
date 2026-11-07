@@ -4,6 +4,8 @@
 
 - [현재 역할·담당 범위](team/roles.md) — 기존 01~04 명세와 담당 연결
 - [현재 구현 상태](team/status.md) — 구현·미구현·보류 구분
+- [API 신청·사전 준비 안내](team/api-onboarding.md) — 담당·공식 링크·우선순위·승인/체험 조건
+- [API 준비·신청 진행표](team/api-access-status.md) — 신청·승인·응답 확인 증거와 다음 확인일
 - [AI 작업수칙](../AGENTS.md) · [AI 도구별 시작과 협업](../CONTRIBUTING.md)
 - [작업 인계 양식](team/handoffs/TEMPLATE.md)
 
