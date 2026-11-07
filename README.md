@@ -73,12 +73,12 @@ Python 백엔드 하나 안에서 모듈을 나누는 방향입니다. 프론트
 
 **반입맞춤 · 국립창원대학교 컴퓨터공학과**
 
-| 이름 | 구분 |
-|---|---|
-| 황대겸 | 팀장 |
-| 최길웅 | 팀원 |
-| 심민준 | 팀원 |
-| 안선효 | 팀원 |
+| 이름 | 구분 | GitHub |
+|---|---|---|
+| 황대겸 | 팀장 | [@unknownamed](https://github.com/unknownamed) |
+| 최길웅 | 팀원 | [@choigilung](https://github.com/choigilung) |
+| 심민준 | 팀원 | [@S-minjun](https://github.com/S-minjun) |
+| 안선효 | 팀원 | [@He6venly](https://github.com/He6venly) |
 
 ## 검수 재실행
 
