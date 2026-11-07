@@ -30,14 +30,19 @@ async function readJson<T>(res: Response): Promise<T> {
   return (await res.json()) as T
 }
 
-/** 백엔드 /v1 연결용. 아직 서버가 없으므로 기본값은 fixture. */
-export function createHttpClient(baseUrl = ''): ApiClient {
+/**
+ * 백엔드 /v1 연결용. 로컬 모의 API(PR #3)는 GET에도 Bearer 모의 토큰을 요구한다.
+ * 토큰은 loopback 전용 모의 값이며 사용자 인증이 아니다.
+ */
+export function createHttpClient(baseUrl = '', token?: string): ApiClient {
+  const get = (path: string, signal?: AbortSignal) =>
+    fetch(`${baseUrl}${path}`, { signal, headers: token ? { Authorization: `Bearer ${token}` } : {} })
   return {
     mode: 'http',
-    getScenario: (id, signal) => fetch(`${baseUrl}/v1/scenarios/${encodeURIComponent(id)}`, { signal }).then(readJson<Snapshot>),
-    getRun: (id, signal) => fetch(`${baseUrl}/v1/runs/${encodeURIComponent(id)}`, { signal }).then(readJson<Run>),
+    getScenario: (id, signal) => get(`/v1/scenarios/${encodeURIComponent(id)}`, signal).then(readJson<Snapshot>),
+    getRun: (id, signal) => get(`/v1/runs/${encodeURIComponent(id)}`, signal).then(readJson<Run>),
     async getResults(id, signal) {
-      const res = await fetch(`${baseUrl}/v1/runs/${encodeURIComponent(id)}/results`, { signal })
+      const res = await get(`/v1/runs/${encodeURIComponent(id)}/results`, signal)
       if (res.status === 202) return { kind: 'pending', run: (await res.json()) as Run }
       return { kind: 'ready', results: await readJson(res) }
     },

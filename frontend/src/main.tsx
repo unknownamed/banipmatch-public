@@ -11,7 +11,7 @@ const mode = import.meta.env.VITE_API_MODE === 'http' ? 'http' : 'fixture'
 const params = new URLSearchParams(location.search)
 
 function Root() {
-  const client = useMemo(() => (mode === 'http' ? createHttpClient() : createFixtureClient()), [])
+  const client = useMemo(() => (mode === 'http' ? createHttpClient('', import.meta.env.VITE_API_TOKEN) : createFixtureClient()), [])
   return (
     <App
       client={client}
