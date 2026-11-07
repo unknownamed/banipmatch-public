@@ -27,6 +27,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install validation dependencies
-        run: python -m pip install -r "docs/development/v0.1/검수/requirements-validation.txt"
+        run: python -m pip install -r "docs/development/v0.1/검수/requirements-validation.txt" -r backend/data/requirements.txt
       - name: Validate contracts, examples, and in-memory DB
         run: python tools/check_development.py
+      - name: Validate data input module
+        run: python -m unittest discover -s tests/data -v
