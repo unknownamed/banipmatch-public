@@ -65,6 +65,8 @@ def validate(name: str, value: object) -> None:
 
 def runtime_openapi() -> dict:
     spec = deepcopy(OPENAPI)
+    # Swagger를 연 현재 호스트·포트를 유지. 배포 예제 URL이나 허용 출처는 변경하지 않음.
+    spec["servers"] = [{"url": "/", "description": "현재 로컬 API 서버"}]
     spec["info"]["description"] = (
         "1차 로컬 모의 API. 설명용 결과만 제공하며 실제 엔진·운영 인증·승인은 미구현. "
         "예제 재생은 입력 최신성을 증명하지 않으며 모든 승인은 차단됨."

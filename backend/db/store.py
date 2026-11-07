@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sqlite3
 from uuid import uuid4
 
@@ -9,12 +10,35 @@ from backend.db.database import Database
 
 # 모의 인증 주체는 서버가 고정. 실제 조직·사용자 권한 모델은 후속 구현 대상.
 DEMO_ACTOR = "local-demo:single-carrier:dispatcher"
+SQLITE_INTEGER_MIN = -(2**63)
+SQLITE_INTEGER_MAX = 2**63 - 1
 
 
-def insert(conn: sqlite3.Connection, table: str, row: dict) -> None:
+def integer_binding(value: object, path: str) -> object:
+    """SQL INTEGER로 전달할 값만 검사. JSON 원본·배포 스키마는 변경하지 않음."""
+    if type(value) is int:
+        integer = value
+    elif type(value) is float and math.isfinite(value) and value.is_integer():
+        # JSON Schema의 integer는 42.0 같은 표현도 허용함. 정확히 표현된 값만 변환.
+        integer = int(value)
+    else:
+        return value  # null·boolean 및 기타 형식 검사는 기존 스키마/DB 경계 유지.
+    if not SQLITE_INTEGER_MIN <= integer <= SQLITE_INTEGER_MAX:
+        raise ApiError(422, "INTEGER_OUT_OF_RANGE", "정수가 저장 가능한 범위를 넘음", [
+            {"path": path, "reason": "SQLite INTEGER는 signed 64-bit 범위만 저장 가능"},
+        ])
+    return integer
+
+
+def insert(conn: sqlite3.Connection, table: str, row: dict, field_paths: dict | None = None) -> None:
     # table/column 이름은 이 모듈의 상수·고정 매핑에서만 생성. 값은 전부 바인딩.
+    integer_columns = {column[1] for column in conn.execute(f"PRAGMA table_info({table})")
+                       if column[2] == "INTEGER"}
+    paths = field_paths or {}
+    values = tuple(integer_binding(value, paths.get(key, f"/{key}")) if key in integer_columns else value
+                   for key, value in row.items())
     columns = ",".join(row)
-    conn.execute(f"INSERT INTO {table} ({columns}) VALUES ({','.join('?' for _ in row)})", tuple(row.values()))
+    conn.execute(f"INSERT INTO {table} ({columns}) VALUES ({','.join('?' for _ in row)})", values)
 
 
 def project(row: dict, scenario_id: str) -> dict:
@@ -71,6 +95,7 @@ class Store:
     def register(self, snapshot: dict, key: str) -> tuple[int, dict]:
         def operation(conn):
             sid, pid, version = (snapshot[k] for k in ("scenario_id", "plan_id", "base_plan_version"))
+            version = integer_binding(version, "/base_plan_version")
             if conn.execute("SELECT 1 FROM scenarios WHERE scenario_id=?", (sid,)).fetchone():
                 raise ApiError(409, "SCENARIO_EXISTS", "이미 등록된 입력 ID임. 새 입력에는 새 ID 사용")
             head = conn.execute("SELECT * FROM plan_heads WHERE plan_id=?", (pid,)).fetchone()
@@ -93,8 +118,9 @@ class Store:
                                  ("windows", "windows"), ("jobs", "jobs"),
                                  ("travel_times", "travel_times"),
                                  ("baseline_assignments", "baseline_assignments")):
-                for row in snapshot[group]:
-                    insert(conn, table, project(row, sid))
+                for index, row in enumerate(snapshot[group]):
+                    insert(conn, table, project(row, sid),
+                           {key: f"/{group}/{index}/{key}" for key in row})
             insert(conn, "changes", project(snapshot["change"], sid))
             for job_id in snapshot["baseline_unassigned_job_ids"]:
                 insert(conn, "baseline_unassigned", {"scenario_id": sid, "job_id": job_id})
@@ -138,6 +164,8 @@ class Store:
 
     def create_run(self, request: dict, key: str, check_fixture) -> tuple[int, dict]:
         def operation(conn):
+            for field in ("base_plan_version", "seed", "time_limit_seconds"):
+                integer_binding(request[field], f"/{field}")
             snapshot = self.snapshot(conn, request["scenario_id"])
             head = self.head(conn, snapshot["plan_id"])
             if (head["current_version"] != request["base_plan_version"]

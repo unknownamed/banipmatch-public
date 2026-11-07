@@ -5,6 +5,7 @@ import json
 import sqlite3
 import threading
 import time
+from urllib.parse import urljoin
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
@@ -351,3 +352,112 @@ def test_swagger_same_origin_post_is_allowed(client, snapshot, origin):
     response = client.post(f"{origin}/v1/scenarios", json=snapshot,
                            headers={"Origin": origin, "Idempotency-Key": "swagger-post"})
     assert response.status_code == 201, response.text
+
+
+@pytest.mark.parametrize("origin", ["http://localhost:8000", "http://localhost:8123", "http://127.0.0.1:8123"])
+def test_swagger_resolves_runtime_server_on_current_host_and_port(client, snapshot, origin):
+    spec_response = client.get(f"{origin}/openapi.json")
+    assert spec_response.status_code == 200
+    spec = spec_response.json()
+    server = urljoin(f"{origin}/openapi.json", spec["servers"][0]["url"])
+    response = client.post(urljoin(server.rstrip("/") + "/", "v1/scenarios"), json=snapshot,
+                           headers={"Origin": origin, "Idempotency-Key": "swagger-resolved"})
+    assert response.status_code == 201, response.text
+    assert spec["servers"][0]["url"] == "/"
+    archived = json.loads((DRAFT / "공통 규격" / "openapi.json").read_text(encoding="utf-8"))
+    assert archived["servers"][0]["url"] == "http://127.0.0.1:8000"
+
+
+@pytest.mark.parametrize("value", [2**63, float(2**63)])
+def test_run_integer_overflow_has_field_error_and_no_partial_records(client, snapshot, value):
+    assert post(client, "/v1/scenarios", snapshot).status_code == 201
+    request = {"scenario_id": "S001", "base_plan_version": 1, "methods": ["B0"],
+               "time_limit_seconds": 10, "seed": value}
+    response = post(client, "/v1/runs", request, "seed-boundary")
+    assert response.status_code == 422, response.text
+    validate("Error", response.json())
+    assert response.json()["code"] == "INTEGER_OUT_OF_RANGE"
+    assert response.json()["details"][0]["path"] == "/seed"
+    with client.app.state.store.db.connect() as conn:
+        assert conn.execute("SELECT count(*) FROM runs").fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM method_results").fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM idempotency_records").fetchone()[0] == 1
+        assert conn.execute("SELECT current_version FROM plan_heads").fetchone()[0] == 1
+    # 거절한 요청의 멱등 기록을 남기지 않아 같은 키로 수정 요청을 보낼 수 있어야 함.
+    request["seed"] = 2**63 - 1
+    accepted = post(client, "/v1/runs", request, "seed-boundary")
+    assert accepted.status_code == 202, accepted.text
+    assert accepted.json()["config"]["seed"] == 2**63 - 1
+    assert results(client, accepted.json()).status_code == 200
+    with client.app.state.store.db.connect() as conn:
+        stored = conn.execute("SELECT seed, typeof(seed) FROM runs").fetchone()
+        assert tuple(stored) == (2**63 - 1, "integer")
+
+
+@pytest.mark.parametrize("value", [2**63, float(2**63)])
+def test_snapshot_integer_overflow_rolls_back_projections_and_idempotency(client, snapshot, value):
+    # 두 번째 차량에서 실패시켜 앞서 삽입한 원본·장소·첫 차량도 롤백되는지 확인.
+    snapshot["vehicles"][1]["capacity_kg"] = value
+    response = post(client, "/v1/scenarios", snapshot, "capacity-boundary")
+    assert response.status_code == 422, response.text
+    validate("Error", response.json())
+    assert response.json()["code"] == "INTEGER_OUT_OF_RANGE"
+    assert response.json()["details"][0]["path"] == "/vehicles/1/capacity_kg"
+    with client.app.state.store.db.connect() as conn:
+        for table in ("scenarios", "locations", "vehicles", "jobs", "windows", "plans", "assignments",
+                      "baseline_assignments", "baseline_unassigned", "plan_heads", "idempotency_records"):
+            assert conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0] == 0
+    snapshot["vehicles"][1]["capacity_kg"] = 2**63 - 1
+    accepted = post(client, "/v1/scenarios", snapshot, "capacity-boundary")
+    assert accepted.status_code == 201, accepted.text
+    assert client.get("/v1/scenarios/S001").json() == snapshot
+    with client.app.state.store.db.connect() as conn:
+        stored = conn.execute("SELECT capacity_kg, typeof(capacity_kg) FROM vehicles WHERE vehicle_id='T2'").fetchone()
+        assert tuple(stored) == (2**63 - 1, "integer")
+
+
+@pytest.mark.parametrize("value", [42.0, float(2**63 - 1024)])
+def test_integral_json_float_is_stored_as_integer_without_mutating_input(client, snapshot, value):
+    snapshot["vehicles"][0]["capacity_kg"] = value
+    original = deepcopy(snapshot)
+    assert post(client, "/v1/scenarios", snapshot).status_code == 201
+    assert snapshot == original
+    assert client.get("/v1/scenarios/S001").json() == original
+    with client.app.state.store.db.connect() as conn:
+        stored = conn.execute("SELECT capacity_kg, typeof(capacity_kg) FROM vehicles WHERE vehicle_id='T1'").fetchone()
+        assert tuple(stored) == (int(value), "integer")
+
+
+@pytest.mark.parametrize("seed", [42.0, float(2**63 - 1024)])
+def test_integral_json_float_run_config_is_stored_and_replayed(client, snapshot, seed):
+    assert post(client, "/v1/scenarios", snapshot).status_code == 201
+    request = {"scenario_id": "S001", "base_plan_version": 1.0, "methods": ["B0"],
+               "time_limit_seconds": 10.0, "seed": seed}
+    original = deepcopy(request)
+    response = post(client, "/v1/runs", request, "float-config")
+    assert response.status_code == 202, response.text
+    validate("Run", response.json())
+    assert request == original
+    assert type(response.json()["config"]["seed"]) is int
+    assert response.json()["config"] == {"seed": int(seed), "time_limit_seconds": 10}
+    assert results(client, response.json()).status_code == 200
+    assert post(client, "/v1/runs", original, "float-config").json() == response.json()
+
+
+@pytest.mark.parametrize("collection,index,field,path", [
+    (None, None, "base_plan_version", "/base_plan_version"),
+    ("jobs", 1, "gross_weight_kg", "/jobs/1/gross_weight_kg"),
+    ("jobs", 1, "service_minutes", "/jobs/1/service_minutes"),
+    ("travel_times", 0, "minutes", "/travel_times/0/minutes"),
+    ("baseline_assignments", 1, "sequence", "/baseline_assignments/1/sequence"),
+])
+def test_other_sqlite_integer_fields_have_precise_storage_errors(client, snapshot, collection, index, field, path):
+    target = snapshot if collection is None else snapshot[collection][index]
+    target[field] = 2**63
+    response = post(client, "/v1/scenarios", snapshot)
+    assert response.status_code == 422, response.text
+    assert response.json()["code"] == "INTEGER_OUT_OF_RANGE"
+    assert response.json()["details"][0]["path"] == path
+    with client.app.state.store.db.connect() as conn:
+        assert conn.execute("SELECT count(*) FROM scenarios").fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM idempotency_records").fetchone()[0] == 0
