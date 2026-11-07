@@ -177,7 +177,8 @@ export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodRes
   return (
     <div className="metrics">
       <Metric label="미처리" a={base.metrics.unassigned_count} b={cand.metrics.unassigned_count} />
-      <Metric label="마감 위반(조정 가능 작업)" a={base.metrics.movable_violation_count} b={cand.metrics.movable_violation_count} />
+      {/* movable_violation_count는 마감 외 제약 위반도 포함한다(PR #4 리뷰). 마감만 따로 세려면 계약 합의 필요 */}
+      <Metric label="제약 위반 작업(조정 가능)" a={base.metrics.movable_violation_count} b={cand.metrics.movable_violation_count} />
       <Metric label="고정 작업 위험" a={base.metrics.fixed_risk_count} b={cand.metrics.fixed_risk_count} />
       <Metric label="변경 작업 수" a={base.metrics.changed_job_ids.length} b={cand.metrics.changed_job_ids.length} />
       <Metric

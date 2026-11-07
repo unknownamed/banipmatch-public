@@ -51,18 +51,22 @@ export function buildRows(snapshot: Snapshot, baseline: MethodResult | undefined
   })
 }
 
-/** 고정 작업이 추천안에서 사라졌거나 차량·순서·시각이 바뀌었는지(엔진 결과 이상 감지용 표시). */
+const ASSIGNMENT_FIELDS = ['vehicle_id', 'sequence', 'pickup_departure_at', 'gate_arrival_at', 'return_at'] as const
+
+/**
+ * 고정 작업이 조정안에서 원안 배정을 그대로 보존했는지. 조정안이 없으면(계산 전) 판단하지 않고 true.
+ * 공통 규칙: 고정 작업은 차량·순서·시각 전체를 보존한다.
+ */
+export function lockedPreserved(r: JobRow, hasCandidate: boolean): boolean {
+  if (!r.locked || !r.baseline || !hasCandidate) return true
+  const c = r.candidate
+  return !!c && ASSIGNMENT_FIELDS.every((f) => c[f] === r.baseline![f])
+}
+
+/** 고정 작업이 조정안에서 사라졌거나 배정 필드가 하나라도 바뀐 작업 ID. */
 export function lockedViolations(rows: JobRow[]): string[] {
-  return rows
-    .filter((r) => r.locked && r.baseline)
-    .filter(
-      (r) =>
-        !r.candidate ||
-        r.candidate.vehicle_id !== r.baseline!.vehicle_id ||
-        r.candidate.sequence !== r.baseline!.sequence ||
-        r.candidate.pickup_departure_at !== r.baseline!.pickup_departure_at,
-    )
-    .map((r) => r.job.job_id)
+  const hasCandidate = rows.some((r) => r.candidate || r.candidateUnassigned || r.candidateMissing)
+  return rows.filter((r) => !lockedPreserved(r, hasCandidate)).map((r) => r.job.job_id)
 }
 
 export const ISSUE_LABEL: Record<string, string> = {

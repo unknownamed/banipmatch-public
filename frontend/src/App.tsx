@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
 import { useDispatchView } from './api/useDispatchView'
-import { ComparisonTable } from './components/ComparisonTable'
-import { ApprovalPanel, ChangeEvidence, Header, MetricsRow, RunStatusPanel, UnresolvedPanel } from './components/Panels'
+import { ComparisonSection } from './components/ComparisonSection'
+import { ApprovalPanel, ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
 import { approvalGate } from './lib/approval'
-import { buildRows, lockedViolations } from './lib/compare'
+import { buildRows } from './lib/compare'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
@@ -18,7 +18,6 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const cand = candidates.find((r) => r.method === picked) ?? candidates[0]
   const rows = useMemo(() => (snapshot ? buildRows(snapshot, base, cand) : []), [snapshot, base, cand])
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
-  const broken = lockedViolations(rows)
 
   return (
     <main>
@@ -47,37 +46,17 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
       {run && <RunStatusPanel run={run} results={results} />}
 
-      <section className="card">
-        <h2>원안 · 조정안 비교</h2>
-        {view.results.state === 'loading' && <p className="muted">결과 조회 중… (원안과 근거는 위에서 먼저 확인할 수 있습니다)</p>}
-        {view.results.state === 'pending' && <p className="muted">계산 중입니다. 결과가 도착하면 자동으로 표시합니다.</p>}
-        {view.results.state === 'error' && <p className="warn">결과를 표시할 수 없습니다: {view.results.message}</p>}
-        {results && results.length === 0 && <p className="warn">결과 목록이 비어 있습니다. 해결 완료가 아닙니다.</p>}
-        {snapshot && results && cand && (
-          <>
-            {candidates.length > 1 && (
-              <div className="tabs" role="tablist">
-                {candidates.map((r) => (
-                  <button key={r.method} role="tab" aria-selected={r === cand} onClick={() => setPicked(r.method)}>
-                    {r.method}
-                  </button>
-                ))}
-              </div>
-            )}
-            {base && <MetricsRow base={base} cand={cand} />}
-            {base && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
-              <p className="warn">
-                미처리가 {base.metrics.unassigned_count}건 → {cand.metrics.unassigned_count}건으로 늘었습니다. 마감 위반 감소에는 미처리로 남긴 작업이
-                포함되어 있으므로 전체 해결이 아닙니다.
-              </p>
-            )}
-            {broken.length > 0 && (
-              <p className="warn">고정 작업 {broken.join(', ')}이(가) 조정안에서 바뀌었거나 빠졌습니다. 엔진·검증 담당 확인이 필요합니다.</p>
-            )}
-            <ComparisonTable rows={rows} asOf={snapshot.as_of} baseLabel={base ? 'B0 원안' : '원안(입력)'} candLabel={`${cand.method} 조정안`} />
-          </>
-        )}
-      </section>
+      {snapshot && (
+        <ComparisonSection
+          snapshot={snapshot}
+          results={view.results}
+          base={base}
+          cand={cand}
+          candidates={candidates}
+          rows={rows}
+          onPick={setPicked}
+        />
+      )}
 
       {snapshot && cand && (
         <>

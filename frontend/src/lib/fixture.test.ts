@@ -39,6 +39,24 @@ describe('공통 예제 비교', () => {
     expect(row('J1').baselineIssues.map((i) => i.code)).toContain('CUTOFF_EXCEEDED')
   })
 
+  // PR #4 리뷰: 도착·복귀만 바뀌어도 고정 위반이다
+  const shiftJ0 = (patch: Partial<MethodResult['assignments'][number]>): MethodResult => ({
+    ...b3,
+    assignments: b3.assignments.map((a) => (a.job_id === 'J0' ? { ...a, ...patch } : a)),
+  })
+
+  it('고정 작업의 도착 시각만 바뀌어도 감지한다', () => {
+    expect(lockedViolations(buildRows(snapshot, b0, shiftJ0({ gate_arrival_at: '2026-11-07T00:25:00Z' })))).toEqual(['J0'])
+  })
+
+  it('고정 작업의 복귀 시각만 바뀌어도 감지한다', () => {
+    expect(lockedViolations(buildRows(snapshot, b0, shiftJ0({ return_at: '2026-11-07T01:05:00Z' })))).toEqual(['J0'])
+  })
+
+  it('조정안이 없으면(계산 전) 고정 위반으로 보지 않는다', () => {
+    expect(lockedViolations(buildRows(snapshot, b0, undefined))).toEqual([])
+  })
+
   it('고정 작업이 조정안에서 빠지면 감지한다', () => {
     const broken: MethodResult = { ...b3, assignments: b3.assignments.filter((a) => a.job_id !== 'J0') }
     expect(lockedViolations(buildRows(snapshot, b0, broken))).toEqual(['J0'])
