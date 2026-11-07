@@ -4,12 +4,12 @@
 
 - [현재 역할·담당 범위](team/roles.md) — 기존 01~04 명세와 담당 연결
 - [현재 구현 상태](team/status.md) — 구현·미구현·보류 구분
+- [리뷰·병합 기준](team/review-policy.md) — 필요한 변경에 관련자 1회 검토, 수정·검사 후 재승인 대기 없음
 - [기존 서비스 비교·개발 적용사항](team/service-comparison.md) — 공식 근거·중복·미확인·네 파트 반영 기준
 - [API 신청·사전 준비 안내](team/api-onboarding.md) — 담당·공식 링크·우선순위·승인/체험 조건
 - [API 준비·신청 진행표](team/api-access-status.md) — 신청·승인·응답 확인 증거와 다음 확인일
 - [AI 작업수칙](../AGENTS.md) · [AI 도구별 시작과 협업](../CONTRIBUTING.md)
 - [작업 인계 양식](team/handoffs/TEMPLATE.md)
-- [로컬 API 1차 실행·연결 안내](../backend/README.md) · [안선효 1차 인계](team/handoffs/2026-11-07-he6venly-api-foundation.md)
 
 공유한 v0.1 PDF는 보존하며, 현재 담당은 위 역할표를 기준으로 합니다.
 
@@ -31,6 +31,8 @@
 
 - 최종 보고서: 준비 중
 - 최종 발표자료: 준비 중
-- 실행 코드: 로컬 모의 API 1차 구현. 실제 엔진·현장 실험 결과는 준비 중
+- [로컬 API 실행 안내](../backend/README.md): 입력 저장·설명용 응답. 실제 엔진·독립 검증 연결은 후속 작업
+- [프론트 실행 안내](../frontend/README.md): 설명용 예제 비교 화면, 실제 서버 전체 연결은 미검증
+- [B0/B1 엔진 실행 안내](../backend/engine/README.md) · [모의 실계산 결과](experiments/engine-b0-b1/README.md): 첫 구현이며 B2/B3·현장 검증은 남음
 
 현재 PDF를 최종 보고서나 실제 실행 성과로 표시하지 않습니다. 새 버전은 별도 폴더에 보관하고 이 목록과 루트 README의 링크를 함께 갱신합니다.

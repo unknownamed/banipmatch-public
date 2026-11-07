@@ -1,0 +1,76 @@
+// PR #4 리뷰: 결과 대기·실패·B0 단독에서도 원안 표가 남는지, 지표 이름이 실제 의미와 맞는지.
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
+import snapshotJson from '@examples/01_snapshot.json'
+import runJson from '@examples/03_run_status.json'
+import resultsJson from '@examples/04_results_설명용.json'
+import type { Results, Run, Snapshot } from '../api/types'
+import type { DispatchView } from '../api/useDispatchView'
+import { buildRows } from '../lib/compare'
+import { ComparisonSection } from './ComparisonSection'
+import { ComparisonTable } from './ComparisonTable'
+
+const snapshot = snapshotJson as unknown as Snapshot
+const run = runJson as unknown as Run
+const results = resultsJson as unknown as Results
+const b0 = results.results.find((r) => r.method === 'B0')!
+const b3 = results.results.find((r) => r.method === 'B3')!
+
+function render(state: DispatchView['results'], withB0 = false, withB3 = false) {
+  const base = withB0 ? b0 : undefined
+  const cand = withB3 ? b3 : undefined
+  return renderToStaticMarkup(
+    <ComparisonSection
+      snapshot={snapshot}
+      results={state}
+      base={base}
+      cand={cand}
+      candidates={cand ? [cand] : []}
+      rows={buildRows(snapshot, base, cand)}
+      onPick={() => {}}
+    />,
+  )
+}
+
+const hasBaselineTable = (html: string) => ['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`<b>${id}</b>`)) && html.includes('T1</b> #2')
+
+describe('원안 표는 결과 상태와 무관하게 남는다', () => {
+  it('계산 중(202)', () => {
+    const html = render({ state: 'pending', run: { ...run, status: 'running' } })
+    expect(hasBaselineTable(html)).toBe(true)
+    expect(html).toContain('원안(입력)')
+    expect(html).not.toContain('조정안</th>')
+  })
+
+  it('결과 조회 실패', () => {
+    const html = render({ state: 'error', message: '실행 실패' })
+    expect(hasBaselineTable(html)).toBe(true)
+    expect(html).toContain('결과를 표시할 수 없습니다')
+  })
+
+  it('B0 단독 결과', () => {
+    const html = render({ state: 'ready', data: { ...results, results: [b0] } }, true, false)
+    expect(hasBaselineTable(html)).toBe(true)
+    expect(html).toContain('B0 원안')
+    expect(html).toContain('원안 진단만 표시')
+    expect(html).not.toContain('조정안</th>')
+  })
+
+  it('조정안이 있으면 지표는 제약 위반으로 표시하고 마감 위반으로 단정하지 않는다', () => {
+    const html = render({ state: 'ready', data: results }, true, true)
+    expect(html).toContain('B3 조정안</th>')
+    expect(html).toContain('제약 위반 작업(조정 가능)')
+    expect(html).not.toContain('마감 위반')
+  })
+})
+
+describe('고정 작업 표시', () => {
+  it('보존되면 원안 유지, 시각이 바뀌면 경고', () => {
+    const ok = renderToStaticMarkup(<ComparisonTable rows={buildRows(snapshot, b0, b3)} asOf={snapshot.as_of} baseLabel="B0" candLabel="B3" />)
+    expect(ok).toContain('원안 유지')
+    const moved = { ...b3, assignments: b3.assignments.map((a) => (a.job_id === 'J0' ? { ...a, return_at: '2026-11-07T01:05:00Z' } : a)) }
+    const bad = renderToStaticMarkup(<ComparisonTable rows={buildRows(snapshot, b0, moved)} asOf={snapshot.as_of} baseLabel="B0" candLabel="B3" />)
+    expect(bad).toContain('고정 작업 변경됨')
+    expect(bad).not.toContain('원안 유지')
+  })
+})
