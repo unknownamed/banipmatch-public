@@ -26,6 +26,15 @@
 
 검수 통과는 **명세·저장 구조·제공 예제**에 대한 결과입니다. 현장 성능이나 실제 최적화 효과를 검증했다는 뜻은 아닙니다.
 
+## 팀원이 처음 작업할 때
+
+1. [AI 공통 작업수칙](AGENTS.md)과 [역할·담당 범위](docs/team/roles.md), [현재 구현 상태](docs/team/status.md)를 읽습니다.
+2. 아래 공통 PDF 00과 본인 담당 PDF 01~04를 읽고 같은 버전의 규격·예제를 사용합니다.
+3. [AI 사용·브랜치·검수 안내](CONTRIBUTING.md)의 시작 문구를 사용하는 AI에게 전달합니다.
+4. 작업 브랜치에서 구현하고 PR에 검증 결과를 남깁니다. AI 세션이 바뀌면 [인계 양식](docs/team/handoffs/TEMPLATE.md)으로 이어갑니다.
+
+ChatGPT·Claude 등 특정 구독으로 통일하지 않습니다. Codex·Claude Code·Copilot·Cursor용 진입점을 마련했고, 일반 웹 채팅에는 관련 파일과 시작 문구를 직접 전달합니다. 모든 AI가 자동으로 저장소를 읽는 것은 아니므로 읽은 파일과 담당 범위를 확인합니다.
+
 ## 개발 문서
 
 공통 문서를 먼저 읽고, 담당 문서와 같은 버전의 규격·예제를 함께 사용합니다.
@@ -58,16 +67,19 @@
 지도·선박/화물 추적·기상·알림은 이 흐름을 돕는 보조 기능으로 검토합니다.
 선박 ETA가 바뀌었다는 이유만으로 반입마감이나 지연 원인을 확정하지 않습니다.
 
-## 역할 분담안
+## 초기 개발 담당 · 2026-11-07
 
-| 파트 | 맡을 일 |
-|---|---|
-| 프론트 | 한 화면에서 변경 근거·배차 비교·미해결 이유·실행 상태 확인 |
-| 데이터 | 입력 검증·표준화, 외부 자료 변환, 출처·갱신시각·사용량 관리 |
-| 최적화 | 고정 조건을 지키는 조정안, B0~B3 비교와 미해결 설명 |
-| API·통합 | 실행·조회·승인, 버전 관리, DB 저장과 독립 결과 검증 |
+| 담당 | 파트·문서 | 맡을 일 |
+|---|---|---|
+| 최길웅 | 프론트 · 01 | 한 화면에서 변경 근거·배차 비교·미해결 이유·실행 상태 확인, API 연결 |
+| 심민준 | 데이터 · 02 | 입력 변환·검증·표준화, 출처·갱신시각·사용량, 시나리오와 예상 판정 |
+| 황대겸 | 최적화 · 03 | 고정 조건을 지키는 조정안, B0~B3 비교와 미해결 설명 |
+| 안선효 | API·DB·통합 · 04 | 실행·조회·승인, 버전 관리, DB 저장과 독립 일정 검증 |
 
-Python 백엔드 하나 안에서 모듈을 나누는 방향입니다. 프론트 기술과 개인별 담당은 팀에서 정합니다.
+공통 개발 규격 00은 네 명 모두 읽습니다. [역할표](docs/team/roles.md)에 첫 작업·산출물·담당 경계가 있습니다.
+배포 PDF의 담당 미정 문구는 작성 당시 상태이며 현재 담당은 위 표와 역할표를 따릅니다.
+Python 백엔드 하나 안에서 모듈을 나누는 방향입니다. 프론트 도구는 첫 구현에서 팀이 정합니다.
+최적화 조건은 공동 검토하고, 각자 자기 파트 연결·검증·보고서 부분을 작성합니다.
 
 ## 팀
 
@@ -75,10 +87,10 @@ Python 백엔드 하나 안에서 모듈을 나누는 방향입니다. 프론트
 
 | 이름 | 구분 | GitHub |
 |---|---|---|
-| 황대겸 | 팀장 | [@unknownamed](https://github.com/unknownamed) |
-| 최길웅 | 팀원 | [@choigilung](https://github.com/choigilung) |
-| 심민준 | 팀원 | [@S-minjun](https://github.com/S-minjun) |
-| 안선효 | 팀원 | [@He6venly](https://github.com/He6venly) |
+| 황대겸 | 팀장 · 최적화 | [@unknownamed](https://github.com/unknownamed) |
+| 최길웅 | 프론트 | [@choigilung](https://github.com/choigilung) |
+| 심민준 | 데이터 | [@S-minjun](https://github.com/S-minjun) |
+| 안선효 | API·DB·통합 | [@He6venly](https://github.com/He6venly) |
 
 ## 검수 재실행
 
@@ -87,9 +99,12 @@ Python 3.12 기준입니다. 별도 가상환경에서 아래 명령을 실행�
 
 ```sh
 python -m pip install -r "docs/development/v0.1/검수/requirements-validation.txt"
-python "docs/development/v0.1/검수/validate_contracts.py"
-python "docs/development/v0.1/검수/validate_db.py"
+python tools/check_development.py
 ```
+
+원본을 보존하도록 임시 복사본에서 검사합니다. PR과 `main` 변경 시 GitHub Actions도 같은 검사를 수행합니다.
+실행 결과는 [Actions](https://github.com/unknownamed/banipmatch/actions)에서 확인합니다.
+현재 CI와 역할별 검토 담당 설정은 실제 앱 검증이나 필수 승인·병합 차단 설정을 뜻하지 않습니다.
 
 ## 데이터와 결과를 읽을 때
 
@@ -114,8 +129,15 @@ python "docs/development/v0.1/검수/validate_db.py"
 
 ```text
 README.md
+AGENTS.md              # AI 공통 기준
+CLAUDE.md              # Claude Code에서 공통 기준 읽기
+CONTRIBUTING.md        # 도구별 시작·PR·검수·인계
+.github/               # Copilot 안내·CODEOWNERS·PR 양식·CI
+.cursor/rules/         # Cursor에서 공통 기준 읽기
+tools/                 # 원본을 보존하는 검수 실행 도구
 docs/
   README.md
+  team/                # 역할·현재 상태·인계 양식
   development/v0.1/
     공통 개발 규격 PDF
     담당별 문서/       # 프론트·데이터·최적화·API·통합

@@ -1,0 +1,20 @@
+# 리뷰 담당 안내. 자동 요청은 요금제·쓰기 권한·초대 수락 조건에 따라 적용됩니다.
+# 별도 브랜치 보호 설정 없이는 이 파일만으로 승인이나 병합을 강제하지 않습니다.
+# 아래 코드 경로는 현재 계획이며 실제 구현 경로가 바뀌면 함께 갱신합니다.
+/frontend/ @choigilung
+/backend/data/ @S-minjun
+/backend/engine/ @unknownamed @He6venly
+/backend/api/ @He6venly
+/backend/db/ @He6venly
+/backend/validation/ @He6venly @unknownamed
+/backend/shared/ @unknownamed @choigilung @S-minjun @He6venly
+/tests/ @unknownamed @choigilung @S-minjun @He6venly
+/docs/development/ @unknownamed @choigilung @S-minjun @He6venly
+/docs/team/ @unknownamed @choigilung @S-minjun @He6venly
+/README.md @unknownamed @choigilung @S-minjun @He6venly
+/AGENTS.md @unknownamed @choigilung @S-minjun @He6venly
+/CONTRIBUTING.md @unknownamed @choigilung @S-minjun @He6venly
+/CLAUDE.md @unknownamed @He6venly
+/.cursor/ @unknownamed @He6venly
+/.github/ @unknownamed @He6venly
+/tools/ @unknownamed @He6venly

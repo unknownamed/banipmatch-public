@@ -1,0 +1,7 @@
+---
+description: 반입맞춤의 공통 작업 지침과 역할표를 읽는 시작 규칙
+alwaysApply: true
+---
+
+저장소 루트의 `AGENTS.md`를 읽고 따른다. `docs/team/roles.md`에서 담당 범위를, `docs/team/status.md`에서 구현 상태를 확인한다.
+관련 담당 명세와 공통 계약을 읽고 작업하며, 자세한 규칙은 AGENTS.md를 기준으로 한다. 다른 파일에 독립된 규칙 사본을 만들지 않는다.
