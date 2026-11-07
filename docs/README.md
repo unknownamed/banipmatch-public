@@ -4,6 +4,7 @@
 
 - [현재 역할·담당 범위](team/roles.md) — 기존 01~04 명세와 담당 연결
 - [현재 구현 상태](team/status.md) — 구현·미구현·보류 구분
+- [리뷰·병합 기준](team/review-policy.md) — 필요한 변경에 관련자 1회 검토, 수정·검사 후 재승인 대기 없음
 - [기존 서비스 비교·개발 적용사항](team/service-comparison.md) — 공식 근거·중복·미확인·네 파트 반영 기준
 - [API 신청·사전 준비 안내](team/api-onboarding.md) — 담당·공식 링크·우선순위·승인/체험 조건
 - [API 준비·신청 진행표](team/api-access-status.md) — 신청·승인·응답 확인 증거와 다음 확인일
