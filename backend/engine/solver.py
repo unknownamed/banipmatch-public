@@ -7,7 +7,7 @@ from time import monotonic
 from .context import Context, EngineInputError, issue, minute, stamp
 from .metrics import MissingTravelTimeError, calculate_metrics
 
-ENGINE_VERSION = "0.1.0-b0-b1"
+ENGINE_VERSION = "0.1.1-b0-b1"
 
 
 def _job_issues(c: Context, a: dict) -> list[dict]:
@@ -93,12 +93,26 @@ def _vehicle_state(c: Context, vid: str) -> tuple[int | None, str, list[str]]:
             if a["return_at"] is not None and available is not None:
                 if minute(v["available_at"]) < minute(a["return_at"]):
                     reasons.append(f"차량 가용 {v['available_at']} < 출발 작업 {j['job_id']} 복귀 {a['return_at']}")
-                if minute(a["return_at"]) > c.now and v["start_location_id"] != j["return_location_id"]:
-                    reasons.append(f"진행 작업 {j['job_id']} 복귀 위치와 가용 시작 위치 불일치")
         else:
             future_seen = True
             if minute(a["pickup_departure_at"]) < c.now:
                 reasons.append(f"미출발 고정 작업 {j['job_id']}의 출발시각이 과거")
+    # The declared start state follows the entire departed prefix. A different
+    # location after a past return needs enough recorded time to reach it; a
+    # later as_of must not silently repair an impossible available_at.
+    if previous_departed is not None and previous_departed["return_at"] is not None and available is not None:
+        last_job = c.jobs[previous_departed["job_id"]]
+        returned = minute(previous_departed["return_at"])
+        origin, destination = last_job["return_location_id"], v["start_location_id"]
+        if origin != destination:
+            if returned > c.now:
+                reasons.append(f"진행 작업 {last_job['job_id']} 복귀 위치와 가용 시작 위치 불일치")
+            else:
+                reposition = c.travel.get((origin, destination))
+                if reposition is None:
+                    reasons.append(f"마지막 출발 작업 복귀 후 가용 위치까지 이동시간 미확정: {origin} → {destination}")
+                elif minute(v["available_at"]) < returned + reposition:
+                    reasons.append(f"차량 가용 {v['available_at']} < 마지막 복귀+시작 위치 이동 {stamp(returned + reposition)} ({origin} → {destination})")
     return (None if reasons else available), v["start_location_id"], reasons
 
 
@@ -149,10 +163,19 @@ def _schedule(c: Context, vid: str, route: list[str], missing_paths: set[str] | 
     numbers = _sequences(c, route)
     if numbers is None:
         return None
+    v = c.vehicles[vid]
+    # Reject statically incompatible movable work before collecting any route
+    # gaps. Such paths cannot affect whether this vehicle can serve the job.
+    # Frozen assignments are retained and diagnosed, including existing risks.
+    for jid in route:
+        j = c.jobs[jid]
+        if not j["frozen"] and (c.missing_job(jid)
+                                or j["equipment_type"] not in v["equipment_types"]
+                                or j["gross_weight_kg"] > v["capacity_kg"]):
+            return None
     cursor, location, reasons = _vehicle_state(c, vid)
     if reasons or cursor is None:
         return None
-    v = c.vehicles[vid]
     result = []
     movable_seen = False
     for jid in route:
@@ -175,8 +198,6 @@ def _schedule(c: Context, vid: str, route: list[str], missing_paths: set[str] | 
             cursor = minute(a["return_at"])
         else:
             movable_seen = True
-            if c.missing_job(jid) or j["equipment_type"] not in v["equipment_types"] or j["gross_weight_kg"] > v["capacity_kg"]:
-                return None
             loaded = c.travel.get((j["origin_id"], j["terminal_id"]))
             returning = c.travel.get((j["terminal_id"], j["return_location_id"]))
             if loaded is None or returning is None:
