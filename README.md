@@ -11,7 +11,7 @@
 
 ## 현재 상태
 
-현재 계약은 **개발 규격 초안 v0.1**입니다. **B0 원안 진단과 B1 마감순 배치**([PR #1](https://github.com/unknownamed/banipmatch/pull/1))와 **설명용 예제 비교 화면**([PR #4](https://github.com/unknownamed/banipmatch/pull/4))이 있습니다. 실제 엔진과 화면 연결·독립 일정 검사·승인, B2/B3 최적화는 후속 작업입니다. PR의 실제 병합 상태는 링크에서 확인할 수 있습니다.
+현재 계약은 **개발 규격 초안 v0.1**입니다. **B0 원안 진단과 B1 마감순 배치**([PR #1](https://github.com/unknownamed/banipmatch/pull/1))와 **설명용 예제 비교 화면**([PR #4](https://github.com/unknownamed/banipmatch/pull/4))이 있습니다. 입력 저장·실행 상태·설명용 결과 조회용 **로컬 API**([PR #3](https://github.com/unknownamed/banipmatch/pull/3))도 포함합니다. #1·#4는 main에 병합됐고 #3의 실제 병합 상태는 링크에서 확인할 수 있습니다. API의 실제 엔진 연결·화면 전체 연결·독립 일정 검사·승인, B2/B3 최적화는 후속 작업입니다.
 
 | 구분 | 상태 |
 |---|---|
@@ -20,6 +20,7 @@
 | DB | SQLite 기준 16개 테이블·133개 필드, 실행 가능한 초기 스키마 |
 | 예제 | 모의 입력·설명용 결과·오류 사례·CSV 제공 |
 | 검수 | 계약·예제 검사 29건, DB 검사 32건 통과 |
+| 로컬 API 1차 | 입력 등록·조회, SQLite 저장, 실행 상태·설명용 B0/B3 결과 조회, 승인 차단. API 테스트 45건 |
 | 엔진 첫 구현 | B0/B1 로컬 실행·엔진 테스트 51건. B2/B3 미구현 |
 | 프론트 첫 구현 | React·TypeScript 예제 비교 화면, 테스트 16건·타입 검사·빌드 통과. 실제 서버 연결은 미검증 |
 | 실제 앱 통합·독립 일정 검사·승인·인증 | 구현 예정 |
@@ -29,6 +30,8 @@
 검수는 **명세·저장 구조·예제와 B0/B1 동작**을 대상으로 합니다. 실제 운송 자료의 효과나 최적성 검증은 아닙니다.
 
 [엔진 실행·연결 안내](backend/engine/README.md) · [모의 예제의 실계산 결과](docs/experiments/engine-b0-b1/README.md) · [API 담당 인계](docs/team/handoffs/2026-11-07-unknownamed-engine-b0-b1.md)
+
+로컬 API 실행·프론트 연결·검증 방법은 [백엔드 안내](backend/README.md)에 있습니다. 현재 서버는 모의 입력과 설명용 결과만 다루며 승인 요청은 차단합니다.
 
 ## 팀원이 처음 작업할 때
 
@@ -115,12 +118,12 @@ Python 백엔드 하나 안에서 모듈을 나누며, 프론트 첫 구현은 R
 ## 검수 재실행
 
 Python 3.12 기준입니다. 별도 가상환경에서 아래 명령을 실행합니다.
-아래 명령은 계약·예제·메모리 DB와 엔진을 검사하며 웹앱이나 외부 API를 실행하지 않습니다.
+아래 명령은 계약·예제·메모리 DB와 로컬 API·엔진을 검사합니다. 프론트 검사는 `frontend/README.md`를 따릅니다. 외부 API는 호출하지 않습니다.
 
 ```sh
-python -m pip install -r "docs/development/v0.1/검수/requirements-validation.txt"
+python -m pip install -r requirements-dev.txt
 python tools/check_development.py
-python -m unittest discover -s tests/engine -v
+python -m pytest -q
 ```
 
 원본을 보존하도록 임시 복사본에서 검사합니다. PR과 `main` 변경 시 GitHub Actions도 같은 검사를 수행합니다.
@@ -139,7 +142,7 @@ python -m unittest discover -s tests/engine -v
 
 프로젝트 저장소: **https://github.com/unknownamed/banipmatch**
 
-현재 보관된 산출물은 위 개발 문서·규격·모의 예제와 B0/B1 코드·계산 결과입니다.
+현재 보관된 산출물은 개발 문서·규격·모의 예제, 로컬 API·저장 코드, B0/B1 코드·계산 결과, 프론트 설명용 비교 화면입니다.
 최종 대회 보고서와 발표자료는 완성 후 [문서 목록](docs/README.md)에 추가합니다.
 보고서 제출 시에는 해당 시점의 커밋 또는 태그 주소를 함께 적어, 어떤 버전을 사용했는지 확인할 수 있게 할 예정입니다.
 
@@ -156,8 +159,11 @@ CONTRIBUTING.md        # 도구별 시작·PR·검수·인계
 .github/               # Copilot 안내·CODEOWNERS·PR 양식·CI
 .cursor/rules/         # Cursor에서 공통 기준 읽기
 tools/                 # 원본을 보존하는 검수 실행 도구
-backend/engine/        # B0/B1 계산·진단·지표·로컬 실행
-tests/engine/          # 엔진 동작·실패 경계 검증
+backend/               # API·DB 로컬 모의 구현과 B0/B1 엔진
+frontend/              # 설명용 비교 화면·상태 표시
+tests/                 # API·DB·엔진 동작과 실패 경계 검증
+requirements.txt       # API 실행 의존성
+requirements-dev.txt   # 개발·검수 의존성
 docs/
   README.md
   team/                # 역할·현재 상태·인계 양식

@@ -2,7 +2,7 @@
 
 배차 담당자용 단일 작업 화면. 현재는 **공통 예제(v0.1) 설명용 결과를 표시하는 단계**이며 백엔드·실제 계산과는 아직 연결하지 않았다.
 
-## 도구 (첫 구현 제안 — 팀 확인 필요)
+## 도구 (PR #4로 병합된 첫 구현)
 
 React 18 + TypeScript + Vite 5, 테스트는 Vitest. 상태 관리·UI 라이브러리는 쓰지 않았다.
 
@@ -19,7 +19,7 @@ npm run build      # 타입 검사 + 빌드
 ```
 
 - 기본은 fixture 모드: `docs/development/v0.1/예제 데이터`의 01·03·04 JSON을 **복사하지 않고 직접** 읽는다.
-- 백엔드가 생기면 `VITE_API_MODE=http npm run dev` 로 `/v1` 요청을 `127.0.0.1:8000`에 넘긴다(포트는 백엔드에 맞춰 `vite.config.ts` 수정).
+- [백엔드 안내](../backend/README.md)에 따라 로컬 API를 실행한 뒤 `frontend/.env.local`에 `VITE_API_MODE=http`와 서버 모의 토큰과 같은 `VITE_API_TOKEN`을 설정하고 개발 서버를 시작한다. `.env.example`을 참고하며 실제 설정값은 Git에 올리지 않는다. `/v1` 요청은 `127.0.0.1:8000`으로 전달한다(포트는 백엔드에 맞춰 `vite.config.ts` 수정). 전체 HTTP 화면 연결은 아직 검증하지 않았다.
 - 다른 ID 조회: `?scenario=S001&run=R001`.
 
 ## 구조
