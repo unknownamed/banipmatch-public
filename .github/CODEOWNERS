@@ -6,6 +6,12 @@
 /backend/engine/ @unknownamed @He6venly
 /backend/api/ @He6venly
 /backend/db/ @He6venly
+/backend/__init__.py @He6venly
+/backend/__main__.py @He6venly
+/backend/README.md @He6venly
+/requirements.txt @He6venly
+/requirements-dev.txt @He6venly
+/.env.example @He6venly
 /backend/validation/ @He6venly @unknownamed
 /backend/shared/ @unknownamed @choigilung @S-minjun @He6venly
 /tests/ @unknownamed @choigilung @S-minjun @He6venly

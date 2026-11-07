@@ -1,0 +1,77 @@
+"""배포된 JSON Schema를 직접 사용해 별도 필드 정의의 불일치를 방지."""
+from __future__ import annotations
+
+from copy import deepcopy
+from datetime import datetime, timezone
+import hashlib
+import json
+import math
+from pathlib import Path
+from uuid import uuid4
+
+from jsonschema import Draft202012Validator, FormatChecker
+
+ROOT = Path(__file__).resolve().parents[2]
+DRAFT = ROOT / "docs" / "development" / "v0.1"
+SCHEMA = json.loads((DRAFT / "공통 규격" / "contracts.schema.json").read_text(encoding="utf-8"))
+OPENAPI = json.loads((DRAFT / "공통 규격" / "openapi.json").read_text(encoding="utf-8"))
+
+
+class ApiError(Exception):
+    def __init__(self, status: int, code: str, message: str, details: list | None = None):
+        super().__init__(code)
+        self.status, self.code, self.message = status, code, message
+        self.details = details or []
+
+    def body(self, request_id: str | None = None) -> dict:
+        return {"request_id": request_id or uuid4().hex, "code": self.code,
+                "message": self.message, "details": self.details}
+
+
+def canonical(value: object) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def digest(value: object) -> str:
+    return hashlib.sha256(canonical(value).encode("utf-8")).hexdigest()
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def validate(name: str, value: object) -> None:
+    def finite(node):
+        if isinstance(node, float) and not math.isfinite(node):
+            raise ApiError(422, "INVALID_JSON_NUMBER", "NaN·Infinity는 JSON 값으로 허용하지 않음")
+        if isinstance(node, dict):
+            for child in node.values():
+                finite(child)
+        elif isinstance(node, list):
+            for child in node:
+                finite(child)
+    finite(value)
+    validator = Draft202012Validator(
+        {"$schema": SCHEMA["$schema"], "$defs": SCHEMA["$defs"], "$ref": f"#/$defs/{name}"},
+        format_checker=FormatChecker(),
+    )
+    errors = list(validator.iter_errors(value))
+    if errors:
+        # jsonschema의 원문 메시지는 요청 값 자체를 포함할 수 있어 반환하지 않음.
+        details = [{"path": "/" + "/".join(map(str, e.absolute_path)),
+                    "reason": f"계약 검사 실패: {e.validator}"} for e in errors[:20]]
+        raise ApiError(422, "SCHEMA_VALIDATION_FAILED", f"{name} 형식이 공통 규격과 다름", details)
+
+
+def runtime_openapi() -> dict:
+    spec = deepcopy(OPENAPI)
+    spec["info"]["description"] = (
+        "1차 로컬 모의 API. 설명용 결과만 제공하며 실제 엔진·운영 인증·승인은 미구현. "
+        "예제 재생은 입력 최신성을 증명하지 않으며 모든 승인은 차단됨."
+    )
+    for path, operations in spec["paths"].items():
+        for operation in operations.values():
+            operation["x-implementation-status"] = (
+                "blocked" if path.endswith("/approvals") else "local-demo"
+            )
+    return spec
