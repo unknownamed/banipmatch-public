@@ -4,12 +4,13 @@ import { useDispatchView } from './api/useDispatchView'
 import { ComparisonSection } from './components/ComparisonSection'
 import { ApprovalPanel } from './components/ApprovalPanel'
 import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
-import { approvalGate } from './lib/approval'
+import { acknowledgeIds, approvalGate, approvalIdempotencyKey } from './lib/approval'
 import { buildRows } from './lib/compare'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
   const [picked, setPicked] = useState<string | null>(null)
+  const approvalKeys = useMemo(() => new Map<string, string>(), [client])
 
   const snapshot = view.scenario.state === 'ready' ? view.scenario.data : null
   const run = view.run.state === 'ready' ? view.run.data : null
@@ -19,6 +20,9 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const cand = candidates.find((r) => r.method === picked) ?? candidates[0]
   const rows = useMemo(() => (snapshot ? buildRows(snapshot, base, cand) : []), [snapshot, base, cand])
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
+  const approvalKey = run && cand ? approvalIdempotencyKey(approvalKeys, run.plan_id, {
+    run_id: run.run_id, method: cand.method, expected_version: run.base_plan_version, acknowledged_job_ids: acknowledgeIds(cand),
+  }) : undefined
 
   return (
     <main>
@@ -62,7 +66,11 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && cand && (
         <>
           <UnresolvedPanel rows={rows} cand={cand} />
-          <ApprovalPanel key={`${run?.run_id}:${cand.method}`} gate={approvalGate(run, cand, snapshot.scenario_id)} client={client} run={run} result={cand} />
+          <ApprovalPanel
+            key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
+            gate={approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined)}
+            client={client} run={run} result={cand} idempotencyKey={approvalKey}
+          />
         </>
       )}
     </main>

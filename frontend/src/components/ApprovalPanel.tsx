@@ -1,41 +1,56 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ApiClient } from '../api/client'
 import { ApiRequestError } from '../api/client'
 import type { Approval, MethodResult, Run } from '../api/types'
-import { acknowledgeIds, approvalErrorHint, type ApprovalGate } from '../lib/approval'
+import { acknowledgeIds, approvalErrorHint, approvalResponseMatches, approvalRetryAllowed, currentPlanWarning, type ApprovalGate } from '../lib/approval'
 import { kstDateTime } from '../lib/time'
 
 type Status =
   | { state: 'idle' }
   | { state: 'sending' }
-  | { state: 'done'; approval: Approval; planVersion: number | null }
-  | { state: 'error'; error: unknown }
+  | { state: 'done'; approval: Approval; planWarning: string | null }
+  | { state: 'error'; error: unknown; retryable: boolean; uncertain: boolean }
 
 /**
  * 운송사 내부 계획 승인. 버튼은 approvalGate를 통과할 때만 열리고, 최종 판단은 서버가 다시 한다.
  * 미처리·고정 위험 작업을 확인해야 보낼 수 있다. 재시도는 같은 Idempotency-Key를 쓴다.
  */
-export function ApprovalPanel({ gate, client, run, result }: { gate: ApprovalGate; client: ApiClient; run: Run | null; result: MethodResult }) {
+export function ApprovalPanel({ gate, client, run, result, idempotencyKey }: { gate: ApprovalGate; client: ApiClient; run: Run | null; result: MethodResult; idempotencyKey?: string }) {
   const ack = acknowledgeIds(result)
   const [checked, setChecked] = useState(false)
   const [status, setStatus] = useState<Status>({ state: 'idle' })
-  const [key] = useState(() => `approve-${crypto.randomUUID()}`) // App이 run+method마다 새로 마운트한다
-  const canSend = gate.allowed && !!client.approve && !!run && (ack.length === 0 || checked) && status.state !== 'sending' && status.state !== 'done'
+  const [fallbackKey] = useState(() => `approve-${crypto.randomUUID()}`)
+  const sending = useRef(false)
+  const attempt = useRef<{ planId: string; request: Parameters<NonNullable<ApiClient['approve']>>[1]; key: string } | null>(null)
+  const canSend = gate.allowed && !!client.approve && !!run && (ack.length === 0 || checked) && status.state !== 'sending' && status.state !== 'done' && (status.state !== 'error' || status.retryable)
 
   async function send() {
-    if (!run || !client.approve) return
+    if (!canSend || sending.current || !run || !client.approve) return
+    sending.current = true // React의 다음 렌더 전에 들어오는 중복 클릭도 차단
+    attempt.current ??= {
+      planId: run.plan_id,
+      request: { run_id: run.run_id, method: result.method, expected_version: run.base_plan_version, acknowledged_job_ids: [...ack] },
+      key: idempotencyKey ?? fallbackKey,
+    }
+    const submitted = attempt.current
     setStatus({ state: 'sending' })
     try {
       const approval = await client.approve(
-        run.plan_id,
-        { run_id: run.run_id, method: result.method, expected_version: run.base_plan_version, acknowledged_job_ids: ack },
-        key,
+        submitted.planId,
+        submitted.request,
+        submitted.key,
       )
+      if (!approvalResponseMatches(approval, run, result.method)) {
+        setStatus({ state: 'error', error: new Error('승인 응답의 계획·실행·방법·버전 또는 외부 반영 상태가 요청과 맞지 않습니다. 현재 계획을 다시 확인하세요.'), retryable: false, uncertain: true })
+        return
+      }
       // 승인 응답과 별개로 서버의 현재 계획 버전을 다시 읽는다.
       const plan = await client.getPlan?.(run.plan_id).catch(() => null)
-      setStatus({ state: 'done', approval, planVersion: plan?.version ?? null })
+      setStatus({ state: 'done', approval, planWarning: currentPlanWarning(plan ?? null, approval, run.scenario_id) })
     } catch (error) {
-      setStatus({ state: 'error', error })
+      setStatus({ state: 'error', error, retryable: !(error instanceof ApiRequestError) || approvalRetryAllowed(error.status, error.body?.code), uncertain: !(error instanceof ApiRequestError) || error.status >= 500 })
+    } finally {
+      sending.current = false
     }
   }
 
@@ -47,7 +62,7 @@ export function ApprovalPanel({ gate, client, run, result }: { gate: ApprovalGat
       {ack.length > 0 && (
         <p>
           <label>
-            <input type="checkbox" checked={checked} disabled={!gate.allowed || status.state === 'done'} onChange={(e) => setChecked(e.target.checked)} />{' '}
+            <input type="checkbox" checked={checked} disabled={!gate.allowed || status.state !== 'idle'} onChange={(e) => setChecked(e.target.checked)} />{' '}
             미처리·고정 위험 작업 <b>{ack.join(', ')}</b>을(를) 확인했습니다.
           </label>
         </p>
@@ -63,20 +78,23 @@ export function ApprovalPanel({ gate, client, run, result }: { gate: ApprovalGat
         </ul>
       )}
       {status.state === 'done' && (
-        <p className="ok" role="status">
-          내부 계획 v{status.approval.version} 승인됨 · {kstDateTime(status.approval.approved_at)}
-          {status.planVersion !== null && status.planVersion !== status.approval.version && ` (서버 현재 계획 v${status.planVersion})`} · 외부 반영{' '}
-          {status.approval.external_actions_performed ? '있음' : '없음'}
-        </p>
+        <div role="status">
+          <p className="ok">
+            내부 계획 v{status.approval.version} 승인됨 · {kstDateTime(status.approval.approved_at)}
+            {' '}· 외부 반영 없음
+          </p>
+          {status.planWarning && <p className="warn">{status.planWarning}</p>}
+        </div>
       )}
       {err !== null && (
         <div className="warn" role="alert">
           <p>
-            승인 실패:{' '}
+            {status.state === 'error' && status.uncertain ? '승인 결과 확인 필요: ' : '승인 거절: '}
             {err instanceof ApiRequestError
               ? `HTTP ${err.status}${err.body ? ` ${err.body.code}` : ''} — ${err.message}`
-              : `서버에 연결하지 못했습니다(${err instanceof Error ? err.message : String(err)}).`}
+              : err instanceof Error ? err.message : String(err)}
           </p>
+          {status.state === 'error' && status.uncertain && status.retryable && <p>서버에서 이미 처리됐을 수 있습니다. 다시 시도하면 같은 요청 내용과 키로 결과를 확인합니다.</p>}
           {err instanceof ApiRequestError && approvalErrorHint(err.status, err.body?.code) && <p>{approvalErrorHint(err.status, err.body?.code)}</p>}
           {err instanceof ApiRequestError &&
             err.body?.details?.map((d) => (
