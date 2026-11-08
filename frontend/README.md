@@ -2,21 +2,23 @@
 
 배차 담당자용 단일 작업 화면. 현재는 **공통 예제(v0.1) 설명용 결과를 표시하는 단계**이며 로컬 API의 입력 등록·실행 요청·결과 조회에 연결했다. API의 실제 최적화 엔진 연결과 독립 일정 검사·승인은 아직 구현하지 않았다.
 
-## 도구 (PR #4로 병합된 첫 구현)
+## 도구
 
-React 18 + TypeScript + Vite 5, 테스트는 Vitest. 상태 관리·UI 라이브러리는 쓰지 않았다.
+React 18 + TypeScript + Vite 6.4.5, 테스트는 Vitest 4.1.12. 상태 관리·UI 라이브러리는 쓰지 않았다. 개발 도구의 알려진 취약점을 줄이기 위해 버전과 잠금 파일을 함께 갱신했다(2026-11-08 `npm audit` 보고 0건이며 모든 보안 문제의 부재를 보장하지 않음).
 
 ## 실행
 
-Node 20 이상.
+Node 24 권장(CI와 같은 버전). Vitest는 Node 20·22·24 이상 지원 계열을 사용한다.
 
 ```sh
 cd frontend
-npm install
+npm ci --ignore-scripts
 npm run dev        # http://localhost:5173
 npm test           # 공통 예제 판정 테스트
 npm run build      # 타입 검사 + 빌드
 ```
+
+PR과 main 변경마다 위 테스트·빌드를 GitHub Actions가 실행한다. 실제 브라우저 조작과 전체 API 연결 검수는 별도로 남긴다.
 
 - 기본은 fixture 모드: `docs/development/v0.1/예제 데이터`의 01·03·04 JSON을 **복사하지 않고 직접** 읽는다.
 - [백엔드 안내](../backend/README.md)에 따라 로컬 API를 실행한 뒤 `frontend/.env.local`에 `VITE_API_MODE=http`와 서버 모의 토큰과 같은 `VITE_API_TOKEN`을 설정하고 개발 서버를 시작한다. `.env.example`을 참고하며 실제 설정값은 Git에 올리지 않는다. `/v1` 요청은 `127.0.0.1:8000`으로 전달한다(포트는 백엔드에 맞춰 `vite.config.ts` 수정).
