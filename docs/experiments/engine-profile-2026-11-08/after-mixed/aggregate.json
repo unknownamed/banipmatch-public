@@ -1,0 +1,186 @@
+[
+  {
+    "input": "mixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B0",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "BASELINE"
+    ],
+    "objective_tuples": [
+      [
+        0,
+        0,
+        720
+      ]
+    ],
+    "max_movable_violations": 9,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 4.142,
+    "wall_ms_median": 4.168,
+    "wall_ms_max": 5.712
+  },
+  {
+    "input": "mixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B1",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "HEURISTIC"
+    ],
+    "objective_tuples": [
+      [
+        3,
+        8,
+        540
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 5.417,
+    "wall_ms_median": 5.634,
+    "wall_ms_max": 5.846
+  },
+  {
+    "input": "mixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B2",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        3,
+        8,
+        540
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 81.035,
+    "wall_ms_median": 90.98,
+    "wall_ms_max": 97.43
+  },
+  {
+    "input": "mixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B3",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        3,
+        5,
+        540
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 121.475,
+    "wall_ms_median": 121.769,
+    "wall_ms_max": 129.365
+  },
+  {
+    "input": "mixed_fixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B0",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "BASELINE"
+    ],
+    "objective_tuples": [
+      [
+        0,
+        0,
+        600
+      ]
+    ],
+    "max_movable_violations": 8,
+    "max_fixed_risks": 1,
+    "wall_ms_min": 4.107,
+    "wall_ms_median": 4.138,
+    "wall_ms_max": 4.766
+  },
+  {
+    "input": "mixed_fixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B1",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "HEURISTIC"
+    ],
+    "objective_tuples": [
+      [
+        3,
+        7,
+        420
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 1,
+    "wall_ms_min": 5.664,
+    "wall_ms_median": 6.124,
+    "wall_ms_max": 6.236
+  },
+  {
+    "input": "mixed_fixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B2",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        3,
+        7,
+        420
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 1,
+    "wall_ms_min": 63.422,
+    "wall_ms_median": 65.437,
+    "wall_ms_max": 70.186
+  },
+  {
+    "input": "mixed_fixed_12.json",
+    "buffer": 10,
+    "budget": 3,
+    "method": "B3",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        3,
+        5,
+        420
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 1,
+    "wall_ms_min": 93.799,
+    "wall_ms_median": 94.573,
+    "wall_ms_max": 98.297
+  }
+]

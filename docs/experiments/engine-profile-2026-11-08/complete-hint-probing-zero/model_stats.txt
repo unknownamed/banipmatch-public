@@ -1,0 +1,11 @@
+satisfaction model '': (model_fingerprint: 0xd060a79c500183eb)
+#Variables: 21'523 (21'472 primary variables)
+  - 21'423 Booleans in [0,1]
+  - 50 in [0,51]
+  - 50 in [0,240]
+#kBoolAnd: 400 (#enforced: 400) (#literals: 800)
+#kCircuit: 8
+#kLinear1: 1'701 (#enforced: 1'700)
+#kLinear2: 40'524 (#enforced: 39'464)
+#kLinear3: 150
+#kLinearN: 240 (#terms: 21'792)

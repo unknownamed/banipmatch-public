@@ -52,7 +52,8 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 **완성할 것:** 같은 입력에서 원안의 위험과 조정안을 계산하고, 미처리·변경량·이동 부담 및 미해결 이유를 비교하는 엔진입니다.
 
 - 구현 범위: B0 원안 위험 진단·B1 마감순 삽입·B2 이동 최소화·B3 변경 최소화를 비교합니다. 모든 조정 방법은 미처리 수를 우선하며, 고정 작업 보존과 미처리 근거를 확인합니다.
-- B0~B3 구현·실험의 최신 상태는 [엔진 인계](handoffs/2026-11-08-unknownamed-engine-experiments.md)에 있습니다. 규모·예산·여유시간·혼합 조건156회를 비교했고, 다음은 리뷰 피드백·API/독립 검사 연결 대조·50건 탐색 병목 분석입니다.
+- B0~B3 구현·실험의 최신 상태는 [엔진0.2.2 인계](handoffs/2026-11-08-unknownamed-engine-performance.md)에 있습니다. 완전한 초기안 힌트·probing0으로 탐색을 보완했고 엔진86개·전체 Python171개/하위156개·계약29개·DB32개 검사를 통과했습니다. [기존0.2.1·156회](../experiments/engine-sensitivity-2026-11-08/README.md)는 보존하며 [후속72회](../experiments/engine-profile-2026-11-08/README.md)와 구분합니다.
+- 후속20건 B3는3초에서 변경2건의 최적성을 증명했고10초 호출 중앙값은5.21→2.42초입니다. 50건10초 B2는 전체 최적, B3는 미처리26/변경23/이동1,440분의 FEASIBLE로 전체 미증명입니다. [기존156회 PDF](../experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)와 [후속72회 PDF](../experiments/engine-report-2026-11-08/engine-performance-followup.pdf)를 활용하되 모의 한계를 유지합니다. 다음은 리뷰 피드백·API/독립 검사 연결 대조·50건 B3의 남은 증명 병목 검증입니다.
 - `solve(snapshot, method, config) → result`의 경계를 유지합니다. 엔진 안에서 DB·웹·외부 API를 호출하거나 입력을 수정하지 않습니다.
 - 출발·고정 작업의 차량·순서·시각을 보존하고, 위험이 생겨도 작업을 삭제하거나 미처리로 바꿔 지표를 좋게 만들지 않습니다.
 - 같은 입력·조건·계산 예산으로 B0~B3를 비교합니다. 입력 부족, 시간 내 해 미발견, 증명된 불가능을 구분하고 확인한 근거만 반환합니다.
