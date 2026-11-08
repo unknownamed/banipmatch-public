@@ -194,12 +194,56 @@ describe('방법 탭 전환 중 승인 상태 유지 (PR #9 리뷰)', () => {
     await act(async () => pick(b1))
     expect(container.textContent).toContain('B3 조정안이 승인 요청 중')
     expect(button().disabled).toBe(true)
+    expect(container.querySelector<HTMLInputElement>('input')!.disabled).toBe(true)
     await act(async () => resolve(approval))
     expect(container.textContent).toContain('B3 조정안이 승인됨')
     await submit()
     await act(async () => pick(computed))
     expect(container.textContent).toContain('내부 계획 v2 승인됨')
     expect(button().disabled).toBe(true)
+    expect(approve).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([
+    ['통신 실패 후 전환', new TypeError('connection lost'), false],
+    ['통신 응답 대기 중 전환', new TypeError('connection lost'), true],
+    ['저장소 장애 후 전환', new ApiRequestError(503, { code: 'STORAGE_UNAVAILABLE', message: 'unavailable' }), false],
+    ['저장소 응답 대기 중 전환', new ApiRequestError(503, { code: 'STORAGE_UNAVAILABLE', message: 'unavailable' }), true],
+  ])('%s 뒤 위험 작업을 다시 확인하고 같은 본문·키로 재시도한다', async (_label, error, switchWhileSending) => {
+    let reject!: (error: unknown) => void
+    const approve = vi.fn().mockImplementationOnce(() => new Promise<Approval>((_resolve, fail) => { reject = fail })).mockResolvedValueOnce(approval)
+    const client = clientWith(approve)
+    await act(async () => root.render(<Host client={client} />))
+    await acknowledge()
+    await submit()
+    if (switchWhileSending) await act(async () => pick(b1))
+    await act(async () => reject(error))
+    if (!switchWhileSending) await act(async () => pick(b1))
+    expect(button().disabled).toBe(true)
+    expect(container.querySelector<HTMLInputElement>('input')!.disabled).toBe(true)
+    await act(async () => pick(computed))
+    const checkbox = container.querySelector<HTMLInputElement>('input')!
+    expect(checkbox.checked).toBe(false)
+    expect(checkbox.disabled).toBe(false)
+    expect(button().disabled).toBe(true)
+    await acknowledge()
+    expect(button().disabled).toBe(false)
+    await submit()
+    expect(approve).toHaveBeenCalledTimes(2)
+    expect(approve.mock.calls[1]).toEqual(approve.mock.calls[0])
+    expect(container.textContent).toContain('내부 계획 v2 승인됨')
+  })
+
+  it('재시도 불가 거절은 방법을 바꿨다가 돌아와도 확인·재전송을 막는다', async () => {
+    const approve = vi.fn().mockRejectedValue(new ApiRequestError(409, { code: 'PLAN_VERSION_CONFLICT', message: 'conflict' }))
+    await act(async () => root.render(<Host client={clientWith(approve)} />))
+    await acknowledge()
+    await submit()
+    await act(async () => pick(b1))
+    await act(async () => pick(computed))
+    expect(container.querySelector<HTMLInputElement>('input')!.disabled).toBe(true)
+    expect(button().disabled).toBe(true)
+    await submit()
     expect(approve).toHaveBeenCalledTimes(1)
   })
 })

@@ -81,7 +81,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       {ack.length > 0 && (
         <p>
           <label>
-            <input type="checkbox" checked={checked} disabled={!gate.allowed || status.state !== 'idle'} onChange={(e) => setChecked(e.target.checked)} />{' '}
+            <input type="checkbox" checked={checked} disabled={otherBusy || !gate.allowed || (status.state !== 'idle' && !(status.state === 'error' && status.retryable))} onChange={(e) => setChecked(e.target.checked)} />{' '}
             미처리·고정 위험 작업 <b>{ack.join(', ')}</b>을(를) 확인했습니다.
           </label>
         </p>
