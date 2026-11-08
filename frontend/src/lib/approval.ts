@@ -21,3 +21,19 @@ export function approvalGate(run: Run | null, result: MethodResult | undefined, 
     reasons.push(`이 결과의 입력(${run.scenario_id})이 현재 입력(${activeScenarioId})과 다릅니다.`)
   return { allowed: reasons.length === 0, reasons }
 }
+
+/** 승인 전에 담당자가 확인해야 하는 작업: 미처리 ∪ 고정 작업 잔여 위험. */
+export function acknowledgeIds(result: MethodResult): string[] {
+  const risky = result.issues.filter((i) => i.code === 'FIXED_RESIDUAL_RISK' && i.job_id).map((i) => i.job_id!)
+  return [...new Set([...result.unassigned_job_ids, ...risky])].sort()
+}
+
+/** 승인 실패 응답을 담당자가 할 일로 바꾼다. Error.code 기준이며 모르는 코드는 서버 메시지만 쓴다. */
+export function approvalErrorHint(status: number, code: string | undefined): string | null {
+  if (code === 'PLAN_VERSION_CONFLICT') return '검토하는 동안 계획이 바뀌었습니다. 최신 계획과 입력으로 다시 계산한 뒤 승인하세요.'
+  if (code === 'IDEMPOTENCY_CONFLICT') return '같은 요청 키로 다른 내용을 보냈습니다. 화면을 새로고침한 뒤 요청 내용을 확인하세요.'
+  if (code === 'RESULT_NOT_COMPUTED') return '설명용 예시 결과는 승인할 수 없습니다.'
+  if (status === 409) return '이 결과의 입력이나 계획이 현재 서버 상태와 다릅니다. 최신 입력으로 다시 계산하세요.'
+  if (status === 503) return '필수 근거의 확인 상태나 유효기간이 충족되지 않았습니다. 반입시간 변경 확인과 입력 유효기간을 다시 확인하세요.'
+  return null
+}

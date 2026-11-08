@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
 import { useDispatchView } from './api/useDispatchView'
 import { ComparisonSection } from './components/ComparisonSection'
-import { ApprovalPanel, ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
+import { ApprovalPanel } from './components/ApprovalPanel'
+import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
 import { approvalGate } from './lib/approval'
 import { buildRows } from './lib/compare'
 
@@ -61,7 +62,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && cand && (
         <>
           <UnresolvedPanel rows={rows} cand={cand} />
-          <ApprovalPanel gate={approvalGate(run, cand, snapshot.scenario_id)} method={cand.method} />
+          <ApprovalPanel key={`${run?.run_id}:${cand.method}`} gate={approvalGate(run, cand, snapshot.scenario_id)} client={client} run={run} result={cand} />
         </>
       )}
     </main>

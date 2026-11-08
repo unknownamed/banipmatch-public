@@ -175,5 +175,30 @@ export interface Results {
   results: MethodResult[]
 }
 
+export interface ApprovalRequest {
+  run_id: string
+  method: Method
+  expected_version: number
+  acknowledged_job_ids: string[]
+}
+
+export interface Approval {
+  approval_id: string
+  plan_id: string
+  version: number
+  run_id: string
+  method: Method
+  approved_by: string
+  approved_at: UtcString
+  external_actions_performed: boolean
+}
+
+export interface Plan {
+  plan_id: string
+  version: number
+  scenario_id: string
+  approval_id: string | null
+}
+
 /** GET /v1/runs/{id}/results — 진행 중 202(Run), 종료 후 200(Results). */
 export type ResultsResponse = { kind: 'pending'; run: Run } | { kind: 'ready'; results: Results }
