@@ -18,7 +18,11 @@ from .metrics import calculate_metrics
 
 
 class BuildTimeout(Exception):
-    pass
+    def __init__(self, input_issues=None):
+        super().__init__("Model construction exceeded its time budget")
+        # A failed constructor does not return its partially built model.
+        # Carry already discovered input problems across that boundary.
+        self.input_issues = copy.deepcopy(input_issues or [])
 
 
 class DispatchModel:
@@ -181,7 +185,7 @@ class DispatchModel:
 
     def check_budget(self):
         if monotonic() >= self.deadline:
-            raise BuildTimeout
+            raise BuildTimeout(self.input_issues)
 
     def all_of(self, values, name):
         result = self.model.new_bool_var(name)
@@ -333,9 +337,14 @@ def solve_optimized(snapshot, method, config, started, engine_version):
     # Seed construction is charged to the same deadline, not extra solver time.
     warm_assignments, warm_unassigned, warm_issues, _ = _insert(c, min(deadline, monotonic() + 1))
     warm_metrics = calculate_metrics(snapshot, warm_assignments, warm_unassigned, warm_issues, 0)
+    vehicle_issues = []
+    for vid in sorted(c.vehicles):
+        reasons = _vehicle_state(c, vid)[2]
+        if reasons:
+            vehicle_issues.append(issue(None, "INPUT_MISSING", f"차량 {vid}: {'; '.join(reasons)}"))
     has_incumbent = (warm_metrics["movable_violation_count"] == 0
                      and not any(i["code"] == "INPUT_MISSING" for i in warm_issues)
-                     and not any(_vehicle_state(c, vid)[2] for vid in c.vehicles))
+                     and not vehicle_issues)
     if has_incumbent:
         assignments, unassigned = warm_assignments, warm_unassigned
         status = "FEASIBLE"
@@ -380,8 +389,14 @@ def solve_optimized(snapshot, method, config, started, engine_version):
                 if outcome == cp_model.INFEASIBLE:
                     status = "INFEASIBLE"
                 break
-    except BuildTimeout:
+    except BuildTimeout as exc:
         timed_out = True
+        # Timing out is not evidence of complete input. Keep both the bounded
+        # warm-start diagnostics and problems found before construction stopped.
+        known_missing = [i for i in warm_issues if i["code"] == "INPUT_MISSING"]
+        for detail in [*exc.input_issues, *known_missing, *vehicle_issues]:
+            if detail not in input_issues:
+                input_issues.append(detail)
 
     proven = all(stage["status"] == "OPTIMAL" for stage in stages) and not input_issues
     if proven:

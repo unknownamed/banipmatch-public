@@ -1,6 +1,6 @@
 # 문서 목록
 
-- [11월 8일 최신 엔진 인계](team/handoffs/2026-11-08-unknownamed-engine-performance.md): 0.2.2 힌트·탐색 설정·성능 보완·연결 담당 참고.
+- [11월 8일 최신 엔진 인계](team/handoffs/2026-11-08-unknownamed-engine-diagnostics.md): 0.2.3 시간 초과 시 입력 누락 진단 보존·연결 담당 참고.
 - [보고서용 실험 표·그림·PDF](experiments/engine-report-2026-11-08/README.md): 기존156회4쪽과 후속72회2쪽, 모의 결과와 남은 한계.
 - [규모·예산·여유시간·혼합 조건156회 비교](experiments/engine-sensitivity-2026-11-08/README.md): 전체 결과와 재현 명령, 성공·미증명 범위.
 
