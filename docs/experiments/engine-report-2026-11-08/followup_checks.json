@@ -11,20 +11,23 @@
   "source_hashes": {
     "docs/experiments/engine-b0-b3/inputs/20_jobs_4_vehicles.json": "ffb88f9e4acb746ac3cb320abfa03480ca36c063b8272f0c854d57e22880c05d",
     "docs/experiments/engine-b0-b3/inputs/50_jobs_8_vehicles.json": "817e693444fa3a8ff65defdd73c6cfd48a842ccccd3ad7d0ebbc3d9e8e2ed618",
-    "docs/experiments/engine-profile-2026-11-08/after-scale/results.jsonl": "fe2f0c11cf372340178c4dfd5360b3364ffd5ad8ed460e257baee9865a3bf17f",
-    "docs/experiments/engine-profile-2026-11-08/after-scale/runs.csv": "75307bbb03ed17bb54f0959f843b1c714fbc8375a736699d51b2155e688a9842",
-    "docs/experiments/engine-profile-2026-11-08/after-scale/metadata.json": "52be0aa058cc27b4f3fbd0e8a5d3fbf83fa3850325258841b94f303aae1781c8",
+    "docs/experiments/engine-profile-2026-11-08/after-scale/results.jsonl": "c34bb5585c40f87f757a92c7db32b6eb544309c111a6140e9a9117f6c13ff44e",
+    "docs/experiments/engine-profile-2026-11-08/after-scale/runs.csv": "0f1f3582538489122970820e401e6f26e6d0d75c70c1e8f63fbfb37ed2c77a30",
+    "docs/experiments/engine-profile-2026-11-08/after-scale/metadata.json": "6bb0adaf61723e0620539f33e771a6c7bb475a4ba7df3d3645386dd230061297",
     "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_12.json": "6562fa876f63205d7e1713778384a57186cbdd6a5da921fe83b71c79acdd69f4",
     "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_fixed_12.json": "0380fc16a95eb3d482ecadcb3c627f7f5cf4f05e579d4f1609156de157792884",
-    "docs/experiments/engine-profile-2026-11-08/after-mixed/results.jsonl": "e85fdb104b85e5a4466ab915442f1d168e3a6ccb4991100dcdcd6b9f9148acac",
-    "docs/experiments/engine-profile-2026-11-08/after-mixed/runs.csv": "68e0c3994f521183f59d75c3718864fe4216924e349ff69583746722fb6c0af8",
-    "docs/experiments/engine-profile-2026-11-08/after-mixed/metadata.json": "adbe3d3d1673f851ece358429b0331115604f37f21b62276038812969fd8219f"
+    "docs/experiments/engine-profile-2026-11-08/after-mixed/results.jsonl": "0f4658229ef2610110c70c6c7014cf761c8eacf73ce5fda0f7a176164b2a5d0a",
+    "docs/experiments/engine-profile-2026-11-08/after-mixed/runs.csv": "1a1b5a4e23a91216063efc74f66a69b4d5a8bb9e28e08ddb1d7ece7d698fe17e",
+    "docs/experiments/engine-profile-2026-11-08/after-mixed/metadata.json": "82dae0acf1a7e56d7b11e43be13a41ec4e03fd765a0b179f2ba06519fda50d31"
   },
   "diagnostic_hashes": {
-    "before-default": "a63c3a4837320674e3b6749f31aaa3bea589995e1b4d2e6d378d277b690543a8",
-    "probing-zero": "7d3b30563ae54c0d809d205ff9755bcf098f2f72a4e15d234be09e37b37c9663",
-    "complete-hint-default": "f3a0351d2bbb680accb38e3591fd83f713235fa3132b58d3d47410d281a0df05",
-    "complete-hint-probing-zero": "e538909b61a714ade346f0618603705199cae96f89e5fb792ef6157ead764e66"
+    "before-default": "98cd2568dfb42f6866fdc2f8f4a5e3d5b3aceff7371adfb563ba623d731b4b75",
+    "probing-zero": "22b36929d964a5bd4b6a4599d4aae80c4bc210f02e00cb8ef6dcdd0f86960be0",
+    "complete-hint-default": "a450012a74e619424a89bd03856b815f76fae839217a4d920782636ff7a07d49",
+    "complete-hint-probing-zero": "a4ba9285922d6d2ac41717b89881e2d2b832ecc1712b9a33537265da8e5e2d11"
   },
-  "scope": "Artifact comparison only; no solver run or independent API validation."
+  "scope": "Artifact comparison only; no solver run or independent API validation.",
+  "hash_normalization": "UTF-8 text; CRLF -> LF only; UTF-8 BOM preserved; SHA-256",
+  "normalized_worktree_head_comparison": "passed",
+  "normalized_worktree_head_unique_files": 23
 }

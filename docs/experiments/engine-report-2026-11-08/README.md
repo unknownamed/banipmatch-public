@@ -10,7 +10,7 @@
 - `03_buffer.png` / `.svg`: 여유시간별 변경 수와 미처리 수.
 - `verified_runs.csv`: 원본156행에서 대조·추출한 주요 지표. 원본 전체 결과를 대체하지 않음.
 - `summary.csv` / `.json`: 묶음·입력·여유·예산·방법별52개 집계(반복/시드 최소·중앙·최대, 증명 수).
-- `source_manifest.json`: 사용한 원본 파일의 SHA-256. 엔진 소스가 후속 작업에서 바뀌어도 과거 결과를 현재 소스로 재생성한 것처럼 설명하지 않음.
+- `source_manifest.json`: 사용한 원본 텍스트를 UTF-8로 읽어 CRLF만 LF로 정규화한 SHA-256(UTF-8 BOM은 보존). 엔진 소스가 후속 작업에서 바뀌어도 과거 결과를 현재 소스로 재생성한 것처럼 설명하지 않음.
 - `checks.json`: 이번 재집계의 원본 대조 범위.
 - `page-1.png` ~ `page-4.png`: PDF 전페이지 시각 검토용 렌더.
 
@@ -44,3 +44,13 @@ python tools/build_engine_report.py --followup
 후속 원본은 `../engine-profile-2026-11-08/after-scale/`48회, `after-mixed/`24회이며 두 메타데이터의 completed=true를 확인했습니다. 진단4회는 시간 비교표에 합치지 않았습니다. 각 진단의 profile.json 해시는 별도 보존했습니다. 전체 후속PDF2쪽도 Poppler로 렌더·시각 확인했습니다.
 
 같은3/10초 예산의20/50건을 기존 실험과 비교했습니다. 20건B3는3초에서도 변경2건의 최적성을 증명했고,10초 호출 중앙값은5.21→2.42초였습니다. 50건10초B2는 전체 최적성을 증명했으나 B3는 미처리OPTIMAL/변경FEASIBLE/이동NOT_RUN입니다. 50건3초B2/B3는 첫 목적FEASIBLE이며 전체 최적성은 미증명입니다. 혼합은3초·세 시드만 후속 확인했으며 기존10초 전체를 다시 실행한 것으로 표현하지 않습니다.
+
+## 운영체제 간 해시 비교
+
+이 폴더의 `source_manifest.json`, `followup_source_manifest.json`과 두 checks의 원본·진단 해시 맵은 UTF-8 텍스트의 CRLF만 LF로 바꾼 뒤 SHA-256을 계산합니다. BOM은 제거하지 않으며 나머지 내용·공백·단독CR도 보존합니다. Git 체크아웃의 줄바꿈 변환만으로 원본 불일치가 발생하는 것을 피하기 위한 기준입니다. 진단 profile.json4건에도 같은 기준을 적용합니다. 기존 실험 원본이나 metadata 내부의 과거 엔진 소스 해시는 수정하지 않습니다. 입력의 정규 JSON 의미 해시 검증도 기존 기준을 유지합니다.
+
+```powershell
+python tools/build_engine_report.py --refresh-source-hashes
+```
+
+이 명령은 기존 해시 목록과 checks만 갱신하고 각 원본의 작업트리 내용과 `git show HEAD:경로`의 LF 정규화 해시가 같은지 확인합니다. 집계CSV·그림·PDF는 재생성하지 않습니다. 확인 기준은 두 checks의 `hash_normalization`과 `normalized_worktree_head_comparison`에 기록합니다.

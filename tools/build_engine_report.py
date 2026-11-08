@@ -15,6 +15,17 @@ SOURCE = ROOT / 'docs/experiments/engine-sensitivity-2026-11-08'
 OUT = ROOT / 'docs/experiments/engine-report-2026-11-08'
 sys.path.insert(0, str(OUT / '_runtime'))
 GREEN = '#244f3e'
+HASH_NORMALIZATION = 'UTF-8 text; CRLF -> LF only; UTF-8 BOM preserved; SHA-256'
+
+
+def normalized_text_sha256(raw: bytes) -> str:
+    """Hash UTF-8 source text consistently across Git checkouts; retain BOM."""
+    normalized = raw.decode('utf-8').replace('\r\n', '\n').encode('utf-8')
+    return hashlib.sha256(normalized).hexdigest()
+
+
+def source_sha256(path: Path) -> str:
+    return normalized_text_sha256(path.read_bytes())
 
 
 def write_json(path, obj):
@@ -37,7 +48,7 @@ def load_and_verify(source=SOURCE, spec=(('scale',72),('mixed',48),('buffer',36)
             input_path = (ROOT / 'docs/experiments/engine-b0-b3/inputs' if bundle == 'scale' else SOURCE / 'inputs') / item['file']
             originals[item['file']] = json.loads(input_path.read_text(encoding='utf-8-sig'))
             assert digest(originals[item['file']]) == item['sha256']
-            manifest[str(input_path.relative_to(ROOT)).replace('\\', '/')] = hashlib.sha256(input_path.read_bytes()).hexdigest()
+            manifest[str(input_path.relative_to(ROOT)).replace('\\', '/')] = source_sha256(input_path)
         for r, c in zip(raw, flat):
             result, m = r['result'], r['result']['metrics']
             assert result['engine_version'] == version
@@ -64,7 +75,7 @@ def load_and_verify(source=SOURCE, spec=(('scale',72),('mixed',48),('buffer',36)
             rows.append(row)
         for filename in ('results.jsonl', 'runs.csv', 'metadata.json'):
             p = folder / filename
-            manifest[str(p.relative_to(ROOT)).replace('\\', '/')] = hashlib.sha256(p.read_bytes()).hexdigest()
+            manifest[str(p.relative_to(ROOT)).replace('\\', '/')] = source_sha256(p)
     pairs = defaultdict(set)
     for r in rows:
         pairs[tuple(r[k] for k in ('bundle','input','buffer','budget','seed','repetition'))].add(r['method'])
@@ -129,7 +140,7 @@ def export_tables(rows, summary, manifest):
     write_json(OUT / 'summary.json', summary)
     write_json(OUT / 'source_manifest.json', manifest)
     write_json(OUT / 'checks.json', dict(runs=156, paired_conditions=39, csv_json_metric_crosscheck='passed',
-        input_hash_metadata_match='passed', source_files_sha256=manifest, adjusted_movable_violations=0,
+        input_hash_metadata_match='passed', source_files_sha256=manifest, hash_normalization=HASH_NORMALIZATION, adjusted_movable_violations=0,
         scope='Existing engine 0.2.1 artifacts only; not independent API validation; no new solver runs.'))
 
 
@@ -263,7 +274,7 @@ def build_followup():
         path=profile/name/'profile.json'
         data=json.loads(path.read_text(encoding='utf-8'))
         assert data['completed']
-        diagnostics[name]=hashlib.sha256(path.read_bytes()).hexdigest()
+        diagnostics[name]=source_sha256(path)
         if name=='before-default':
             phases={p['name']:p['seconds'] for p in data['phases']}
             assert round(phases['warm_start'],3)==0.063 and round(phases['model_build'],3)==0.468
@@ -299,7 +310,8 @@ def build_followup():
     write_json(OUT/'followup_checks.json',dict(runs=72,paired_conditions=18,diagnostic_runs_excluded=4,
         csv_json_metric_status_checks='passed',paired_old_condition_checks='passed',displayed_claims='passed',
         engine_version='0.2.2-b0-b3',validation_status='not_run',approval_eligible=False,
-        source_hashes=manifest,diagnostic_hashes=diagnostics,scope='Artifact comparison only; no solver run or independent API validation.'))
+        source_hashes=manifest,diagnostic_hashes=diagnostics,hash_normalization=HASH_NORMALIZATION,
+        scope='Artifact comparison only; no solver run or independent API validation.'))
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -369,8 +381,40 @@ def build_followup():
     print(json.dumps({'followup_verified_runs':72,'pdf':'engine-performance-followup.pdf'}))
 
 
+def refresh_source_hashes():
+    """Refresh provenance only, without touching figures, summaries or PDFs."""
+    import subprocess
+    old_path=OUT/'source_manifest.json'
+    follow_path=OUT/'followup_source_manifest.json'
+    old=json.loads(old_path.read_text(encoding='utf-8'))
+    follow=json.loads(follow_path.read_text(encoding='utf-8'))
+    paths=set(old)|set(follow['before'])|set(follow['after'])
+    diagnostic_paths={name:f'docs/experiments/engine-profile-2026-11-08/{name}/profile.json' for name in follow['diagnostics']}
+    paths.update(diagnostic_paths.values())
+    hashes={path:source_sha256(ROOT/path) for path in paths}
+    for path in sorted(paths):
+        committed=subprocess.run(['git','show',f'HEAD:{path}'],cwd=ROOT,check=True,capture_output=True).stdout
+        assert hashes[path]==normalized_text_sha256(committed), path
+    old={path:hashes[path] for path in old}
+    for group in ('before','after'):
+        follow[group]={path:hashes[path] for path in follow[group]}
+    follow['diagnostics']={name:hashes[path] for name,path in diagnostic_paths.items()}
+    write_json(old_path,old);write_json(follow_path,follow)
+    for filename,updates in [('checks.json',dict(source_files_sha256=old)),
+                             ('followup_checks.json',dict(source_hashes=follow['after'],diagnostic_hashes=follow['diagnostics']))]:
+        path=OUT/filename
+        checks=json.loads(path.read_text(encoding='utf-8'))
+        checks.update(updates,hash_normalization=HASH_NORMALIZATION,
+                      normalized_worktree_head_comparison='passed',normalized_worktree_head_unique_files=len(paths))
+        write_json(path,checks)
+    print(json.dumps({'normalized_source_files':len(paths),'worktree_head_match':'passed','pdf_regenerated':False}))
+
+
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--pdf',action='store_true');parser.add_argument('--followup',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--pdf',action='store_true');parser.add_argument('--followup',action='store_true')
+    parser.add_argument('--refresh-source-hashes',action='store_true');args=parser.parse_args()
+    if args.refresh_source_hashes:
+        refresh_source_hashes();return
     if args.followup:
         build_followup();return
     rows,manifest=load_and_verify();summary=summarize(rows);verify_report_claims(summary)
