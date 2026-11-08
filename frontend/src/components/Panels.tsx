@@ -1,5 +1,4 @@
 import type { MethodResult, Run, Snapshot } from '../api/types'
-import type { ApprovalGate } from '../lib/approval'
 import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
 import { kstDateTime, kstTime } from '../lib/time'
 
@@ -232,25 +231,6 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
           {ISSUE_LABEL[i.code] ?? i.code}: {i.explanation}
         </p>
       ))}
-    </section>
-  )
-}
-
-export function ApprovalPanel({ gate, method }: { gate: ApprovalGate; method: string }) {
-  return (
-    <section className="card">
-      <h2>운송사 내부 계획 승인</h2>
-      <p className="muted">내부 배차 계획만 확정합니다. 터미널 방문예약 변경, 기존 TMS 반영, 기사 통보는 하지 않습니다.</p>
-      <button type="button" disabled={!gate.allowed} title={gate.reasons.join('\n')}>
-        {method} 조정안 승인
-      </button>
-      {!gate.allowed && (
-        <ul className="warn">
-          {gate.reasons.map((r) => (
-            <li key={r}>{r}</li>
-          ))}
-        </ul>
-      )}
     </section>
   )
 }
