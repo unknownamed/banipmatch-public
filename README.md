@@ -21,10 +21,10 @@
 | 내부 API·데이터 계약 | OpenAPI 3.1.1, JSON Schema 초안 |
 | DB | SQLite 기준 16개 테이블·133개 필드, 실행 가능한 초기 스키마 |
 | 예제 | 모의 입력·설명용 결과·오류 사례·CSV 제공 |
-| 검수 | 전체 Python216개/하위검사221개, 계약·예제29개, DB32개 통과 |
+| 검수 | 전체 Python236개/하위검사223개, 계약·예제29개, DB32개 통과 |
 | 데이터 첫 구현 | [CSV·JSON 입력 검증](backend/data/README.md), 오류의 필드·출처·행 반환, CLI 준비와 수신/관측시각 검사. API 실행 전 점검에 연결 |
 | 로컬 API 1차 | 입력 등록·조회·SQLite 저장. 설명용 재생 또는 선택형 B0~B3 실계산·독립 검사·내부 승인. API 테스트61건 |
-| 엔진 | 0.2.3 B0/B1 및 B2/B3 사전식 최적화, 엔진 테스트89건. 완전한 초기안 힌트·probing0 보완. [기존0.2.1·156회](docs/experiments/engine-sensitivity-2026-11-08/README.md)와 [후속72회](docs/experiments/engine-profile-2026-11-08/README.md)를 분리 보존. 실제 API 연결 검수, 전체 브라우저 시연은 후속 |
+| 엔진 | 0.2.3 B0/B1 및 B2/B3 사전식 최적화, 엔진·평가 테스트100건. 완전한 초기안 힌트·probing0 보완. [기존0.2.1·156회](docs/experiments/engine-sensitivity-2026-11-08/README.md)와 [후속72회](docs/experiments/engine-profile-2026-11-08/README.md)를 분리 보존. 실제 API 연결 검수, 전체 브라우저 시연은 후속 |
 | 프론트 | React·TypeScript 비교·입력 등록·오류 입력 안내·내부 승인 요청 화면. 테스트62건·타입 검사·빌드 통과. 탭 전환 중 승인 상태·재시도 보존, 실계산 목표 단계 표시. 전체 브라우저 검수는 후속 |
 | 통합·인증·배포 | CLI·실계산 API·독립 검사·로컬 승인 연결 검수. 운영 인증·사용자 격리·공개 배포 미구현 |
 | 외부 API 연동·실제 운송 자료 | 권한·표본 확인 필요 |
@@ -39,6 +39,8 @@
 로컬 API 실행·프론트 연결·검증 방법은 [백엔드 안내](backend/README.md)에 있습니다. 기본 서버는 설명용 재생이며 `BANIPMATCH_RUN_MODE=engine`에서 모의 입력을 실제 계산합니다. 검증된 결과만 로컬 내부 승인할 수 있고 외부 예약·기사 통보는 수행하지 않습니다. [통합 검수와 한계](docs/team/handoffs/2026-11-08-pr12-pr14-integration.md)를 확인하세요.
 
 [심사 대응 설계 보완서(PDF 4쪽)](docs/design/evaluation-addendum-2026-11-08.pdf)는 기존 설계v6와 함께 읽는 내부 개발 자료입니다. 최종 보고서·발표자료와 구분합니다.
+
+새 [80회 평가와 한계](docs/experiments/engine-evaluation-2026-11-08/README.md) · [설명용 PDF4쪽](docs/experiments/engine-evaluation-2026-11-08/engine-evaluation-summary.pdf): 조정안60개를 별도 검사했고, 같은 처리 작업에서 변경 감소와 이동 증가를 함께 확인했습니다. 50건에서는 이점·전체 최적성을 확인하지 못했습니다. [HJNC 공식 업무 근거](docs/team/operational-evidence.md)와 함께 읽습니다.
 
 ## 팀원이 처음 작업할 때
 

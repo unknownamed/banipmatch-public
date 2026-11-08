@@ -1,0 +1,14 @@
+{
+  "runs": 80,
+  "expected_runs": 80,
+  "failures": 0,
+  "exceptions": 0,
+  "independently_validated": 60,
+  "baseline_integrity_passed": 20,
+  "not_eligible": 0,
+  "objective_proven": 35,
+  "pairs": 20,
+  "equal_count_comparable": 20,
+  "identical_workload_comparable": 14,
+  "delta_convention": "B3 minus B2; equal count does not imply identical served jobs"
+}
