@@ -131,3 +131,21 @@ describe('고정 작업 표시', () => {
     expect(bad).not.toContain('원안 유지')
   })
 })
+
+describe('실행 실패 표시', () => {
+  it('Run.error의 실패 방법·이유(details)를 보여준다', () => {
+    const failed: Run = { ...run, status: 'failed', error: {
+      code: 'RUN_EXECUTION_FAILED', message: '실행 실패', request_id: 'req-1',
+      details: [{ path: '/methods', reason: 'B2: 실행 제한시간 초과' }],
+    } }
+    const html = renderToStaticMarkup(<RunStatusPanel run={failed} results={null} />)
+    expect(html).toContain('RUN_EXECUTION_FAILED')
+    expect(html).toContain('B2: 실행 제한시간 초과')
+    expect(html).toContain('req-1')
+  })
+
+  it('error가 없으면 사유 미제공으로 표시한다', () => {
+    const html = renderToStaticMarkup(<RunStatusPanel run={{ ...run, status: 'failed', error: null }} results={null} />)
+    expect(html).toContain('사유 미제공')
+  })
+})

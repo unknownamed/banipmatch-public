@@ -119,9 +119,17 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
         {run.methods.join(', ')} · 제한 {run.config.time_limit_seconds}초 · seed {run.config.seed}
       </p>
       {run.status === 'failed' && (
-        <p className="warn">
-          실패 이유: {run.error ? `${run.error.code} — ${run.error.message}` : '사유 미제공'}
-        </p>
+        <div className="warn" role="alert">
+          <p>실패 이유: {run.error ? `${run.error.code} — ${run.error.message}` : '사유 미제공'}</p>
+          {/* 실패 방법·이유는 details에 온다(예: "B2: 실행 제한시간 초과"). 실패한 실행의 결과는 승인하지 않는다. */}
+          {run.error?.details?.map((d, i) => (
+            <p key={i} className="small">
+              <code>{d.path}</code> {d.reason}
+            </p>
+          ))}
+          {run.error?.request_id && <p className="muted small">요청 ID {run.error.request_id} (서버 기록 확인용)</p>}
+          <p className="muted small">한 방법이라도 실패하면 이 실행의 결과는 저장되지 않습니다. 원인을 확인한 뒤 새로 계산을 요청하세요.</p>
+        </div>
       )}
       {results && (
         <table className="grid small">
