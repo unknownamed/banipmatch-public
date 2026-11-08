@@ -1,6 +1,6 @@
 # B2/B3 모형과 판정 범위
 
-기준: 엔진 `0.2.1-b0-b3`, 공통 계약 `v0.1.0`, OR-Tools `9.15.6755`. 함수는 기존 `solve(snapshot, method, config)`를 유지합니다. DB·웹·외부 수집·내부 승인 상태를 변경하지 않습니다.
+기준: 엔진 `0.2.2-b0-b3`, 공통 계약 `v0.1.0`, OR-Tools `9.15.6755`. 함수는 기존 `solve(snapshot, method, config)`를 유지합니다. DB·웹·외부 수집·내부 승인 상태를 변경하지 않습니다.
 
 ## 무엇을 결정하는가
 
@@ -19,6 +19,16 @@
 - 상한은 차량 가용시각·후보들의 최후 복귀·고정 복귀 중 최댓값입니다. 빈 경로도 허용합니다. 접근은 실제 선택한 직전 작업의 구간을 사용하며 삼각부등식을 가정하지 않습니다.
 
 이 제약은 목적이나 가능한 일정의 범위를 바꾸지 않습니다. 양수 여유시간, 0시간 작업, 비삼각 이동행렬, 고정 작업의 근무 초과, 늦은 가용시각을 회귀 검사합니다.
+
+## 완전한 초기안 힌트와 탐색 설정 · 0.2.2
+
+초기 유효안에서 배정·차량·경로·순서·출발시각뿐 아니라 변경 여부의 AND/OR·시각 비교·상대순서 비교 등 보조변수 값까지 계산해 모든 모형 변수에 힌트를 제공합니다. 힌트는 제약이 아니며 솔버가 유효성과 목적값을 검사합니다. 다음 목적 단계의 힌트도 현재 후보로 다시 구성합니다.
+
+OR-Tools9.15의 `cp_model_probing_level` 기본값은2이며0은 probing을 끕니다([공식 파라미터 정의](https://github.com/google/or-tools/blob/v9.15/ortools/sat/sat_parameters.proto), 조회2026-11-08). 이 엔진은 이를0으로 설정하고 `cp_model_presolve` 등 나머지 전처리는 유지합니다. 조밀한 경로 모형의 짧은 예산이 probing에 소진되던 관측에 대응한 설정이며, 기존 제약·목적·작업량 한계와 가능한 일정은 그대로입니다. 모든 입력에서 더 빠르다는 보장은 아닙니다.
+
+[정식 후속72회](../../docs/experiments/engine-profile-2026-11-08/README.md)에서20건 B3는3초에도 변경2건의 최적성을 증명했고10초 호출 시간 중앙값은5.21→2.42초였습니다. 50건10초 B2는3회 모두 전체 최적, B3는 미처리26/변경23/이동1,440분이며 단계별 `OPTIMAL/FEASIBLE/NOT_RUN`으로 전체 최적성이 미증명입니다. 50건3초는 두 방법 모두 첫 목적이 `FEASIBLE`이었습니다. 진단4회 로그 시간은 정식 비교에 합치지 않습니다.
+
+[기존0.2.1·156회 PDF](../../docs/experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)와 [후속0.2.2·72회 PDF](../../docs/experiments/engine-report-2026-11-08/engine-performance-followup.pdf)를 분리 보존합니다. 검사는 엔진86개·전체 Python171개/하위156개·계약29개·DB32개 통과이며 API 독립 일정 검사·승인은 여전히 별도입니다. [최신 인계](../../docs/team/handoffs/2026-11-08-unknownamed-engine-performance.md)에 다음 검증을 남깁니다.
 
 ## 두 목적의 차이
 
@@ -45,7 +55,7 @@
 
 - 현행 계약은 고정 작업의 순서 정수도 보존합니다. 고정 순서 1 앞이나 빈 정수가 없는 고정 예약 사이에는 삽입할 수 없습니다. 따라서 최적성은 이 계약 모형 안의 결과이며 현장 전체 배차 공간의 최적성을 뜻하지 않습니다.
 - 후보 접근 경로 누락은 보수적으로 입력 부족으로 표시합니다. 누락 구간을 0으로 가정하지 않으며 희소 행렬의 허용 범위는 후속 검토입니다.
-- 입력 규모만으로 실행 시간을 보장하지 않습니다. [후속 실험](../../docs/experiments/engine-sensitivity-2026-11-08/README.md)은 규모·예산·조건에 따른 증명과 유효안의 차이를 기록합니다. 11월 7일 0.2.0의 원본 결과도 별도로 보존합니다.
+- 입력 규모만으로 실행 시간을 보장하지 않습니다. [0.2.1의156회 실험](../../docs/experiments/engine-sensitivity-2026-11-08/README.md)과 [0.2.2의72회 후속 실험](../../docs/experiments/engine-profile-2026-11-08/README.md)은 규모·예산·조건에 따른 증명과 유효안의 차이를 기록합니다. 11월 7일 0.2.0의 원본 결과도 별도로 보존합니다.
 - 반환 결과는 계속 `validation_status=not_run`, `approval_eligible=false`입니다. 엔진 내부의 모형 검사·지표 대조·테스트가 선효 담당의 독립 일정 검사기를 대신하지 않습니다.
 
 ## 확인한 공식 자료
@@ -53,5 +63,6 @@
 - [CP-SAT의 정수 모형과 해 상태](https://developers.google.com/optimization/cp/cp_solver)
 - [솔버 시간 제한](https://developers.google.com/optimization/cp/cp_tasks)
 - [Circuit·선택 노드의 공식 Python 구현](https://github.com/google/or-tools/blob/v9.15/ortools/sat/python/cp_model.py)
+- [OR-Tools9.15 probing·전처리 파라미터 정의](https://github.com/google/or-tools/blob/v9.15/ortools/sat/sat_parameters.proto) (2026-11-08 확인)
 
 조회일 2026-11-07. 공식 도구 설명을 참고해 이 프로젝트의 제약·목적을 직접 구현했습니다. 해당 도구가 우리 업무 모형의 정확성을 보증하는 것은 아닙니다.

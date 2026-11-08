@@ -1,0 +1,45 @@
+{
+  "data_mode": "simulated",
+  "python": "3.12.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "git_head": "a848b3e18e48acf2f0c72cc95eaf4d4ab8a003dd",
+  "source_sha256": {
+    "backend/engine/__init__.py": "3ed21e98995d9e9336fd4b48351d20e3e8663a9e3bed40074fed5386e2603c88",
+    "backend/engine/__main__.py": "d1e6cccca9e9f088c8663f16132382bc3fbec41d05b6a62938759107a5aa5f84",
+    "backend/engine/context.py": "7f705d19e52758356dc7687460e766ab602c985446f4ac1cc568991d81ee0959",
+    "backend/engine/metrics.py": "bec593bb167fe58e07b51088ca50a6d8cf9614ca670e7d2d51347839bc345b75",
+    "backend/engine/optimization.py": "2669d3d0734f0f69c153ed4f924ac9f09a25488083b9c275bab0c88915e692b9",
+    "backend/engine/solver.py": "be3eb0c79c86a054e0fd36ee07919f7733de7bae06973f1fce41aa4d1d42cd05",
+    "tools/benchmark_engine.py": "8d598fa071bcf19ac1d1fc3090092e49eef9830c542e07a0fd9581aec7918600"
+  },
+  "worker_count": 1,
+  "external_warm_start": false,
+  "budgets": [
+    3,
+    10
+  ],
+  "buffers": null,
+  "seeds": [
+    0
+  ],
+  "repeats": 3,
+  "methods": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "inputs": [
+    {
+      "file": "20_jobs_4_vehicles.json",
+      "sha256": "3c328453e773820c93df05e31b656f5b2133fe54ec22873688ddfdd0e57b7503"
+    },
+    {
+      "file": "50_jobs_8_vehicles.json",
+      "sha256": "2ca815fafd6cd77ee0b69a6e300a603e180702a2be775cd6015d4697b1987414"
+    }
+  ],
+  "baseline_policy": "Preserve original assignment records, including frozen times.",
+  "completed": true,
+  "completed_runs": 48
+}
