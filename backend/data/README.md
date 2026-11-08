@@ -1,4 +1,4 @@
-# 데이터 입력 모듈 · 첫 구현
+# 데이터 입력·준비 모듈
 
 담당: 심민준. 계약: `docs/development/v0.1/`의 `0.1.0`.
 
@@ -65,6 +65,7 @@ report = load_jobs_csv(
 - 모든 입력에 기존 JSON Schema 적용. 구조 오류가 있으면 의미 검사를 시작하지 않음.
 - ID 중복·참조·터미널 종류·항차 시간창·변경 대상·확인자/확인시각 검사.
 - 변경·시간창의 `confirmed_at > as_of`는 `CONFIRMATION_AFTER_SNAPSHOT`, `input_valid_until < as_of`는 `INPUT_EXPIRED_AT_SNAPSHOT`. 같으면 허용하며 서버 현재시각과 비교하지 않음.
+- 모든 사실 묶음의 `evidence.received_at > as_of`는 `EVIDENCE_AFTER_SNAPSHOT`, `observed_at > received_at`는 `EVIDENCE_TIME_ORDER`. 당시 아직 받지 않은 자료나 역전된 관측·수신 시각을 계산에 넣지 않음. 관측시각 `null`과 미래의 계획 시각(`ready_at` 등)은 이 이유로 거절하지 않음.
 - 원안 배정/미처리의 전체 작업 분할, 차량 내 순서 중복, 출발 작업 고정·이유·원안·복귀/가용 모순 검사.
 - v0.1 공통 의미 규칙에 따라 관측·수신·확인 시각을 포함한 모든 입력 시각은 UTC `Z`와 분 경계를 요구. 원문의 초·소수초를 임의로 반올림하거나 시간대 없는 값·KST 문자열을 추정 변환하지 않음. 원본 시각의 정규화 근거는 수집·변환 단계에서 확보해야 함.
 - 차량별 마지막 출발 작업의 복귀 위치와 확정 시작 위치가 다르면, 복귀 후 방향별 이동시간과 가용시각을 비교. 이동시간이 확보된 재이동은 허용하고, 복귀 전 위치 불일치·시간 부족·경로 누락은 차단.
@@ -92,3 +93,36 @@ report = load_jobs_csv(
 선효: PR #3은 누락/미확인 입력도 보관한 뒤 실행을 차단한다. 이 모듈을 등록 때 무조건 적용해 저장 정책을 바꾸지 말고, 실행 전 점검에 연결할 위치를 검토한다. `INPUT_MISSING`의 422, 미확인 근거의 503 등 기존 HTTP 구분은 API 담당이 유지한다. `valid`를 독립 일정 검사·승인 성공으로 사용하지 않는다.
 대겸: 공통 예제 판정·필요 이동구간을 확인하고, 엔진 내부의 별도 입력 방어와 연결할 위치 검토.
 길웅: 전달받은 오류의 파일명·행·필드·사유 표시.
+
+## 로컬 명령으로 입력 준비
+
+Python 코드를 별도로 쓰지 않고 정상 스냅샷·오류 보고서를 준비할 수 있습니다.
+아래 명령은 저장소 루트에서 실행합니다. 출력 경로는 매번 새 이름을 지정합니다.
+
+```sh
+python -m backend.data validate-json "docs/development/v0.1/예제 데이터/01_snapshot.json" --output local/prepared-01.json --report local/report-01.json
+python -m backend.data validate-json "docs/development/v0.1/예제 데이터/07_snapshot_입력누락.json" --report local/report-missing.json
+python -m backend.data import-jobs "docs/development/v0.1/예제 데이터/jobs_template.csv" --context "docs/development/v0.1/예제 데이터/01_snapshot.json" --evidence local/jobs-evidence.json --output local/prepared-csv.json --report local/report-csv.json
+```
+
+`--evidence`는 API 키가 아니라 아래 형식의 **CSV 전체 자료 출처** JSON입니다.
+이 예시는 기존 모의 CSV용이며 실제 자료에 그대로 복사하지 않습니다. 기존 입력의 시각을 CLI가 오늘 날짜로 바꾸지 않습니다.
+
+```json
+{
+  "kind": "simulated",
+  "source_ref": "fixture:scenario_001",
+  "observed_at": null,
+  "received_at": "2026-11-07T00:00:00Z"
+}
+```
+
+- 출력은 입력 사본이며 실제 API 등록·계산·승인이나 외부 수집을 실행하지 않습니다.
+- 표준 출력에는 항상 JSON 검사 보고서가 나옵니다. `--report`로 같은 내용을 파일에 저장할 수 있습니다. 원본 배차 내용은 보고서에 넣지 않습니다.
+- `valid`, `input_sha256`, `issues`를 제공합니다. 해시는 UTF-8·키 정렬·공백 제거·`ensure_ascii=False` JSON 기준이므로 서버의 같은 직렬화 해시와 대조할 수 있습니다. 서버 등록이나 API의 해시 검증을 대신하지 않습니다.
+- 종료코드 `0`은 입력 검사·요청한 저장 성공, `2`는 잘못된/미확인/읽기 불가 입력, `1`은 출력 경로·저장 실패입니다. 잘못된 명령 인자는 argparse가 별도 사용법과 코드 `2`를 반환합니다.
+- 오류 입력이면 `--output`의 스냅샷을 만들지 않고 보고서만 저장합니다. 기존 파일·디렉터리·심볼릭 링크는 덮어쓰지 않습니다. `--output`과 `--report`는 입력 또는 서로 같은 경로를 쓸 수 없습니다.
+- 스냅샷과 보고서 두 파일 저장은 하나의 트랜잭션이 아닙니다. 저장 도중 오류가 나면 코드 `1`과 표준 출력 오류를 확인하고, 남은 출력 파일을 정상 결과로 자동 채택하지 않습니다. 종료코드 `0`과 `valid=true`를 함께 확인해야 합니다.
+- CSV 문맥 파일은 `jobs`가 교체되기 전 의미 검사를 하지 않습니다. 새 CSV로 기존 잘못된 작업을 고칠 수 있으며, 최종 결합 결과 전체는 검사합니다.
+- CSV 작업 오류는 CSV 파일·행, 문맥 오류는 문맥 JSON 파일, 명시한 공통 출처 오류는 출처 JSON 파일에 연결합니다. `load_jobs_csv()`를 직접 호출할 때도 선택 인자 `context_source`, `evidence_source`로 파일명을 제공할 수 있습니다. 기존 호출 방식은 유지됩니다.
+- 자료의 미래 수신·시간 역전은 입력 오류입니다. HTTP 코드는 데이터 모듈이 정하지 않으며, API 담당의 기존 실행 전 점검에서 처리합니다.
