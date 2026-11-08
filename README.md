@@ -44,6 +44,8 @@
 
 ## 팀원이 처음 작업할 때
 
+**매 작업 시작·재개 및 PR 제출·병합 전에 [최신 main 반영 절차](CONTRIBUTING.md#최신-main을-반영하는-순서)를 따릅니다.** 원격 정보를 가져온 뒤 새 작업은 최신 `origin/main`에서 시작하고, 진행 중인 작업은 기존 변경을 보존하며 합칩니다. Git 접근이 없는 웹 채팅 AI에는 직접 최신 파일을 전달해야 합니다.
+
 1. [AI 공통 작업수칙](AGENTS.md)과 [역할·담당 범위](docs/team/roles.md), [현재 구현 상태](docs/team/status.md), [기존 서비스 비교·담당별 적용사항](docs/team/service-comparison.md)을 읽습니다.
 2. 아래 공통 PDF 00과 본인 담당 PDF 01~04를 읽고 같은 버전의 규격·예제를 사용합니다.
 3. [AI 사용·브랜치·검수 안내](CONTRIBUTING.md)의 시작 문구를 사용하는 AI에게 전달합니다.
