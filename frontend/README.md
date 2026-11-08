@@ -22,7 +22,7 @@ PR과 main 변경마다 위 테스트·빌드를 GitHub Actions가 실행한다.
 
 - 기본은 fixture 모드: `docs/development/v0.1/예제 데이터`의 01·03·04 JSON을 **복사하지 않고 직접** 읽는다.
 - [백엔드 안내](../backend/README.md)에 따라 로컬 API를 실행한 뒤 `frontend/.env.local`에 `VITE_API_MODE=http`와 서버 모의 토큰과 같은 `VITE_API_TOKEN`을 설정하고 개발 서버를 시작한다. `.env.example`을 참고하며 실제 설정값은 Git에 올리지 않는다. `/v1` 요청은 `127.0.0.1:8000`으로 전달한다(포트는 백엔드에 맞춰 `vite.config.ts` 수정).
-- HTTP 모드에서 `?run=`이 없으면 **예제로 계산 요청** 화면이 뜬다. 버튼을 누르면 예제 01을 새 ID로 `POST /v1/scenarios`, 02로 `POST /v1/runs`를 보내고 받은 `run_id` 결과 화면으로 이동한다. 실패 후 다시 시도는 같은 본문·같은 Idempotency-Key를 쓴다. 2026-11-08 main의 로컬 API로 등록 201 → 실행 202 → 결과 200과 J0 고정·J3 미처리·승인 차단 표시, 백엔드 중단 시 오류 안내를 확인했다. 승인 POST와 07/08 오류 입력 화면은 아직 없다.
+- HTTP 모드에서 `?run=`이 없으면 **예제로 계산 요청** 화면이 뜬다. 버튼을 누르면 예제 01을 새 ID로 `POST /v1/scenarios`, 02로 `POST /v1/runs`를 보내고 받은 `run_id` 결과 화면으로 이동한다. 실패 후 다시 시도는 같은 본문·같은 Idempotency-Key를 쓴다. 2026-11-08 main의 로컬 API로 등록 201 → 실행 202 → 결과 200과 J0 고정·J3 미처리·승인 차단 표시, 백엔드 중단 시 오류 안내를 확인했다. 입력 예제는 01·07(입력 누락)·08(미확인 변경) 중 고른다. 07의 422 입력 오류·08의 `503 WINDOW_UNCONFIRMED`처럼 입력 확인이 필요하면 원안과 거절 사유를 보여주고 재시도 버튼은 숨긴다. `503 STORAGE_UNAVAILABLE` 등 일시 장애에는 오류 안내와 같은 요청의 재시도를 유지한다. 승인 POST는 아직 없다.
 - 다른 ID 조회: `?scenario=S001&run=R001`.
 
 ## 구조

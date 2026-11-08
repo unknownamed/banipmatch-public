@@ -29,6 +29,7 @@ class DispatchModel:
         self.model = m = cp_model.CpModel()
         self.selected, self.departure, self.rank, self.on_vehicle = {}, {}, {}, {}
         self.route_arcs, self.objectives, self.empty = {}, {}, {}
+        self.hint_operations = []
         self.input_issues = []
         self.zero = m.new_bool_var("false")
         m.add(self.zero == 0)
@@ -187,6 +188,7 @@ class DispatchModel:
         for value in values:
             self.model.add(result <= value)
         self.model.add(result >= sum(values) - len(values) + 1)
+        self.hint_operations.append((result, "and", values))
         return result
 
     def any_of(self, values, name):
@@ -196,6 +198,7 @@ class DispatchModel:
         for value in values:
             self.model.add(result >= value)
         self.model.add(result <= sum(values))
+        self.hint_operations.append((result, "or", values))
         return result
 
     def retained_on_original_vehicle(self, jid):
@@ -222,6 +225,8 @@ class DispatchModel:
                 m.add(expression).only_enforce_if(flag)
             m.add(self.departure[jid] >= before - tolerance).only_enforce_if(early.Not())
             m.add(self.departure[jid] <= before + tolerance).only_enforce_if(late.Not())
+            self.hint_operations.append((early, "lt", (self.departure[jid], before - tolerance)))
+            self.hint_operations.append((late, "gt", (self.departure[jid], before + tolerance)))
             outside = self.any_of([early, late], f"outside-tolerance:{jid}")
             reasons[jid].append(self.all_of([p, outside], f"time-changed:{jid}"))
         for left, right in combinations(sorted(c.base), 2):
@@ -234,6 +239,7 @@ class DispatchModel:
             reversed_order = m.new_bool_var(f"reversed:{left}:{right}")
             m.add(self.rank[left] > self.rank[right]).only_enforce_if(reversed_order)
             m.add(self.rank[left] <= self.rank[right]).only_enforce_if(reversed_order.Not())
+            self.hint_operations.append((reversed_order, "rank_gt", (self.rank[left], self.rank[right])))
             inversion = self.all_of([self.retained_on_original_vehicle(left),
                                      self.retained_on_original_vehicle(right), reversed_order], f"inversion:{left}:{right}")
             reasons[left].append(inversion)
@@ -255,22 +261,50 @@ class DispatchModel:
             jid for jid in self.movable if not solver.value(self.selected[jid]))
 
     def hint(self, assignments):
-        """Both methods get the same bounded B1 construction, within their budget."""
+        """Complete auxiliary values for the same bounded B1/current incumbent.
+
+        These are hints, never constraints. The solver still checks feasibility
+        and may improve any variable; no objective or route is fixed here.
+        """
         current = {a["job_id"]: a for a in assignments}
+        values = {i: int(v.domain[0]) for i, v in enumerate(self.model.proto.variables)
+                  if len(v.domain) == 2 and v.domain[0] == v.domain[1]}
+        values[self.zero.index] = 0
+        for jid in self.fixed:
+            values[self.selected[jid].index] = 1
         for jid in self.movable:
             row = current.get(jid)
-            self.model.add_hint(self.selected[jid], int(row is not None))
-            self.model.add_hint(self.departure[jid], minute(row["pickup_departure_at"]) - self.c.now if row else 0)
-            self.model.add_hint(self.rank[jid], int(row["sequence"]) if row else 0)
+            values[self.selected[jid].index] = int(row is not None)
+            values[self.departure[jid].index] = minute(row["pickup_departure_at"]) - self.c.now if row else 0
+            values[self.rank[jid].index] = int(row["sequence"]) if row else 0
         for (vid, jid), variable in self.on_vehicle.items():
-            self.model.add_hint(variable, int(jid in current and current[jid]["vehicle_id"] == vid))
+            values[variable.index] = int(jid in current and current[jid]["vehicle_id"] == vid)
         for vid, arcs in self.route_arcs.items():
             route = [a["job_id"] for a in sorted(assignments, key=lambda a: a["sequence"])
                      if a["vehicle_id"] == vid and self.c.jobs[a["job_id"]]["state"] != "departed"]
             edges = set(zip([None, *route], [*route, None])) if route else set()
-            self.model.add_hint(self.empty[vid], int(not route))
+            values[self.empty[vid].index] = int(not route)
             for edge, variable in arcs.items():
-                self.model.add_hint(variable, int(edge in edges))
+                values[variable.index] = int(edge in edges)
+        def value(variable):
+            index = variable.index
+            return values[index] if index >= 0 else 1 - values[-index - 1]
+        # Helpers are recorded in dependency order when the model is built.
+        for variable, operation, operands in self.hint_operations:
+            if operation == "and":
+                answer = all(value(v) for v in operands)
+            elif operation == "or":
+                answer = any(value(v) for v in operands)
+            elif operation == "lt":
+                answer = value(operands[0]) < operands[1]
+            elif operation == "gt":
+                answer = value(operands[0]) > operands[1]
+            else:
+                answer = value(operands[0]) > value(operands[1])
+            values[variable.index] = int(answer)
+        self.model.clear_hints()
+        for index, answer in sorted(values.items()):
+            self.model.add_hint(self.model.get_int_var_from_proto_index(index), answer)
 
 
 def _run_stage(model, objective, remaining, seed):
@@ -278,6 +312,9 @@ def _run_stage(model, objective, remaining, seed):
     solver.parameters.max_time_in_seconds = remaining
     solver.parameters.num_search_workers = 1
     solver.parameters.random_seed = seed
+    # The dense route model otherwise spends short budgets probing without
+    # reaching search. Keep presolve, but reserve that work for actual search.
+    solver.parameters.cp_model_probing_level = 0
     model.minimize(objective)
     return solver, solver.solve(model)
 
@@ -373,5 +410,6 @@ def solve_optimized(snapshot, method, config, started, engine_version):
                                          seed_used=True, time_limit_seconds=config["time_limit_seconds"],
                                          time_limit_reached=timed_out, budget_scope="input/model/all objective stages",
                                          proof_scope="known-input v0.1 integer sequence model", external_warm_start=False,
-                                         warm_start_budget_seconds=1, warm_start_valid=has_incumbent),
+                                         warm_start_budget_seconds=1, warm_start_valid=has_incumbent,
+                                         cp_model_probing_level=0, hint_scope="complete model variables"),
                     initial_solution_ref="internal:B1-same-input-within-total-budget", worker_count=1))

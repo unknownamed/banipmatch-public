@@ -1,0 +1,370 @@
+[
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B0",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "BASELINE"
+    ],
+    "objective_tuples": [
+      [
+        0,
+        0,
+        1200
+      ]
+    ],
+    "max_movable_violations": 10,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 5.649,
+    "wall_ms_median": 5.721,
+    "wall_ms_max": 6.519
+  },
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B1",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "HEURISTIC"
+    ],
+    "objective_tuples": [
+      [
+        8,
+        12,
+        720
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 12.716,
+    "wall_ms_median": 12.809,
+    "wall_ms_max": 13.936
+  },
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B2",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        8,
+        12,
+        720
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 538.946,
+    "wall_ms_median": 582.193,
+    "wall_ms_max": 629.936
+  },
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B3",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        8,
+        2,
+        720
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 2089.782,
+    "wall_ms_median": 2366.268,
+    "wall_ms_max": 2607.226
+  },
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B0",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "BASELINE"
+    ],
+    "objective_tuples": [
+      [
+        0,
+        0,
+        1200
+      ]
+    ],
+    "max_movable_violations": 10,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 5.937,
+    "wall_ms_median": 6.823,
+    "wall_ms_max": 8.33
+  },
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B1",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "HEURISTIC"
+    ],
+    "objective_tuples": [
+      [
+        8,
+        12,
+        720
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 12.821,
+    "wall_ms_median": 14.465,
+    "wall_ms_max": 14.772
+  },
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B2",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        8,
+        12,
+        720
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 599.725,
+    "wall_ms_median": 606.989,
+    "wall_ms_max": 676.591
+  },
+  {
+    "input": "20_jobs_4_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B3",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        8,
+        2,
+        720
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 2320.494,
+    "wall_ms_median": 2424.749,
+    "wall_ms_max": 2466.516
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B0",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "BASELINE"
+    ],
+    "objective_tuples": [
+      [
+        0,
+        0,
+        3000
+      ]
+    ],
+    "max_movable_violations": 30,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 11.438,
+    "wall_ms_median": 11.545,
+    "wall_ms_max": 12.463
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B1",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "HEURISTIC"
+    ],
+    "objective_tuples": [
+      [
+        26,
+        24,
+        1440
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 48.686,
+    "wall_ms_median": 54.334,
+    "wall_ms_max": 63.678
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B2",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "FEASIBLE"
+    ],
+    "objective_tuples": [
+      [
+        26,
+        24,
+        1440
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 3023.059,
+    "wall_ms_median": 3027.506,
+    "wall_ms_max": 3038.516
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 3,
+    "method": "B3",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "FEASIBLE"
+    ],
+    "objective_tuples": [
+      [
+        26,
+        24,
+        1440
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 3018.008,
+    "wall_ms_median": 3031.483,
+    "wall_ms_max": 3040.525
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B0",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "BASELINE"
+    ],
+    "objective_tuples": [
+      [
+        0,
+        0,
+        3000
+      ]
+    ],
+    "max_movable_violations": 30,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 11.546,
+    "wall_ms_median": 12.307,
+    "wall_ms_max": 12.791
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B1",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "HEURISTIC"
+    ],
+    "objective_tuples": [
+      [
+        26,
+        24,
+        1440
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 49.067,
+    "wall_ms_median": 53.276,
+    "wall_ms_max": 105.737
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B2",
+    "runs": 3,
+    "proven_runs": 3,
+    "statuses": [
+      "OPTIMAL"
+    ],
+    "objective_tuples": [
+      [
+        26,
+        24,
+        1440
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 6998.924,
+    "wall_ms_median": 7625.383,
+    "wall_ms_max": 7729.292
+  },
+  {
+    "input": "50_jobs_8_vehicles.json",
+    "buffer": 0,
+    "budget": 10,
+    "method": "B3",
+    "runs": 3,
+    "proven_runs": 0,
+    "statuses": [
+      "FEASIBLE"
+    ],
+    "objective_tuples": [
+      [
+        26,
+        23,
+        1440
+      ]
+    ],
+    "max_movable_violations": 0,
+    "max_fixed_risks": 0,
+    "wall_ms_min": 10021.804,
+    "wall_ms_median": 10028.487,
+    "wall_ms_max": 10030.23
+  }
+]

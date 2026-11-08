@@ -1,0 +1,35 @@
+{
+  "before": {
+    "docs/experiments/engine-b0-b3/inputs/20_jobs_4_vehicles.json": "ffb88f9e4acb746ac3cb320abfa03480ca36c063b8272f0c854d57e22880c05d",
+    "docs/experiments/engine-b0-b3/inputs/50_jobs_8_vehicles.json": "817e693444fa3a8ff65defdd73c6cfd48a842ccccd3ad7d0ebbc3d9e8e2ed618",
+    "docs/experiments/engine-sensitivity-2026-11-08/scale/results.jsonl": "19d826252ca1013318771976a8f1ccaa4ea94b8899bee98c910cd2489dae0abb",
+    "docs/experiments/engine-sensitivity-2026-11-08/scale/runs.csv": "51217fae7e6cc1e26d9a444f2540bd880bb3a809fd1140e1efd7ed38a3915838",
+    "docs/experiments/engine-sensitivity-2026-11-08/scale/metadata.json": "b419b6ac917b1867c4275585bef50d8b1fddf0875a1db4cd68c957887771ae3b",
+    "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_12.json": "6562fa876f63205d7e1713778384a57186cbdd6a5da921fe83b71c79acdd69f4",
+    "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_fixed_12.json": "0380fc16a95eb3d482ecadcb3c627f7f5cf4f05e579d4f1609156de157792884",
+    "docs/experiments/engine-sensitivity-2026-11-08/mixed/results.jsonl": "b97f046f826e3f9c66f0d9ac293cc2ce652fb4569a4221fd4ed643303b9c360f",
+    "docs/experiments/engine-sensitivity-2026-11-08/mixed/runs.csv": "1ea172fba94873363fbd6fb5a450d7da87aca9b84914df7184c53d370fb17b89",
+    "docs/experiments/engine-sensitivity-2026-11-08/mixed/metadata.json": "891cffbaa1ff75bb0e8fb1a81ba78dbf1cffb4a1a9bc614ff77d1f1eccba0917",
+    "docs/experiments/engine-sensitivity-2026-11-08/buffer/results.jsonl": "ce05f0e6fe9627279692854f91fad8f4b5b5c6373bced2fdc9cc74069e1aa311",
+    "docs/experiments/engine-sensitivity-2026-11-08/buffer/runs.csv": "1815c86aaf012acc675272cb1e106d7a37b528565e91888f1d377e0485092585",
+    "docs/experiments/engine-sensitivity-2026-11-08/buffer/metadata.json": "2fea50889ddbe2443539295131b75bc1c907d4b8db7c152d79f637100c5590ad"
+  },
+  "after": {
+    "docs/experiments/engine-b0-b3/inputs/20_jobs_4_vehicles.json": "ffb88f9e4acb746ac3cb320abfa03480ca36c063b8272f0c854d57e22880c05d",
+    "docs/experiments/engine-b0-b3/inputs/50_jobs_8_vehicles.json": "817e693444fa3a8ff65defdd73c6cfd48a842ccccd3ad7d0ebbc3d9e8e2ed618",
+    "docs/experiments/engine-profile-2026-11-08/after-scale/results.jsonl": "c34bb5585c40f87f757a92c7db32b6eb544309c111a6140e9a9117f6c13ff44e",
+    "docs/experiments/engine-profile-2026-11-08/after-scale/runs.csv": "0f1f3582538489122970820e401e6f26e6d0d75c70c1e8f63fbfb37ed2c77a30",
+    "docs/experiments/engine-profile-2026-11-08/after-scale/metadata.json": "6bb0adaf61723e0620539f33e771a6c7bb475a4ba7df3d3645386dd230061297",
+    "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_12.json": "6562fa876f63205d7e1713778384a57186cbdd6a5da921fe83b71c79acdd69f4",
+    "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_fixed_12.json": "0380fc16a95eb3d482ecadcb3c627f7f5cf4f05e579d4f1609156de157792884",
+    "docs/experiments/engine-profile-2026-11-08/after-mixed/results.jsonl": "0f4658229ef2610110c70c6c7014cf761c8eacf73ce5fda0f7a176164b2a5d0a",
+    "docs/experiments/engine-profile-2026-11-08/after-mixed/runs.csv": "1a1b5a4e23a91216063efc74f66a69b4d5a8bb9e28e08ddb1d7ece7d698fe17e",
+    "docs/experiments/engine-profile-2026-11-08/after-mixed/metadata.json": "82dae0acf1a7e56d7b11e43be13a41ec4e03fd765a0b179f2ba06519fda50d31"
+  },
+  "diagnostics": {
+    "before-default": "98cd2568dfb42f6866fdc2f8f4a5e3d5b3aceff7371adfb563ba623d731b4b75",
+    "probing-zero": "22b36929d964a5bd4b6a4599d4aae80c4bc210f02e00cb8ef6dcdd0f86960be0",
+    "complete-hint-default": "a450012a74e619424a89bd03856b815f76fae839217a4d920782636ff7a07d49",
+    "complete-hint-probing-zero": "a4ba9285922d6d2ac41717b89881e2d2b832ecc1712b9a33537265da8e5e2d11"
+  }
+}

@@ -1,6 +1,7 @@
 # 문서 목록
 
-- [11월 8일 엔진 후속 인계](team/handoffs/2026-11-08-unknownamed-engine-experiments.md): 0.2.1 작업량 한계·검증·연결 담당 참고.
+- [11월 8일 최신 엔진 인계](team/handoffs/2026-11-08-unknownamed-engine-performance.md): 0.2.2 힌트·탐색 설정·성능 보완·연결 담당 참고.
+- [보고서용 실험 표·그림·PDF](experiments/engine-report-2026-11-08/README.md): 기존156회4쪽과 후속72회2쪽, 모의 결과와 남은 한계.
 - [규모·예산·여유시간·혼합 조건156회 비교](experiments/engine-sensitivity-2026-11-08/README.md): 전체 결과와 재현 명령, 성공·미증명 범위.
 
 ## 팀 작업 안내
@@ -38,7 +39,7 @@
 - [데이터 입력 검증 안내](../backend/data/README.md): CSV·JSON 입력과 행별 오류, API 연결 시 지킬 경계
 - [B2/B3 엔진 인계](team/handoffs/2026-11-07-unknownamed-engine-b2-b3.md): 최적화·단계별 판정·후속 연결
 - [B0~B3 모의 비교](experiments/engine-b0-b3/README.md): 입력7종·결과·재현 명령·성능 한계
-- [프론트 실행 안내](../frontend/README.md): 설명용 예제 비교 화면, 실제 서버 전체 연결은 미검증
-- [B0/B1 엔진 실행 안내](../backend/engine/README.md) · [모의 실계산 결과](experiments/engine-b0-b1/README.md): 첫 구현이며 B2/B3·현장 검증은 남음
+- [프론트 실행 안내](../frontend/README.md): 설명용 예제 비교·HTTP 입력 등록/실행·입력 오류 안내, 실제 엔진 전체 연결은 후속
+- [B0~B3 엔진 실행 안내](../backend/engine/README.md) · [B0/B1 최초 결과](experiments/engine-b0-b1/README.md): 초기 결과와 현재 엔진 버전을 구분, 현장 검증은 후속
 
 현재 PDF를 최종 보고서나 실제 실행 성과로 표시하지 않습니다. 새 버전은 별도 폴더에 보관하고 이 목록과 루트 README의 링크를 함께 갱신합니다.
