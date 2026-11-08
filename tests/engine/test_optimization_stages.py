@@ -97,6 +97,50 @@ class OptimizationStagesTests(unittest.TestCase):
         key = lambda r: (r["metrics"]["unassigned_count"], len(r["metrics"]["changed_job_ids"]), r["metrics"]["movable_travel_minutes"])
         self.assertLessEqual(key(result), key(baseline))
 
+    def assert_incomplete_timeout(self, snapshot, result, reason):
+        self.assertEqual(result["solution_status"], "INPUT_INCOMPLETE")
+        self.assertTrue(any(i["code"] == "INPUT_MISSING" and reason in i["explanation"]
+                            for i in result["issues"]))
+        self.assertTrue(result["execution_metadata"]["solver_settings"]["time_limit_reached"])
+        self.assertTrue(all(s["status"] == "NOT_RUN" for s in result["objective_stages"]))
+        self.assertFalse(result["objective_proven"])
+        self.assertFalse(result["approval_eligible"])
+        self.assertEqual(next(a for a in result["assignments"] if a["job_id"] == "J0"),
+                         snapshot["baseline_assignments"][0])
+
+    def test_build_timeout_retains_missing_vehicle_availability(self):
+        snapshot = fixture()
+        snapshot["vehicles"][0]["available_at"] = None
+        for method in ("B2", "B3"):
+            with self.subTest(method=method), patch.object(opt, "DispatchModel", side_effect=opt.BuildTimeout):
+                result = solve(snapshot, method)
+            self.assert_incomplete_timeout(snapshot, result, "available_at")
+
+    def test_build_timeout_retains_missing_approach_found_by_warm_start(self):
+        snapshot = fixture()
+        snapshot["travel_times"] = [p for p in snapshot["travel_times"]
+                                    if (p["from_location_id"], p["to_location_id"]) != ("D", "O")]
+        for method in ("B2", "B3"):
+            with self.subTest(method=method), patch.object(opt, "DispatchModel", side_effect=opt.BuildTimeout):
+                result = solve(snapshot, method)
+            self.assert_incomplete_timeout(snapshot, result, "D → O")
+
+    def test_timeout_inside_construction_retains_discovered_input_issues(self):
+        snapshot = fixture()
+        snapshot["vehicles"][0]["available_at"] = None
+        original = opt.DispatchModel.check_budget
+        discovered = []
+        def expire_after_diagnosis(model):
+            if model.input_issues:
+                discovered.extend(model.input_issues)
+                model.deadline = -1
+            original(model)
+        with patch.object(opt.DispatchModel, "check_budget", expire_after_diagnosis):
+            result = solve(snapshot, "B3")
+        self.assertTrue(discovered)
+        self.assert_incomplete_timeout(snapshot, result, "available_at")
+        self.assertTrue(all(detail in result["issues"] for detail in discovered))
+
     def test_missing_ready_vehicle_and_routes_are_never_optimal(self):
         for missing in ("ready", "vehicle", "route"):
             with self.subTest(missing=missing):

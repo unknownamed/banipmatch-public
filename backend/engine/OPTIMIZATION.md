@@ -1,6 +1,6 @@
 # B2/B3 모형과 판정 범위
 
-기준: 엔진 `0.2.2-b0-b3`, 공통 계약 `v0.1.0`, OR-Tools `9.15.6755`. 함수는 기존 `solve(snapshot, method, config)`를 유지합니다. DB·웹·외부 수집·내부 승인 상태를 변경하지 않습니다.
+기준: 엔진 `0.2.3-b0-b3`, 공통 계약 `v0.1.0`, OR-Tools `9.15.6755`. 함수는 기존 `solve(snapshot, method, config)`를 유지합니다. DB·웹·외부 수집·내부 승인 상태를 변경하지 않습니다.
 
 ## 무엇을 결정하는가
 
@@ -29,6 +29,12 @@ OR-Tools9.15의 `cp_model_probing_level` 기본값은2이며0은 probing을 끕�
 [정식 후속72회](../../docs/experiments/engine-profile-2026-11-08/README.md)에서20건 B3는3초에도 변경2건의 최적성을 증명했고10초 호출 시간 중앙값은5.21→2.42초였습니다. 50건10초 B2는3회 모두 전체 최적, B3는 미처리26/변경23/이동1,440분이며 단계별 `OPTIMAL/FEASIBLE/NOT_RUN`으로 전체 최적성이 미증명입니다. 50건3초는 두 방법 모두 첫 목적이 `FEASIBLE`이었습니다. 진단4회 로그 시간은 정식 비교에 합치지 않습니다.
 
 [기존0.2.1·156회 PDF](../../docs/experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)와 [후속0.2.2·72회 PDF](../../docs/experiments/engine-report-2026-11-08/engine-performance-followup.pdf)를 분리 보존합니다. 검사는 엔진86개·전체 Python171개/하위156개·계약29개·DB32개 통과이며 API 독립 일정 검사·승인은 여전히 별도입니다. [최신 인계](../../docs/team/handoffs/2026-11-08-unknownamed-engine-performance.md)에 다음 검증을 남깁니다.
+
+## 시간 초과 시 입력 누락 보존 · 0.2.3
+
+모형 생성자가 중간에 시간 초과로 끝나면, 그때까지 발견한 입력 문제를 예외에 담아 반환 경로에 전달합니다. 초기안 구성 중 발견한 누락과 차량 가용 상태의 누락도 보존합니다. 따라서 차량 `available_at`이나 후보 접근 경로가 미확정인 입력을 계산 시간만 부족한 `UNKNOWN`으로 바꾸지 않고, `INPUT_INCOMPLETE`와 근거를 함께 제공합니다. 계산하지 않은 목적 단계는 계속 `NOT_RUN`, 최적성·승인 가능 여부는 false입니다. 입력이 충분한 시간 초과는 기존 유효안과 `FEASIBLE` 판정을 유지합니다.
+
+변경은 진단 보존에 한정되며 목적·가능해·완료된 탐색의 결과는 바꾸지 않습니다. [회귀와 연결 인계](../../docs/team/handoffs/2026-11-08-unknownamed-engine-diagnostics.md)를 따릅니다. 앞선 성능 PDF와72회 실험은0.2.2 결과로 보존하며0.2.3에서 재측정한 것으로 표시하지 않습니다.
 
 ## 두 목적의 차이
 

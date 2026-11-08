@@ -38,6 +38,7 @@ def check_result_integrity(snapshot: dict, result: dict) -> None:
         cursor = max(_time(snapshot["as_of"]), _time(vehicle["available_at"])) if vehicle["available_at"] else None
         location = vehicle["start_location_id"]
         previous_movable = False
+        conflicting_fixed = False
         for row in sorted((a for a in assignments if a["vehicle_id"] == vid), key=lambda a: a["sequence"]):
             job = jobs[row["job_id"]]
             if job["frozen"]:
@@ -46,12 +47,19 @@ def check_result_integrity(snapshot: dict, result: dict) -> None:
                     if previous_movable and (cursor is None or leg not in travel
                             or cursor + timedelta(minutes=travel[leg]) > _time(row["pickup_departure_at"])):
                         raise ValueError("조정 작업과 후속 고정 작업 충돌")
-                    cursor = _time(row["return_at"]) if row["return_at"] else None
+                    if cursor is None or leg not in travel or _time(row["pickup_departure_at"]) < cursor + timedelta(minutes=travel[leg]):
+                        conflicting_fixed = True
+                    if row["return_at"] is None:
+                        cursor = None
+                    elif cursor is not None:
+                        cursor = max(cursor, _time(row["return_at"]))
                     location = job["return_location_id"]
                 elif previous_movable:
                     raise ValueError("출발 고정 작업 앞에 조정 작업이 배치됨")
                 previous_movable = False
                 continue
+            if conflicting_fixed:
+                raise ValueError("시간이 충돌한 고정 작업 뒤에 조정 작업 배치 불가")
             legs = [(location, job["origin_id"]), (job["origin_id"], job["terminal_id"]),
                     (job["terminal_id"], job["return_location_id"])]
             if (cursor is None or any(leg not in travel for leg in legs)
@@ -122,9 +130,12 @@ def verify_schedule(snapshot: dict, result: dict) -> bool:
                     return False
         cursor = max(_time(snapshot["as_of"]), _time(vehicle["available_at"]))
         location = vehicle["start_location_id"]
+        conflicting_fixed = False
         for row in route:
             job = jobs[row["job_id"]]
             if not job["frozen"]:
+                if conflicting_fixed:
+                    return False
                 cursor, location = _time(row["return_at"]), job["return_location_id"]
                 continue
             if (job["ready_at"] is None or job["gross_weight_kg"] is None or job["service_minutes"] is None
@@ -148,7 +159,8 @@ def verify_schedule(snapshot: dict, result: dict) -> bool:
                     return False
                 if dep < cursor + timedelta(minutes=travel[leg]):
                     verified_risks.add(job["job_id"])
-                cursor, location = ret, job["return_location_id"]
+                    conflicting_fixed = True
+                cursor, location = max(cursor, ret), job["return_location_id"]
 
     if verified_risks != claimed_risks:
         return False

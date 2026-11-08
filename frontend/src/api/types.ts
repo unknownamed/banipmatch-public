@@ -163,7 +163,7 @@ export interface MethodResult {
   approval_eligible: boolean
   engine_version: string
   solver_version: string | null
-  objective_stages: { name: string; status: string; value?: number | null }[]
+  objective_stages: { objective: 'unassigned' | 'changed' | 'travel'; status: 'OPTIMAL' | 'FEASIBLE' | 'UNKNOWN' | 'NOT_RUN'; value: number | null; best_bound: number | null }[]
   validation_status: 'passed' | 'failed' | 'not_run'
 }
 
@@ -173,6 +173,31 @@ export interface Results {
   base_plan_version: number
   input_sha256: string
   results: MethodResult[]
+}
+
+export interface ApprovalRequest {
+  run_id: string
+  method: Method
+  expected_version: number
+  acknowledged_job_ids: string[]
+}
+
+export interface Approval {
+  approval_id: string
+  plan_id: string
+  version: number
+  run_id: string
+  method: Method
+  approved_by: string
+  approved_at: UtcString
+  external_actions_performed: boolean
+}
+
+export interface Plan {
+  plan_id: string
+  version: number
+  scenario_id: string
+  approval_id: string | null
 }
 
 /** GET /v1/runs/{id}/results — 진행 중 202(Run), 종료 후 200(Results). */

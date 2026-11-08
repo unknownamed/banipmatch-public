@@ -2,13 +2,18 @@ import { useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
 import { useDispatchView } from './api/useDispatchView'
 import { ComparisonSection } from './components/ComparisonSection'
-import { ApprovalPanel, ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
-import { approvalGate } from './lib/approval'
+import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
+import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
+import { acknowledgeIds, approvalGate, approvalIdempotencyKey } from './lib/approval'
 import { buildRows } from './lib/compare'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
   const [picked, setPicked] = useState<string | null>(null)
+  const approvalKeys = useMemo(() => new Map<string, string>(), [client])
+  // 승인 진행 상태는 방법 탭 전환으로 패널이 다시 만들어져도 유지한다. 실행이 바뀌면 버린다.
+  const [approval, setApproval] = useState<{ key: string; value: SharedApproval }>({ key: '', value: null })
+  const approvalScope = `${scenarioId}:${runId}:${client.mode}`
 
   const snapshot = view.scenario.state === 'ready' ? view.scenario.data : null
   const run = view.run.state === 'ready' ? view.run.data : null
@@ -18,6 +23,9 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const cand = candidates.find((r) => r.method === picked) ?? candidates[0]
   const rows = useMemo(() => (snapshot ? buildRows(snapshot, base, cand) : []), [snapshot, base, cand])
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
+  const approvalKey = run && cand ? approvalIdempotencyKey(approvalKeys, run.plan_id, {
+    run_id: run.run_id, method: cand.method, expected_version: run.base_plan_version, acknowledged_job_ids: acknowledgeIds(cand),
+  }) : undefined
 
   return (
     <main>
@@ -61,7 +69,13 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && cand && (
         <>
           <UnresolvedPanel rows={rows} cand={cand} />
-          <ApprovalPanel gate={approvalGate(run, cand, snapshot.scenario_id)} method={cand.method} />
+          <ApprovalPanel
+            key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
+            gate={approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined)}
+            client={client} run={run} result={cand} idempotencyKey={approvalKey}
+            shared={approval.key === approvalScope ? approval.value : null}
+            onShared={(value) => setApproval({ key: approvalScope, value })}
+          />
         </>
       )}
     </main>

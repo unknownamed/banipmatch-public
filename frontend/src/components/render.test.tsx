@@ -10,6 +10,7 @@ import { ApiRequestError } from '../api/client'
 import { buildRows } from '../lib/compare'
 import { ComparisonSection } from './ComparisonSection'
 import { ComparisonTable } from './ComparisonTable'
+import { RunStatusPanel } from './Panels'
 import { isInputRejection } from './StartRunPanel'
 
 const snapshot = snapshotJson as unknown as Snapshot
@@ -17,6 +18,18 @@ const run = runJson as unknown as Run
 const results = resultsJson as unknown as Results
 const b0 = results.results.find((r) => r.method === 'B0')!
 const b3 = results.results.find((r) => r.method === 'B3')!
+
+it('실계산 목표 단계의 계약 필드와 상태를 표시한다', () => {
+  const html = renderToStaticMarkup(<RunStatusPanel run={run} results={[{
+    ...b3, result_origin: 'computed', objective_stages: [
+      { objective: 'unassigned', status: 'OPTIMAL', value: 1, best_bound: 1 },
+      { objective: 'changed', status: 'FEASIBLE', value: 2, best_bound: 1 },
+    ],
+  }]} />)
+  expect(html).toContain('unassigned:OPTIMAL')
+  expect(html).toContain('changed:FEASIBLE')
+  expect(html).not.toContain('undefined')
+})
 
 function render(state: DispatchView['results'], withB0 = false, withB3 = false) {
   const base = withB0 ? b0 : undefined
