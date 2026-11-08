@@ -67,7 +67,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       <section className="card">
         <h2>예제로 계산 요청</h2>
         <p className="muted">
-          현재 서버는 설명용 결과(illustrative_fixture)만 돌려줍니다. 실제 최적화 계산이 아니며 승인할 수 없습니다.
+          서버 설정에 따라 설명용 결과(illustrative_fixture, 승인 불가) 또는 엔진 실계산 결과를 돌려줍니다. 결과 화면의 &lsquo;결과 출처&rsquo;로 구분하세요.
+          공통 예제는 기준시각이 지난 모의 자료라 실계산이어도 승인은 입력 유효기간 만료(503 INPUT_EXPIRED)로 거절될 수 있습니다.
         </p>
         <p>
           <label>

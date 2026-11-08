@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
 import { useDispatchView } from './api/useDispatchView'
 import { ComparisonSection } from './components/ComparisonSection'
 import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
 import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
-import { acknowledgeIds, approvalGate, approvalIdempotencyKey } from './lib/approval'
+import { acknowledgeIds, approvalGate, approvalIdempotencyKey, type ApprovalGate } from './lib/approval'
 import { buildRows } from './lib/compare'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
@@ -22,6 +22,15 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const candidates = results?.filter((r) => r.method !== 'B0') ?? []
   const cand = candidates.find((r) => r.method === picked) ?? candidates[0]
   const rows = useMemo(() => (snapshot ? buildRows(snapshot, base, cand) : []), [snapshot, base, cand])
+  // 새로고침 뒤에도 이미 다른 승인으로 바뀐 계획을 409 전에 알린다. 최종 판단은 서버가 한다.
+  const [planNow, setPlanNow] = useState<{ planId: string; version: number } | null>(null)
+  useEffect(() => {
+    if (!run || !client.getPlan) return
+    let live = true
+    client.getPlan(run.plan_id).then((p) => live && p.plan_id === run.plan_id && setPlanNow({ planId: p.plan_id, version: p.version })).catch(() => {})
+    return () => { live = false }
+  }, [client, run?.plan_id, approval.value?.status.state])
+  const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
   const approvalKey = run && cand ? approvalIdempotencyKey(approvalKeys, run.plan_id, {
     run_id: run.run_id, method: cand.method, expected_version: run.base_plan_version, acknowledged_job_ids: acknowledgeIds(cand),
@@ -71,7 +80,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
           <UnresolvedPanel rows={rows} cand={cand} />
           <ApprovalPanel
             key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
-            gate={approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined)}
+            gate={withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null)}
             client={client} run={run} result={cand} idempotencyKey={approvalKey}
             shared={approval.key === approvalScope ? approval.value : null}
             onShared={(value) => setApproval({ key: approvalScope, value })}
@@ -80,4 +89,8 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       )}
     </main>
   )
+}
+
+function withPlanCheck(gate: ApprovalGate, reason: string | null): ApprovalGate {
+  return reason ? { allowed: false, reasons: [...gate.reasons, reason] } : gate
 }
