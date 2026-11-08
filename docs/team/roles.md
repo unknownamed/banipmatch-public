@@ -39,7 +39,7 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 **완성할 것:** CSV·JSON과 이용이 허용된 외부 응답을 내부 공통 규격으로 바꾸고, 다른 파트가 사용할 입력의 의미와 출처를 검사하는 데이터 모듈입니다.
 
 - 첫 작업: 기존 모의 CSV·JSON을 읽고 ID·참조·시간대·단위·누락·중복을 검사한 뒤, 정상 입력과 행별 오류를 돌려줍니다. 외부 API 승인 없이 기존 예제로 시작합니다.
-- 첫 구현은 [데이터 모듈](../../backend/data/README.md)과 [PR #5 인계](handoffs/2026-11-07-s-minjun-input-validation.md)에 있습니다. 다음 작업은 API 담당과 실행 전 검사 연결이며, 등록 단계에서 누락 입력의 보관을 막지 않습니다.
+- 첫 구현은 [데이터 모듈](../../backend/data/README.md)과 [PR #5 인계](handoffs/2026-11-07-s-minjun-input-validation.md)에 있습니다. 다음 연결 검수는 API 담당과 실행 전 검사 연결이며, 등록 단계에서 누락 입력의 보관을 막지 않습니다.
 - 원본과 정규화 결과를 연결하고 관측·모의·가정을 구분합니다. 반입시간과 선박 접안 예정시간을 같은 값으로 취급하지 않습니다.
 - 누락 이동시간을 0으로 채우거나, 복귀 상태가 불명확한 차량을 즉시 사용 가능하다고 가정하지 않습니다.
 - 정상·누락·잘못된 참조·준비 지연 등의 시나리오와 예상 판정을 준비합니다. 일정 계산의 기대 결과는 황대겸·안선효와 근거를 맞춥니다.
@@ -54,7 +54,7 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 **완성할 것:** 같은 입력에서 원안의 위험과 조정안을 계산하고, 미처리·변경량·이동 부담 및 미해결 이유를 비교하는 엔진입니다.
 
 - 구현 범위: B0 원안 위험 진단·B1 마감순 삽입·B2 이동 최소화·B3 변경 최소화를 비교합니다. 모든 조정 방법은 미처리 수를 우선하며, 고정 작업 보존과 미처리 근거를 확인합니다.
-- B0~B3 구현·실험의 최신 상태는 [엔진0.2.3 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)에 있습니다. 완전한 초기안 힌트·probing0으로 탐색을 보완했고 엔진89개·전체 Python174개/하위160개·계약29개·DB32개 검사를 통과했습니다. [기존0.2.1·156회](../experiments/engine-sensitivity-2026-11-08/README.md)는 보존하며 [후속72회](../experiments/engine-profile-2026-11-08/README.md)와 구분합니다.
+- B0~B3 구현·실험은 [엔진0.2.3 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)를 따릅니다. 완전한 초기안 힌트·probing0으로 탐색을 보완했고 엔진89개 검사를 통과했습니다. 최신 API·데이터 연결 후 전체 검수는 [통합 인계](handoffs/2026-11-08-pr12-pr14-integration.md)에 있습니다. [기존0.2.1·156회](../experiments/engine-sensitivity-2026-11-08/README.md)는 보존하며 [후속72회](../experiments/engine-profile-2026-11-08/README.md)와 구분합니다.
 - 후속20건 B3는3초에서 변경2건의 최적성을 증명했고10초 호출 중앙값은5.21→2.42초입니다. 50건10초 B2는 전체 최적, B3는 미처리26/변경23/이동1,440분의 FEASIBLE로 전체 미증명입니다. [기존156회 PDF](../experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)와 [후속72회 PDF](../experiments/engine-report-2026-11-08/engine-performance-followup.pdf)를 활용하되 모의 한계를 유지합니다. 다음은 리뷰 피드백·API/독립 검사 연결 대조·50건 B3의 남은 증명 병목 검증입니다.
 - `solve(snapshot, method, config) → result`의 경계를 유지합니다. 엔진 안에서 DB·웹·외부 API를 호출하거나 입력을 수정하지 않습니다.
 - 출발·고정 작업의 차량·순서·시각을 보존하고, 위험이 생겨도 작업을 삭제하거나 미처리로 바꿔 지표를 좋게 만들지 않습니다.
@@ -86,7 +86,7 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 
 리뷰는 [리뷰·병합 기준](review-policy.md)에 따라 필요한 큰 변경에 관련자가 1회 수행합니다. 아래 담당 경로는 모든 PR의 자동 리뷰 요청 대상이라는 뜻이 아닙니다.
 
-다음은 담당별 코드 경로입니다. 프론트·API·DB·데이터 입력·B0~B3 엔진 구현이 있고, API의 실제 엔진 연결과 독립 일정 검사는 후속 작업입니다. 데이터 PR #5는 main에 병합됐습니다.
+다음은 담당별 코드 경로입니다. 프론트·API·DB·데이터 입력·B0~B3 엔진 구현이 있고, 실제 엔진 API·독립 일정 검사·로컬 내부 승인까지 연결했습니다. 전체 브라우저 시연과 운영 인증은 후속 작업입니다. 데이터 PR #5는 main에 병합됐습니다.
 
 | 코드 경로 | 주 담당 | 범위 |
 |---|---|---|
@@ -95,7 +95,7 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 | `backend/engine/` | 황대겸 | 원안 진단·배차 조정·비교 지표 |
 | `backend/api/` | 안선효 | 요청·실행 관리·조회·승인 연결 |
 | `backend/db/` | 안선효 | 저장·버전·트랜잭션 |
-| `backend/validation/` | 안선효 | 엔진 결과의 독립 일정 검사 |
+| `backend/api/result_integrity.py` | 안선효 | 엔진 결과의 독립 일정 검사(현재 구현 경로) |
 | `backend/__init__.py`, `backend/__main__.py`, `backend/README.md`, 루트 `requirements*.txt`·`.env.example` | 안선효 | 백엔드 실행·환경·의존성·API 안내 |
 | `tests/test_api.py`, `tests/engine/`, 프론트 내 테스트 | 각 기능 담당 | API·엔진·화면의 검증과 회귀 확인 |
 

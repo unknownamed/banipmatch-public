@@ -1,5 +1,7 @@
 # 문서 목록
 
+- [심사 대응 설계 보완서(PDF 4쪽)](design/evaluation-addendum-2026-11-08.pdf): 설계v6 유지, 증거·실험·담당별 완료 기준·전문가 질의 준비.
+
 - [11월 8일 최신 엔진 인계](team/handoffs/2026-11-08-unknownamed-engine-diagnostics.md): 0.2.3 시간 초과 시 입력 누락 진단 보존·연결 담당 참고.
 - [보고서용 실험 표·그림·PDF](experiments/engine-report-2026-11-08/README.md): 기존156회4쪽과 후속72회2쪽, 모의 결과와 남은 한계.
 - [규모·예산·여유시간·혼합 조건156회 비교](experiments/engine-sensitivity-2026-11-08/README.md): 전체 결과와 재현 명령, 성공·미증명 범위.
@@ -36,11 +38,11 @@
 
 - 최종 보고서: 준비 중
 - 최종 발표자료: 준비 중
-- [로컬 API 실행 안내](../backend/README.md): 입력 저장·설명용 응답. 실제 엔진·독립 검증 연결은 후속 작업
+- [로컬 API 실행 안내](../backend/README.md): 설명용 재생 또는 선택형 실계산·독립 검사·내부 승인. [PR12·14 통합 검수](team/handoffs/2026-11-08-pr12-pr14-integration.md)
 - [데이터 입력 검증 안내](../backend/data/README.md): CSV·JSON 입력과 행별 오류, API 연결 시 지킬 경계
 - [B2/B3 엔진 인계](team/handoffs/2026-11-07-unknownamed-engine-b2-b3.md): 최적화·단계별 판정·후속 연결
 - [B0~B3 모의 비교](experiments/engine-b0-b3/README.md): 입력7종·결과·재현 명령·성능 한계
-- [프론트 실행 안내](../frontend/README.md): 설명용 예제 비교·HTTP 입력 등록/실행·입력 오류 안내, 실제 엔진 전체 연결은 후속
+- [프론트 실행 안내](../frontend/README.md): 설명용 예제 비교·HTTP 입력 등록/실행·입력 오류 안내, 실계산 계약 표시 반영·전체 브라우저 검수는 후속
 - [B0~B3 엔진 실행 안내](../backend/engine/README.md) · [B0/B1 최초 결과](experiments/engine-b0-b1/README.md): 초기 결과와 현재 엔진 버전을 구분, 현장 검증은 후속
 
 현재 PDF를 최종 보고서나 실제 실행 성과로 표시하지 않습니다. 새 버전은 별도 폴더에 보관하고 이 목록과 루트 README의 링크를 함께 갱신합니다.
