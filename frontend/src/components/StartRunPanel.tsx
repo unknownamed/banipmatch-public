@@ -21,11 +21,13 @@ type Status =
   | { state: 'idle' }
   | { state: 'sending'; step: string }
   | { state: 'error'; step: string; error: unknown }
-  /** 입력은 등록됐지만 서버가 계산을 거절(422/503). 같은 요청 재시도로는 풀리지 않는다. */
+  /** 입력은 등록됐지만 입력 오류·미확인 변경으로 계산이 거절됨. */
   | { state: 'rejected'; error: ApiRequestError; snapshot: Snapshot }
 
-const isRejection = (e: unknown): e is ApiRequestError =>
-  e instanceof ApiRequestError && !!e.body && (e.status === 422 || e.status === 503)
+// 503은 저장소 일시 장애에도 쓰인다. 503 중 입력 확인이 필요한 코드만 재시도를 막는다.
+export const isInputRejection = (e: unknown): e is ApiRequestError =>
+  e instanceof ApiRequestError && !!e.body &&
+  (e.status === 422 || (e.status === 503 && e.body.code === 'WINDOW_UNCONFIRMED'))
 
 /** http 모드에서 run 파라미터가 없을 때: 공통 예제로 입력 등록 → 계산 요청 → 결과 화면으로 이동. */
 export function StartRunPanel({ client }: { client: ApiClient }) {
@@ -48,7 +50,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       const run = await client.createRun!(attempt.run, attempt.runKey)
       location.search = `?scenario=${encodeURIComponent(run.scenario_id)}&run=${encodeURIComponent(run.run_id)}`
     } catch (error) {
-      if (step === '계산 요청' && isRejection(error)) {
+      if (step === '계산 요청' && isInputRejection(error)) {
         // 등록된 입력을 서버에서 다시 읽어 보여준다(화면이 가진 사본이 아니라 저장된 원본).
         const saved = await client.getScenario(attempt.snapshot.scenario_id).catch(() => attempt.snapshot)
         setStatus({ state: 'rejected', error, snapshot: saved })
