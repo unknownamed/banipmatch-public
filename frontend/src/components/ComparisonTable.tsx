@@ -49,6 +49,7 @@ export function ComparisonTable({
               <tr key={r.job.job_id} className={r.candidateUnassigned ? 'row-unassigned' : r.locked ? 'row-locked' : ''}>
                 <td>
                   <b>{r.job.job_id}</b> <span className="muted">{r.job.voyage_id}</span>
+                  {r.job.ready_at === null && <div className="warn small">준비시각 미확인</div>}
                   {r.locked && (
                     <div>
                       <span className="badge lock" title={r.job.freeze_reason ?? undefined}>
