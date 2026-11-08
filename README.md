@@ -11,7 +11,7 @@
 
 ## 현재 상태
 
-현재 계약은 **개발 규격 초안 v0.1**입니다. **B0 원안 진단과 B1 마감순 배치**([PR #1](https://github.com/unknownamed/banipmatch/pull/1))와 **설명용 예제 비교 화면**([PR #4](https://github.com/unknownamed/banipmatch/pull/4))이 있습니다. 입력 저장·실행 상태·설명용 결과 조회용 **로컬 API**([PR #3](https://github.com/unknownamed/banipmatch/pull/3))도 포함합니다. #1·#4는 main에 병합됐고 #3의 실제 병합 상태는 링크에서 확인할 수 있습니다. API의 실제 엔진 연결·화면 전체 연결·독립 일정 검사·승인, B2/B3 최적화는 후속 작업입니다.
+현재 계약은 **개발 규격 초안 v0.1**입니다. 데이터 입력 검증·로컬 API/저장·설명용 비교 화면과 **B0~B3 계산 엔진**이 있습니다. B2/B3는 같은 처리 수준에서 이동과 변경 부담을 비교하며 [모의 실험과 한계](docs/experiments/engine-b0-b3/README.md)를 기록했습니다. API의 실제 엔진 연결·화면 전체 연결·독립 일정 검사·승인은 후속 작업입니다.
 
 | 구분 | 상태 |
 |---|---|
@@ -22,15 +22,15 @@
 | 검수 | 계약·예제 검사 29건, DB 검사 32건 통과 |
 | 데이터 첫 구현 | [CSV·JSON 입력 검증](backend/data/README.md), 오류의 필드·출처·행 반환. API 실행 경로 연결은 후속 작업 |
 | 로컬 API 1차 | 입력 등록·조회, SQLite 저장, 실행 상태·설명용 B0/B3 결과 조회, 승인 차단. API 테스트 45건 |
-| 엔진 첫 구현 | B0/B1 로컬 실행·엔진 테스트 51건. B2/B3 미구현 |
+| 엔진 | B0/B1 및 B2/B3 사전식 최적화, 엔진 테스트82건. [규모·예산·혼합 조건156회 비교](docs/experiments/engine-sensitivity-2026-11-08/README.md). 전체 앱 연결은 후속 |
 | 프론트 첫 구현 | React·TypeScript 예제 비교 화면, 테스트 16건·타입 검사·빌드 통과. 실제 서버 연결은 미검증 |
 | 실제 앱 통합·독립 일정 검사·승인·인증 | 구현 예정 |
 | 외부 API 연동·실제 운송 자료 | 권한·표본 확인 필요 |
 | 최종 대회 보고서·발표자료 | 준비 중 |
 
-검수는 **명세·저장 구조·예제와 B0/B1 동작**을 대상으로 합니다. 실제 운송 자료의 효과나 최적성 검증은 아닙니다.
+검수는 **명세·저장 구조·예제와 B0~B3 동작**을 대상으로 합니다. 모형의 최적성 증명은 실제 운송 자료의 효과 검증과 다릅니다.
 
-[엔진 실행·연결 안내](backend/engine/README.md) · [모의 예제의 실계산 결과](docs/experiments/engine-b0-b1/README.md) · [API 담당 인계](docs/team/handoffs/2026-11-07-unknownamed-engine-b0-b1.md)
+[엔진 실행·연결 안내](backend/engine/README.md) · [모의 예제의 실계산 결과](docs/experiments/engine-b0-b1/README.md) · [최신 엔진 인계](docs/team/handoffs/2026-11-08-unknownamed-engine-experiments.md)
 
 로컬 API 실행·프론트 연결·검증 방법은 [백엔드 안내](backend/README.md)에 있습니다. 현재 서버는 모의 입력과 설명용 결과만 다루며 승인 요청은 차단합니다.
 
@@ -143,7 +143,7 @@ python -m pytest -q
 
 프로젝트 저장소: **https://github.com/unknownamed/banipmatch**
 
-현재 보관된 산출물은 개발 문서·규격·모의 예제, 로컬 API·저장 코드, B0/B1 코드·계산 결과, 프론트 설명용 비교 화면입니다.
+현재 보관된 산출물은 개발 문서·규격·모의 예제, 로컬 API·저장 코드, B0~B3 코드·계산 결과, 프론트 설명용 비교 화면입니다.
 최종 대회 보고서와 발표자료는 완성 후 [문서 목록](docs/README.md)에 추가합니다.
 보고서 제출 시에는 해당 시점의 커밋 또는 태그 주소를 함께 적어, 어떤 버전을 사용했는지 확인할 수 있게 할 예정입니다.
 
@@ -160,7 +160,7 @@ CONTRIBUTING.md        # 도구별 시작·PR·검수·인계
 .github/               # Copilot 안내·CODEOWNERS·PR 양식·CI
 .cursor/rules/         # Cursor에서 공통 기준 읽기
 tools/                 # 원본을 보존하는 검수 실행 도구
-backend/               # API·DB 로컬 모의 구현과 B0/B1 엔진
+backend/               # 데이터·API·DB 로컬 모의 구현과 B0~B3 엔진
 frontend/              # 설명용 비교 화면·상태 표시
 tests/                 # API·DB·엔진 동작과 실패 경계 검증
 requirements.txt       # API 실행 의존성

@@ -121,11 +121,15 @@ class SolverTests(unittest.TestCase):
         with self.assertRaises(EngineInputError):
             solve(snapshot, "B1", CONFIG)
 
-    def test_unimplemented_methods_are_explicit(self):
+    def test_optimization_methods_are_computed_and_report_objective_stages(self):
         for method in ["B2", "B3"]:
             with self.subTest(method=method):
-                with self.assertRaises(NotImplementedError):
-                    solve(fixture(), method, CONFIG)
+                result = solve(fixture(), method, CONFIG)
+                self.assertEqual(result["result_origin"], "computed")
+                self.assertEqual(result["solution_status"], "OPTIMAL")
+                self.assertTrue(result["objective_proven"])
+                self.assertEqual(result["objective_stages"][0]["value"], 1)
+                self.assertFalse(result["approval_eligible"])
 
     def test_b0_missing_travel_is_input_error_not_invented_zero(self):
         snapshot = without_approach_leg(fixture())
