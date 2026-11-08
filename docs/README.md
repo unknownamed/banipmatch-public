@@ -46,3 +46,9 @@
 - [B0~B3 엔진 실행 안내](../backend/engine/README.md) · [B0/B1 최초 결과](experiments/engine-b0-b1/README.md): 초기 결과와 현재 엔진 버전을 구분, 현장 검증은 후속
 
 현재 PDF를 최종 보고서나 실제 실행 성과로 표시하지 않습니다. 새 버전은 별도 폴더에 보관하고 이 목록과 루트 README의 링크를 함께 갱신합니다.
+
+## 새 평가와 현장 문제 근거
+
+- [80회 모의 평가·재현·한계](experiments/engine-evaluation-2026-11-08/README.md) · [PDF4쪽](experiments/engine-evaluation-2026-11-08/engine-evaluation-summary.pdf)
+- [HJNC 공식 근거·심사 질문 준비](team/operational-evidence.md)
+- [황대겸 평가 인계](team/handoffs/2026-11-08-unknownamed-evaluation.md)

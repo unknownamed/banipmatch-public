@@ -84,10 +84,10 @@ def make_pairs(records):
             row = group.get(method)
             if row is None or row.get("error") or row.get("audit", {}).get("schedule") != "passed":
                 reasons.append(f"{method}_not_validated")
-            if row and row.get("result"):
-                values[method] = row["result"]
-                if row["result"]["metrics"]["movable_violation_count"] != 0:
-                    reasons.append(f"{method}_movable_violations")
+                continue  # Preserve raw failures; never aggregate their untrusted shape.
+            values[method] = row["result"]
+            if row["result"]["metrics"]["movable_violation_count"] != 0:
+                reasons.append(f"{method}_movable_violations")
         if len(values) == 2:
             a, b = values["B2"]["metrics"], values["B3"]["metrics"]
             if a["unassigned_count"] != b["unassigned_count"]:
@@ -156,7 +156,9 @@ def run(protocol_path, output_dir):
                     log.flush()
                     records.append(record)
                     row = {k: v for k, v in record.items() if k not in {"result", "audit", "error"}}
-                    result = record.get("result", {})
+                    # Error payloads can be any JSON value, including null or a list.
+                    # Only successful audits provide usable structure and metrics.
+                    result = record["result"] if not record["audit"]["failed"] else {}
                     metrics = result.get("metrics", {})
                     row.update(status=result.get("solution_status"), objective_proven=result.get("objective_proven"),
                                stages=canonical(result.get("objective_stages", [])),
@@ -176,7 +178,7 @@ def run(protocol_path, output_dir):
                    independently_validated=sum(r["audit"]["schedule"] == "passed" for r in records),
                    baseline_integrity_passed=sum(r["audit"]["schedule"] == "baseline_not_applicable" for r in records),
                    not_eligible=sum(r["audit"]["schedule"] == "not_eligible" for r in records),
-                   objective_proven=sum(bool(r.get("result", {}).get("objective_proven")) for r in records),
+                   objective_proven=sum(r["audit"]["schedule"] == "passed" and bool(r["result"]["objective_proven"]) for r in records),
                    pairs=len(pairs), equal_count_comparable=sum(p["equal_count_comparable"] for p in pairs),
                    identical_workload_comparable=sum(p["equal_count_comparable"] and p.get("identical_assigned_set", False) for p in pairs),
                    delta_convention="B3 minus B2; equal count does not imply identical served jobs")

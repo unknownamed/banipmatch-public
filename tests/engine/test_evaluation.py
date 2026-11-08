@@ -117,3 +117,23 @@ def test_returned_raw_result_retained_on_mutation_or_failed_audit(tmp_path, snap
     else:
         assert all(r["audit"]["schedule"] == "failed" and "error" not in r for r in adjusted)
     assert all(r["result"]["validation_status"] == "not_run" and not r["result"]["approval_eligible"] for r in records)
+
+
+@pytest.mark.parametrize("malformed", [{"method": "B2"}, {"metrics": None}, None, ["not", "a", "result"]])
+def test_malformed_results_preserved_without_breaking_summary(tmp_path, snapshot, monkeypatch, malformed):
+    path = protocol_file(tmp_path, snapshot)
+    monkeypatch.setattr(evaluation, "solve", lambda *args: deepcopy(malformed))
+    output = tmp_path / "results"
+    assert evaluation.run(path, output) == 1
+    records = [json.loads(line) for line in (output / "results.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert len(records) == 8 and all(r["result"] == malformed and r["audit"]["failed"] for r in records)
+    summary = json.loads((output / "summary.json").read_text(encoding="utf-8"))
+    assert summary["exceptions"] == summary["failures"] == 8
+    assert summary["independently_validated"] == summary["objective_proven"] == 0
+    assert summary["pairs"] == 2 and summary["equal_count_comparable"] == 0
+    import csv
+    pairs = list(csv.DictReader((output / "pairs.csv").open(encoding="utf-8-sig")))
+    assert all("not_validated" in row["exclusion_reason"] and not row.get("changed_delta") for row in pairs)
+    runs = list(csv.DictReader((output / "runs.csv").open(encoding="utf-8-sig")))
+    assert all(not row["unassigned"] and not row["changed"] for row in runs)
+    assert json.loads((output / "metadata.json").read_text(encoding="utf-8"))["completed"]
