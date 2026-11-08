@@ -7,7 +7,7 @@ import type { ApiClient, RunRequest } from '../api/client'
 import { ApiRequestError } from '../api/client'
 import type { Snapshot } from '../api/types'
 import { buildRows } from '../lib/compare'
-import { newAttempt, type StartAttempt } from '../lib/startRun'
+import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type StartAttempt } from '../lib/startRun'
 import { ComparisonSection } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
 
@@ -27,7 +27,7 @@ type Status =
 // 503은 저장소 일시 장애에도 쓰인다. 503 중 입력 확인이 필요한 코드만 재시도를 막는다.
 export const isInputRejection = (e: unknown): e is ApiRequestError =>
   e instanceof ApiRequestError && !!e.body &&
-  (e.status === 422 || (e.status === 503 && e.body.code === 'WINDOW_UNCONFIRMED'))
+  ((e.status === 422 && !isMethodRejection(e.body.code)) || (e.status === 503 && e.body.code === 'WINDOW_UNCONFIRMED'))
 
 /** http 모드에서 run 파라미터가 없을 때: 공통 예제로 입력 등록 → 계산 요청 → 결과 화면으로 이동. */
 export function StartRunPanel({ client }: { client: ApiClient }) {
@@ -35,6 +35,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   // 예제마다 한 시도를 유지한다. 실패 후 "다시 시도"는 같은 본문·같은 멱등키. 새 시도는 새로고침.
   const [attempts] = useState(() => new Map<string, StartAttempt>())
   const [status, setStatus] = useState<Status>({ state: 'idle' })
+  // B0는 비교 기준이라 항상 포함한다. 기본은 명세대로 B0~B3 전체.
+  const [picked, setPicked] = useState<ReadonlySet<MethodId>>(() => new Set(ALL_METHODS))
   const example = EXAMPLES.find((e) => e.id === exampleId)!
   if (!attempts.has(exampleId))
     attempts.set(exampleId, newAttempt(example.snapshot as unknown as Snapshot, runRequestJson as unknown as RunRequest))
@@ -47,7 +49,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       await client.registerScenario!(attempt.snapshot, attempt.scenarioKey)
       step = '계산 요청'
       setStatus({ state: 'sending', step })
-      const run = await client.createRun!(attempt.run, attempt.runKey)
+      const { body, key } = runFor(attempt, picked)
+      const run = await client.createRun!(body, key)
       location.search = `?scenario=${encodeURIComponent(run.scenario_id)}&run=${encodeURIComponent(run.run_id)}`
     } catch (error) {
       if (step === '계산 요청' && isInputRejection(error)) {
@@ -62,7 +65,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   return (
     <main>
       <div className="banner" role="note">
-        로컬 모의 API에 연결된 화면입니다. 공통 예제 입력을 새 ID({attempt.snapshot.scenario_id})로 등록하고 B0·B3 계산을 요청합니다.
+        로컬 모의 API에 연결된 화면입니다. 공통 예제 입력을 새 ID({attempt.snapshot.scenario_id})로 등록하고 선택한 방법으로 계산을 요청합니다.
       </div>
       <section className="card">
         <h2>예제로 계산 요청</h2>
@@ -89,6 +92,27 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
             </select>
           </label>
         </p>
+        <fieldset disabled={status.state === 'sending'}>
+          <legend>계산 방법</legend>
+          {ALL_METHODS.map((m) => (
+            <label key={m} style={{ marginRight: '1em' }}>
+              <input
+                type="checkbox"
+                checked={m === 'B0' || picked.has(m)}
+                disabled={m === 'B0'}
+                onChange={(e) => {
+                  const next = new Set(picked)
+                  if (e.target.checked) next.add(m)
+                  else next.delete(m)
+                  setPicked(next)
+                  if (status.state === 'error') setStatus({ state: 'idle' })
+                }}
+              />{' '}
+              {m}
+              {m === 'B0' && ' (원안 진단 · 항상 포함)'}
+            </label>
+          ))}
+        </fieldset>
         {status.state !== 'rejected' && (
           <button type="button" disabled={status.state === 'sending'} onClick={start}>
             {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '입력 등록 후 계산 요청'}
@@ -115,7 +139,11 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
                   <code>{d.path}</code> {d.reason}
                 </p>
               ))}
-            <p className="muted small">다시 시도하면 같은 요청·같은 멱등키로 보내 중복 등록·중복 실행이 생기지 않습니다.</p>
+            {err instanceof ApiRequestError && isMethodRejection(err.body?.code) ? (
+              <p>서버가 이 방법을 계산하지 않습니다. 설명용 모드는 B0·B3만 제공합니다. 방법 선택을 바꾼 뒤 다시 요청하세요.</p>
+            ) : (
+              <p className="muted small">다시 시도하면 같은 요청·같은 멱등키로 보내 중복 등록·중복 실행이 생기지 않습니다.</p>
+            )}
           </div>
         )}
         {status.state === 'rejected' && (

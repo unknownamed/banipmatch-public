@@ -23,6 +23,7 @@ PR과 main 변경마다 위 테스트·빌드를 GitHub Actions가 실행한다.
 - 기본은 fixture 모드: `docs/development/v0.1/예제 데이터`의 01·03·04 JSON을 **복사하지 않고 직접** 읽는다.
 - [백엔드 안내](../backend/README.md)에 따라 로컬 API를 실행한 뒤 `frontend/.env.local`에 `VITE_API_MODE=http`와 서버 모의 토큰과 같은 `VITE_API_TOKEN`을 설정하고 개발 서버를 시작한다. `.env.example`을 참고하며 실제 설정값은 Git에 올리지 않는다. `/v1` 요청은 `127.0.0.1:8000`으로 전달한다(포트는 백엔드에 맞춰 `vite.config.ts` 수정).
 - HTTP 모드에서 `?run=`이 없으면 **예제로 계산 요청** 화면이 뜬다. 버튼을 누르면 새 ID로 `POST /v1/scenarios`, `POST /v1/runs`를 보내고 받은 `run_id` 결과 화면으로 이동한다. 실패 후 다시 시도는 같은 본문·같은 Idempotency-Key를 쓴다. 로컬 API로 등록201 → 실행202 → 결과200과 설명용 결과의 승인 차단을 확인했다.
+- 계산 방법은 B0~B3 체크박스로 고른다(기본 전체, B0는 비교 기준이라 항상 포함). 방법이 바뀌면 실행 요청 멱등키도 바뀐다. 설명용 모드 서버는 B1/B2에 `422 DEMO_METHOD_UNAVAILABLE`을 주므로 입력 거절이 아닌 "방법을 바꿔 다시 요청" 안내로 표시한다.
 - 입력 예제는 01·07(입력 누락)·08(미확인 변경) 중 고른다. 07의 422 입력 오류·08의 `503 WINDOW_UNCONFIRMED`처럼 입력 확인이 필요하면 원안과 거절 사유를 보여주고 재시도 버튼은 숨긴다. `503 STORAGE_UNAVAILABLE` 등 일시 장애에는 오류 안내와 같은 요청의 재시도를 유지한다.
 - 승인은 approvalGate를 통과하고 미처리·고정 위험 작업 확인 체크 후에만 `POST /v1/plans/{plan_id}/approvals`를 보낸다. 승인 응답과 `GET /v1/plans/{plan_id}`의 현재 계획을 대조하고, 409·422·503은 오류 코드별 할 일을 안내한다. 현재 서버는 설명용 결과만 주므로 실제 승인 저장 성공은 아직 확인하지 못했다.
 - 다른 ID 조회: `?scenario=S001&run=R001`.
