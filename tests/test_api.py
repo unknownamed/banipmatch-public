@@ -3,8 +3,10 @@ from copy import deepcopy
 from dataclasses import replace
 import json
 import sqlite3
+import subprocess
 import threading
 import time
+from unittest.mock import patch
 from urllib.parse import urljoin
 from uuid import uuid4
 
@@ -15,6 +17,7 @@ import pytest
 from backend.api.app import create_app
 from backend.api.contracts import DRAFT, digest, validate
 from backend.api.fixture import FixtureReplay
+from backend.api.engine_replay import EngineReplay
 from conftest import make_client
 
 
@@ -33,8 +36,8 @@ def start(client, snapshot):
     return response.json()
 
 
-def results(client, run):
-    deadline = time.monotonic() + 5
+def results(client, run, timeout=5):
+    deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         response = client.get(f"/v1/runs/{run['run_id']}/results")
         if response.status_code != 202:
@@ -233,7 +236,7 @@ def test_running_job_does_not_block_reads(settings, snapshot):
             assert response.headers["retry-after"] == "1"
             assert client.get("/v1/scenarios/S001").status_code == 200
             assert client.get("/v1/plans/P001").status_code == 200
-            assert post(client, "/v1/plans/P001/approvals", approval(run)).status_code == 503
+            assert post(client, "/v1/plans/P001/approvals", approval(run)).status_code == 422
         finally:
             adapter.release.set()
         assert results(client, run).status_code == 200
@@ -342,7 +345,7 @@ def test_cors_and_runtime_openapi(client):
     assert spec["components"]["schemas"] == json.loads(
         (DRAFT / "공통 규격" / "openapi.json").read_text(encoding="utf-8")
     )["components"]["schemas"]
-    assert spec["paths"]["/v1/plans/{plan_id}/approvals"]["post"]["x-implementation-status"] == "blocked"
+    assert spec["paths"]["/v1/plans/{plan_id}/approvals"]["post"]["x-implementation-status"] == "local-demo"
     assert response.headers["cache-control"] == "no-store"
     assert response.headers["x-request-id"]
 
@@ -352,6 +355,268 @@ def test_swagger_same_origin_post_is_allowed(client, snapshot, origin):
     response = client.post(f"{origin}/v1/scenarios", json=snapshot,
                            headers={"Origin": origin, "Idempotency-Key": "swagger-post"})
     assert response.status_code == 201, response.text
+
+
+def test_execution_preflight_blocks_missing_route_without_losing_registered_input(client, snapshot):
+    snapshot["travel_times"] = [row for row in snapshot["travel_times"]
+                                if (row["from_location_id"], row["to_location_id"]) != ("D", "O")]
+    assert post(client, "/v1/scenarios", snapshot).status_code == 201
+    request = {"scenario_id": "S001", "base_plan_version": 1, "methods": ["B0"],
+               "time_limit_seconds": 10, "seed": 42}
+    response = post(client, "/v1/runs", request, "missing-route")
+    assert response.status_code == 422
+    assert response.json()["code"] == "INPUT_INCOMPLETE"
+    assert any("TRAVEL_TIME_MISSING" in d["reason"] for d in response.json()["details"])
+    assert client.get("/v1/scenarios/S001").json() == snapshot
+    with client.app.state.store.db.connect() as conn:
+        assert conn.execute("SELECT count(*) FROM runs").fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM idempotency_records WHERE route='POST /v1/runs'").fetchone()[0] == 0
+
+
+def test_execution_preflight_checks_evidence_precision(client, snapshot):
+    snapshot["jobs"][1]["evidence"]["received_at"] = "2026-11-07T00:00:01Z"
+    assert post(client, "/v1/scenarios", snapshot).status_code == 201
+    response = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                    "methods": ["B0"], "time_limit_seconds": 10, "seed": 42})
+    assert response.status_code == 422
+    assert response.json()["code"] == "INPUT_INVALID"
+    assert any(d["path"] == "/jobs/1/evidence/received_at" for d in response.json()["details"])
+
+
+def test_real_engine_run_is_computed_and_expired_input_cannot_be_approved(settings, snapshot):
+    with make_client(replace(settings, run_mode="engine")) as client:
+        assert "B0~B3 실계산 모드" in client.get("/openapi.json").json()["info"]["description"]
+        assert post(client, "/v1/scenarios", snapshot).status_code == 201
+        request = {"scenario_id": "S001", "base_plan_version": 1, "methods": ["B0", "B1"],
+                   "time_limit_seconds": 10, "seed": 42}
+        response = post(client, "/v1/runs", request)
+        assert response.status_code == 202
+        run = response.json()
+        result = results(client, run)
+        assert result.status_code == 200, result.text
+        validate("Results", result.json())
+        methods = result.json()["results"]
+        assert [r["method"] for r in methods] == ["B0", "B1"]
+        assert all(r["result_origin"] == "computed" for r in methods)
+        assert methods[0]["validation_status"] == "not_run" and not methods[0]["approval_eligible"]
+        assert methods[1]["validation_status"] == "passed" and methods[1]["approval_eligible"]
+        assert next(a for a in methods[1]["assignments"] if a["job_id"] == "J0") == snapshot["baseline_assignments"][0]
+        assert "J3" in methods[1]["unassigned_job_ids"]
+        denied = post(client, "/v1/plans/P001/approvals", approval(run, method="B1"))
+        assert denied.status_code == 503
+        assert denied.json()["code"] == "INPUT_EXPIRED"
+
+
+def test_engine_mode_runs_and_independently_checks_optimized_methods(settings, snapshot):
+    with make_client(settings, replay=EngineReplay()) as client:
+        assert post(client, "/v1/scenarios", snapshot).status_code == 201
+        response = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                        "methods": ["B2", "B3"], "time_limit_seconds": 10, "seed": 42})
+        assert response.status_code == 202
+        returned = results(client, response.json(), timeout=40)
+        assert returned.status_code == 200, returned.text
+        result_list = returned.json()["results"]
+        assert [r["method"] for r in result_list] == ["B2", "B3"]
+        for result in result_list:
+            assert result["result_origin"] == "computed"
+            assert result["validation_status"] == "passed"
+            assert result["approval_eligible"] is True
+            assert next(a for a in result["assignments"] if a["job_id"] == "J0") == snapshot["baseline_assignments"][0]
+            if result["objective_proven"]:
+                assert result["solution_status"] == "OPTIMAL"
+
+
+def test_proven_optimization_is_stored_and_independently_checked(settings, snapshot):
+    from backend.engine import solve
+    result = solve(snapshot, "B1", {"time_limit_seconds": 10, "seed": 42})
+    unassigned = result["metrics"]["unassigned_count"]
+    travel = result["metrics"]["movable_travel_minutes"]
+    result.update(method="B2", solution_status="OPTIMAL", objective_proven=True,
+                  objective_stages=[{"objective": "unassigned", "status": "OPTIMAL", "value": unassigned, "best_bound": unassigned},
+                                    {"objective": "travel", "status": "OPTIMAL", "value": travel, "best_bound": travel}])
+    success = subprocess.CompletedProcess([], 0, stdout=json.dumps(result), stderr="")
+    with patch("backend.api.engine_replay.subprocess.run", return_value=success):
+        with make_client(settings, replay=EngineReplay()) as client:
+            assert post(client, "/v1/scenarios", snapshot).status_code == 201
+            response = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                            "methods": ["B2"], "time_limit_seconds": 10, "seed": 42})
+            stored = results(client, response.json()).json()["results"][0]
+            assert stored["objective_proven"] is True
+            assert stored["validation_status"] == "passed"
+            assert stored["approval_eligible"] is True
+
+
+def test_local_approval_is_atomic_idempotent_and_versioned(settings, snapshot):
+    with make_client(settings, replay=EngineReplay()) as client:
+        assert post(client, "/v1/scenarios", snapshot).status_code == 201
+        response = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                        "methods": ["B1"], "time_limit_seconds": 10, "seed": 42})
+        run = response.json()
+        assert results(client, run, timeout=20).status_code == 200
+        request = approval(run, method="B1")
+        with patch("backend.db.store.utc_now", return_value="2026-11-07T00:30:00Z"):
+            missing = post(client, "/v1/plans/P001/approvals", {**request, "acknowledged_job_ids": []}, "missing")
+            assert missing.status_code == 422
+            assert missing.json()["code"] == "ACKNOWLEDGEMENT_REQUIRED"
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                responses = list(pool.map(lambda _: post(client, "/v1/plans/P001/approvals", request, "same-approval"), range(4)))
+            assert all(r.status_code == 201 for r in responses), [r.text for r in responses]
+            assert all(r.json() == responses[0].json() for r in responses)
+            approved = responses[0].json()
+            validate("Approval", approved)
+            assert approved["version"] == 2 and approved["external_actions_performed"] is False
+            plan = client.get("/v1/plans/P001").json()
+            validate("Plan", plan)
+            assert plan["approval_id"] == approved["approval_id"] and plan["version"] == 2
+            assert post(client, "/v1/plans/P001/approvals", request, "different-key").status_code == 409
+            assert post(client, "/v1/plans/P001/approvals", {**request, "acknowledged_job_ids": []}, "same-approval").json()["code"] == "IDEMPOTENCY_CONFLICT"
+        assert post(client, "/v1/plans/P001/approvals", request, "same-approval").json() == approved
+        with client.app.state.store.db.connect() as conn:
+            assert conn.execute("SELECT count(*) FROM approvals").fetchone()[0] == 1
+            assert conn.execute("SELECT count(*) FROM plans").fetchone()[0] == 2
+            assert conn.execute("SELECT current_version FROM plan_heads").fetchone()[0] == 2
+        next_snapshot = deepcopy(snapshot)
+        next_snapshot.update(scenario_id="S002", base_plan_version=2,
+                             baseline_assignments=plan["assignments"], baseline_unassigned_job_ids=plan["unassigned_job_ids"])
+        assert post(client, "/v1/scenarios", next_snapshot).status_code == 201
+        assert post(client, "/v1/plans/P001/approvals", request, "old-result").status_code == 409
+
+
+def test_expired_or_future_input_cannot_be_approved(settings, snapshot):
+    with make_client(settings, replay=EngineReplay()) as client:
+        assert post(client, "/v1/scenarios", snapshot).status_code == 201
+        run = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                   "methods": ["B1"], "time_limit_seconds": 10, "seed": 42}).json()
+        assert results(client, run, timeout=20).status_code == 200
+        for clock, code in (("2026-11-06T23:59:00Z", "INPUT_STALE"), ("2026-11-07T03:00:01Z", "INPUT_EXPIRED")):
+            with patch("backend.db.store.utc_now", return_value=clock):
+                denied = post(client, "/v1/plans/P001/approvals", approval(run, method="B1"))
+                assert denied.status_code == 503 and denied.json()["code"] == code
+        with client.app.state.store.db.connect() as conn:
+            assert conn.execute("SELECT count(*) FROM approvals").fetchone()[0] == 0
+
+
+def test_competing_approvals_allow_only_one_version(settings, snapshot):
+    with make_client(settings, replay=EngineReplay()) as client:
+        assert post(client, "/v1/scenarios", snapshot).status_code == 201
+        run = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                   "methods": ["B1"], "time_limit_seconds": 10, "seed": 42}).json()
+        assert results(client, run, timeout=20).status_code == 200
+        with patch("backend.db.store.utc_now", return_value="2026-11-07T00:30:00Z"):
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                responses = list(pool.map(lambda n: post(client, "/v1/plans/P001/approvals", approval(run, method="B1"), f"competing-{n}"), range(4)))
+        assert sorted(r.status_code for r in responses) == [201, 409, 409, 409]
+        with client.app.state.store.db.connect() as conn:
+            assert conn.execute("SELECT count(*) FROM approvals").fetchone()[0] == 1
+            assert conn.execute("SELECT count(*) FROM plans").fetchone()[0] == 2
+
+
+def test_approval_storage_failure_rolls_back_everything(settings, snapshot):
+    from backend.db import store as store_module
+    original_insert = store_module.insert
+    def fail_approval(conn, table, row, field_paths=None):
+        if table == "approvals":
+            raise sqlite3.OperationalError("simulated storage failure")
+        return original_insert(conn, table, row, field_paths)
+    with make_client(settings, replay=EngineReplay()) as client:
+        assert post(client, "/v1/scenarios", snapshot).status_code == 201
+        run = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                   "methods": ["B1"], "time_limit_seconds": 10, "seed": 42}).json()
+        assert results(client, run, timeout=20).status_code == 200
+        with patch("backend.db.store.utc_now", return_value="2026-11-07T00:30:00Z"):
+            with patch("backend.db.store.insert", side_effect=fail_approval):
+                denied = post(client, "/v1/plans/P001/approvals", approval(run, method="B1"), "retry-after-failure")
+                assert denied.status_code == 503 and denied.json()["code"] == "STORAGE_UNAVAILABLE"
+            with client.app.state.store.db.connect() as conn:
+                assert conn.execute("SELECT count(*) FROM plans").fetchone()[0] == 1
+                assert conn.execute("SELECT count(*) FROM approvals").fetchone()[0] == 0
+                assert conn.execute("SELECT current_version FROM plan_heads").fetchone()[0] == 1
+                assert conn.execute("SELECT count(*) FROM idempotency_records WHERE idempotency_key='retry-after-failure'").fetchone()[0] == 0
+            assert post(client, "/v1/plans/P001/approvals", approval(run, method="B1"), "retry-after-failure").status_code == 201
+
+
+def test_metric_mismatch_never_becomes_eligible(settings, snapshot):
+    from backend.engine import solve
+    result = solve(snapshot, "B1", {"time_limit_seconds": 10, "seed": 42})
+    result["metrics"]["movable_travel_minutes"] += 1
+    success = subprocess.CompletedProcess([], 0, stdout=json.dumps(result), stderr="")
+    with patch("backend.api.engine_replay.subprocess.run", return_value=success):
+        with make_client(settings, replay=EngineReplay()) as client:
+            assert post(client, "/v1/scenarios", snapshot).status_code == 201
+            run = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                       "methods": ["B1"], "time_limit_seconds": 10, "seed": 42}).json()
+            result = results(client, run).json()["results"][0]
+            assert result["validation_status"] == "failed" and not result["approval_eligible"]
+            assert post(client, "/v1/plans/P001/approvals", approval(run, method="B1")).json()["code"] == "RESULT_NOT_ELIGIBLE"
+
+
+def test_fixed_residual_risk_must_be_verified_and_acknowledged(settings, snapshot):
+    from backend.api.result_integrity import verify_schedule
+    from backend.engine import solve
+    snapshot["jobs"][0]["gross_weight_kg"] = 100000
+    result = solve(snapshot, "B1", {"time_limit_seconds": 10, "seed": 42})
+    assert verify_schedule(snapshot, result)
+    tampered = deepcopy(result)
+    tampered["issues"] = [i for i in tampered["issues"] if i["job_id"] != "J0"]
+    assert not verify_schedule(snapshot, tampered)
+    tampered = deepcopy(result)
+    tampered["metrics"]["movable_travel_minutes"] += 1
+    assert not verify_schedule(snapshot, tampered)
+    with make_client(settings, replay=EngineReplay()) as client:
+        assert post(client, "/v1/scenarios", snapshot).status_code == 201
+        run = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                   "methods": ["B1"], "time_limit_seconds": 10, "seed": 42}).json()
+        computed = results(client, run, timeout=20).json()["results"][0]
+        assert computed["validation_status"] == "passed" and computed["approval_eligible"]
+        with patch("backend.db.store.utc_now", return_value="2026-11-07T00:30:00Z"):
+            missing = post(client, "/v1/plans/P001/approvals", approval(run, method="B1"))
+            assert missing.status_code == 422 and missing.json()["code"] == "ACKNOWLEDGEMENT_REQUIRED"
+            accepted = post(client, "/v1/plans/P001/approvals", approval(run, method="B1", acknowledged_job_ids=["J0", "J3"]))
+            assert accepted.status_code == 201, accepted.text
+
+
+@pytest.mark.parametrize("mutation", ["drop_fixed", "duplicate_job", "duplicate_slot", "invalid_time"])
+def test_engine_rejects_corrupt_assignment_without_partial_results(settings, snapshot, mutation):
+    from backend.engine import solve
+    result = solve(snapshot, "B1", {"time_limit_seconds": 10, "seed": 42})
+    if mutation == "drop_fixed":
+        result["assignments"] = [a for a in result["assignments"] if a["job_id"] != "J0"]
+        result["unassigned_job_ids"].append("J0")
+    elif mutation == "duplicate_job":
+        result["assignments"].append(deepcopy(result["assignments"][0]))
+    elif mutation == "duplicate_slot":
+        result["assignments"][1]["vehicle_id"] = result["assignments"][0]["vehicle_id"]
+        result["assignments"][1]["sequence"] = result["assignments"][0]["sequence"]
+    else:
+        movable = next(a for a in result["assignments"] if a["job_id"] != "J0")
+        movable["gate_arrival_at"] = "2026-11-08T00:00:00Z"
+    success = subprocess.CompletedProcess([], 0, stdout=json.dumps(result), stderr="")
+    with patch("backend.api.engine_replay.subprocess.run", return_value=success):
+        with make_client(settings, replay=EngineReplay()) as client:
+            assert post(client, "/v1/scenarios", snapshot).status_code == 201
+            response = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                            "methods": ["B1"], "time_limit_seconds": 10, "seed": 42})
+            assert results(client, response.json()).status_code == 503
+            with client.app.state.store.db.connect() as conn:
+                assert conn.execute("SELECT count(*) FROM method_results").fetchone()[0] == 0
+
+
+def test_engine_failure_discards_partial_results_and_records_method(settings, snapshot):
+    from backend.engine import solve
+    first = solve(snapshot, "B0", {"time_limit_seconds": 10, "seed": 42})
+    success = subprocess.CompletedProcess([], 0, stdout=json.dumps(first), stderr="")
+    with patch("backend.api.engine_replay.subprocess.run", side_effect=[success, subprocess.TimeoutExpired("engine", 15)]):
+        with make_client(settings, replay=EngineReplay()) as client:
+            assert post(client, "/v1/scenarios", snapshot).status_code == 201
+            response = post(client, "/v1/runs", {"scenario_id": "S001", "base_plan_version": 1,
+                            "methods": ["B0", "B1"], "time_limit_seconds": 10, "seed": 42})
+            run = response.json()
+            assert results(client, run).status_code == 503
+            state = client.get(f"/v1/runs/{run['run_id']}").json()
+            assert state["status"] == "failed"
+            assert "B1" in state["error"]["details"][0]["reason"]
+            with client.app.state.store.db.connect() as conn:
+                assert conn.execute("SELECT count(*) FROM method_results").fetchone()[0] == 0
 
 
 @pytest.mark.parametrize("origin", ["http://localhost:8000", "http://localhost:8123", "http://127.0.0.1:8123"])

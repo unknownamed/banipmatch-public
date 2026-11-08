@@ -150,7 +150,7 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
                 <td>
                   <code>{r.engine_version}</code>
                 </td>
-                <td>{r.objective_stages.length ? r.objective_stages.map((o) => `${o.name}:${o.status}`).join(', ') : '없음(계산 안 함)'}</td>
+                <td>{r.objective_stages.length ? r.objective_stages.map((o) => `${o.objective}:${o.status}`).join(', ') : '없음(계산 안 함)'}</td>
                 <td>{r.validation_status === 'not_run' ? '실행 안 함' : r.validation_status}</td>
               </tr>
             ))}

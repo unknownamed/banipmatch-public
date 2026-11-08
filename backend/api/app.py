@@ -15,6 +15,8 @@ from starlette.middleware.cors import CORSMiddleware
 
 from backend.api.contracts import ApiError, runtime_openapi, validate
 from backend.api.fixture import FixtureReplay
+from backend.api.engine_replay import EngineReplay
+from backend.api.input_preflight import check_input
 from backend.api.runs import ReplayJobs
 from backend.api.settings import Settings
 from backend.api.storage_checks import storage_checks
@@ -26,7 +28,7 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
     settings = settings or Settings.from_env()
     database = Database(settings.db_path)
     store = Store(database)
-    adapter = replay or FixtureReplay()
+    adapter = replay or (EngineReplay() if settings.run_mode == "engine" else FixtureReplay())
 
     @asynccontextmanager
     async def lifespan(app):
@@ -47,7 +49,7 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
     app = FastAPI(title="반입맞춤 로컬 모의 API", version="0.1.0", lifespan=lifespan,
                   swagger_ui_parameters={"persistAuthorization": False})
     app.state.store = store
-    app.openapi = runtime_openapi
+    app.openapi = lambda: runtime_openapi(settings.run_mode)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins),
                        allow_methods=["GET", "POST"],
                        allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
@@ -138,7 +140,10 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
     @app.post("/v1/runs", dependencies=dependencies)
     def create_run(request: Request, body: Any = Body(...)):
         validate("RunRequest", body)
-        status, response = store.create_run(body, key(request), adapter.check)
+        def check(snapshot, methods):
+            check_input(snapshot)
+            adapter.check(snapshot, methods)
+        status, response = store.create_run(body, key(request), check)
         app.state.jobs.submit(response["run_id"])
         return JSONResponse(response, status_code=status)
 
@@ -158,7 +163,7 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
     @app.post("/v1/plans/{plan_id}/approvals", dependencies=dependencies)
     def approve_plan(plan_id: str, request: Request, body: Any = Body(...)):
         validate("ApprovalRequest", body)
-        key(request)
-        store.reject_approval(plan_id, body)
+        status, response = store.approve(plan_id, body, key(request))
+        return JSONResponse(response, status_code=status)
 
     return app

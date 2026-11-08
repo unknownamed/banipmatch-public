@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import math
 import sqlite3
+from datetime import datetime
 from uuid import uuid4
 
 from backend.api.contracts import ApiError, canonical, digest, utc_now
@@ -202,15 +203,63 @@ class Store:
                          "base_plan_version": run["base_plan_version"], "input_sha256": sha,
                          "results": [indexed[m] for m in run["methods"]]}
 
-    def reject_approval(self, plan_id: str, request: dict) -> None:
-        with self.db.transaction() as conn:
+    def approve(self, plan_id: str, request: dict, key: str) -> tuple[int, dict]:
+        """단일 로컬 모의 주체의 내부 승인. 버전 갱신과 멱등 응답을 원자적으로 저장."""
+        from backend.api.input_preflight import check_input
+        from backend.api.result_integrity import verify_schedule
+
+        def operation(conn):
+            integer_binding(request["expected_version"], "/expected_version")
             head, run = self.head(conn, plan_id), self.run(conn, request["run_id"])
             if (run["plan_id"] != plan_id or request["expected_version"] != head["current_version"]
                     or run["base_plan_version"] != head["current_version"]
                     or run["scenario_id"] != head["active_scenario_id"]):
                 raise ApiError(409, "PLAN_VERSION_CONFLICT", "계획 또는 입력이 변경되어 이전 결과 승인 불가")
+            if run["status"] != "completed":
+                raise ApiError(422, "RUN_NOT_COMPLETED", "완료된 실행만 승인 가능")
             row = conn.execute("SELECT result_json FROM method_results WHERE run_id=? AND method=?",
                                (run["run_id"], request["method"])).fetchone()
-            if row and json.loads(row[0])["result_origin"] == "illustrative_fixture":
+            if row is None:
+                raise ApiError(404, "RESULT_NOT_FOUND", "요청한 방법의 결과가 없음")
+            result = json.loads(row[0])
+            if result["result_origin"] != "computed":
                 raise ApiError(422, "RESULT_NOT_COMPUTED", "설명용 결과는 승인할 수 없음")
-            raise ApiError(503, "APPROVAL_NOT_IMPLEMENTED", "실계산·독립 검증·운영 인증·승인 기능은 미구현")
+            snapshot = self.snapshot(conn, run["scenario_id"])
+            if (request["method"] == "B0" or not result["approval_eligible"]
+                    or result["validation_status"] != "passed" or not verify_schedule(snapshot, result)):
+                raise ApiError(422, "RESULT_NOT_ELIGIBLE", "독립 검증을 통과한 조정 결과만 승인 가능")
+            now = utc_now()
+            current_time = datetime.fromisoformat(now.replace("Z", "+00:00"))
+            if current_time < datetime.fromisoformat(snapshot["as_of"].replace("Z", "+00:00")):
+                raise ApiError(503, "INPUT_STALE", "입력 기준시각이 서버 현재시각 이후임")
+            if current_time > datetime.fromisoformat(snapshot["policy"]["input_valid_until"].replace("Z", "+00:00")):
+                raise ApiError(503, "INPUT_EXPIRED", "입력 유효기간이 지났음")
+            check_input(snapshot)
+            required = set(result["unassigned_job_ids"]) | {
+                issue["job_id"] for issue in result["issues"]
+                if issue["code"] == "FIXED_RESIDUAL_RISK" and issue["job_id"] is not None
+            }
+            if not required <= set(request["acknowledged_job_ids"]):
+                raise ApiError(422, "ACKNOWLEDGEMENT_REQUIRED", "미처리·고정 위험 작업을 확인해야 함")
+            version, sid, approval_id = head["current_version"] + 1, run["scenario_id"], "A-" + uuid4().hex
+            approval = {"approval_id": approval_id, "plan_id": plan_id, "version": version,
+                        "run_id": run["run_id"], "method": request["method"], "approved_by": DEMO_ACTOR,
+                        "approved_at": now, "external_actions_performed": False}
+            plan = {"plan_id": plan_id, "version": version, "scenario_id": sid,
+                    "assignments": result["assignments"], "unassigned_job_ids": result["unassigned_job_ids"],
+                    "approval_id": approval_id}
+            insert(conn, "plans", {"plan_id": plan_id, "version": version, "scenario_id": sid,
+                                   "approval_id": approval_id, "plan_json": canonical(plan), "created_at": now})
+            for assignment in result["assignments"]:
+                insert(conn, "assignments", {"plan_id": plan_id, "version": version, "scenario_id": sid, **assignment})
+            insert(conn, "approvals", {"approval_id": approval_id, "plan_id": plan_id, "version": version,
+                   "scenario_id": sid, "run_id": run["run_id"], "method": request["method"],
+                   "expected_version": request["expected_version"], "approved_by": DEMO_ACTOR, "approved_at": now,
+                   "acknowledged_job_ids_json": canonical(request["acknowledged_job_ids"]), "external_actions_performed": False})
+            updated = conn.execute("UPDATE plan_heads SET current_version=?, updated_at=? WHERE plan_id=? "
+                                   "AND current_version=? AND active_scenario_id=?",
+                                   (version, now, plan_id, request["expected_version"], sid)).rowcount
+            if updated != 1:
+                raise ApiError(409, "PLAN_VERSION_CONFLICT", "계획 또는 입력이 변경됨")
+            return 201, approval
+        return self.idempotent(f"POST /v1/plans/{plan_id}/approvals", key, request, operation)

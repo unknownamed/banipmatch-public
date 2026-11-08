@@ -33,28 +33,39 @@ def _unique_object(pairs: list[tuple[str, Any]]) -> dict:
     return result
 
 
-def load_snapshot_json(path: str | Path) -> InputReport:
+def _read_json_document(path: str | Path) -> tuple[Any, tuple[InputIssue, ...]]:
     path = Path(path)
     try:
         value = json.loads(path.read_text(encoding="utf-8-sig"), object_pairs_hook=_unique_object)
     except _DuplicateKey:
-        return InputReport(None, (InputIssue("JSON_DUPLICATE_KEY", "", "JSON 객체의 키가 중복됩니다.", path.name),))
+        return None, (InputIssue("JSON_DUPLICATE_KEY", "", "JSON 객체의 키가 중복됩니다.", path.name),)
     except json.JSONDecodeError as error:
-        return InputReport(None, (InputIssue("JSON_INVALID", "", "JSON 문법이 올바르지 않습니다.", path.name, error.lineno),))
+        return None, (InputIssue("JSON_INVALID", "", "JSON 문법이 올바르지 않습니다.", path.name, error.lineno),)
     except (OSError, UnicodeError):
-        return InputReport(None, (InputIssue("FILE_READ", "", "UTF-8 파일을 읽을 수 없습니다.", path.name),))
+        return None, (InputIssue("FILE_READ", "", "UTF-8 파일을 읽을 수 없습니다.", path.name),)
     except ValueError:
-        return InputReport(None, (InputIssue("JSON_INVALID", "", "처리 가능한 JSON 숫자 범위를 초과했습니다.", path.name),))
+        return None, (InputIssue("JSON_INVALID", "", "처리 가능한 JSON 숫자 범위를 초과했습니다.", path.name),)
+    return value, ()
+
+
+def load_snapshot_json(path: str | Path) -> InputReport:
+    path = Path(path)
+    value, issues = _read_json_document(path)
+    if issues:
+        return InputReport(None, issues)
     return validate_snapshot(value, source=path.name)
 
 
-def load_jobs_csv(path: str | Path, *, context: dict, evidence: dict) -> InputReport:
+def load_jobs_csv(
+    path: str | Path, *, context: dict, evidence: dict,
+    context_source: str | None = None, evidence_source: str | None = None,
+) -> InputReport:
     """context의 jobs를 CSV 전체로 교체한다. 새 출처는 호출자가 명시해야 한다."""
     path = Path(path)
     if not isinstance(context, dict):
-        return InputReport(None, (InputIssue("CONTEXT_INVALID", "", "전체 스냅샷 문맥이 필요합니다.", path.name),))
+        return InputReport(None, (InputIssue("CONTEXT_INVALID", "", "전체 스냅샷 문맥이 필요합니다.", context_source),))
     if not contract_validator("Evidence").is_valid(evidence):
-        return InputReport(None, (InputIssue("EVIDENCE_INVALID", "/evidence", "CSV 자료의 출처·유형·시각을 명시해야 합니다.", path.name),))
+        return InputReport(None, (InputIssue("EVIDENCE_INVALID", "/evidence", "CSV 자료의 출처·유형·시각을 명시해야 합니다.", evidence_source or path.name),))
     jobs = []
     rows: list[int] = []
     issues = []
@@ -107,8 +118,13 @@ def load_jobs_csv(path: str | Path, *, context: dict, evidence: dict) -> InputRe
     for issue in report.issues:
         parts = issue.path.split("/")
         if len(parts) > 2 and parts[1] == "jobs" and parts[2].isdigit():
-            mapped.append(replace(issue, source=path.name, row=rows[int(parts[2])]))
+            if len(parts) > 3 and parts[3] == "evidence" and evidence_source:
+                mapped.append(replace(issue, source=evidence_source))
+            else:
+                mapped.append(replace(issue, source=path.name, row=rows[int(parts[2])]))
+        elif issue.path == "/jobs":
+            mapped.append(replace(issue, source=path.name))
         else:
             # 문맥 오류를 CSV 행의 오류로 잘못 표시하지 않는다.
-            mapped.append(issue)
+            mapped.append(replace(issue, source=context_source))
     return InputReport(report.snapshot, tuple(mapped))
