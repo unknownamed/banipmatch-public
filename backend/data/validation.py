@@ -107,6 +107,26 @@ def validate_snapshot(value: Any, *, source: str | None = None) -> InputReport:
 
     check_minutes(snapshot)
     as_of = _time(snapshot["as_of"])
+
+    def check_evidence(node: Any, path: str = "") -> None:
+        if isinstance(node, dict):
+            for key, item in node.items():
+                child = path + _pointer([key])
+                if key == "evidence":
+                    received = _time(item["received_at"])
+                    if received > as_of:
+                        issue("EVIDENCE_AFTER_SNAPSHOT", child + "/received_at",
+                              "입력 기준시각 이후에 수신한 자료는 사용할 수 없습니다.")
+                    if item["observed_at"] is not None and _time(item["observed_at"]) > received:
+                        issue("EVIDENCE_TIME_ORDER", child + "/observed_at",
+                              "관측시각이 수신시각보다 늦습니다. 시각의 의미와 출처를 확인해야 합니다.")
+                else:
+                    check_evidence(item, child)
+        elif isinstance(node, list):
+            for index, item in enumerate(node):
+                check_evidence(item, path + f"/{index}")
+
+    check_evidence(snapshot)
     if _time(snapshot["policy"]["input_valid_until"]) < as_of:
         issue("INPUT_EXPIRED_AT_SNAPSHOT", "/policy/input_valid_until",
               "입력 기준시각이 입력 유효기간 이후입니다.")
