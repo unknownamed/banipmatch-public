@@ -21,7 +21,7 @@
 | 내부 API·데이터 계약 | OpenAPI 3.1.1, JSON Schema 초안 |
 | DB | SQLite 기준 16개 테이블·133개 필드, 실행 가능한 초기 스키마 |
 | 예제 | 모의 입력·설명용 결과·오류 사례·CSV 제공 |
-| 검수 | 전체 Python227개/하위검사221개, 계약·예제29개, DB32개 통과 |
+| 검수 | 전체 Python236개/하위검사223개, 계약·예제29개, DB32개 통과 |
 | 데이터 첫 구현 | [CSV·JSON 입력 검증](backend/data/README.md), 오류의 필드·출처·행 반환, CLI 준비와 수신/관측시각 검사. API 실행 전 점검에 연결 |
 | 로컬 API 1차 | 입력 등록·조회·SQLite 저장. 설명용 재생 또는 선택형 B0~B3 실계산·독립 검사·내부 승인. API 테스트61건 |
 | 엔진 | 0.2.3 B0/B1 및 B2/B3 사전식 최적화, 엔진·평가 테스트100건. 완전한 초기안 힌트·probing0 보완. [기존0.2.1·156회](docs/experiments/engine-sensitivity-2026-11-08/README.md)와 [후속72회](docs/experiments/engine-profile-2026-11-08/README.md)를 분리 보존. 실제 API 연결 검수, 전체 브라우저 시연은 후속 |
