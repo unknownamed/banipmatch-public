@@ -61,21 +61,23 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       const plan = await client.getPlan?.(run.plan_id).catch(() => null)
       setStatus({ state: 'done', approval, planWarning: currentPlanWarning(plan ?? null, approval, run.scenario_id) })
     } catch (error) {
-      setStatus({ state: 'error', error, retryable: !(error instanceof ApiRequestError) || approvalRetryAllowed(error.status, error.body?.code), uncertain: !(error instanceof ApiRequestError) || error.status >= 500 })
+      // 코드가 있는 503(유효기간·미확인 근거 등)은 서버의 확정 거절이다. 처리 여부를 모르는 건 재시도 대상뿐이다.
+      const retryable = !(error instanceof ApiRequestError) || approvalRetryAllowed(error.status, error.body?.code)
+      setStatus({ state: 'error', error, retryable, uncertain: retryable })
     } finally {
       sending.current = false
     }
   }
 
   const err = status.state === 'error' ? status.error : null
-  const otherLabel = shared?.status.state === 'sending' ? '승인 요청 중' : shared?.status.state === 'done' ? '승인됨' : '승인 결과 확인 필요'
+  const otherLabel = shared?.status.state === 'sending' ? '승인 요청 중입니다' : shared?.status.state === 'done' ? '승인되었습니다' : '승인 결과를 확인해야 합니다'
   return (
     <section className="card">
       <h2>운송사 내부 계획 승인</h2>
       <p className="muted">내부 배차 계획만 확정합니다. 터미널 방문예약 변경, 기존 TMS 반영, 기사 통보는 하지 않습니다.</p>
       {otherBusy && (
         <p className="warn" role="status">
-          이 실행은 {shared!.method} 조정안이 {otherLabel}입니다. {shared!.method} 탭에서 결과를 확인하세요. 다른 방법은 보낼 수 없습니다.
+          이 실행은 {shared!.method} 조정안이 {otherLabel}. {shared!.method} 탭에서 결과를 확인하세요. 다른 방법은 보낼 수 없습니다.
         </p>
       )}
       {ack.length > 0 && (
@@ -87,7 +89,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
         </p>
       )}
       <button type="button" disabled={!canSend} title={gate.reasons.join('\n')} onClick={send}>
-        {status.state === 'sending' ? '승인 요청 중…' : status.state === 'error' ? '다시 시도' : `${result.method} 조정안 승인`}
+        {status.state === 'sending' ? '승인 요청 중…' : status.state === 'error' && status.retryable ? '다시 시도' : `${result.method} 조정안 승인`}
       </button>
       {!gate.allowed && (
         <ul className="warn">

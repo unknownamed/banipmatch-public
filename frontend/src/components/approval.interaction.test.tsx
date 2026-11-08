@@ -87,7 +87,7 @@ describe('승인 상태 전이', () => {
     expect(container.textContent).toContain('승인됨')
   })
 
-  it.each([[409, 'PLAN_VERSION_CONFLICT'], [422, 'RESULT_NOT_COMPUTED'], [503, 'WINDOW_UNCONFIRMED'], [503, 'APPROVAL_NOT_IMPLEMENTED']])('HTTP %s %s 뒤 오래된 요청을 반복하지 않는다', async (status, code) => {
+  it.each([[409, 'PLAN_VERSION_CONFLICT'], [422, 'RESULT_NOT_COMPUTED'], [503, 'WINDOW_UNCONFIRMED'], [503, 'INPUT_EXPIRED'], [503, 'APPROVAL_NOT_IMPLEMENTED']])('HTTP %s %s 뒤 오래된 요청을 반복하지 않는다', async (status, code) => {
     const approve = vi.fn().mockRejectedValue(new ApiRequestError(Number(status), { code: String(code), message: 'rejected' }))
     await render(clientWith(approve))
     await acknowledge()
@@ -96,6 +96,10 @@ describe('승인 상태 전이', () => {
     await submit()
     expect(approve).toHaveBeenCalledTimes(1)
     expect(container.textContent).not.toContain('승인됨')
+    // 확정 거절은 '결과 확인 필요'나 '다시 시도'로 보이지 않는다(브라우저 검수 2026-11-09).
+    expect(container.textContent).toContain('승인 거절')
+    expect(container.textContent).not.toContain('결과 확인 필요')
+    expect(button().textContent).not.toContain('다시 시도')
   })
 
   it('저장소 장애는 유효기간으로 오인하지 않고 같은 요청으로 재시도할 수 있다', async () => {
@@ -196,7 +200,7 @@ describe('방법 탭 전환 중 승인 상태 유지 (PR #9 리뷰)', () => {
     expect(button().disabled).toBe(true)
     expect(container.querySelector<HTMLInputElement>('input')!.disabled).toBe(true)
     await act(async () => resolve(approval))
-    expect(container.textContent).toContain('B3 조정안이 승인됨')
+    expect(container.textContent).toContain('B3 조정안이 승인되었습니다')
     await submit()
     await act(async () => pick(computed))
     expect(container.textContent).toContain('내부 계획 v2 승인됨')
