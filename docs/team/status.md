@@ -1,6 +1,6 @@
 # 현재 구현 상태
 
-기준일: 2026-11-08. 소스·검수·병합 기록으로 확인한 상태만 갱신합니다. B2/B3 최초 구현은 [PR #6](https://github.com/unknownamed/banipmatch/pull/6)으로 병합됐으며, 엔진0.2.2·프론트 #7/#8의 후속 연결은 [최신 통합 인계](handoffs/2026-11-08-main-integration.md)를 따릅니다. #9는 사용자 요청으로 이번 병합에서 제외했습니다.
+기준일: 2026-11-08. 소스·검수·병합 기록으로 확인한 상태만 갱신합니다. B2/B3와 프론트 #7/#8 통합은 [직전 인계](handoffs/2026-11-08-main-integration.md), 최신 엔진0.2.3은 [진단 보완 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)를 따릅니다. #9는 선효의 지적 수정과 재시도 오류 보완 후 사용자가 보류를 해제해 병합했습니다.
 
 ## 합의한 개발 방향
 
@@ -21,10 +21,10 @@
 | 실행·승인 차단 | 설명용 B0/B3 결과·실패/재시작 복구. 실제 엔진 미연결. 설명용 승인422·이전 입력/계획409, 승인 저장은 미구현 |
 | 개발 예제 | v0.1 모의 입력과 수작업 설명용 결과는 원본 보존 |
 | 엔진 실계산 예제 | [B0/B1 최초 결과](../experiments/engine-b0-b1/README.md)와 [B0~B3 비교7종](../experiments/engine-b0-b3/README.md). 모두 모의 입력의 실제 코드 실행 |
-| 로컬 검수 | 전체 Python171개/하위검사156개, 계약·예제29개 + 메모리 DB32개 통과 |
+| 로컬 검수 | 전체 Python174개/하위검사160개, 계약·예제29개 + 메모리 DB32개 통과 |
 | 데이터 입력 | [PR #5](https://github.com/unknownamed/banipmatch/pull/5) CSV·JSON 변환·입력 관계 검사·필드/출처/행 오류 반환. 시간 관계·정밀도·복귀 후 차량 가용 검사 보완. API 실행 경로 연결은 후속 작업 |
-| 엔진 | B0 진단·B1 삽입 + B2/B3 사전식 최적화, 테스트86건. 엔진0.2.2. 완전한 초기안 힌트·probing0, 기존 제약·목적·전처리 유지. 단계별 최적성·초기안·총 시간 예산 기록. [최신 인계](handoffs/2026-11-08-unknownamed-engine-performance.md) |
-| 프론트 | PR #4·#7의 비교 화면·HTTP 입력 등록/실행과 #8의 누락·미확인 입력 안내 반영. 일시 저장 장애는 재시도를 유지. 테스트24건·타입 검사·빌드 통과. 설명용 API 연결 확인, 실제 엔진·브라우저 전체 검수는 후속 |
+| 엔진 | B0 진단·B1 삽입 + B2/B3 사전식 최적화, 테스트89건. 엔진0.2.3. 완전한 초기안 힌트·probing0, 기존 제약·목적·전처리 유지. 단계별 최적성·초기안·총 시간 예산 기록. [최신 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md) |
+| 프론트 | PR #4·#7·#8의 비교·입력 실행·오류 안내와 #9의 내부 승인 요청 화면 반영. 방법 전환 중 진행 상태 보존, 통신 실패·503 뒤 위험 재확인과 같은 키 재시도. 테스트61건·타입 검사·빌드 통과. 서버 승인 저장·실제 엔진·브라우저 전체 검수는 후속 |
 | 실제 앱 통합·독립 일정 검사·승인·인증 | 미구현 |
 | 외부 API·실배차·GPS | 승인·실표본·운송사 협조 미확보. 이용 가능하다고 가정하지 않음 |
 | AI 협업 | 공통 지침·도구별 진입점·담당표·PR/인계 양식. [필요한 변경만 관련자 1회 검토](review-policy.md), 피드백 수정·검사 후 재승인 대기 없음 |
@@ -37,7 +37,7 @@
 
 1. 각자 역할표의 첫 작업을 맡고 작은 예제 하나로 입력→저장→계산 상태→비교 화면을 연결합니다.
 2. 설명용 결과로 연결한 화면에는 모의 표시를 유지하고 승인을 막습니다.
-3. [최신 엔진 인계](handoffs/2026-11-08-unknownamed-engine-performance.md)에 따라 `solve()`를 연결하고 독립 일정 검사와 승인 충돌을 구현합니다. 현재 엔진 결과는 모두 `validation_status=not_run`, `approval_eligible=false`입니다.
+3. [최신 엔진 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)에 따라 `solve()`를 연결하고 독립 일정 검사와 승인 충돌을 구현합니다. 현재 엔진 결과는 모두 `validation_status=not_run`, `approval_eligible=false`입니다.
 4. 엔진 담당은 [기존0.2.1·156회 실험](../experiments/engine-sensitivity-2026-11-08/README.md)을 보존하고 [0.2.2·72회 후속 실험](../experiments/engine-profile-2026-11-08/README.md)을 추가했습니다. 20건 B3는3초에서도 변경2건의 최적성을 증명했고10초 호출 중앙값은5.21→2.42초입니다. 50건10초 B2는 전체 최적성을 증명했으나 B3는26/23/1,440(미처리/변경/이동분)의 FEASIBLE로 전체 미증명이며3초는 두 방법 모두 첫 목적 FEASIBLE입니다. 다음은 리뷰 피드백·통합 대조·50건 B3의 남은 증명 병목 검증입니다. [기존156회 PDF4쪽](../experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)과 [후속72회 PDF2쪽](../experiments/engine-report-2026-11-08/engine-performance-followup.pdf)을 분리 제공합니다. 모의 결과를 현장 효과로 확대하지 않습니다.
 5. 데이터·API 담당은 [입력 검증 인계](handoffs/2026-11-07-s-minjun-input-validation.md)를 읽고 실행 전 점검에 연결합니다. 누락·미확인 입력도 등록·보관하는 API 정책은 유지하며, `InputReport.valid`를 일정 독립 검증·승인 성공으로 사용하지 않습니다.
 

@@ -19,18 +19,18 @@
 | 내부 API·데이터 계약 | OpenAPI 3.1.1, JSON Schema 초안 |
 | DB | SQLite 기준 16개 테이블·133개 필드, 실행 가능한 초기 스키마 |
 | 예제 | 모의 입력·설명용 결과·오류 사례·CSV 제공 |
-| 검수 | 전체 Python171개/하위검사156개, 계약·예제29개, DB32개 통과 |
+| 검수 | 전체 Python174개/하위검사160개, 계약·예제29개, DB32개 통과 |
 | 데이터 첫 구현 | [CSV·JSON 입력 검증](backend/data/README.md), 오류의 필드·출처·행 반환. API 실행 경로 연결은 후속 작업 |
 | 로컬 API 1차 | 입력 등록·조회, SQLite 저장, 실행 상태·설명용 B0/B3 결과 조회, 승인 차단. API 테스트 45건 |
-| 엔진 | 0.2.2 B0/B1 및 B2/B3 사전식 최적화, 엔진 테스트86건. 완전한 초기안 힌트·probing0 보완. [기존0.2.1·156회](docs/experiments/engine-sensitivity-2026-11-08/README.md)와 [후속72회](docs/experiments/engine-profile-2026-11-08/README.md)를 분리 보존. 전체 앱 연결은 후속 |
-| 프론트 | React·TypeScript 비교 화면, HTTP 입력 등록·실행 요청·오류 입력 원안 표시. 테스트24건·타입 검사·빌드 통과. 설명용 API 연결 확인, 실제 엔진·브라우저 전체 검수는 후속 |
+| 엔진 | 0.2.3 B0/B1 및 B2/B3 사전식 최적화, 엔진 테스트89건. 완전한 초기안 힌트·probing0 보완. [기존0.2.1·156회](docs/experiments/engine-sensitivity-2026-11-08/README.md)와 [후속72회](docs/experiments/engine-profile-2026-11-08/README.md)를 분리 보존. 전체 앱 연결은 후속 |
+| 프론트 | React·TypeScript 비교·입력 등록·오류 입력 안내·내부 승인 요청 화면. 테스트61건·타입 검사·빌드 통과. 탭 전환 중 승인 상태·재시도 보존. 실제 서버 승인 저장·엔진 연결·브라우저 전체 검수는 후속 |
 | 실제 앱 통합·독립 일정 검사·승인·인증 | 구현 예정 |
 | 외부 API 연동·실제 운송 자료 | 권한·표본 확인 필요 |
 | 최종 대회 보고서·발표자료 | 준비 중 |
 
 검수는 **명세·저장 구조·예제와 B0~B3 동작**을 대상으로 합니다. 모형의 최적성 증명은 실제 운송 자료의 효과 검증과 다릅니다.
 
-[엔진 실행·연결 안내](backend/engine/README.md) · [모의 예제의 실계산 결과](docs/experiments/engine-b0-b1/README.md) · [최신 엔진 인계](docs/team/handoffs/2026-11-08-unknownamed-engine-performance.md)
+[엔진 실행·연결 안내](backend/engine/README.md) · [모의 예제의 실계산 결과](docs/experiments/engine-b0-b1/README.md) · [최신 엔진 인계](docs/team/handoffs/2026-11-08-unknownamed-engine-diagnostics.md)
 
 보고서 삽입용 [기존156회 요약 PDF4쪽](docs/experiments/engine-report-2026-11-08/engine-experiment-summary.pdf) · [0.2.2 후속72회 PDF2쪽](docs/experiments/engine-report-2026-11-08/engine-performance-followup.pdf). 후속20건 B3는3초에서도 변경2건의 최적성을 증명했고10초 호출 중앙값은5.21→2.42초였습니다. 50건10초 B2는 전체 최적성을 증명했지만 B3는 미처리26/변경23/이동1,440분의 `FEASIBLE`로 전체 최적성은 미증명입니다. 모의 결과이며 API 독립 일정 검사·승인·현장 검증은 별도입니다.
 
