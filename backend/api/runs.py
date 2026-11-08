@@ -1,7 +1,9 @@
-"""가벼운 설명용 응답 작업만 별도 스레드에서 실행. 실제 엔진 실행기가 아님."""
+"""실행 상태와 저장 관리. 실계산은 어댑터가 별도 프로세스로 실행."""
 from concurrent.futures import ThreadPoolExecutor
 
 from backend.api.contracts import ApiError, canonical, utc_now, validate
+from backend.api.engine_replay import EngineExecutionError
+from backend.api.result_integrity import check_result_integrity, verify_schedule
 from backend.db.store import Store, insert
 
 
@@ -36,9 +38,17 @@ class ReplayJobs:
                 raise ValueError("fixture method mismatch")
             for result in results:
                 validate("MethodResult", result)
-                if (result["result_origin"] != "illustrative_fixture" or result["approval_eligible"]
-                        or result["objective_proven"] or result["validation_status"] != "not_run"):
-                    raise ValueError("first phase only permits unapproved illustrative fixtures")
+                if (result["result_origin"] != self.replay.result_origin or result["approval_eligible"]
+                        or result["validation_status"] != "not_run"
+                        or (result["result_origin"] == "illustrative_fixture" and result["objective_proven"])):
+                    raise ValueError("독립 검사 전 승인 불가 결과만 저장 가능")
+                if result["result_origin"] == "computed":
+                    check_result_integrity(snapshot, result)
+                    if verify_schedule(snapshot, result):
+                        result["validation_status"] = "passed"
+                        result["approval_eligible"] = True
+                    elif result["method"] != "B0" and result["solution_status"] in {"HEURISTIC", "FEASIBLE", "OPTIMAL"}:
+                        result["validation_status"] = "failed"
             with self.store.db.transaction() as conn:
                 for result in results:
                     insert(conn, "method_results", {
@@ -49,10 +59,11 @@ class ReplayJobs:
                     })
                 conn.execute("UPDATE runs SET status='completed', finished_at=? WHERE run_id=?",
                              (utc_now(), run_id))
-        except Exception:
+        except Exception as exc:
             # 예외 본문에는 요청·파일 경로·외부 응답이 포함될 수 있어 저장/반환하지 않음.
-            error = ApiError(503, "RUN_EXECUTION_FAILED", "설명용 결과 작업 실패",
-                             [{"path": "/methods", "reason": "이 실행의 모든 결과는 승인 불가"}]).body()
+            reason = f"{exc.method}: {exc.reason}" if isinstance(exc, EngineExecutionError) else "실행 결과 처리 실패"
+            error = ApiError(503, "RUN_EXECUTION_FAILED", "실행 실패",
+                             [{"path": "/methods", "reason": reason}]).body()
             with self.store.db.transaction() as conn:
                 conn.execute("UPDATE runs SET status='failed', finished_at=?, error_json=? WHERE run_id=?",
                              (utc_now(), canonical(error), run_id))

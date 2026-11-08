@@ -6,6 +6,7 @@ from backend.api.contracts import ApiError, DRAFT, canonical
 
 
 class FixtureReplay:
+    result_origin = "illustrative_fixture"
     def __init__(self):
         examples = DRAFT / "예제 데이터"
         self.snapshot = json.loads((examples / "01_snapshot.json").read_text(encoding="utf-8"))
