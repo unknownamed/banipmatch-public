@@ -4,6 +4,7 @@ import { App } from './App'
 import { createHttpClient } from './api/client'
 import { createFixtureClient, FIXTURE_IDS } from './api/fixtureClient'
 import { MapCheck } from './components/MapCheck'
+import { StartRunPanel } from './components/StartRunPanel'
 import './styles.css'
 
 // VITE_API_MODE=http 이면 /v1 백엔드에 연결한다. 기본은 공통 예제(fixture).
@@ -12,6 +13,8 @@ const params = new URLSearchParams(location.search)
 
 function Root() {
   const client = useMemo(() => (mode === 'http' ? createHttpClient('', import.meta.env.VITE_API_TOKEN) : createFixtureClient()), [])
+  // 서버 run_id는 서버가 만든다. http 모드에서 run이 없으면 계산 요청부터 시작한다.
+  if (mode === 'http' && !params.get('run')) return <StartRunPanel client={client} />
   return (
     <App
       client={client}
