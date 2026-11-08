@@ -11,9 +11,9 @@ from . import EngineInputError, solve
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="반입맞춤 B0/B1 로컬 계산")
+    parser = argparse.ArgumentParser(description="반입맞춤 B0~B3 로컬 계산")
     parser.add_argument("--snapshot", type=Path, required=True)
-    parser.add_argument("--methods", nargs="+", choices=("B0", "B1"), default=["B0", "B1"])
+    parser.add_argument("--methods", nargs="+", choices=("B0", "B1", "B2", "B3"), default=["B0", "B1", "B2", "B3"])
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--time-limit-seconds", type=int, default=10)
     parser.add_argument("--output", type=Path)

@@ -91,7 +91,7 @@ class BoundaryTests(unittest.TestCase):
         validator = Draft202012Validator({"$defs": schema["$defs"], "$ref": "#/$defs/Results"},
                                           format_checker=FormatChecker())
         self.assertEqual(list(validator.iter_errors(result)), [])
-        self.assertEqual([r["method"] for r in result["results"]], ["B0", "B1"])
+        self.assertEqual([r["method"] for r in result["results"]], ["B0", "B1", "B2", "B3"])
         self.assertTrue(all(r["result_origin"] == "computed" for r in result["results"]))
 
     def test_cli_input_rejection_does_not_write_a_result_file(self):

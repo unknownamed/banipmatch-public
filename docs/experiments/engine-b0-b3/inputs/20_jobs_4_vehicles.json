@@ -1,0 +1,827 @@
+{
+  "schema_version": "0.1.0",
+  "scenario_id": "DEMO-20_jobs_4_vehicles",
+  "plan_id": "P001",
+  "base_plan_version": 1,
+  "data_mode": "simulated",
+  "as_of": "2026-11-07T00:00:00Z",
+  "locations": [
+    {
+      "location_id": "D",
+      "name": "모의 차고지",
+      "kind": "depot",
+      "latitude": null,
+      "longitude": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "location_id": "O",
+      "name": "모의 상차지",
+      "kind": "origin",
+      "latitude": null,
+      "longitude": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "location_id": "HJNC",
+      "name": "모의 대상 터미널",
+      "kind": "terminal",
+      "latitude": null,
+      "longitude": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    }
+  ],
+  "vehicles": [
+    {
+      "vehicle_id": "T1",
+      "start_location_id": "D",
+      "available_at": "2026-11-07T00:00:00Z",
+      "shift_end_at": "2026-11-07T04:00:00Z",
+      "capacity_kg": 30000,
+      "equipment_types": [
+        "DRY20",
+        "DRY40"
+      ],
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "vehicle_id": "T2",
+      "start_location_id": "D",
+      "available_at": "2026-11-07T00:00:00Z",
+      "shift_end_at": "2026-11-07T04:00:00Z",
+      "capacity_kg": 30000,
+      "equipment_types": [
+        "DRY20",
+        "DRY40"
+      ],
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "vehicle_id": "T3",
+      "start_location_id": "D",
+      "available_at": "2026-11-07T00:00:00Z",
+      "shift_end_at": "2026-11-07T04:00:00Z",
+      "capacity_kg": 30000,
+      "equipment_types": [
+        "DRY20",
+        "DRY40"
+      ],
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "vehicle_id": "T4",
+      "start_location_id": "D",
+      "available_at": "2026-11-07T00:00:00Z",
+      "shift_end_at": "2026-11-07T04:00:00Z",
+      "capacity_kg": 30000,
+      "equipment_types": [
+        "DRY20",
+        "DRY40"
+      ],
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "job_id": "J001",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:00:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J002",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:15:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J003",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:30:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J004",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:45:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J005",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:00:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J006",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:15:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J007",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:30:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J008",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:45:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J009",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:00:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J010",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:15:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J011",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:30:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J012",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:45:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J013",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:00:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J014",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:15:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J015",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:30:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J016",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:45:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J017",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:00:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J018",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:15:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J019",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:30:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "job_id": "J020",
+      "voyage_id": "V1",
+      "origin_id": "O",
+      "terminal_id": "HJNC",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T00:45:00Z",
+      "gross_weight_kg": 24000,
+      "equipment_type": "DRY40",
+      "service_minutes": 0,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    }
+  ],
+  "windows": [
+    {
+      "window_id": "W1",
+      "voyage_id": "V1",
+      "terminal_id": "HJNC",
+      "opens_at": "2026-11-07T00:00:00Z",
+      "closes_at": "2026-11-07T03:00:00Z",
+      "verification": "confirmed",
+      "confirmed_by": "demo-dispatcher",
+      "confirmed_at": "2026-11-07T00:00:00Z",
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    }
+  ],
+  "travel_times": [
+    {
+      "from_location_id": "D",
+      "to_location_id": "O",
+      "minutes": 20,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "O",
+      "to_location_id": "HJNC",
+      "minutes": 30,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "HJNC",
+      "to_location_id": "D",
+      "minutes": 10,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "D",
+      "to_location_id": "HJNC",
+      "minutes": 30,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "HJNC",
+      "to_location_id": "O",
+      "minutes": 30,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "O",
+      "to_location_id": "D",
+      "minutes": 10,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "D",
+      "to_location_id": "D",
+      "minutes": 0,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "O",
+      "to_location_id": "O",
+      "minutes": 0,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "HJNC",
+      "to_location_id": "HJNC",
+      "minutes": 0,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:travel_matrix",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    }
+  ],
+  "baseline_assignments": [
+    {
+      "job_id": "J001",
+      "vehicle_id": "T1",
+      "sequence": 1,
+      "pickup_departure_at": "2026-11-07T00:20:00Z",
+      "gate_arrival_at": "2026-11-07T00:50:00Z",
+      "return_at": "2026-11-07T01:00:00Z"
+    },
+    {
+      "job_id": "J002",
+      "vehicle_id": "T2",
+      "sequence": 1,
+      "pickup_departure_at": "2026-11-07T00:20:00Z",
+      "gate_arrival_at": "2026-11-07T00:50:00Z",
+      "return_at": "2026-11-07T01:00:00Z"
+    },
+    {
+      "job_id": "J003",
+      "vehicle_id": "T3",
+      "sequence": 1,
+      "pickup_departure_at": "2026-11-07T00:20:00Z",
+      "gate_arrival_at": "2026-11-07T00:50:00Z",
+      "return_at": "2026-11-07T01:00:00Z"
+    },
+    {
+      "job_id": "J004",
+      "vehicle_id": "T4",
+      "sequence": 1,
+      "pickup_departure_at": "2026-11-07T00:20:00Z",
+      "gate_arrival_at": "2026-11-07T00:50:00Z",
+      "return_at": "2026-11-07T01:00:00Z"
+    },
+    {
+      "job_id": "J005",
+      "vehicle_id": "T1",
+      "sequence": 2,
+      "pickup_departure_at": "2026-11-07T01:20:00Z",
+      "gate_arrival_at": "2026-11-07T01:50:00Z",
+      "return_at": "2026-11-07T02:00:00Z"
+    },
+    {
+      "job_id": "J006",
+      "vehicle_id": "T2",
+      "sequence": 2,
+      "pickup_departure_at": "2026-11-07T01:20:00Z",
+      "gate_arrival_at": "2026-11-07T01:50:00Z",
+      "return_at": "2026-11-07T02:00:00Z"
+    },
+    {
+      "job_id": "J007",
+      "vehicle_id": "T3",
+      "sequence": 2,
+      "pickup_departure_at": "2026-11-07T01:20:00Z",
+      "gate_arrival_at": "2026-11-07T01:50:00Z",
+      "return_at": "2026-11-07T02:00:00Z"
+    },
+    {
+      "job_id": "J008",
+      "vehicle_id": "T4",
+      "sequence": 2,
+      "pickup_departure_at": "2026-11-07T01:20:00Z",
+      "gate_arrival_at": "2026-11-07T01:50:00Z",
+      "return_at": "2026-11-07T02:00:00Z"
+    },
+    {
+      "job_id": "J009",
+      "vehicle_id": "T1",
+      "sequence": 3,
+      "pickup_departure_at": "2026-11-07T02:20:00Z",
+      "gate_arrival_at": "2026-11-07T02:50:00Z",
+      "return_at": "2026-11-07T03:00:00Z"
+    },
+    {
+      "job_id": "J010",
+      "vehicle_id": "T2",
+      "sequence": 3,
+      "pickup_departure_at": "2026-11-07T02:20:00Z",
+      "gate_arrival_at": "2026-11-07T02:50:00Z",
+      "return_at": "2026-11-07T03:00:00Z"
+    },
+    {
+      "job_id": "J011",
+      "vehicle_id": "T3",
+      "sequence": 3,
+      "pickup_departure_at": "2026-11-07T02:20:00Z",
+      "gate_arrival_at": "2026-11-07T02:50:00Z",
+      "return_at": "2026-11-07T03:00:00Z"
+    },
+    {
+      "job_id": "J012",
+      "vehicle_id": "T4",
+      "sequence": 3,
+      "pickup_departure_at": "2026-11-07T02:20:00Z",
+      "gate_arrival_at": "2026-11-07T02:50:00Z",
+      "return_at": "2026-11-07T03:00:00Z"
+    },
+    {
+      "job_id": "J013",
+      "vehicle_id": "T1",
+      "sequence": 4,
+      "pickup_departure_at": "2026-11-07T03:20:00Z",
+      "gate_arrival_at": "2026-11-07T03:50:00Z",
+      "return_at": "2026-11-07T04:00:00Z"
+    },
+    {
+      "job_id": "J014",
+      "vehicle_id": "T2",
+      "sequence": 4,
+      "pickup_departure_at": "2026-11-07T03:20:00Z",
+      "gate_arrival_at": "2026-11-07T03:50:00Z",
+      "return_at": "2026-11-07T04:00:00Z"
+    },
+    {
+      "job_id": "J015",
+      "vehicle_id": "T3",
+      "sequence": 4,
+      "pickup_departure_at": "2026-11-07T03:20:00Z",
+      "gate_arrival_at": "2026-11-07T03:50:00Z",
+      "return_at": "2026-11-07T04:00:00Z"
+    },
+    {
+      "job_id": "J016",
+      "vehicle_id": "T4",
+      "sequence": 4,
+      "pickup_departure_at": "2026-11-07T03:20:00Z",
+      "gate_arrival_at": "2026-11-07T03:50:00Z",
+      "return_at": "2026-11-07T04:00:00Z"
+    },
+    {
+      "job_id": "J017",
+      "vehicle_id": "T1",
+      "sequence": 5,
+      "pickup_departure_at": "2026-11-07T04:20:00Z",
+      "gate_arrival_at": "2026-11-07T04:50:00Z",
+      "return_at": "2026-11-07T05:00:00Z"
+    },
+    {
+      "job_id": "J018",
+      "vehicle_id": "T2",
+      "sequence": 5,
+      "pickup_departure_at": "2026-11-07T04:20:00Z",
+      "gate_arrival_at": "2026-11-07T04:50:00Z",
+      "return_at": "2026-11-07T05:00:00Z"
+    },
+    {
+      "job_id": "J019",
+      "vehicle_id": "T3",
+      "sequence": 5,
+      "pickup_departure_at": "2026-11-07T04:20:00Z",
+      "gate_arrival_at": "2026-11-07T04:50:00Z",
+      "return_at": "2026-11-07T05:00:00Z"
+    },
+    {
+      "job_id": "J020",
+      "vehicle_id": "T4",
+      "sequence": 5,
+      "pickup_departure_at": "2026-11-07T04:20:00Z",
+      "gate_arrival_at": "2026-11-07T04:50:00Z",
+      "return_at": "2026-11-07T05:00:00Z"
+    }
+  ],
+  "change": {
+    "change_id": "C001",
+    "voyage_id": "V1",
+    "terminal_id": "HJNC",
+    "previous_opens_at": "2026-11-06T23:00:00Z",
+    "previous_closes_at": "2026-11-07T03:00:00Z",
+    "new_window_id": "W1",
+    "verification": "confirmed",
+    "confirmed_by": "demo-dispatcher",
+    "confirmed_at": "2026-11-07T00:00:00Z",
+    "evidence": {
+      "kind": "simulated",
+      "source_ref": "fixture:scenario_001",
+      "observed_at": null,
+      "received_at": "2026-11-07T00:00:00Z"
+    }
+  },
+  "policy": {
+    "buffer_minutes": 0,
+    "time_change_tolerance_minutes": 5,
+    "input_valid_until": "2026-11-07T03:00:00Z",
+    "allow_wait_before_open": false,
+    "external_actions_enabled": false
+  },
+  "baseline_unassigned_job_ids": []
+}
