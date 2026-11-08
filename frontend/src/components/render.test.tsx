@@ -109,6 +109,12 @@ describe('계산 요청 거절과 일시 장애 구분', () => {
     }))).toBe(false)
   })
 
+  it('설명용 모드의 B1/B2 미제공은 입력 거절이 아니라 방법을 바꿔 다시 요청할 오류다', () => {
+    expect(isInputRejection(new ApiRequestError(422, {
+      code: 'DEMO_METHOD_UNAVAILABLE', message: '제공된 설명용 결과는 B0·B3뿐임',
+    }))).toBe(false)
+  })
+
   it('본문 없는 503과 연결 실패를 입력 거절로 단정하지 않는다', () => {
     expect(isInputRejection(new ApiRequestError(503, null))).toBe(false)
     expect(isInputRejection(new Error('Failed to fetch'))).toBe(false)
