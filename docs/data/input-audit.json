@@ -1,0 +1,654 @@
+{
+  "report_version": "1",
+  "scope": "declared_snapshot_metadata_only",
+  "external_permissions": "not_assessed",
+  "representativeness": "not_assessed",
+  "counts_are_fact_bundles_not_independent_observations": true,
+  "source_sha256_lf": {
+    "tools/audit_data_evidence.py": "6d3ddf5c4c0e7cf3930ade76a587600ed0afbca4837d5d254bc51a109fa11e48",
+    "backend/data/validation.py": "bf94396f296e81ab7e7c776959b0dbb8ef9a1f80e1cda533a7ba70b1f0c664d9",
+    "backend/data/inputs.py": "3add355dd6ac3eeec4cb09be2930180ff1e1cbf867004864c0bc8f5339e6a8a7"
+  },
+  "snapshot_count": 9,
+  "valid_snapshot_count": 9,
+  "snapshots": [
+    {
+      "path": "docs/experiments/engine-b0-b3/inputs/01_common.json",
+      "valid": true,
+      "input_sha256": "1f6b7ea4e54e0e289d6aeda289e3edaf803c566e6657cd2101a1f618e8c76010",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "DEMO-01_common",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 2,
+        "jobs": 4,
+        "windows": 2,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "assumed": 9,
+        "simulated": 12
+      },
+      "declared_source_refs": {
+        "fixture:scenario_001": 12,
+        "fixture:travel_matrix": 9
+      },
+      "observed_at_null_count": 21,
+      "fact_bundle_count": 21,
+      "job_conditions": {
+        "frozen_count": 1,
+        "departed_count": 1,
+        "equipment_types": {
+          "DRY40": 4
+        },
+        "gross_weight_kg": {
+          "known": 4,
+          "null": 0,
+          "min": 24000,
+          "max": 24000
+        },
+        "service_minutes": {
+          "known": 4,
+          "null": 0,
+          "min": 20,
+          "max": 20
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 2,
+        "null": 0,
+        "min": 30000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 2,
+        "null": 0,
+        "min": 150,
+        "max": 240
+      },
+      "policy": {
+        "buffer_minutes": 10,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T03:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-b0-b3/inputs/02_change_travel_tradeoff.json",
+      "valid": true,
+      "input_sha256": "765eca8825a037f1a7ba6d4dbcd9c144efa08a48de8445b3d97fccf37f035d22",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "DEMO-02_change_travel_tradeoff",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 2,
+        "jobs": 1,
+        "windows": 1,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "assumed": 9,
+        "simulated": 8
+      },
+      "declared_source_refs": {
+        "fixture:scenario_001": 8,
+        "fixture:travel_matrix": 9
+      },
+      "observed_at_null_count": 17,
+      "fact_bundle_count": 17,
+      "job_conditions": {
+        "frozen_count": 0,
+        "departed_count": 0,
+        "equipment_types": {
+          "DRY40": 1
+        },
+        "gross_weight_kg": {
+          "known": 1,
+          "null": 0,
+          "min": 24000,
+          "max": 24000
+        },
+        "service_minutes": {
+          "known": 1,
+          "null": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 2,
+        "null": 0,
+        "min": 30000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 1,
+        "null": 0,
+        "min": 120,
+        "max": 120
+      },
+      "policy": {
+        "buffer_minutes": 0,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T03:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-b0-b3/inputs/03_keep_departure.json",
+      "valid": true,
+      "input_sha256": "a46b48fa7af6ccef77056eaac35110c0e538a8960e8dfb6cd3a6be7c10b00d7f",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "DEMO-03_keep_departure",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 1,
+        "jobs": 1,
+        "windows": 1,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "assumed": 9,
+        "simulated": 7
+      },
+      "declared_source_refs": {
+        "fixture:scenario_001": 7,
+        "fixture:travel_matrix": 9
+      },
+      "observed_at_null_count": 16,
+      "fact_bundle_count": 16,
+      "job_conditions": {
+        "frozen_count": 0,
+        "departed_count": 0,
+        "equipment_types": {
+          "DRY40": 1
+        },
+        "gross_weight_kg": {
+          "known": 1,
+          "null": 0,
+          "min": 24000,
+          "max": 24000
+        },
+        "service_minutes": {
+          "known": 1,
+          "null": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 1,
+        "null": 0,
+        "min": 30000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 1,
+        "null": 0,
+        "min": 120,
+        "max": 120
+      },
+      "policy": {
+        "buffer_minutes": 0,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T03:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-b0-b3/inputs/04_serve_before_change.json",
+      "valid": true,
+      "input_sha256": "b9c990004cf476422ff3dc7492d4d06cd13e8680d12dada189bc1a6d470eb10b",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "DEMO-04_serve_before_change",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 2,
+        "jobs": 2,
+        "windows": 1,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "assumed": 9,
+        "simulated": 9
+      },
+      "declared_source_refs": {
+        "fixture:scenario_001": 9,
+        "fixture:travel_matrix": 9
+      },
+      "observed_at_null_count": 18,
+      "fact_bundle_count": 18,
+      "job_conditions": {
+        "frozen_count": 0,
+        "departed_count": 0,
+        "equipment_types": {
+          "DRY20": 1,
+          "DRY40": 1
+        },
+        "gross_weight_kg": {
+          "known": 2,
+          "null": 0,
+          "min": 24000,
+          "max": 24000
+        },
+        "service_minutes": {
+          "known": 2,
+          "null": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 2,
+        "null": 0,
+        "min": 30000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 1,
+        "null": 0,
+        "min": 30,
+        "max": 30
+      },
+      "policy": {
+        "buffer_minutes": 0,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T03:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-b0-b3/inputs/05_fixed_reservation.json",
+      "valid": true,
+      "input_sha256": "3dddad77e42b9c7bfe6022f3631aef26d867a86531a2e062eaead6f618c82a1a",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "DEMO-05_fixed_reservation",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 1,
+        "jobs": 2,
+        "windows": 1,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "assumed": 9,
+        "simulated": 8
+      },
+      "declared_source_refs": {
+        "fixture:scenario_001": 8,
+        "fixture:travel_matrix": 9
+      },
+      "observed_at_null_count": 17,
+      "fact_bundle_count": 17,
+      "job_conditions": {
+        "frozen_count": 1,
+        "departed_count": 0,
+        "equipment_types": {
+          "DRY40": 2
+        },
+        "gross_weight_kg": {
+          "known": 2,
+          "null": 0,
+          "min": 24000,
+          "max": 24000
+        },
+        "service_minutes": {
+          "known": 2,
+          "null": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 1,
+        "null": 0,
+        "min": 30000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 1,
+        "null": 0,
+        "min": 180,
+        "max": 180
+      },
+      "policy": {
+        "buffer_minutes": 0,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T03:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-b0-b3/inputs/20_jobs_4_vehicles.json",
+      "valid": true,
+      "input_sha256": "3c328453e773820c93df05e31b656f5b2133fe54ec22873688ddfdd0e57b7503",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "DEMO-20_jobs_4_vehicles",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 4,
+        "jobs": 20,
+        "windows": 1,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "assumed": 9,
+        "simulated": 29
+      },
+      "declared_source_refs": {
+        "fixture:scenario_001": 29,
+        "fixture:travel_matrix": 9
+      },
+      "observed_at_null_count": 38,
+      "fact_bundle_count": 38,
+      "job_conditions": {
+        "frozen_count": 0,
+        "departed_count": 0,
+        "equipment_types": {
+          "DRY40": 20
+        },
+        "gross_weight_kg": {
+          "known": 20,
+          "null": 0,
+          "min": 24000,
+          "max": 24000
+        },
+        "service_minutes": {
+          "known": 20,
+          "null": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 4,
+        "null": 0,
+        "min": 30000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 1,
+        "null": 0,
+        "min": 180,
+        "max": 180
+      },
+      "policy": {
+        "buffer_minutes": 0,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T03:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-b0-b3/inputs/50_jobs_8_vehicles.json",
+      "valid": true,
+      "input_sha256": "2ca815fafd6cd77ee0b69a6e300a603e180702a2be775cd6015d4697b1987414",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "DEMO-50_jobs_8_vehicles",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 8,
+        "jobs": 50,
+        "windows": 1,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "assumed": 9,
+        "simulated": 63
+      },
+      "declared_source_refs": {
+        "fixture:scenario_001": 63,
+        "fixture:travel_matrix": 9
+      },
+      "observed_at_null_count": 72,
+      "fact_bundle_count": 72,
+      "job_conditions": {
+        "frozen_count": 0,
+        "departed_count": 0,
+        "equipment_types": {
+          "DRY40": 50
+        },
+        "gross_weight_kg": {
+          "known": 50,
+          "null": 0,
+          "min": 24000,
+          "max": 24000
+        },
+        "service_minutes": {
+          "known": 50,
+          "null": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 8,
+        "null": 0,
+        "min": 30000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 1,
+        "null": 0,
+        "min": 180,
+        "max": 180
+      },
+      "policy": {
+        "buffer_minutes": 0,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T03:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_12.json",
+      "valid": true,
+      "input_sha256": "8944bf134e4dfae281a2f04670b33e753b083c92243b84e7e9698fd495fd6cd2",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "mixed_12",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 4,
+        "jobs": 12,
+        "windows": 3,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "simulated": 32
+      },
+      "declared_source_refs": {
+        "fixture:benchmark:mixed_12": 32
+      },
+      "observed_at_null_count": 32,
+      "fact_bundle_count": 32,
+      "job_conditions": {
+        "frozen_count": 0,
+        "departed_count": 0,
+        "equipment_types": {
+          "DRY20": 6,
+          "DRY40": 6
+        },
+        "gross_weight_kg": {
+          "known": 12,
+          "null": 0,
+          "min": 18000,
+          "max": 28000
+        },
+        "service_minutes": {
+          "known": 12,
+          "null": 0,
+          "min": 0,
+          "max": 20
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 4,
+        "null": 0,
+        "min": 20000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 3,
+        "null": 0,
+        "min": 150,
+        "max": 180
+      },
+      "policy": {
+        "buffer_minutes": 10,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T06:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    },
+    {
+      "path": "docs/experiments/engine-sensitivity-2026-11-08/inputs/mixed_fixed_12.json",
+      "valid": true,
+      "input_sha256": "c3118931e9656017965931c63ded380816afd9f075ba004f32a351cf2e6b0708",
+      "issues": [],
+      "schema_version": "0.1.0",
+      "scenario_id": "mixed_fixed_12",
+      "declared_data_mode": "simulated",
+      "as_of_utc": "2026-11-07T00:00:00Z",
+      "counts": {
+        "locations": 3,
+        "vehicles": 4,
+        "jobs": 12,
+        "windows": 3,
+        "travel_times": 9
+      },
+      "declared_evidence_kinds": {
+        "simulated": 32
+      },
+      "declared_source_refs": {
+        "fixture:benchmark:mixed_fixed_12": 32
+      },
+      "observed_at_null_count": 32,
+      "fact_bundle_count": 32,
+      "job_conditions": {
+        "frozen_count": 2,
+        "departed_count": 1,
+        "equipment_types": {
+          "DRY20": 6,
+          "DRY40": 6
+        },
+        "gross_weight_kg": {
+          "known": 12,
+          "null": 0,
+          "min": 18000,
+          "max": 28000
+        },
+        "service_minutes": {
+          "known": 12,
+          "null": 0,
+          "min": 0,
+          "max": 20
+        }
+      },
+      "vehicle_capacity_kg": {
+        "known": 4,
+        "null": 0,
+        "min": 20000,
+        "max": 30000
+      },
+      "travel_minutes": {
+        "known": 9,
+        "null": 0,
+        "min": 0,
+        "max": 30
+      },
+      "window_duration_minutes": {
+        "known": 3,
+        "null": 0,
+        "min": 150,
+        "max": 180
+      },
+      "policy": {
+        "buffer_minutes": 10,
+        "time_change_tolerance_minutes": 5,
+        "input_valid_until": "2026-11-07T06:00:00Z",
+        "allow_wait_before_open": false,
+        "external_actions_enabled": false
+      }
+    }
+  ]
+}
