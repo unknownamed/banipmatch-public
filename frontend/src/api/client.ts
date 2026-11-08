@@ -1,4 +1,4 @@
-import type { ApiError, ResultsResponse, Run, Snapshot } from './types'
+import type { ApiError, Approval, ApprovalRequest, Plan, ResultsResponse, Run, Snapshot } from './types'
 
 /** 화면이 쓰는 조회 API. 구현은 fixture(공통 예제) 또는 http(백엔드) 중 하나. */
 export interface ApiClient {
@@ -9,6 +9,8 @@ export interface ApiClient {
   /** http 모드 전용. 재시도에는 같은 Idempotency-Key와 같은 본문을 쓴다. */
   registerScenario?(snapshot: Snapshot, idempotencyKey: string): Promise<{ scenario_id: string; plan_id: string }>
   createRun?(request: RunRequest, idempotencyKey: string): Promise<Run>
+  approve?(planId: string, request: ApprovalRequest, idempotencyKey: string): Promise<Approval>
+  getPlan?(planId: string): Promise<Plan>
 }
 
 export interface RunRequest {
@@ -59,6 +61,8 @@ export function createHttpClient(baseUrl = '', token?: string): ApiClient {
     mode: 'http',
     registerScenario: (snapshot, key) => post('/v1/scenarios', snapshot, key),
     createRun: (request, key) => post('/v1/runs', request, key),
+    approve: (planId, request, key) => post(`/v1/plans/${encodeURIComponent(planId)}/approvals`, request, key),
+    getPlan: (planId) => get(`/v1/plans/${encodeURIComponent(planId)}`).then(readJson<Plan>),
     getScenario: (id, signal) => get(`/v1/scenarios/${encodeURIComponent(id)}`, signal).then(readJson<Snapshot>),
     getRun: (id, signal) => get(`/v1/runs/${encodeURIComponent(id)}`, signal).then(readJson<Run>),
     async getResults(id, signal) {
