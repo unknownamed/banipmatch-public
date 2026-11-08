@@ -163,7 +163,7 @@ export interface MethodResult {
   approval_eligible: boolean
   engine_version: string
   solver_version: string | null
-  objective_stages: { name: string; status: string; value?: number | null }[]
+  objective_stages: { objective: 'unassigned' | 'changed' | 'travel'; status: 'OPTIMAL' | 'FEASIBLE' | 'UNKNOWN' | 'NOT_RUN'; value: number | null; best_bound: number | null }[]
   validation_status: 'passed' | 'failed' | 'not_run'
 }
 

@@ -153,7 +153,7 @@ describe('요청·결과 경계', () => {
     expect(approvalGate(run, { ...computed, solution_status }, run.scenario_id).allowed).toBe(false)
   })
   it('목적 단계 UNKNOWN은 유효한 FEASIBLE 결과의 승인을 막는 전체 해 상태가 아니다', () => {
-    const result: MethodResult = { ...computed, solution_status: 'FEASIBLE', objective_proven: false, objective_stages: [{ name: 'unassigned', status: 'UNKNOWN' }] }
+    const result: MethodResult = { ...computed, solution_status: 'FEASIBLE', objective_proven: false, objective_stages: [{ objective: 'unassigned', status: 'UNKNOWN', value: null, best_bound: null }] }
     expect(approvalGate(run, result, run.scenario_id).allowed).toBe(true)
   })
   it('입력·실행·결과의 계획 버전과 현재 요청 ID를 대조한다', () => {
