@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act } from 'react'
+import { act, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import runJson from '@examples/03_run_status.json'
@@ -9,7 +9,7 @@ import type { ApiClient } from '../api/client'
 import { ApiRequestError } from '../api/client'
 import type { Approval, MethodResult, Plan, Results, Run, Snapshot } from '../api/types'
 import { acknowledgeIds, approvalGate, approvalIdempotencyKey } from '../lib/approval'
-import { ApprovalPanel } from './ApprovalPanel'
+import { ApprovalPanel, type SharedApproval } from './ApprovalPanel'
 
 const run = runJson as unknown as Run
 const results = resultsJson as unknown as Results
@@ -171,5 +171,35 @@ describe('요청·결과 경계', () => {
     const other = approvalIdempotencyKey(cache, run.plan_id, { ...request, method: 'B1' })
     expect(other).not.toBe(first)
     expect(approvalIdempotencyKey(cache, run.plan_id, request)).toBe(first)
+  })
+})
+
+describe('방법 탭 전환 중 승인 상태 유지 (PR #9 리뷰)', () => {
+  const b1: MethodResult = { ...computed, method: 'B1' }
+  let pick!: (m: MethodResult) => void
+  // App처럼 승인 상태를 패널 밖에 두고, 방법이 바뀌면 패널을 새로 만든다.
+  function Host({ client }: { client: ApiClient }) {
+    const [result, setResult] = useState(computed)
+    const [shared, setShared] = useState<SharedApproval>(null)
+    pick = setResult
+    return <ApprovalPanel key={result.method} gate={approvalGate(run, result, run.scenario_id)} client={client} run={run} result={result} idempotencyKey={`k-${result.method}`} shared={shared} onShared={setShared} />
+  }
+
+  it('전송 중 다른 방법으로 갔다 돌아와도 진행·성공 상태가 남고 다른 방법은 보내지 않는다', async () => {
+    let resolve!: (a: Approval) => void
+    const approve = vi.fn(() => new Promise<Approval>((done) => { resolve = done }))
+    await act(async () => root.render(<Host client={clientWith(approve)} />))
+    await acknowledge()
+    await submit()
+    await act(async () => pick(b1))
+    expect(container.textContent).toContain('B3 조정안이 승인 요청 중')
+    expect(button().disabled).toBe(true)
+    await act(async () => resolve(approval))
+    expect(container.textContent).toContain('B3 조정안이 승인됨')
+    await submit()
+    await act(async () => pick(computed))
+    expect(container.textContent).toContain('내부 계획 v2 승인됨')
+    expect(button().disabled).toBe(true)
+    expect(approve).toHaveBeenCalledTimes(1)
   })
 })

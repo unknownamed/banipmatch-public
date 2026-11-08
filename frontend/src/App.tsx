@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
 import { useDispatchView } from './api/useDispatchView'
 import { ComparisonSection } from './components/ComparisonSection'
-import { ApprovalPanel } from './components/ApprovalPanel'
+import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
 import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
 import { acknowledgeIds, approvalGate, approvalIdempotencyKey } from './lib/approval'
 import { buildRows } from './lib/compare'
@@ -11,6 +11,9 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const view = useDispatchView(client, scenarioId, runId)
   const [picked, setPicked] = useState<string | null>(null)
   const approvalKeys = useMemo(() => new Map<string, string>(), [client])
+  // 승인 진행 상태는 방법 탭 전환으로 패널이 다시 만들어져도 유지한다. 실행이 바뀌면 버린다.
+  const [approval, setApproval] = useState<{ key: string; value: SharedApproval }>({ key: '', value: null })
+  const approvalScope = `${scenarioId}:${runId}:${client.mode}`
 
   const snapshot = view.scenario.state === 'ready' ? view.scenario.data : null
   const run = view.run.state === 'ready' ? view.run.data : null
@@ -70,6 +73,8 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
             gate={approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined)}
             client={client} run={run} result={cand} idempotencyKey={approvalKey}
+            shared={approval.key === approvalScope ? approval.value : null}
+            onShared={(value) => setApproval({ key: approvalScope, value })}
           />
         </>
       )}
