@@ -6,9 +6,11 @@ import runJson from '@examples/03_run_status.json'
 import resultsJson from '@examples/04_results_설명용.json'
 import type { Results, Run, Snapshot } from '../api/types'
 import type { DispatchView } from '../api/useDispatchView'
+import { ApiRequestError } from '../api/client'
 import { buildRows } from '../lib/compare'
 import { ComparisonSection } from './ComparisonSection'
 import { ComparisonTable } from './ComparisonTable'
+import { isInputRejection } from './StartRunPanel'
 
 const snapshot = snapshotJson as unknown as Snapshot
 const run = runJson as unknown as Run
@@ -72,6 +74,31 @@ describe('미확인 입력 표시', () => {
     )
     expect(html.match(/준비시각 미확인/g)).toHaveLength(1)
     expect(html).toContain('<b>J1</b>')
+  })
+})
+
+describe('계산 요청 거절과 일시 장애 구분', () => {
+  it('07의 입력 누락은 같은 입력의 재시도로 해결되지 않는다', () => {
+    expect(isInputRejection(new ApiRequestError(422, {
+      code: 'INPUT_INCOMPLETE', message: '미확인 입력이 있어 설명용 결과를 적용할 수 없음',
+    }))).toBe(true)
+  })
+
+  it('08의 반입시간 미확인은 503이어도 입력 확인이 필요하다', () => {
+    expect(isInputRejection(new ApiRequestError(503, {
+      code: 'WINDOW_UNCONFIRMED', message: '반입시간 변경 확인이 필요함',
+    }))).toBe(true)
+  })
+
+  it('저장소 503은 입력 수정 대상이 아니므로 일반 오류·재시도 경로를 유지한다', () => {
+    expect(isInputRejection(new ApiRequestError(503, {
+      code: 'STORAGE_UNAVAILABLE', message: '저장소를 사용할 수 없음',
+    }))).toBe(false)
+  })
+
+  it('본문 없는 503과 연결 실패를 입력 거절로 단정하지 않는다', () => {
+    expect(isInputRejection(new ApiRequestError(503, null))).toBe(false)
+    expect(isInputRejection(new Error('Failed to fetch'))).toBe(false)
   })
 })
 
