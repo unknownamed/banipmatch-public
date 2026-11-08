@@ -12,6 +12,8 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 역할표는 작업 분담이며, 기존 계약의 필드·단위·상태를 새로 정의하는 문서가 아닙니다.
 [기존 서비스 비교·개발 적용사항](service-comparison.md)의 공통 결론과 자신의 담당 부분도 읽습니다. 비교 결과는 현재 주제를 구체화하는 참고 기준이며, 신규 기능·필드·외부 동작을 자동으로 추가하는 지시가 아닙니다.
 
+[심사 항목별 증거 준비](evaluation-evidence.md)는 아래 네 담당이 자기 범위에서 준비할 주장·근거·미확인·완료 기준을 연결합니다. 역할을 재배정하거나 새 기능·외부 연락을 추가하는 문서가 아닙니다.
+
 | 담당 | 파트 | 담당 문서 | AI가 읽을 본문 |
 |---|---|---|---|
 | 최길웅 · [@choigilung](https://github.com/choigilung) | 프론트·화면 | [01 프론트](../development/v0.1/담당별%20문서/01_프론트_작업명세_v0.1.pdf) | [frontend_pages.json](../development/v0.1/공통%20규격/frontend_pages.json) |
