@@ -64,6 +64,17 @@ describe('원안 표는 결과 상태와 무관하게 남는다', () => {
   })
 })
 
+describe('미확인 입력 표시', () => {
+  it('07 입력의 null 준비시각은 0이나 정상으로 채우지 않고 미확인으로 보인다', async () => {
+    const s07 = (await import('@examples/07_snapshot_입력누락.json')).default as unknown as Snapshot
+    const html = renderToStaticMarkup(
+      <ComparisonTable rows={buildRows(s07, undefined, undefined)} asOf={s07.as_of} baseLabel="원안(입력)" candLabel={null} />,
+    )
+    expect(html.match(/준비시각 미확인/g)).toHaveLength(1)
+    expect(html).toContain('<b>J1</b>')
+  })
+})
+
 describe('고정 작업 표시', () => {
   it('보존되면 원안 유지, 시각이 바뀌면 경고', () => {
     const ok = renderToStaticMarkup(<ComparisonTable rows={buildRows(snapshot, b0, b3)} asOf={snapshot.as_of} baseLabel="B0" candLabel="B3" />)
