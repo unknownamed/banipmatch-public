@@ -21,10 +21,10 @@ def minute(value):
     return int((datetime.fromisoformat(value.replace("Z", "+00:00")) - EPOCH).total_seconds() // 60)
 
 
-def tiny_snapshot(rng):
+def tiny_snapshot(rng, buffer_minutes=0):
     path = Path(__file__).resolve().parents[2] / "docs/development/v0.1/예제 데이터/01_snapshot.json"
     snapshot = json.loads(path.read_text(encoding="utf-8"))
-    snapshot["policy"].update(buffer_minutes=0, time_change_tolerance_minutes=rng.randrange(2))
+    snapshot["policy"].update(buffer_minutes=buffer_minutes, time_change_tolerance_minutes=rng.randrange(2))
     for leg in snapshot["travel_times"]:
         leg["minutes"] = (0 if leg["from_location_id"] == leg["to_location_id"]
                           else rng.randint(1, 2))
@@ -48,10 +48,33 @@ def tiny_snapshot(rng):
         else:
             vehicle, departure = rng.choice(("T1", "T2")), rng.randrange(8)
             arrival = departure + travel[job["origin_id"], "HJNC"]
-            returned = arrival + job["service_minutes"] + travel["HJNC", job["return_location_id"]]
+            returned = arrival + buffer_minutes + job["service_minutes"] + travel["HJNC", job["return_location_id"]]
             snapshot["baseline_assignments"].append(dict(
                 job_id=job["job_id"], vehicle_id=vehicle, sequence=index + 1,
                 pickup_departure_at=at(departure), gate_arrival_at=at(arrival), return_at=at(returned)))
+    return snapshot
+
+
+def buffer_boundary_snapshot(buffer_minutes, *, cutoff_only):
+    """Isolate either gate+buffer cutoff or return+buffer vehicle occupancy."""
+    snapshot = tiny_snapshot(random.Random(18), buffer_minutes)
+    snapshot["policy"]["time_change_tolerance_minutes"] = 0
+    snapshot["vehicles"] = snapshot["vehicles"][:1]
+    snapshot["vehicles"][0].update(start_location_id="O", available_at=at(0),
+                                    shift_end_at=at(20 if cutoff_only else 6))
+    snapshot["windows"][0].update(opens_at=at(0), closes_at=at(5 if cutoff_only else 20))
+    for leg in snapshot["travel_times"]:
+        leg["minutes"] = 0 if leg["from_location_id"] == leg["to_location_id"] else 1
+    snapshot["jobs"] = snapshot["jobs"][:1 if cutoff_only else 2]
+    snapshot["baseline_assignments"], snapshot["baseline_unassigned_job_ids"] = [], []
+    for index, job in enumerate(snapshot["jobs"]):
+        job.update(origin_id="O", return_location_id="O", ready_at=at(3 if cutoff_only else 0),
+                   service_minutes=0)
+        departure = 3 if cutoff_only else index * (2 + buffer_minutes)
+        snapshot["baseline_assignments"].append(dict(
+            job_id=job["job_id"], vehicle_id="T1", sequence=index + 1,
+            pickup_departure_at=at(departure), gate_arrival_at=at(departure + 1),
+            return_at=at(departure + 2 + buffer_minutes)))
     return snapshot
 
 
@@ -69,6 +92,7 @@ def exhaustive_objectives(snapshot):
     window = snapshot["windows"][0]
     baseline = {row["job_id"]: row for row in snapshot["baseline_assignments"]}
     tolerance = snapshot["policy"]["time_change_tolerance_minutes"]
+    buffer = snapshot["policy"]["buffer_minutes"]
     vehicle_ids, job_ids = tuple(sorted(vehicles)), tuple(sorted(jobs))
 
     def route_schedules(vehicle_id, route, index=0, cursor=0, location=None, rows=(), distance=0):
@@ -80,9 +104,9 @@ def exhaustive_objectives(snapshot):
         approach = travel[location, job["origin_id"]]
         loaded = travel[job["origin_id"], job["terminal_id"]]
         returning = travel[job["terminal_id"], job["return_location_id"]]
-        duration = loaded + job["service_minutes"] + returning
+        duration = loaded + buffer + job["service_minutes"] + returning
         earliest = max(cursor + approach, minute(job["ready_at"]), minute(window["opens_at"]) - loaded)
-        latest = min(minute(window["closes_at"]) - loaded,
+        latest = min(minute(window["closes_at"]) - loaded - buffer,
                      minute(vehicles[vehicle_id]["shift_end_at"]) - duration)
         for departure in range(earliest, latest + 1):
             row = (job["job_id"], (vehicle_id, index + 1, departure))
@@ -128,6 +152,18 @@ def exhaustive_objectives(snapshot):
 
 
 class ExhaustiveOptimizationTests(unittest.TestCase):
+    def assert_matches_oracle(self, snapshot, method, expected):
+        result = solve(snapshot, method, {"seed": 1, "time_limit_seconds": 5})
+        metrics = result["metrics"]
+        actual = (metrics["unassigned_count"], metrics["movable_travel_minutes"])
+        if method == "B3":
+            actual = (actual[0], len(metrics["changed_job_ids"]), actual[1])
+        self.assertEqual(result["solution_status"], "OPTIMAL")
+        self.assertTrue(result["objective_proven"])
+        self.assertEqual(actual, expected[method])
+        self.assertEqual(metrics["movable_violation_count"], 0)
+        return actual
+
     def test_small_deterministic_cases_match_all_assignments_orders_and_start_times(self):
         rng = random.Random(471)
         for case in range(5):
@@ -135,15 +171,48 @@ class ExhaustiveOptimizationTests(unittest.TestCase):
             expected = exhaustive_objectives(snapshot)
             for method in ("B2", "B3"):
                 with self.subTest(case=case, method=method):
-                    result = solve(snapshot, method, {"seed": 1, "time_limit_seconds": 5})
-                    metrics = result["metrics"]
-                    actual = (metrics["unassigned_count"], metrics["movable_travel_minutes"])
-                    if method == "B3":
-                        actual = (actual[0], len(metrics["changed_job_ids"]), actual[1])
-                    self.assertEqual(result["solution_status"], "OPTIMAL")
-                    self.assertTrue(result["objective_proven"])
-                    self.assertEqual(actual, expected[method])
-                    self.assertEqual(metrics["movable_violation_count"], 0)
+                    self.assert_matches_oracle(snapshot, method, expected)
+
+    def test_buffer_counts_towards_cutoff_without_becoming_travel(self):
+        # Ready at 3, loaded travel 1, cutoff 5: buffer 1 fits exactly; 2 cannot fit.
+        for buffer, expected in (
+            (1, {"B2": (0, 2), "B3": (0, 0, 2)}),
+            (2, {"B2": (1, 0), "B3": (1, 0, 0)}),
+        ):
+            snapshot = buffer_boundary_snapshot(buffer, cutoff_only=True)
+            self.assertEqual(exhaustive_objectives(snapshot), expected)
+            for method in ("B2", "B3"):
+                with self.subTest(buffer=buffer, method=method):
+                    self.assert_matches_oracle(snapshot, method, expected)
+
+    def test_buffer_extends_return_and_limits_vehicle_reuse(self):
+        # One vehicle, shift end 6: two 3-minute jobs fit, two 4-minute jobs do not.
+        # The cutoff is deliberately loose, so only return/vehicle occupancy binds.
+        for buffer, expected in (
+            (1, {"B2": (0, 4), "B3": (0, 0, 4)}),
+            (2, {"B2": (1, 2), "B3": (1, 0, 2)}),
+        ):
+            snapshot = buffer_boundary_snapshot(buffer, cutoff_only=False)
+            self.assertEqual(exhaustive_objectives(snapshot), expected)
+            for method in ("B2", "B3"):
+                with self.subTest(buffer=buffer, method=method):
+                    self.assert_matches_oracle(snapshot, method, expected)
+
+    def test_certified_buffered_objectives_do_not_depend_on_input_array_order(self):
+        for buffer in (1, 2):
+            snapshot = tiny_snapshot(random.Random(471), buffer)
+            shuffled = deepcopy(snapshot)
+            for field in ("jobs", "vehicles", "travel_times", "baseline_assignments",
+                          "baseline_unassigned_job_ids"):
+                shuffled[field].reverse()
+            expected = exhaustive_objectives(snapshot)
+            self.assertEqual(exhaustive_objectives(shuffled), expected)
+            for method in ("B2", "B3"):
+                with self.subTest(buffer=buffer, method=method):
+                    original = self.assert_matches_oracle(snapshot, method, expected)
+                    reordered = self.assert_matches_oracle(shuffled, method, expected)
+                    # Different tied schedules are valid; the proved objective tuple is invariant.
+                    self.assertEqual(original, reordered)
 
 
 if __name__ == "__main__":

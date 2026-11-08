@@ -7,7 +7,7 @@ from time import monotonic
 from .context import Context, EngineInputError, issue, minute, stamp
 from .metrics import MissingTravelTimeError, calculate_metrics
 
-ENGINE_VERSION = "0.2.0-b0-b3"
+ENGINE_VERSION = "0.2.1-b0-b3"
 
 
 def _job_issues(c: Context, a: dict) -> list[dict]:

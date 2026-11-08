@@ -1,5 +1,8 @@
 # 문서 목록
 
+- [11월 8일 엔진 후속 인계](team/handoffs/2026-11-08-unknownamed-engine-experiments.md): 0.2.1 작업량 한계·검증·연결 담당 참고.
+- [규모·예산·여유시간·혼합 조건156회 비교](experiments/engine-sensitivity-2026-11-08/README.md): 전체 결과와 재현 명령, 성공·미증명 범위.
+
 ## 팀 작업 안내
 
 - [현재 역할·담당 범위](team/roles.md) — 기존 01~04 명세와 담당 연결

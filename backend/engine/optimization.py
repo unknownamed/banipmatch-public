@@ -105,6 +105,7 @@ class DispatchModel:
                 continue
             nodes = {jid: idx + 1 for idx, jid in enumerate(ids)}
             arcs, stored = [], {}
+            workload_terms, latest_returns = [], [available]
             empty = m.new_bool_var(f"empty:{vid}")
             self.empty[vid] = empty
             arcs.append((0, 0, empty))
@@ -114,8 +115,23 @@ class DispatchModel:
                 x = self.on_vehicle[vid, jid] = m.new_bool_var(f"on:{vid}:{jid}")
                 if jid in self.fixed:
                     m.add(x == 1)
+                    fixed = c.base[jid]
+                    # Use the immutable recorded occupancy even when the fixed
+                    # reservation has a residual cutoff or shift-end risk.
+                    workload_terms.append((minute(fixed["return_at"])
+                                           - minute(fixed["pickup_departure_at"])) * x)
+                    latest_returns.append(minute(fixed["return_at"]))
                 else:
                     m.add(self.departure[jid] + self.duration[jid] <= minute(v["shift_end_at"]) - c.now).only_enforce_if(x)
+                    workload_terms.append(self.duration[jid] * x)
+                    job = c.jobs[jid]
+                    # cutoff bounds arrival + buffer; adding the complete
+                    # duration cancels both loaded travel and buffer.
+                    latest_returns.append(min(
+                        minute(v["shift_end_at"]),
+                        minute(c.window(jid)["closes_at"]) + int(job["service_minutes"])
+                        + int(c.travel[job["terminal_id"], job["return_location_id"]]),
+                    ))
                 arcs.append((nodes[jid], nodes[jid], x.Not()))
                 m.add_implication(x, empty.Not())
                 end = m.new_bool_var(f"end:{vid}:{jid}")
@@ -144,9 +160,14 @@ class DispatchModel:
                         previous_rank = self.rank[previous]
                     m.add(self.departure[jid] >= end_time + int(minutes)).only_enforce_if(arc)
                     m.add(self.rank[jid] > previous_rank).only_enforce_if(arc)
+                    workload_terms.append(int(minutes) * arc)
                     if jid not in self.fixed:
                         travel_terms.append(int(minutes) * arc)
             m.add_circuit(arcs)
+            # Summing selected route-time inequalities telescopes to the last
+            # return minus availability, with all waiting removed. This implied
+            # bound needs neither positive durations nor a metric travel matrix.
+            m.add(sum(workload_terms) <= max(latest_returns) - available)
             self.route_arcs[vid] = stored
 
         for jid in self.movable:

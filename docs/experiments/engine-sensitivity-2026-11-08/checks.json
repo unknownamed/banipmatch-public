@@ -1,0 +1,15 @@
+{
+  "checked_at_utc": "2026-11-08T08:00:14.363876+00:00",
+  "client_date": "2026-11-08",
+  "runs": 156,
+  "paired_conditions": 39,
+  "method_result_schema": "passed",
+  "input_source_hashes": "passed",
+  "source_hash_checks": 21,
+  "frozen_records_preserved": "passed",
+  "job_partition": "passed",
+  "movable_violations_adjusted_methods": 0,
+  "validation_status": "not_run",
+  "approval_eligible": false,
+  "scope": "Artifact consistency and engine internal diagnostics; not the API independent schedule validator."
+}
