@@ -1,0 +1,15 @@
+{
+  "checked_at_utc": "2026-11-08T11:33:05.335972+00:00",
+  "runs": 72,
+  "source_hash_checks": 14,
+  "frozen_record_checks": 24,
+  "method_result_schema": "passed",
+  "input_source_hashes": "passed",
+  "job_partition": "passed",
+  "frozen_records_preserved": "passed",
+  "movable_violations_adjusted_methods": 0,
+  "validation_status": "not_run",
+  "approval_eligible": false,
+  "diagnostic_override_smoke": "passed",
+  "scope": "Artifact consistency and engine internal diagnostics; not the API independent schedule validator."
+}
