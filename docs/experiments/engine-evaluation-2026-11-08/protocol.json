@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "frozen_at_utc": "2026-11-08T13:02:46.427641+00:00",
+  "base_git_head": "e2d9151c593536e66381d2f6268cb484c5ed90da",
+  "methods": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "solver_seeds": [
+    0,
+    17
+  ],
+  "cases": [
+    {
+      "id": "eval_cutoff_8_101",
+      "input": "inputs/eval_cutoff_8_101.json",
+      "sha256": "91fde4676fa0a1311164bb913ab2ef809d5200764c2ef5ebded16d286d7da8ea",
+      "before_event": "before-event/eval_cutoff_8_101.json",
+      "before_event_sha256": "073fbdf75171f5b01b89cba8a6fb860a81a315e8e1b2f5e1e89a133c3037722c",
+      "profile": "cutoff",
+      "generation_seed": 101,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_cutoff_8_202",
+      "input": "inputs/eval_cutoff_8_202.json",
+      "sha256": "92730e42785445c8b19deced968effe4683f6257c1c28954901d85b114f80e0d",
+      "before_event": "before-event/eval_cutoff_8_202.json",
+      "before_event_sha256": "c998fecd0d98bfd04dec39799383ddeab652f5417598013d8e076d132ef3d17f",
+      "profile": "cutoff",
+      "generation_seed": 202,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_opening_8_101",
+      "input": "inputs/eval_opening_8_101.json",
+      "sha256": "c8ac52204cf99f2148ac863dfcca56bb5a7c1b6fae377ae1af74c1ce4b79f212",
+      "before_event": "before-event/eval_opening_8_101.json",
+      "before_event_sha256": "202f5753ee6c7141b3621f2cad7c352d819152eac96850a01176f933ef0ebe9d",
+      "profile": "opening",
+      "generation_seed": 101,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_opening_8_202",
+      "input": "inputs/eval_opening_8_202.json",
+      "sha256": "0cf817147c7920c8c157247be7c5956341af56c099cb7f909a4cd809266694ac",
+      "before_event": "before-event/eval_opening_8_202.json",
+      "before_event_sha256": "4ce6d22ff5d9b6c70b2baca8b31a4f98508901b8a9e9e5983564ae3845e4495b",
+      "profile": "opening",
+      "generation_seed": 202,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_readiness_8_101",
+      "input": "inputs/eval_readiness_8_101.json",
+      "sha256": "1be24d104bb8d7f5b34740f0e3262a6a5c0c5c294774d28f7f899d725c843091",
+      "before_event": "before-event/eval_readiness_8_101.json",
+      "before_event_sha256": "084862a96ec0172c77d09b59599a1954f6cfc1c3940e94823a884b817c1fa73f",
+      "profile": "readiness",
+      "generation_seed": 101,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_readiness_8_202",
+      "input": "inputs/eval_readiness_8_202.json",
+      "sha256": "e7aae70a5a5f00e1d52ab42c4a75fb0ace71b9dca6e28d6b98c2eb4093b93b09",
+      "before_event": "before-event/eval_readiness_8_202.json",
+      "before_event_sha256": "cab3b1c30f359d5407bf857e3829d52f297bf43a592b815b3feb90ee10f14eb0",
+      "profile": "readiness",
+      "generation_seed": 202,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_fixed_8_101",
+      "input": "inputs/eval_fixed_8_101.json",
+      "sha256": "503e53be6ba5e7f41da58d76817b453646829837fadbb1e1da13239c06fc706a",
+      "before_event": "before-event/eval_fixed_8_101.json",
+      "before_event_sha256": "40ff62b73e6f32429a5da03cb462dce8916219f78bcec78d47249b25957b764a",
+      "profile": "fixed",
+      "generation_seed": 101,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_fixed_8_202",
+      "input": "inputs/eval_fixed_8_202.json",
+      "sha256": "dddc976326137cb5b5cfef62c501174ddb06b2ebd51863af1a583a4d2397edb6",
+      "before_event": "before-event/eval_fixed_8_202.json",
+      "before_event_sha256": "1f12d3714b30cb92ca6b07bb2ebcab3fe3324b3ce3b950ab668156f18227f09f",
+      "profile": "fixed",
+      "generation_seed": 202,
+      "jobs": 8,
+      "vehicles": 3,
+      "budget_seconds": 3
+    },
+    {
+      "id": "eval_cutoff_20_303",
+      "input": "inputs/eval_cutoff_20_303.json",
+      "sha256": "723ab554b4cb9be0839f70b740d84d2c0c487b7fb10f7983898cbf31231b8948",
+      "before_event": "before-event/eval_cutoff_20_303.json",
+      "before_event_sha256": "ae64ca75b0546af723cb510e3f11f577b4a8a0a1c73d54f24840e8a1a88e9789",
+      "profile": "cutoff",
+      "generation_seed": 303,
+      "jobs": 20,
+      "vehicles": 4,
+      "budget_seconds": 10
+    },
+    {
+      "id": "eval_cutoff_50_404",
+      "input": "inputs/eval_cutoff_50_404.json",
+      "sha256": "78f583f4a5b9564204a3abaa801d22e0df2f034a374a5f8fb85d58298a2af401",
+      "before_event": "before-event/eval_cutoff_50_404.json",
+      "before_event_sha256": "7b9aef49e8f0008de993a6f0cb313cffc1e21f931f2da180f71aa90a9ed5a391",
+      "profile": "cutoff",
+      "generation_seed": 404,
+      "jobs": 50,
+      "vehicles": 8,
+      "budget_seconds": 10
+    }
+  ],
+  "expected_runs": 80,
+  "data_mode": "simulated",
+  "worker_count": 1,
+  "selection": "All declared cases retained; no solver call during generation; no parameter tuning from this set.",
+  "interpretation": "New synthetic evaluation, not an independently sampled operational holdout or evidence of field savings.",
+  "assumptions": {
+    "directed_travel_minutes": [
+      8,
+      30
+    ],
+    "buffer_minutes": 10,
+    "readiness_minutes": [
+      0,
+      60
+    ],
+    "late_readiness_minutes": 350,
+    "service_minutes": [
+      5,
+      10,
+      15
+    ],
+    "shift_minutes": 600,
+    "old_window_minutes": [
+      -60,
+      600
+    ],
+    "change_tolerance_minutes": 5,
+    "locations": "Artificial complete directed graph; not measured Busan road routes"
+  },
+  "engine_source_sha256": {
+    "backend/engine/__init__.py": "3ed21e98995d9e9336fd4b48351d20e3e8663a9e3bed40074fed5386e2603c88",
+    "backend/engine/__main__.py": "d1e6cccca9e9f088c8663f16132382bc3fbec41d05b6a62938759107a5aa5f84",
+    "backend/engine/context.py": "7f705d19e52758356dc7687460e766ab602c985446f4ac1cc568991d81ee0959",
+    "backend/engine/metrics.py": "bec593bb167fe58e07b51088ca50a6d8cf9614ca670e7d2d51347839bc345b75",
+    "backend/engine/optimization.py": "b9dab812695ca2290aa21670bfadf9f06c03e4e8d4e9c8ce24b85a0a9467b084",
+    "backend/engine/solver.py": "34e2702f12332c6499bcb1e256a17249e57db5ef2e175beb1c35317112459344"
+  },
+  "generator_sha256": "b472638532b1ecdc06aa800a59cc67ba0d63d100853ef0ebd3153d8b596a26d6"
+}
