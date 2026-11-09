@@ -32,52 +32,51 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const c = s.change
   const w = s.windows.find((x) => x.window_id === c.new_window_id)
   return (
-    <section className="card">
+    <section className="card evidence">
       <h2>변경 근거 · 터미널 반입 허용시간(항차)</h2>
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}
       <p className="muted small">선박 접안예정(ETA)이나 트럭 방문예약 시간이 아니라, 항차별 컨테이너 반입 시작·마감입니다.</p>
-      <table className="kv">
-        <tbody>
-          <tr>
-            <th>적용 항차 · 터미널</th>
-            <td>
-              {c.voyage_id} · {c.terminal_id}
-            </td>
-          </tr>
-          <tr>
-            <th>이전 반입 허용시간</th>
-            <td>
-              {kstTime(c.previous_opens_at)} ~ {kstTime(c.previous_closes_at)}
-            </td>
-          </tr>
-          <tr>
-            <th>새 반입 허용시간</th>
-            <td>
-              {w ? (
-                <>
-                  {kstTime(w.opens_at)} ~ <b>{kstTime(w.closes_at)}</b>
-                </>
-              ) : (
-                <span className="warn">새 시간창 {c.new_window_id}을(를) 입력에서 찾지 못함</span>
-              )}
-            </td>
-          </tr>
-          <tr>
-            <th>확정 여부</th>
-            <td>
-              <span className={c.verification === 'confirmed' ? 'ok' : 'warn'}>{VERIFY[c.verification] ?? c.verification}</span>
-              {c.confirmed_by && ` · ${c.confirmed_by}`} · 확인 {kstDateTime(c.confirmed_at)}
-            </td>
-          </tr>
-          <tr>
-            <th>출처</th>
-            <td>
-              {EVIDENCE[c.evidence.kind] ?? c.evidence.kind} · <code>{c.evidence.source_ref}</code> · 수신{' '}
-              {kstDateTime(c.evidence.received_at)}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <dl className="evidence-strip">
+        <div>
+          <dt>적용 항차 · 터미널</dt>
+          <dd>
+            {c.voyage_id} · {c.terminal_id}
+          </dd>
+        </div>
+        <div>
+          <dt>이전 반입 허용시간</dt>
+          <dd>
+            {kstTime(c.previous_opens_at)} ~ {kstTime(c.previous_closes_at)}
+          </dd>
+        </div>
+        <div className="evidence-new">
+          <dt>새 반입 허용시간</dt>
+          <dd>
+            {w ? (
+              <>
+                {kstTime(w.opens_at)} ~ <b>{kstTime(w.closes_at)}</b>
+              </>
+            ) : (
+              <span className="warn">새 시간창 {c.new_window_id}을(를) 입력에서 찾지 못함</span>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt>확정 여부</dt>
+          <dd>
+            <span className={c.verification === 'confirmed' ? 'ok' : 'warn'}>{VERIFY[c.verification] ?? c.verification}</span>
+            {c.confirmed_by && ` · ${c.confirmed_by}`}
+            <div className="muted small">확인 {kstDateTime(c.confirmed_at)}</div>
+          </dd>
+        </div>
+        <div>
+          <dt>출처</dt>
+          <dd>
+            {EVIDENCE[c.evidence.kind] ?? c.evidence.kind} · <code>{c.evidence.source_ref}</code>
+            <div className="muted small">수신 {kstDateTime(c.evidence.received_at)}</div>
+          </dd>
+        </div>
+      </dl>
       {c.verification !== 'confirmed' && (
         <p className="warn">확정되지 않은 변경입니다. 새 시간창 적용 계산과 승인은 막아야 합니다.</p>
       )}
@@ -132,49 +131,55 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
         </div>
       )}
       {results && (
-        <table className="grid small">
-          <thead>
-            <tr>
-              <th>방법</th>
-              <th>결과 출처</th>
-              <th>해 상태</th>
-              <th>엔진</th>
-              <th>목표 단계</th>
-              <th>독립 검사</th>
-            </tr>
-          </thead>
-          <tbody>
-            {results.map((r) => (
-              <tr key={r.method}>
-                <td>{r.method}</td>
-                <td>
-                  {r.result_origin === 'illustrative_fixture' ? (
-                    <span className="badge fixture">설명용 예시</span>
-                  ) : (
-                    <span className="badge">계산</span>
-                  )}
-                </td>
-                <td>{solutionLabel(r)}</td>
-                <td>
-                  <code>{r.engine_version}</code>
-                </td>
-                <td>{r.objective_stages.length ? r.objective_stages.map((o) => `${o.objective}:${o.status}`).join(', ') : '없음(계산 안 함)'}</td>
-                <td>{r.validation_status === 'not_run' ? '실행 안 함' : r.validation_status}</td>
+        <div className="table-wrap">
+          <table className="grid small">
+            <thead>
+              <tr>
+                <th>방법</th>
+                <th>결과 출처</th>
+                <th>해 상태</th>
+                <th>엔진</th>
+                <th>목표 단계</th>
+                <th>독립 검사</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {results.map((r) => (
+                <tr key={r.method}>
+                  <td>{r.method}</td>
+                  <td>
+                    {r.result_origin === 'illustrative_fixture' ? (
+                      <span className="badge fixture">설명용 예시</span>
+                    ) : (
+                      <span className="badge">계산</span>
+                    )}
+                  </td>
+                  <td>{solutionLabel(r)}</td>
+                  <td>
+                    <code>{r.engine_version}</code>
+                  </td>
+                  <td>{r.objective_stages.length ? r.objective_stages.map((o) => `${o.objective}:${o.status}`).join(', ') : '없음(계산 안 함)'}</td>
+                  <td>{r.validation_status === 'not_run' ? '실행 안 함' : r.validation_status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   )
 }
 
-function Metric({ label, a, b }: { label: string; a: number | string | null; b: number | string | null }) {
+// 모든 지표는 작을수록 좋다. 나빠진 값은 강조하고, 값이 없으면 비교하지 않는다.
+function Metric({ label, a, b }: { label: string; a: number | null; b: number | null }) {
+  const trend = a === null || b === null || a === b ? '' : b > a ? 'worse' : 'better'
   return (
-    <div className="metric">
-      <div className="muted">{label}</div>
-      <div>
-        <span>{a ?? '미제공'}</span> → <b>{b ?? '미제공'}</b>
+    <div className={`metric ${trend}`}>
+      <div className="metric-label">{label}</div>
+      <div className="metric-value">{b ?? '미제공'}</div>
+      <div className="metric-base">
+        원안 {a ?? '미제공'}
+        {trend && <span className="metric-delta">{trend === 'worse' ? ' ▲' : ' ▼'} {Math.abs(b! - a!)}</span>}
       </div>
     </div>
   )

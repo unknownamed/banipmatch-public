@@ -63,30 +63,33 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
       {run && <RunStatusPanel run={run} results={results} />}
 
-      {snapshot && (
-        <ComparisonSection
-          snapshot={snapshot}
-          results={view.results}
-          base={base}
-          cand={cand}
-          candidates={candidates}
-          rows={rows}
-          onPick={setPicked}
-        />
-      )}
-
-      {snapshot && cand && (
-        <>
-          <UnresolvedPanel rows={rows} cand={cand} />
-          <ApprovalPanel
-            key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
-            gate={withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null)}
-            client={client} run={run} result={cand} idempotencyKey={approvalKey}
-            shared={approval.key === approvalScope ? approval.value : null}
-            onShared={(value) => setApproval({ key: approvalScope, value })}
+      {/* 넓은 화면: 왼쪽 비교, 오른쪽 미해결·승인. 좁으면 위아래로 쌓인다. */}
+      <div className="workspace">
+        {snapshot && (
+          <ComparisonSection
+            snapshot={snapshot}
+            results={view.results}
+            base={base}
+            cand={cand}
+            candidates={candidates}
+            rows={rows}
+            onPick={setPicked}
           />
-        </>
-      )}
+        )}
+
+        {snapshot && cand && (
+          <aside className="side">
+            <UnresolvedPanel rows={rows} cand={cand} />
+            <ApprovalPanel
+              key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
+              gate={withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null)}
+              client={client} run={run} result={cand} idempotencyKey={approvalKey}
+              shared={approval.key === approvalScope ? approval.value : null}
+              onShared={(value) => setApproval({ key: approvalScope, value })}
+            />
+          </aside>
+        )}
+      </div>
     </main>
   )
 }
