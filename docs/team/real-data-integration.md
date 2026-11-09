@@ -13,7 +13,7 @@
 | 최길웅 `choigilung` | 기존 카카오맵을 유지하고 실제/참고/모의 자료의 표시·실패 상태 준비 | 항목별 자료 구분·출처·조회시각, 실제 항차에 가정한 마감 변경 표시, 마지막 성공 자료와 조회 실패 구분. 기존 SDK 재가입 불필요. 배포 도메인·쿼터는 기존 앱에서 확인 |
 | 황대겸 `unknownamed` | 로컬 관측 비교 도구와 혼합 입력 채택 기준 준비. 자료가 검증되면 기존 엔진에 입력해 비교 | 관측 차이와 확정 변경 분리, 시간대/단위/고정 조건 검증 후 새 혼합 사례·B0~B3 비교. 원본80회는 재계산/튜닝하지 않음. 기존 문의 회신·도입 근거는 별도 확인 |
 
-담당 이슈: [민준 #30](https://github.com/unknownamed/banipmatch/issues/30) · [선효 #31](https://github.com/unknownamed/banipmatch/issues/31) · [길웅 #32](https://github.com/unknownamed/banipmatch/issues/32) · [대겸 #33](https://github.com/unknownamed/banipmatch/issues/33). 키 발급 여부는 아직 미확인이다. 이 문서로 발급·신청·본인인증을 대신 완료했다고 기록하지 않는다. 키 보유자가 따로 있으면 그 사람과 수집 담당을 먼저 맞추며, 같은 목적의 키를 무작정 늘리지 않는다.
+담당 이슈: [민준 #30](https://github.com/unknownamed/banipmatch/issues/30) · [선효 #31](https://github.com/unknownamed/banipmatch/issues/31) · [길웅 #32](https://github.com/unknownamed/banipmatch/issues/32) · [대겸 #33](https://github.com/unknownamed/banipmatch/issues/33). 후속으로 민준 본인 키 발급·인증과 소량 실응답을 [확인했다](../data/road-api-verification.md). 단위·집계/품질·필요 구간 검증이 남아 #30은 열어 둔다. 키를 공유하거나 같은 목적의 키를 무작정 늘리지 않는다.
 
 ## 우선 채택 후보와 확인 결과
 
