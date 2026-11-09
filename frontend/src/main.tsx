@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { App } from './App'
 import { createHttpClient } from './api/client'
 import { createFixtureClient, FIXTURE_IDS } from './api/fixtureClient'
+import { AppBar } from './components/AppBar'
 import { MapCheck } from './components/MapCheck'
 import { StartRunPanel } from './components/StartRunPanel'
 import './styles.css'
@@ -26,6 +27,7 @@ function Root() {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <AppBar mode={mode} />
     {params.get('view') === 'map' ? <MapCheck /> : <Root />}
   </StrictMode>,
 )

@@ -32,7 +32,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const c = s.change
   const w = s.windows.find((x) => x.window_id === c.new_window_id)
   return (
-    <section className="card">
+    <section className="card evidence">
       <h2>변경 근거 · 터미널 반입 허용시간(항차)</h2>
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}
       <p className="muted small">선박 접안예정(ETA)이나 트럭 방문예약 시간이 아니라, 항차별 컨테이너 반입 시작·마감입니다.</p>
@@ -169,12 +169,16 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
   )
 }
 
-function Metric({ label, a, b }: { label: string; a: number | string | null; b: number | string | null }) {
+// 모든 지표는 작을수록 좋다. 나빠진 값은 강조하고, 값이 없으면 비교하지 않는다.
+function Metric({ label, a, b }: { label: string; a: number | null; b: number | null }) {
+  const trend = a === null || b === null || a === b ? '' : b > a ? 'worse' : 'better'
   return (
-    <div className="metric">
-      <div className="muted">{label}</div>
-      <div>
-        <span>{a ?? '미제공'}</span> → <b>{b ?? '미제공'}</b>
+    <div className={`metric ${trend}`}>
+      <div className="metric-label">{label}</div>
+      <div className="metric-value">{b ?? '미제공'}</div>
+      <div className="metric-base">
+        원안 {a ?? '미제공'}
+        {trend && <span className="metric-delta">{trend === 'worse' ? ' ▲' : ' ▼'} {Math.abs(b! - a!)}</span>}
       </div>
     </div>
   )
