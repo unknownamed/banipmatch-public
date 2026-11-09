@@ -3,6 +3,7 @@ import type { ApiClient } from '../api/client'
 import { ApiRequestError } from '../api/client'
 import type { Approval, MethodResult, Run } from '../api/types'
 import { acknowledgeIds, approvalErrorHint, approvalResponseMatches, approvalRetryAllowed, currentPlanWarning, type ApprovalGate } from '../lib/approval'
+import { Icon } from './Icon'
 import { kstDateTime } from '../lib/time'
 
 export type Status =
@@ -75,6 +76,12 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
     <section className="card">
       <h2>운송사 내부 계획 승인</h2>
       <p className="muted">내부 배차 계획만 확정합니다. 터미널 방문예약 변경, 기존 TMS 반영, 기사 통보는 하지 않습니다.</p>
+      <ApprovalSteps
+        acknowledged={ack.length === 0 || checked}
+        sending={status.state === 'sending'}
+        done={status.state === 'done'}
+        failed={status.state === 'error'}
+      />
       {otherBusy && (
         <p className="warn" role="status">
           이 실행은 {shared!.method} 조정안이 {otherLabel}. {shared!.method} 탭에서 결과를 확인하세요. 다른 방법은 보낼 수 없습니다.
@@ -126,5 +133,27 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
         </div>
       )}
     </section>
+  )
+}
+
+/** 위험 확인 → 승인 요청 → 내부 계획 확정의 진행 막대. 화면 상태만 보여주고 판단은 하지 않는다. */
+function ApprovalSteps({ acknowledged, sending, done, failed }: { acknowledged: boolean; sending: boolean; done: boolean; failed: boolean }) {
+  const steps = [
+    { label: '위험 확인', state: acknowledged || done ? 'done' : 'todo' },
+    { label: '승인 요청', state: done ? 'done' : sending ? 'active' : failed ? 'failed' : 'todo' },
+    { label: '내부 계획 확정', state: done ? 'done' : 'todo' },
+  ]
+  return (
+    <ol className="steps" aria-label="승인 진행">
+      {steps.map((s, i) => (
+        <li key={s.label} className={`step step-${s.state}`}>
+          <span className="step-bar" />
+          <span className="step-label">
+            <span className="step-mark">{s.state === 'done' ? <Icon name="check" size={11} /> : i + 1}</span>
+            {s.label}
+          </span>
+        </li>
+      ))}
+    </ol>
   )
 }
