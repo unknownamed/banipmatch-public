@@ -1,0 +1,215 @@
+{
+  "report_version": "1",
+  "scope": "frozen_synthetic_input_pairs_only",
+  "protocol_raw_sha256": "1e08d7e97e155f651aed79b039998b4ef94ac3bc35a29bfd1369297fec0e4e4e",
+  "case_count": 10,
+  "snapshot_count": 20,
+  "valid_case_count": 10,
+  "duplicate_case_ids": false,
+  "generator_raw_sha256": "b472638532b1ecdc06aa800a59cc67ba0d63d100853ef0ebd3153d8b596a26d6",
+  "generator_hash_matches_protocol": true,
+  "valid": true,
+  "schedule_validation": "not_run",
+  "solver_execution": "not_run",
+  "external_permissions": "not_assessed",
+  "field_representativeness": "not_assessed",
+  "source_sha256_lf": {
+    "tools/audit_evaluation_data.py": "21495bd85f4a10cc2ecd7dd40992e78ccb87ffd71b7a65d006ca8d8080dd6a08",
+    "backend/data/validation.py": "bf94396f296e81ab7e7c776959b0dbb8ef9a1f80e1cda533a7ba70b1f0c664d9",
+    "backend/data/inputs.py": "3add355dd6ac3eeec4cb09be2930180ff1e1cbf867004864c0bc8f5339e6a8a7"
+  },
+  "cases": [
+    {
+      "case_id": "eval_cutoff_8_101",
+      "input": "inputs/eval_cutoff_8_101.json",
+      "before_event": "before-event/eval_cutoff_8_101.json",
+      "profile": "cutoff",
+      "generation_seed": 101,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "91fde4676fa0a1311164bb913ab2ef809d5200764c2ef5ebded16d286d7da8ea",
+      "before_raw_sha256": "073fbdf75171f5b01b89cba8a6fb860a81a315e8e1b2f5e1e89a133c3037722c",
+      "before_input_sha256": "ef3502b7e21ff6934052c70530e05980fb6932704ca0cb8fe7ceb38c05ffa4d4",
+      "input_sha256": "23572769a54193c2305911ab972104485744f8ba5bac162bd2896699588a6f41",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    },
+    {
+      "case_id": "eval_cutoff_8_202",
+      "input": "inputs/eval_cutoff_8_202.json",
+      "before_event": "before-event/eval_cutoff_8_202.json",
+      "profile": "cutoff",
+      "generation_seed": 202,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "92730e42785445c8b19deced968effe4683f6257c1c28954901d85b114f80e0d",
+      "before_raw_sha256": "c998fecd0d98bfd04dec39799383ddeab652f5417598013d8e076d132ef3d17f",
+      "before_input_sha256": "cfa33b056722fa449db6ce08812ac1d297fee61effdc3b09698befe04521f1ba",
+      "input_sha256": "9f55f66081df5e8be29d773920d3874489070add8a4b274ad08894b3a9244f6f",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    },
+    {
+      "case_id": "eval_opening_8_101",
+      "input": "inputs/eval_opening_8_101.json",
+      "before_event": "before-event/eval_opening_8_101.json",
+      "profile": "opening",
+      "generation_seed": 101,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "c8ac52204cf99f2148ac863dfcca56bb5a7c1b6fae377ae1af74c1ce4b79f212",
+      "before_raw_sha256": "202f5753ee6c7141b3621f2cad7c352d819152eac96850a01176f933ef0ebe9d",
+      "before_input_sha256": "ba4b78daa3b4615753a908a7f9e5c8b968b5ad516077a968b7d1ad2312f0374b",
+      "input_sha256": "7c915cdfc9a5a7ed0f7717ca7eb021905574b6ae2b0dd2f563b6dfa09d4c7ed4",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at",
+        "/windows/0/opens_at"
+      ]
+    },
+    {
+      "case_id": "eval_opening_8_202",
+      "input": "inputs/eval_opening_8_202.json",
+      "before_event": "before-event/eval_opening_8_202.json",
+      "profile": "opening",
+      "generation_seed": 202,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "0cf817147c7920c8c157247be7c5956341af56c099cb7f909a4cd809266694ac",
+      "before_raw_sha256": "4ce6d22ff5d9b6c70b2baca8b31a4f98508901b8a9e9e5983564ae3845e4495b",
+      "before_input_sha256": "4810ef5b455867e9768b5c872f91c96ea246e94da67b9695b4dc06b0faca059a",
+      "input_sha256": "74ec288617ce8d026c89a850efe15eae91cd6467925c58307d0530a98721b94e",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at",
+        "/windows/0/opens_at"
+      ]
+    },
+    {
+      "case_id": "eval_readiness_8_101",
+      "input": "inputs/eval_readiness_8_101.json",
+      "before_event": "before-event/eval_readiness_8_101.json",
+      "profile": "readiness",
+      "generation_seed": 101,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "1be24d104bb8d7f5b34740f0e3262a6a5c0c5c294774d28f7f899d725c843091",
+      "before_raw_sha256": "084862a96ec0172c77d09b59599a1954f6cfc1c3940e94823a884b817c1fa73f",
+      "before_input_sha256": "1a6daba7d77bb797d28d8ecfa145cc9714f50629457abdc6c9b818d949ce1e2e",
+      "input_sha256": "faa172585dc70dde3e5476ae289e6c336881d676ac3a499e2aaf36debc20b479",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    },
+    {
+      "case_id": "eval_readiness_8_202",
+      "input": "inputs/eval_readiness_8_202.json",
+      "before_event": "before-event/eval_readiness_8_202.json",
+      "profile": "readiness",
+      "generation_seed": 202,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "e7aae70a5a5f00e1d52ab42c4a75fb0ace71b9dca6e28d6b98c2eb4093b93b09",
+      "before_raw_sha256": "cab3b1c30f359d5407bf857e3829d52f297bf43a592b815b3feb90ee10f14eb0",
+      "before_input_sha256": "b2c067adb84f0287a127d1538e8dbf6a3560ddb1660f42608b2f0c39383a8f8b",
+      "input_sha256": "63c75c575c50bbc8c4ad9160680cd4ed184468c38909bf5736a49ea2fa5da78e",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    },
+    {
+      "case_id": "eval_fixed_8_101",
+      "input": "inputs/eval_fixed_8_101.json",
+      "before_event": "before-event/eval_fixed_8_101.json",
+      "profile": "fixed",
+      "generation_seed": 101,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "503e53be6ba5e7f41da58d76817b453646829837fadbb1e1da13239c06fc706a",
+      "before_raw_sha256": "40ff62b73e6f32429a5da03cb462dce8916219f78bcec78d47249b25957b764a",
+      "before_input_sha256": "80f22d06b32d3d865d5bd714daf85c53c8b271b3e4e8e6d8625134fe7048b9c8",
+      "input_sha256": "98622775908056e21143102c89b583fb6be829fd8ced5d8551845a727bf5f451",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    },
+    {
+      "case_id": "eval_fixed_8_202",
+      "input": "inputs/eval_fixed_8_202.json",
+      "before_event": "before-event/eval_fixed_8_202.json",
+      "profile": "fixed",
+      "generation_seed": 202,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "dddc976326137cb5b5cfef62c501174ddb06b2ebd51863af1a583a4d2397edb6",
+      "before_raw_sha256": "1f12d3714b30cb92ca6b07bb2ebcab3fe3324b3ce3b950ab668156f18227f09f",
+      "before_input_sha256": "9f8a4ca6076ae2c5395bee35af88792e6acc0047b443ec3643355513b4c55029",
+      "input_sha256": "6fdbb0ed9def6318ad4f92e58c20822ab06ee2c24819d23e4626f9430ee61aab",
+      "jobs": 8,
+      "vehicles": 3,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    },
+    {
+      "case_id": "eval_cutoff_20_303",
+      "input": "inputs/eval_cutoff_20_303.json",
+      "before_event": "before-event/eval_cutoff_20_303.json",
+      "profile": "cutoff",
+      "generation_seed": 303,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "723ab554b4cb9be0839f70b740d84d2c0c487b7fb10f7983898cbf31231b8948",
+      "before_raw_sha256": "ae64ca75b0546af723cb510e3f11f577b4a8a0a1c73d54f24840e8a1a88e9789",
+      "before_input_sha256": "cb4a6c3df00bcc772b767448b0fc30cd3ecfc3c5f67ba281c52fce8c353c25cc",
+      "input_sha256": "2498e6712e7d1a7ceb7f12192c4d2e26b49b3bde8ea473a89ab8ea4d4e1f7a3c",
+      "jobs": 20,
+      "vehicles": 4,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    },
+    {
+      "case_id": "eval_cutoff_50_404",
+      "input": "inputs/eval_cutoff_50_404.json",
+      "before_event": "before-event/eval_cutoff_50_404.json",
+      "profile": "cutoff",
+      "generation_seed": 404,
+      "valid": true,
+      "issues": [],
+      "input_raw_sha256": "78f583f4a5b9564204a3abaa801d22e0df2f034a374a5f8fb85d58298a2af401",
+      "before_raw_sha256": "7b9aef49e8f0008de993a6f0cb313cffc1e21f931f2da180f71aa90a9ed5a391",
+      "before_input_sha256": "e0959be209e167554f2adede688c1af18018966a18b9b2d31f79fcad017ba42c",
+      "input_sha256": "e79aa15baa1551cee5e4a065cee25350eb4686732e1f7447519a81e57d1ceb6f",
+      "jobs": 50,
+      "vehicles": 8,
+      "declared_data_mode": "simulated",
+      "changed_fields": [
+        "/windows/0/closes_at"
+      ]
+    }
+  ]
+}
