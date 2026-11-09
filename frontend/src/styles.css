@@ -131,3 +131,31 @@ fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px
   .metric { border-right: 0; border-bottom: 1px solid var(--line); }
   .evidence-strip > div { border-right: 0; border-bottom: 1px solid var(--line); }
 }
+
+/* 차량별 일정: 같은 시간축 위에 원안·조정안 막대 */
+.timeline { display: grid; gap: 10px; overflow-x: auto; }
+/* 좁은 화면에서는 막대가 읽히도록 최소 폭을 두고 타임라인만 옆으로 스크롤 */
+.timeline > .lane, .timeline > .vehicle-card { min-width: 620px; }
+.timeline-legend { display: flex; flex-wrap: wrap; gap: 4px; }
+.legend-deadline { border-bottom: 2px dashed var(--warn); }
+.legend-late { color: var(--warn); font-weight: 600; }
+.legend-changed { color: var(--accent); font-weight: 600; }
+.vehicle-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px 12px; background: var(--card); }
+.vehicle-card h3 { margin: 0 0 6px; font-size: 0.95rem; }
+.lane { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: 8px; min-height: 30px; }
+.lane-name { font-size: 0.78rem; color: var(--muted); }
+.lane-track { position: relative; height: 26px; background: var(--soft); border-radius: 8px; }
+.lane.axis .lane-track { background: transparent; height: 34px; }
+.lane-empty { position: absolute; left: 8px; top: 5px; }
+.tick { position: absolute; top: 0; transform: translateX(-50%); font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.deadline-label { position: absolute; bottom: 0; transform: translateX(-50%); font-size: 0.72rem; color: var(--warn); font-weight: 600; white-space: nowrap; }
+.deadline { position: absolute; top: -4px; bottom: -4px; border-left: 2px dashed var(--warn); z-index: 2; pointer-events: none; }
+.job-bar { position: absolute; top: 3px; height: 20px; display: flex; align-items: center; padding: 0 6px; box-sizing: border-box; border-radius: 6px; background: #dfe6e2; border: 1px solid #c7d1cb; font-size: 0.74rem; font-weight: 600; white-space: nowrap; overflow: hidden; }
+.job-bar.locked { background: var(--lock-soft); border-color: #c4cef5; color: var(--lock); }
+.job-bar.changed { background: var(--accent-soft); border: 2px solid var(--accent); }
+.job-bar.late { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+.job-bar .arrival { position: absolute; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: currentColor; }
+.unassigned-row { margin: 0; padding: 8px 12px; border-radius: 10px; background: var(--warn-soft); border: 1px solid var(--warn-line); }
+@media (max-width: 640px) {
+  .lane { grid-template-columns: 64px minmax(0, 1fr); }
+}

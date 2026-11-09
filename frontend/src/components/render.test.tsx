@@ -31,7 +31,7 @@ it('실계산 목표 단계의 계약 필드와 상태를 표시한다', () => {
   expect(html).not.toContain('undefined')
 })
 
-function render(state: DispatchView['results'], withB0 = false, withB3 = false) {
+function render(state: DispatchView['results'], withB0 = false, withB3 = false, layout: 'vehicle' | 'job' = 'job') {
   const base = withB0 ? b0 : undefined
   const cand = withB3 ? b3 : undefined
   return renderToStaticMarkup(
@@ -43,6 +43,7 @@ function render(state: DispatchView['results'], withB0 = false, withB3 = false) 
       candidates={cand ? [cand] : []}
       rows={buildRows(snapshot, base, cand)}
       onPick={() => {}}
+      initialLayout={layout}
     />,
   )
 }
@@ -50,6 +51,13 @@ function render(state: DispatchView['results'], withB0 = false, withB3 = false) 
 const hasBaselineTable = (html: string) => ['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`<b>${id}</b>`)) && html.includes('T1</b> #2')
 
 describe('원안 표는 결과 상태와 무관하게 남는다', () => {
+  it('차량별 보기(기본)도 계산 중에 원안 막대를 보여준다', () => {
+    const html = render({ state: 'pending', run: { ...run, status: 'running' } }, false, false, 'vehicle')
+    expect(['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`>${id}<`) || html.includes(` ${id}<`))).toBe(true)
+    expect(html).toContain('원안(입력)')
+    expect(html).not.toContain('조정안</span>')
+  })
+
   it('계산 중(202)', () => {
     const html = render({ state: 'pending', run: { ...run, status: 'running' } })
     expect(hasBaselineTable(html)).toBe(true)
@@ -147,5 +155,34 @@ describe('실행 실패 표시', () => {
   it('error가 없으면 사유 미제공으로 표시한다', () => {
     const html = renderToStaticMarkup(<RunStatusPanel run={{ ...run, status: 'failed', error: null }} results={null} />)
     expect(html).toContain('사유 미제공')
+  })
+})
+
+describe('차량별 일정', () => {
+  it('원안·조정안 막대를 같은 축에 두고 마감 초과·고정·변경·미처리를 표시한다', async () => {
+    const { timelineModel } = await import('./VehicleTimeline')
+    const b0 = results.results.find((r) => r.method === 'B0')!
+    const b3 = results.results.find((r) => r.method === 'B3')!
+    const m = timelineModel(buildRows(snapshot, b0, b3), true)!
+    expect(m.vehicles.map((v) => v.id)).toEqual(['T1', 'T2'])
+    const t1 = m.vehicles[0]
+    expect(t1.base.find((b) => b.jobId === 'J0')!.locked).toBe(true)
+    expect(t1.base.find((b) => b.jobId === 'J1')!.late).toBe(true) // 원안 J1 도착 10:40 > 마감 10:30
+    expect(t1.cand.find((b) => b.jobId === 'J0')!.changed).toBe(false)
+    expect(t1.cand.find((b) => b.jobId === 'J2')!.changed).toBe(true)
+    expect(m.unassigned).toEqual(['J3'])
+    expect(m.deadlines.map((d) => d.label)).toContain('V1 마감 10:30')
+    for (const b of [...t1.base, ...t1.cand]) {
+      expect(b.left).toBeGreaterThanOrEqual(0)
+      expect(b.left + b.width).toBeLessThanOrEqual(100.0001)
+    }
+  })
+
+  it('조정안이 없으면 원안 줄만 그리고, 배정이 없으면 모델을 만들지 않는다', async () => {
+    const { timelineModel } = await import('./VehicleTimeline')
+    const m = timelineModel(buildRows(snapshot, undefined, undefined), false)!
+    expect(m.vehicles.every((v) => v.cand.length === 0)).toBe(true)
+    expect(m.unassigned).toEqual([])
+    expect(timelineModel([], true)).toBeNull()
   })
 })
