@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "build:showcase": "tsc -b && vite build --config vite.showcase.config.ts",
+    "preview:showcase": "vite preview --config vite.showcase.config.ts"
   },
   "dependencies": {
     "react": "18.3.1",

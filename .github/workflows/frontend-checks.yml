@@ -37,3 +37,17 @@ jobs:
         run: npm test
       - name: Check types and build
         run: npm run build
+      - name: Build isolated public showcase
+        env:
+          VITE_API_MODE: http
+          VITE_API_TOKEN: banipmatch-public-build-must-not-include-this
+        run: npm run build:showcase
+      - name: Verify static publish boundary
+        run: python3 ../tools/check_showcase_dist.py
+      - name: Save public showcase files for review (does not publish)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: banipmatch-showcase-${{ github.sha }}
+          path: frontend/dist-showcase/
+          if-no-files-found: error
+          retention-days: 7
