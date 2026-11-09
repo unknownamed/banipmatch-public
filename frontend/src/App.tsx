@@ -49,7 +49,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         </div>
       )}
 
-      {view.scenario.state === 'loading' && <p className="card">입력 불러오는 중…</p>}
+      {view.scenario.state === 'loading' && <Skeleton label="입력 불러오는 중…" lines={3} />}
       {view.scenario.state === 'error' && <p className="card warn">입력 조회 실패: {view.scenario.message}</p>}
 
       {snapshot && (
@@ -59,7 +59,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         </>
       )}
 
-      {view.run.state === 'loading' && <p className="card">실행 상태 조회 중…</p>}
+      {view.run.state === 'loading' && <Skeleton label="실행 상태 조회 중…" lines={2} />}
       {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
       {run && <RunStatusPanel run={run} results={results} />}
 
@@ -96,4 +96,16 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
 
 function withPlanCheck(gate: ApprovalGate, reason: string | null): ApprovalGate {
   return reason ? { allowed: false, reasons: [...gate.reasons, reason] } : gate
+}
+
+/** 불러오는 동안 실제 카드 크기의 회색 자리표시. 글자는 화면 낭독기용으로 남긴다. */
+function Skeleton({ label, lines }: { label: string; lines: number }) {
+  return (
+    <div className="card skeleton" role="status" aria-busy="true">
+      <span className="sr-only">{label}</span>
+      {Array.from({ length: lines }, (_, i) => (
+        <i key={i} style={{ width: `${88 - i * 18}%` }} />
+      ))}
+    </div>
+  )
 }

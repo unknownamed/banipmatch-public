@@ -57,6 +57,7 @@ describe('승인 상태 전이', () => {
     expect(approve).toHaveBeenCalledWith(run.plan_id, { run_id: run.run_id, method: 'B3', expected_version: run.base_plan_version, acknowledged_job_ids: ['J3'] }, 'approve-stable')
     expect(container.textContent).toContain('내부 계획 v2 승인됨')
     expect(container.textContent).toContain('외부 반영 없음')
+    expect(container.querySelectorAll('.step-done').length).toBe(3) // 위험 확인·승인 요청·내부 계획 확정
     expect(button().disabled).toBe(true)
     await submit()
     expect(approve).toHaveBeenCalledTimes(1)

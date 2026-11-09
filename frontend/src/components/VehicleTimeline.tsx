@@ -1,5 +1,6 @@
 import type { Assignment } from '../api/types'
 import type { JobRow } from '../lib/compare'
+import { Icon } from './Icon'
 import { kstTime } from '../lib/time'
 
 const HOUR = 3_600_000
@@ -97,7 +98,7 @@ function Lane({ name, bars, model, incomplete }: { name: string; bars: Bar[]; mo
             style={{ left: `${b.left}%`, width: `${b.width}%` }}
             title={b.label}
           >
-            {b.locked && '🔒 '}
+            {b.locked && <Icon name="lock" size={11} />}
             {b.jobId}
             <i className="arrival" style={{ left: `${((b.arrival - b.left) / b.width) * 100}%` }} aria-hidden="true" />
           </span>
@@ -115,7 +116,7 @@ export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]
     <div className="timeline">
       <div className="timeline-legend small muted">
         막대: 출발~복귀 · 점: 게이트 도착 · <span className="legend-deadline">세로선</span>: 반입 마감 ·{' '}
-        <span className="legend-late">빨강</span>: 마감 초과 · <span className="legend-changed">초록 테두리</span>: 조정안에서 변경 · 🔒 고정
+        <span className="legend-late">빨강</span>: 마감 초과 · <span className="legend-changed">초록 테두리</span>: 조정안에서 변경 · <Icon name="lock" size={11} /> 고정
       </div>
       <div className="lane axis">
         <span className="lane-name" />

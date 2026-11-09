@@ -1,5 +1,6 @@
 import type { MethodResult, Run, Snapshot } from '../api/types'
 import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
+import { Icon } from './Icon'
 import { kstDateTime, kstTime } from '../lib/time'
 
 const DATA_MODE: Record<Snapshot['data_mode'], string> = { simulated: '모의', observed: '관측', mixed: '혼합' }
@@ -171,15 +172,23 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
 }
 
 // 모든 지표는 작을수록 좋다. 나빠진 값은 강조하고, 값이 없으면 비교하지 않는다.
-function Metric({ label, a, b }: { label: string; a: number | null; b: number | null }) {
+function Metric({ label, a, b, icon }: { label: string; a: number | null; b: number | null; icon: Parameters<typeof Icon>[0]['name'] }) {
   const trend = a === null || b === null || a === b ? '' : b > a ? 'worse' : 'better'
   return (
     <div className={`metric ${trend}`}>
+      <span className="metric-icon">
+        <Icon name={icon} size={18} />
+      </span>
       <div className="metric-label">{label}</div>
       <div className="metric-value">{b ?? '미제공'}</div>
       <div className="metric-base">
         원안 {a ?? '미제공'}
-        {trend && <span className="metric-delta">{trend === 'worse' ? ' ▲' : ' ▼'} {Math.abs(b! - a!)}</span>}
+        {trend && (
+          <span className="metric-delta">
+            {' '}
+            <Icon name={trend === 'worse' ? 'up' : 'down'} size={11} /> {Math.abs(b! - a!)}
+          </span>
+        )}
       </div>
     </div>
   )
@@ -188,13 +197,14 @@ function Metric({ label, a, b }: { label: string; a: number | null; b: number | 
 export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodResult }) {
   return (
     <div className="metrics">
-      <Metric label="미처리" a={base.metrics.unassigned_count} b={cand.metrics.unassigned_count} />
+      <Metric label="미처리" icon="warning" a={base.metrics.unassigned_count} b={cand.metrics.unassigned_count} />
       {/* movable_violation_count는 마감 외 제약 위반도 포함한다(PR #4 리뷰). 마감만 따로 세려면 계약 합의 필요 */}
-      <Metric label="제약 위반 작업(조정 가능)" a={base.metrics.movable_violation_count} b={cand.metrics.movable_violation_count} />
-      <Metric label="고정 작업 위험" a={base.metrics.fixed_risk_count} b={cand.metrics.fixed_risk_count} />
-      <Metric label="변경 작업 수" a={base.metrics.changed_job_ids.length} b={cand.metrics.changed_job_ids.length} />
+      <Metric label="제약 위반 작업(조정 가능)" icon="clock" a={base.metrics.movable_violation_count} b={cand.metrics.movable_violation_count} />
+      <Metric label="고정 작업 위험" icon="lock" a={base.metrics.fixed_risk_count} b={cand.metrics.fixed_risk_count} />
+      <Metric label="변경 작업 수" icon="swap" a={base.metrics.changed_job_ids.length} b={cand.metrics.changed_job_ids.length} />
       <Metric
         label="이동 부담(분)"
+        icon="truck"
         a={base.metrics.movable_travel_minutes}
         b={cand.metrics.movable_travel_minutes}
       />
