@@ -12,20 +12,31 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.evaluate_engine import audit_result, make_pairs, sha256
+from tools.evaluate_engine import audit_result, make_pairs
 from backend.api.contracts import validate
 
 EVALUATION = ROOT / "docs/experiments/engine-evaluation-2026-11-08"
 SOURCE_COMMIT = "0d2640bec9886fe344166809123bc9a2cc19bb92"
 # These identify the published evidence, rather than accepting a self-consistent
 # rewrite of a protocol, its inputs, and its results as the original experiment.
+# Hash UTF-8 bytes after CRLF -> LF only, matching the committed Git blobs.
 FROZEN_HASHES = {
     "protocol.json": "1e08d7e97e155f651aed79b039998b4ef94ac3bc35a29bfd1369297fec0e4e4e",
-    "results/results.jsonl": "435bb9fc0d09195f80a29a51eac03c7951777d1615d67f2f8b233eb059ee23af",
+    "results/results.jsonl": "c2c01698fbc8dfe78c32b5ec3d017aa0004a5e4d204e31cad5b1cdfcbf684821",
     "results/metadata.json": "5451005ba1ce5e60d19c9d27a378091cea4c3ca227451d9570c41d4cb6e8a8fd",
     "results/summary.json": "b521fc530ca55ebb5c1d9c4f3263f10354b5d1ad86a8c4c31379d757a1f325dd",
 }
 LABELS = {"cutoff": "마감 단축", "opening": "시작 지연", "readiness": "준비 지연", "fixed": "고정 작업 위험"}
+ORIGINAL_RESULTS_BYTE_SHA256 = "435bb9fc0d09195f80a29a51eac03c7951777d1615d67f2f8b233eb059ee23af"
+
+
+def normalized_bytes(value):
+    """Ignore checkout CRLF conversion only; preserve spaces, BOM and lone CR."""
+    return value.replace(b"\r\n", b"\n")
+
+
+def sha256(path):
+    return hashlib.sha256(normalized_bytes(path.read_bytes())).hexdigest()
 
 
 def read_json(path):
@@ -139,6 +150,8 @@ def build_bundle(directory=EVALUATION):
                           comparison=comparison(methods["B2"], methods["B3"])))
     return dict(schema_version="1.0", evidence_kind="frozen_synthetic_evaluation",
                 provenance=dict(source_commit=SOURCE_COMMIT, protocol_sha256=FROZEN_HASHES["protocol.json"],
+                                hash_convention="UTF-8 bytes with CRLF normalized to LF only; no other whitespace normalization",
+                                original_results_byte_sha256=ORIGINAL_RESULTS_BYTE_SHA256,
                                 metadata_sha256=FROZEN_HASHES["results/metadata.json"],
                                 results_sha256=FROZEN_HASHES["results/results.jsonl"],
                                 summary_sha256=FROZEN_HASHES["results/summary.json"],
@@ -159,7 +172,7 @@ def markdown(bundle):
         a, b = (case["methods"][m]["result"] for m in ("B2", "B3"))
         ma, mb = a["metrics"], b["metrics"]
         lines.append(f"| {case['label']} | {ma['unassigned_count']}→{mb['unassigned_count']} | {len(ma['changed_job_ids'])}→{len(mb['changed_job_ids'])} | {ma['movable_travel_minutes']}→{mb['movable_travel_minutes']} | {ma['fixed_risk_count']}→{mb['fixed_risk_count']} | {'같음' if case['comparison']['same_served_job_set'] else '다름'} | {a['objective_proven']}→{b['objective_proven']} |")
-    lines.extend(["", "## 재현·추적", "", "`python tools/build_showcase_evidence.py --check`는 원시 파일·입력·출처 커밋 소스 해시, 80개 방법/시드 조합, 독립 일정 검사를 확인하고 산출물을 바이트 단위로 대조한다. 솔버를 호출하지 않는다. 새 시각 정보를 생성하지 않는다.", "", "[JSON](showcase.json)의 `provenance`에 원본 SHA-256과 출처 커밋을, 각 방법의 `source_jsonl_line`에 [results.jsonl](results/results.jsonl)의 1부터 시작하는 행 번호를 기록했다. 각 `methods` 항목은 행 번호 외 원시 기록을 그대로 보존한다. 실행 가능한 해와 최적성 증명은 서로 다르며 `solution_status`, `objective_proven`, `objective_stages`를 확인한다.", "", f"출처 커밋: `{SOURCE_COMMIT}`", ""])
+    lines.extend(["", "## 재현·추적", "", "`python tools/build_showcase_evidence.py --check`는 원시 파일·입력·출처 커밋 소스 해시, 80개 방법/시드 조합, 독립 일정 검사를 확인하고 산출물을 대조한다. 솔버를 호출하지 않는다. 새 시각 정보를 생성하지 않는다.", "", "파일 해시와 산출물 대조는 Git의 운영체제별 줄바꿈 변환을 허용하기 위해 UTF-8 바이트의 CRLF만 LF로 정규화한다. 공백·내용·BOM·단독 CR은 변경하지 않으며, 공백 한 글자 변경도 실패한다. `provenance.hash_convention`이 이 규칙을 명시한다. `results_sha256`은 저장소 LF 기준이고, 원래 Windows 실행의 CRLF 원본 바이트 해시는 `original_results_byte_sha256`에 별도로 보존했다. 입력·프로토콜·메타데이터에 남은 기존 실행 해시는 바꾸지 않았다.", "", "[JSON](showcase.json)의 `provenance`에 SHA-256과 출처 커밋을, 각 방법의 `source_jsonl_line`에 [results.jsonl](results/results.jsonl)의 1부터 시작하는 행 번호를 기록했다. 각 `methods` 항목은 행 번호 외 원시 기록을 그대로 보존한다. 실행 가능한 해와 최적성 증명은 서로 다르며 `solution_status`, `objective_proven`, `objective_stages`를 확인한다.", "", f"출처 커밋: `{SOURCE_COMMIT}`", ""])
     return "\n".join(lines)
 
 
@@ -168,12 +181,12 @@ def main():
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     try:
-        bundle = build_bundle()
+        bundle = build_bundle(EVALUATION)
         outputs = {"showcase.json": json.dumps(bundle, ensure_ascii=False, indent=2) + "\n", "showcase.md": markdown(bundle)}
         for name, content in outputs.items():
             path = EVALUATION / name
             if args.check:
-                if not path.exists() or path.read_bytes() != content.encode("utf-8"):
+                if not path.exists() or normalized_bytes(path.read_bytes()) != content.encode("utf-8"):
                     raise ValueError(f"Showcase differs; regenerate: {name}")
             else:
                 path.write_bytes(content.encode("utf-8"))

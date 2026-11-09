@@ -2,6 +2,7 @@
 from copy import deepcopy
 import json
 import shutil
+import subprocess
 
 import pytest
 
@@ -62,11 +63,12 @@ def test_grid_and_independent_audit_reject_corruption(raw, corruption):
 
 
 @pytest.mark.parametrize("name", ["protocol.json", "results/results.jsonl", "results/metadata.json", "results/summary.json", "inputs/eval_cutoff_8_101.json"])
-def test_frozen_files_and_inputs_cannot_be_rewritten(tmp_path, name):
+@pytest.mark.parametrize("eol", [b"\n", b"\r\n"])
+def test_frozen_files_and_inputs_cannot_be_rewritten(tmp_path, name, eol):
     directory = tmp_path / "evidence"
     shutil.copytree(showcase.EVALUATION, directory)
     path = directory / name
-    path.write_bytes(path.read_bytes() + b" ")
+    path.write_bytes(showcase.normalized_bytes(path.read_bytes()).replace(b"\n", eol) + b" ")
     with pytest.raises(ValueError, match="hash mismatch"):
         showcase.build_bundle(directory)
 
@@ -102,3 +104,37 @@ def test_check_reproduces_outputs_without_solver(monkeypatch):
     monkeypatch.setattr(evaluate_engine, "solve", forbidden)
     monkeypatch.setattr("sys.argv", ["build_showcase_evidence.py", "--check"])
     assert showcase.main() == 0
+
+
+@pytest.mark.parametrize("eol", [b"\n", b"\r\n"])
+def test_checkout_line_endings_produce_identical_bundle_and_check(tmp_path, bundle, monkeypatch, eol):
+    directory = tmp_path / "evidence"
+    shutil.copytree(showcase.EVALUATION, directory)
+    for path in directory.rglob("*"):
+        if path.is_file() and path.suffix in {".json", ".jsonl", ".md", ".diff"}:
+            path.write_bytes(showcase.normalized_bytes(path.read_bytes()).replace(b"\n", eol))
+    assert showcase.build_bundle(directory) == bundle
+    monkeypatch.setattr(showcase, "EVALUATION", directory)
+    monkeypatch.setattr("sys.argv", ["build_showcase_evidence.py", "--check"])
+    assert showcase.main() == 0
+    # Output checking tolerates EOL conversion, but never ignores other bytes.
+    path = directory / "showcase.json"
+    path.write_bytes(path.read_bytes() + b" ")
+    assert showcase.main() == 1
+
+
+def test_committed_git_blobs_reproduce_linux_checkout(tmp_path, bundle):
+    directory = tmp_path / "git-blobs"
+    prefix = showcase.EVALUATION.relative_to(showcase.ROOT).as_posix() + "/"
+    names = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", "HEAD", "--", prefix], cwd=showcase.ROOT).decode().splitlines()
+    for name in names:
+        path = directory / name.removeprefix(prefix)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(subprocess.check_output(["git", "show", f"HEAD:{name}"], cwd=showcase.ROOT))
+    assert showcase.build_bundle(directory) == bundle
+
+
+def test_newline_normalization_does_not_ignore_other_bytes():
+    assert showcase.normalized_bytes(b"a\r\nb\n") == b"a\nb\n"
+    assert showcase.normalized_bytes(b"a\rb\n") == b"a\rb\n"
+    assert showcase.normalized_bytes(b"\xef\xbb\xbfa \n") == b"\xef\xbb\xbfa \n"

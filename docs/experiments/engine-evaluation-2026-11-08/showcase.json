@@ -4,8 +4,10 @@
   "provenance": {
     "source_commit": "0d2640bec9886fe344166809123bc9a2cc19bb92",
     "protocol_sha256": "1e08d7e97e155f651aed79b039998b4ef94ac3bc35a29bfd1369297fec0e4e4e",
+    "hash_convention": "UTF-8 bytes with CRLF normalized to LF only; no other whitespace normalization",
+    "original_results_byte_sha256": "435bb9fc0d09195f80a29a51eac03c7951777d1615d67f2f8b233eb059ee23af",
     "metadata_sha256": "5451005ba1ce5e60d19c9d27a378091cea4c3ca227451d9570c41d4cb6e8a8fd",
-    "results_sha256": "435bb9fc0d09195f80a29a51eac03c7951777d1615d67f2f8b233eb059ee23af",
+    "results_sha256": "c2c01698fbc8dfe78c32b5ec3d017aa0004a5e4d204e31cad5b1cdfcbf684821",
     "summary_sha256": "b521fc530ca55ebb5c1d9c4f3263f10354b5d1ad86a8c4c31379d757a1f325dd",
     "source_sha256": {
       "backend/engine/__init__.py": "3ed21e98995d9e9336fd4b48351d20e3e8663a9e3bed40074fed5386e2603c88",
