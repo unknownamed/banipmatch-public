@@ -1,0 +1,73 @@
+{
+  "report_version": 1,
+  "external_permissions": "not_assessed",
+  "hjnc": {
+    "bytes": 5641,
+    "sha256": "0af71c65fa43c282ed56a73c7007c14db7bbcc9628280120d377752b602c4952",
+    "row_count": 10,
+    "unique_nonempty_voyage_ids": 10,
+    "duplicate_nonempty_voyage_ids": 0,
+    "missing_or_nontext": {
+      "VOY_NO": 0,
+      "YARD_OPEN": 0,
+      "YARD_CLOSE": 0,
+      "ETB": 0
+    },
+    "naive_time_ranges": {
+      "YARD_OPEN": [
+        "2026-11-03 00:00",
+        "2026-11-08 00:00"
+      ],
+      "YARD_CLOSE": [
+        "2026-11-06 07:00",
+        "2026-11-11 11:00"
+      ],
+      "ETB": [
+        "2026-11-06 17:00",
+        "2026-11-11 21:00"
+      ]
+    },
+    "reported_total": 22,
+    "reported_has_next": false,
+    "reported_total_matches_rows": false,
+    "time_zone": "unconfirmed",
+    "change_history": "not_established",
+    "coverage_and_permissions": "not_established"
+  },
+  "gwangyang_gate": {
+    "bytes": 5401590,
+    "sha256": "890bebf3f82d61a4efa2fa0161bf58907b31a89db4e5208646eb7bb9d04a251e",
+    "encoding": "cp949",
+    "physical_data_rows": 226217,
+    "all_fields_empty_rows": 168046,
+    "nonempty_rows": 58171,
+    "masked_plate_rows": 58171,
+    "invalid_time_rows": 0,
+    "negative_elapsed_rows": 0,
+    "invalid_work_time_rows": 0,
+    "missing_by_column_nonempty": {
+      "차량번호": 0,
+      "진입게이트": 0,
+      "진입일시": 0,
+      "진출게이트": 0,
+      "진출일시": 0,
+      "작업시간": 0
+    },
+    "elapsed_vs_work_time_comparable_rows": 58171,
+    "elapsed_vs_work_time_mismatch_rows": 28548,
+    "elapsed_minus_work_minutes_histogram": {
+      "0": 29623,
+      "1": 28548
+    },
+    "elapsed_minutes_nearest_rank": {
+      "count": 58171,
+      "min": 0,
+      "max": 360,
+      "p50": 23,
+      "p90": 59,
+      "p95": 73
+    },
+    "meaning": "terminal_entry_to_exit_only; not HJNC queue/service or road travel",
+    "calibration_status": "not_used"
+  }
+}

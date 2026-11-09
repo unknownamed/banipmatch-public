@@ -51,6 +51,10 @@
 
 로컬 원본: `local/data-research-2026-11-09/gwangyang-west-2026-h1.csv`. 집계: 같은 폴더의 `gwangyang-quality-summary.json`. 팀원이 재검증하려면 위 공식 링크에서 원본을 받아 해시·인코딩·빈 행 수부터 대조한다.
 
+후속: [공유 재현 집계](collected-samples-audit.json)와 [로컬 실행·외부 요청 준비](external-data-request.md)를 추가했다. 시간 불일치28,548건 모두 출입시각 차이가 원본 작업시간보다1분 컸다. 그 원인은 확인되지 않았으며 기존 해석과 합성 입력은 유지한다.
+
+HJNC 페이지의 공개 JavaScript도 후속 확인했다. 표는 실제로 `stringContent`를 파싱하고 페이지 수는 `result.total / amount`에서 직접 계산한다. 따라서 `hasNext=false`만으로 수집 완료를 판단하면 안 된다. 앞선 날짜의 ETB를 가진 첫3행은 ATD가 요청 기간에 들어 있었으나, 이것만으로 서버 날짜 필터의 정확한 조건을 단정하지 않는다. 공개 화면 소스 확인이며 새 항차 응답 수집·허가 확보는 아니다.
+
 ## 남은 수집 요청과 완료 기준
 
 | 자료 | 민준이 정리할 필수 항목 | 완료로 볼 근거 |
