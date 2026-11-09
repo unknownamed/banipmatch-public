@@ -1,5 +1,6 @@
 import type { MethodResult, Run, Snapshot } from '../api/types'
 import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
+import { Icon } from './Icon'
 import { kstDateTime, kstTime } from '../lib/time'
 
 const DATA_MODE: Record<Snapshot['data_mode'], string> = { simulated: '모의', observed: '관측', mixed: '혼합' }
@@ -179,7 +180,12 @@ function Metric({ label, a, b }: { label: string; a: number | null; b: number | 
       <div className="metric-value">{b ?? '미제공'}</div>
       <div className="metric-base">
         원안 {a ?? '미제공'}
-        {trend && <span className="metric-delta">{trend === 'worse' ? ' ▲' : ' ▼'} {Math.abs(b! - a!)}</span>}
+        {trend && (
+          <span className="metric-delta">
+            {' '}
+            <Icon name={trend === 'worse' ? 'up' : 'down'} size={11} /> {Math.abs(b! - a!)}
+          </span>
+        )}
       </div>
     </div>
   )

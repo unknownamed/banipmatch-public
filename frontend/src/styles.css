@@ -141,7 +141,7 @@ fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px
 }
 
 /* 차량별 일정: 같은 시간축 위에 원안·조정안 막대 */
-.timeline { display: grid; gap: 10px; overflow-x: auto; }
+.timeline { display: grid; gap: 10px; overflow-x: auto; padding-right: 22px; }
 /* 좁은 화면에서는 막대가 읽히도록 최소 폭을 두고 타임라인만 옆으로 스크롤 */
 .timeline > .lane, .timeline > .vehicle-card { min-width: 620px; }
 .timeline-legend { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -166,4 +166,39 @@ fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px
 .unassigned-row { margin: 0; padding: 8px 12px; border-radius: 10px; background: var(--warn-soft); border: 1px solid var(--warn-line); }
 @media (max-width: 640px) {
   .lane { grid-template-columns: 64px minmax(0, 1fr); }
+}
+
+/* ── taste skill 적용: 아이콘·숫자·움직임·로딩 ───────────────────────── */
+.icon { display: inline-block; vertical-align: -2px; flex: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 시각·수치는 자릿수가 흔들리지 않게 고정폭 숫자 */
+.grid, .metric-value, .metric-base, .evidence-strip dd, .tick, .deadline-label, .job-bar, .kv td { font-variant-numeric: tabular-nums; }
+
+/* 부드러운 전환과 눌림 피드백(transform·opacity·색만 움직인다) */
+:root { --ease: cubic-bezier(0.16, 1, 0.3, 1); }
+.tabs button, .pill-nav a, .card > button, .grid tbody tr { transition: color 0.25s var(--ease), border-color 0.25s var(--ease), background-color 0.25s var(--ease), transform 0.2s var(--ease); }
+.card > button:active:not(:disabled), .tabs button:active { transform: translateY(1px) scale(0.99); }
+.card { box-shadow: 0 1px 2px rgba(23, 32, 27, 0.04), 0 12px 32px -18px rgba(31, 122, 77, 0.18); }
+
+/* 목록은 한꺼번에 뜨지 않고 위에서부터 차례로 나타난다 */
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.vehicle-card, .grid tbody tr, .metric { animation: rise 0.45s var(--ease) both; }
+.vehicle-card:nth-child(3), .grid tbody tr:nth-child(2), .metric:nth-child(2) { animation-delay: 60ms; }
+.vehicle-card:nth-child(4), .grid tbody tr:nth-child(3), .metric:nth-child(3) { animation-delay: 120ms; }
+.vehicle-card:nth-child(5), .grid tbody tr:nth-child(4), .metric:nth-child(4) { animation-delay: 180ms; }
+.vehicle-card:nth-child(n + 6), .grid tbody tr:nth-child(n + 5), .metric:nth-child(5) { animation-delay: 240ms; }
+
+/* 계산 대기·진행 중인 상태 배지만 숨 쉬듯 깜박인다 */
+@keyframes breathe { 50% { opacity: 0.55; } }
+.badge.run-queued, .badge.run-running { animation: breathe 1.6s ease-in-out infinite; }
+
+/* 스켈레톤 로딩 */
+.skeleton { display: grid; gap: 10px; }
+.skeleton i { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--soft) 0%, #e9ede9 40%, var(--soft) 80%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+.skeleton i:first-of-type { height: 18px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

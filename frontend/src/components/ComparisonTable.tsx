@@ -1,5 +1,6 @@
 import type { Assignment } from '../api/types'
 import { ISSUE_LABEL, lockedPreserved, type ChangeKind, type JobRow } from '../lib/compare'
+import { Icon } from './Icon'
 import { kstTimeWithDay } from '../lib/time'
 
 const CHANGE_LABEL: Record<ChangeKind, string> = { vehicle: '차량', order: '순서', time: '시각' }
@@ -68,7 +69,7 @@ export function ComparisonTable({
                   {r.locked && (
                     <div>
                       <span className="badge lock" title={r.job.freeze_reason ?? undefined}>
-                        🔒 고정{r.job.state === 'departed' ? ' · 출발함' : ''}
+                        <Icon name="lock" /> 고정{r.job.state === 'departed' ? ' · 출발함' : ''}
                       </span>
                     </div>
                   )}
@@ -78,7 +79,7 @@ export function ComparisonTable({
                   <Cell a={r.baseline} refUtc={asOf} closesAt={r.window?.closes_at} />
                   {r.baselineIssues.map((i, k) => (
                     <div key={k} className="warn small">
-                      ⚠ {ISSUE_LABEL[i.code] ?? i.code}
+                      <Icon name="warning" /> {ISSUE_LABEL[i.code] ?? i.code}
                     </div>
                   ))}
                 </td>
@@ -99,7 +100,7 @@ export function ComparisonTable({
                       preserved ? (
                         <span className="dot dot-muted">원안 유지</span>
                       ) : (
-                        <span className="dot dot-warn">⚠ 고정 작업 변경됨 · 확인 필요</span>
+                        <span className="dot dot-warn">고정 작업 변경됨 · 확인 필요</span>
                       )
                     ) : r.changes.length ? (
                       <span className="dot dot-ok">{r.changes.map((c) => CHANGE_LABEL[c]).join('·')} 변경</span>
