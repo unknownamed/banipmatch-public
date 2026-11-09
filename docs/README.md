@@ -36,6 +36,8 @@
 
 [묶음 안내](development/v0.1/%EB%A8%BC%EC%A0%80_%EC%9D%BD%EA%B8%B0.txt) · [규격](development/v0.1/%EA%B3%B5%ED%86%B5%20%EA%B7%9C%EA%B2%A9) · [예제](development/v0.1/%EC%98%88%EC%A0%9C%20%EB%8D%B0%EC%9D%B4%ED%84%B0) · [검수](development/v0.1/%EA%B2%80%EC%88%98)
 
+- [고정 평가10종의 시연·보고서 비교표](experiments/engine-evaluation-2026-11-08/showcase.md) — 기존80회 원본을 보존한 전체 사례 비교와 출처 추적
+
 ## 대회 최종 제출물
 
 - 최종 보고서: 준비 중

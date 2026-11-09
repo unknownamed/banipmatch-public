@@ -74,3 +74,7 @@ python -m pytest tests/engine/test_optimization_oracle.py tests/engine/test_eval
 - [문제의 공식 근거와 질의응답](../../team/operational-evidence.md)
 
 각 결과의 원시 `validation_status`와 별도 `audit.schedule`을 구분한다. 이전 156회·72회의 결과가 새 검사에 의해 소급 승인된 것은 아니다. 재현 결과는 새로운 폴더에 기록하며, 이미 작성된 평가 묶음은 수정해서 유리한 결과로 바꾸지 않는다.
+
+## 2026-11-09 화면·보고서 연결 자료
+
+[전체10사례 비교표](showcase.md)와 [읽기 전용 JSON](showcase.json)은 보존된80회 기록에서 모든 입력의 솔버 시드0 결과40개를 묶습니다. 전체20쌍과 시드17을 포함한 집계도 함께 남겨 유리한 결과만 표시하지 않습니다. 원시 결과의 승인 불가 상태와 별도 감사 기록을 구분하며, 기존 평가를 새 API 실행으로 꾸미지 않습니다. `python tools/build_showcase_evidence.py --check`로 과거 소스·입력·결과 해시와 독립 검산을 재확인합니다. Git 기록이 얕은 복제본에서는 출처 커밋을 먼저 받아야 합니다.
