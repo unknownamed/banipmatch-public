@@ -56,6 +56,7 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 - 구현 범위: B0 원안 위험 진단·B1 마감순 삽입·B2 이동 최소화·B3 변경 최소화를 비교합니다. 모든 조정 방법은 미처리 수를 우선하며, 고정 작업 보존과 미처리 근거를 확인합니다.
 - B0~B3 구현·실험은 [엔진0.2.3 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)를 따릅니다. 완전한 초기안 힌트·probing0으로 탐색을 보완했고 엔진89개 검사를 통과한 기록입니다. 추가 평가 도구 검사는 아래 최신 인계를 따릅니다. 최신 API·데이터 연결 후 전체 검수는 [통합 인계](handoffs/2026-11-08-pr12-pr14-integration.md)에 있습니다. [기존0.2.1·156회](../experiments/engine-sensitivity-2026-11-08/README.md)는 보존하며 [후속72회](../experiments/engine-profile-2026-11-08/README.md)와 구분합니다.
 - 후속20건 B3는3초에서 변경2건의 최적성을 증명했고10초 호출 중앙값은5.21→2.42초입니다. 50건10초 B2는 전체 최적, B3는 미처리26/변경23/이동1,440분의 FEASIBLE로 전체 미증명입니다. [기존156회 PDF](../experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)와 [후속72회 PDF](../experiments/engine-report-2026-11-08/engine-performance-followup.pdf)를 활용하되 모의 한계를 유지합니다. API·독립 검사 연결은 이후 검수했습니다. 새 [80회 평가와 독립 대조](handoffs/2026-11-08-unknownamed-evaluation.md)에서 같은 처리 작업과 다른 작업을 구분하고 이동 증가까지 제시했습니다. 다음은 대표 사례의 화면 대조·보고서 설명, 별도 개발 자료를 사용한50건 탐색 보완입니다.
+- 위 후속 중 대표 화면 대조와 평가 수치·절충 설명은 [평가 근거 연결](handoffs/2026-11-09-unknownamed-showcase-evidence.md) 및 PR24~26에서 완료했습니다. 이를 재구현하지 않습니다. 추가로 [고정 작업의 작은 사례 독립 검산](handoffs/2026-11-09-unknownamed-frozen-oracle.md)을 보강했습니다. 최종 제출용 보고서·발표 통합과 별도 개발 자료의50건 탐색 연구는 남아 있습니다.
 - `solve(snapshot, method, config) → result`의 경계를 유지합니다. 엔진 안에서 DB·웹·외부 API를 호출하거나 입력을 수정하지 않습니다.
 - 출발·고정 작업의 차량·순서·시각을 보존하고, 위험이 생겨도 작업을 삭제하거나 미처리로 바꿔 지표를 좋게 만들지 않습니다.
 - 같은 입력·조건·계산 예산으로 B0~B3를 비교합니다. 입력 부족, 시간 내 해 미발견, 증명된 불가능을 구분하고 확인한 근거만 반환합니다.
