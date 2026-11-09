@@ -1,0 +1,162 @@
+{
+  "report_version": 1,
+  "source": "KMA API Hub",
+  "sample_scope": "Geojedo station 22104 and Busan sea warning S1311100; not terminal measurements",
+  "key_status": "authenticated_response_confirmed",
+  "network_calls_this_retry": 3,
+  "previous_403_calls": 3,
+  "server_sharing_permissions": "unconfirmed",
+  "cases": [
+    {
+      "case": "station",
+      "endpoint": "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php",
+      "request_parameters_without_key": {
+        "inf": "BUOY",
+        "stn": "22104",
+        "help": "1"
+      },
+      "raw_sha256": "ff23610cc2da35ed934d17aac7ee0a101e2ff906e0a0d3e740fb0003eb623db0",
+      "raw_bytes": 149,
+      "kind": "station",
+      "http_status": 403,
+      "received_at": "2026-11-09T14:00:01.586836+00:00",
+      "engine_conversion": "not_performed",
+      "causal_attribution": "not_established",
+      "status": "application_required"
+    },
+    {
+      "case": "sea",
+      "endpoint": "https://apihub.kma.go.kr/api/typ01/url/sea_obs.php",
+      "request_parameters_without_key": {
+        "stn": "22104",
+        "help": "1"
+      },
+      "raw_sha256": "ff23610cc2da35ed934d17aac7ee0a101e2ff906e0a0d3e740fb0003eb623db0",
+      "raw_bytes": 149,
+      "kind": "sea",
+      "http_status": 403,
+      "received_at": "2026-11-09T14:00:17.079187+00:00",
+      "engine_conversion": "not_performed",
+      "causal_attribution": "not_established",
+      "status": "application_required"
+    },
+    {
+      "case": "warning",
+      "endpoint": "https://apihub.kma.go.kr/api/typ01/url/wrn_now_data.php",
+      "request_parameters_without_key": {
+        "fe": "f",
+        "help": "1"
+      },
+      "raw_sha256": "ff23610cc2da35ed934d17aac7ee0a101e2ff906e0a0d3e740fb0003eb623db0",
+      "raw_bytes": 149,
+      "kind": "warning",
+      "http_status": 403,
+      "received_at": "2026-11-09T14:00:18.732661+00:00",
+      "engine_conversion": "not_performed",
+      "causal_attribution": "not_established",
+      "status": "application_required"
+    },
+    {
+      "case": "station-approved",
+      "endpoint": "https://apihub.kma.go.kr/api/typ01/url/stn_inf.php",
+      "request_parameters_without_key": {
+        "inf": "BUOY",
+        "stn": "22104",
+        "help": "1"
+      },
+      "raw_sha256": "fd58d63037223f199307f6814a541db024a68a64a70f45a10d89d949e6e2ead5",
+      "raw_bytes": 930,
+      "kind": "station",
+      "http_status": 200,
+      "received_at": "2026-11-09T14:06:42.014071+00:00",
+      "engine_conversion": "not_performed",
+      "causal_attribution": "not_established",
+      "status": "sample_received",
+      "row_count": 1,
+      "units_source": "response_help_and_official_documentation",
+      "expected_station": "22104",
+      "station_mismatch_rows": 0,
+      "stations": [
+        {
+          "STN_ID": "22104",
+          "STN_KO": "거제도",
+          "LON": "128.90000000",
+          "LAT": "34.76670000",
+          "FCT_ID": "12B20000"
+        }
+      ]
+    },
+    {
+      "case": "sea-approved",
+      "endpoint": "https://apihub.kma.go.kr/api/typ01/url/sea_obs.php",
+      "request_parameters_without_key": {
+        "stn": "22104",
+        "help": "1"
+      },
+      "raw_sha256": "b8a570a72c442c74a12626ef6b40261a1ee5a7a74e1734b1ab02ec5224199cff",
+      "raw_bytes": 1360,
+      "kind": "sea",
+      "http_status": 200,
+      "received_at": "2026-11-09T14:06:42.294790+00:00",
+      "engine_conversion": "not_performed",
+      "causal_attribution": "not_established",
+      "status": "sample_received",
+      "row_count": 1,
+      "units_source": "response_help_and_official_documentation",
+      "expected_station": "22104",
+      "station_mismatch_rows": 0,
+      "observations": [
+        {
+          "station_id": "22104",
+          "observed_at_utc": "2026-11-09T14:00:00Z",
+          "original_time_kst": "202611092300",
+          "received_minus_observed_seconds": 402,
+          "wh_m_original": "1.2",
+          "ws_m_s_original": "9.1",
+          "gust_m_s_original": "11.5",
+          "missing_or_invalid_nonnegative_fields": []
+        }
+      ],
+      "future_observation_rows": 0,
+      "missing_sentinel_policy": "not_confirmed; negative_or_invalid_values_not_zero_filled"
+    },
+    {
+      "case": "warning-approved",
+      "endpoint": "https://apihub.kma.go.kr/api/typ01/url/wrn_now_data.php",
+      "request_parameters_without_key": {
+        "fe": "f",
+        "help": "1"
+      },
+      "raw_sha256": "ff5a64ce0b7de146b90910d9982c63352b0280513c25a96abaafd918a881c952",
+      "raw_bytes": 7494,
+      "kind": "warning",
+      "http_status": 200,
+      "received_at": "2026-11-09T14:06:42.587094+00:00",
+      "engine_conversion": "not_performed",
+      "causal_attribution": "not_established",
+      "status": "sample_received",
+      "row_count": 35,
+      "units_source": "response_help_and_official_documentation",
+      "target_regions": [
+        "S1311100"
+      ],
+      "selected_row_count": 1,
+      "selected_records": [
+        {
+          "region_id": "S1311100",
+          "region_name": "부산앞바다",
+          "published_at_utc": "2026-11-08T07:00:00Z",
+          "effective_at_utc": null,
+          "effective_time_original_kst": "202611092358",
+          "effective_representation": "preliminary_period_code",
+          "kind": "풍랑",
+          "level": "예비",
+          "command": "발표",
+          "release_notice_original": ""
+        }
+      ],
+      "coverage": "not_established; warning_response_may_have_no_end_marker",
+      "absence_interpretation": "no_selected_row_is_not_proof_of_no_warning"
+    }
+  ]
+}
