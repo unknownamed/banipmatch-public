@@ -92,9 +92,16 @@ export function Showcase({ archive }: { archive: Archive }) {
           {overview.groups.map((group) => (
             <p key={group.size}>
               {group.size}건 입력: 동일 작업 비교 {group.comparable} /{" "}
-              {group.total}쌍 · 변경 차이(건) {group.changed.range} (미제공{" "}
-              {group.changed.unavailable}쌍) · 가변 이동 차이(분){" "}
-              {group.travel.range} (미제공 {group.travel.unavailable}쌍)
+              {group.total}쌍 ·{" "}
+              {group.comparable === 0 ? (
+                "동일 작업 비교 쌍 없음"
+              ) : (
+                <>
+                  변경 차이(건) {group.changed.range} (미제공{" "}
+                  {group.changed.unavailable}쌍) · 가변 이동 차이(분){" "}
+                  {group.travel.range} (미제공 {group.travel.unavailable}쌍)
+                </>
+              )}
             </p>
           ))}
           {overview.pairCount === 0 && (

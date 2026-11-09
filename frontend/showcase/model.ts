@@ -139,8 +139,8 @@ const statusNames: Record<SolutionStatus, string> = {
   HEURISTIC: "휴리스틱",
   OPTIMAL: "최적",
   FEASIBLE: "실행 가능 · 최적 미증명",
-  INFEASIBLE: "실행 불가능",
-  UNKNOWN: "해 상태 미확인",
+  INFEASIBLE: "해 없음",
+  UNKNOWN: "시간 내 해 미발견",
   MODEL_INVALID: "모델 오류",
   INPUT_INCOMPLETE: "입력 부족",
 };

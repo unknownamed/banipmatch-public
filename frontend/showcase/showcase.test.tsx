@@ -159,7 +159,10 @@ describe("보존 자료에서 계산하는 요약", () => {
       total: 2,
       changed: { range: "미제공", unavailable: 0 },
     });
-    expect(contextText(changed)).toContain("동일 작업 비교 0 / 2쌍");
+    expect(contextText(changed)).toContain(
+      "동일 작업 비교 0 / 2쌍 · 동일 작업 비교 쌍 없음",
+    );
+    expect(contextText(changed)).not.toContain("미제공 0쌍");
     expect(contextText(changed)).not.toContain("999");
   });
   it("빈 비교·누락값을 0으로 만들지 않고 미제공 수와 미확인 규모를 표시한다", () => {
@@ -168,7 +171,8 @@ describe("보존 자료에서 계산하는 요약", () => {
     expect(contextText(changed)).toContain("계산 시드 0종");
     expect(contextText(changed)).toContain("비교 기록 없음");
     expect(contextText(changed)).toContain("비교 기록이 없습니다");
-    expect(contextText(changed)).toContain("변경 차이(건) 미제공");
+    expect(contextText(changed)).toContain("동일 작업 비교 쌍 없음");
+    expect(contextText(changed)).not.toContain("미제공 0쌍");
     const base = archive.context.pairs[0];
     changed.context.pairs = [
       { ...base, changed_delta: null, travel_minutes_delta: null },
@@ -210,8 +214,8 @@ describe("업무 상태의 한국어와 원문 표기", () => {
     );
     expect(solutionLabel("OPTIMAL", true)).toBe("최적(OPTIMAL)");
     expect(solutionLabel("HEURISTIC", false)).toBe("휴리스틱(HEURISTIC)");
-    expect(solutionLabel("INFEASIBLE", false)).toBe("실행 불가능(INFEASIBLE)");
-    expect(solutionLabel("UNKNOWN", false)).toBe("해 상태 미확인(UNKNOWN)");
+    expect(solutionLabel("INFEASIBLE", false)).toBe("해 없음(INFEASIBLE)");
+    expect(solutionLabel("UNKNOWN", false)).toBe("시간 내 해 미발견(UNKNOWN)");
     expect(solutionLabel("MODEL_INVALID", false)).toBe(
       "모델 오류(MODEL_INVALID)",
     );

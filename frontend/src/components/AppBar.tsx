@@ -2,10 +2,14 @@
 export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
   const params = new URLSearchParams(location.search)
   const current = params.get('view') === 'map' ? 'map' : mode === 'http' && !params.get('run') ? 'start' : 'review'
+  const reviewParams = new URLSearchParams(params)
+  reviewParams.delete('view')
+  const mapParams = new URLSearchParams(reviewParams)
+  mapParams.set('view', 'map')
   const links = [
     ...(mode === 'http' ? [{ id: 'start', label: '계산 요청', href: '?' }] : []),
-    { id: 'review', label: '비교 · 승인', href: mode === 'http' ? location.search.replace(/[?&]view=map/, '') || '?' : '?' },
-    { id: 'map', label: '지도 확인', href: '?view=map' },
+    { id: 'review', label: '비교 · 승인', href: `?${reviewParams.toString()}` },
+    { id: 'map', label: '지도 확인', href: `?${mapParams.toString()}` },
   ]
   return (
     <header className="appbar">
