@@ -16,5 +16,5 @@
     "types": ["vite/client", "node"],
     "paths": { "@examples/*": ["../docs/development/v0.1/예제 데이터/*"] }
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "vite.config.ts", "showcase", "vite.showcase.config.ts"]
 }
