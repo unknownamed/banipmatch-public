@@ -75,6 +75,9 @@ def http_client(base_url: str, token: str):
     return call
 
 
+POLL_SECONDS = 1.0
+
+
 def run_demo(call, snapshot: dict, *, time_limit=3, seed=42, record=None, review_only=False):
     """call은 헤더를 저장하지 않는 HTTP 경계. 서버 시계와 원본 자료는 변경하지 않음."""
     evidence = []
@@ -113,7 +116,8 @@ def run_demo(call, snapshot: dict, *, time_limit=3, seed=42, record=None, review
             break
         if time.monotonic() >= deadline:
             raise TimeoutError("결과 조회 대기시간 초과")
-        time.sleep(0.1)
+        # 서버는 202에 Retry-After: 1을 준다. 더 촘촘한 조회는 엔진 자식 프로세스를 느리게 해 3초 설정에서 B2 시간 초과를 낸다(PR #22 리뷰).
+        time.sleep(POLL_SECONDS)
     save_step({"method": "GET", "path": path, "request": None, "status": status, "response": result})
     if status != 200:
         raise ValueError(f"결과 조회 실패: HTTP {status}")
