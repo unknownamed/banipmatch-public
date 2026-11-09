@@ -32,13 +32,13 @@ code { font-size: 0.85em; background: var(--soft); border: 1px solid var(--line)
 a { color: var(--accent); }
 
 /* 상단 바 */
-.appbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 16px; padding: 10px 20px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text); text-decoration: none; }
+.appbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 16px; padding: 0 20px; min-height: 56px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.brand { padding: 12px 0; display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text); text-decoration: none; }
 .brand-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.85rem; }
-.pill-nav { display: flex; gap: 4px; padding: 4px; background: var(--soft); border: 1px solid var(--line); border-radius: 999px; }
-.pill-nav a { padding: 6px 14px; border-radius: 999px; color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+.pill-nav { display: flex; gap: 22px; align-self: stretch; margin-left: 12px; }
+.pill-nav a { display: flex; align-items: center; padding: 0 2px; border-bottom: 2px solid transparent; color: var(--muted); text-decoration: none; font-size: 0.92rem; font-weight: 500; }
 .pill-nav a:hover { color: var(--text); }
-.pill-nav a[aria-current='page'] { background: var(--text); color: #fff; }
+.pill-nav a[aria-current='page'] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
 .appbar-note { margin-left: auto; font-size: 0.8rem; color: var(--muted); }
 
 /* 카드 */
@@ -85,13 +85,20 @@ ul.warn { padding-left: 28px; }
 table { border-collapse: collapse; width: 100%; }
 .kv th { text-align: left; width: 170px; color: var(--muted); font-weight: 500; padding: 6px 8px 6px 0; vertical-align: top; }
 .kv td { padding: 6px 0; }
-.grid th, .grid td { border-bottom: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
-.grid thead th { background: var(--soft); color: var(--muted); font-weight: 600; font-size: 0.8rem; border-bottom: 1px solid var(--line); }
-.grid thead th:first-child { border-top-left-radius: 10px; }
-.grid thead th:last-child { border-top-right-radius: 10px; }
+.grid th, .grid td { border-bottom: 1px solid var(--line); padding: 14px 12px; text-align: left; vertical-align: top; }
+.grid thead th { background: transparent; color: var(--muted); font-weight: 600; font-size: 0.76rem; letter-spacing: 0.04em; padding-top: 10px; padding-bottom: 10px; }
 .grid tbody tr:hover { background: #fafbfa; }
 .grid.small td, .grid.small th { padding: 7px 10px; font-size: 0.85rem; }
-.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+.table-wrap { overflow-x: auto; }
+.job-cell b { font-size: 1rem; }
+.late-time { color: var(--warn); font-weight: 600; }
+.issue-text { margin-top: 4px; color: var(--text); }
+/* 상태: 색 점 + 글자 */
+.dot { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.dot-ok { color: var(--accent); }
+.dot-warn { color: var(--warn); }
+.dot-muted { color: var(--muted); }
 .row-locked { background: #f8f9ff; }
 .row-unassigned { background: #fff8f7; }
 
@@ -105,10 +112,11 @@ table { border-collapse: collapse; width: 100%; }
 .metric.worse .metric-value, .metric.worse .metric-delta { color: var(--warn); }
 .metric.better .metric-delta { color: var(--ok); }
 
-/* 방법 탭: 알약 모양 */
-.tabs { display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 12px; background: var(--soft); border: 1px solid var(--line); border-radius: 999px; }
-.tabs button { border: 0; background: transparent; padding: 6px 16px; border-radius: 999px; cursor: pointer; color: var(--muted); }
-.tabs button[aria-selected='true'] { background: var(--text); color: #fff; }
+/* 탭: 초록 밑줄 (Terminal49 래퍼런스) */
+.tabs { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; border-bottom: 2px solid transparent; background: transparent; padding: 8px 2px; margin-bottom: -1px; cursor: pointer; color: var(--muted); font-weight: 500; }
+.tabs button:hover { color: var(--text); }
+.tabs button[aria-selected='true'] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
 
 .issue { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; background: var(--soft); }
 .issue summary { cursor: pointer; }
