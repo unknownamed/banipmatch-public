@@ -1,11 +1,12 @@
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 import json
+from unittest.mock import patch
 
 import pytest
 
 from backend.api.engine_replay import EngineReplay
-from backend.api.contracts import digest
+from backend.api.contracts import DRAFT, digest
 from conftest import make_client
 from tools.demo_engine_api import http_client, main, prepare_snapshot, run_demo
 
@@ -93,3 +94,28 @@ def test_wrong_registered_input_hash_stops_before_run_or_approval(snapshot):
     with pytest.raises(ValueError, match='해시'):
         run_demo(call, snapshot)
     assert calls == ['/v1/scenarios']
+
+
+def test_pending_results_wait_and_failure_is_not_retried_or_approved(snapshot):
+    run = json.loads((DRAFT / '예제 데이터' / '03_run_status.json').read_text(encoding='utf-8'))
+    polls = 0
+    paths = []
+    def call(method, path, body=None, key=None):
+        nonlocal polls
+        paths.append((method, path))
+        if path == '/v1/scenarios':
+            return 201, {'input_sha256': digest(snapshot)}
+        if path.startswith('/v1/scenarios/'):
+            return 200, snapshot
+        if path == '/v1/runs':
+            return 202, run
+        polls += 1
+        if polls <= 3:
+            return 202, {**run, 'status': 'running'}
+        return 503, {'code': 'RUN_EXECUTION_FAILED'}
+    with patch('tools.demo_engine_api.time.sleep') as sleep:
+        with pytest.raises(ValueError, match='503'):
+            run_demo(call, snapshot)
+    assert [args.args[0] for args in sleep.call_args_list] == [1.0, 1.0, 1.0]
+    assert polls == 4
+    assert not any(path.endswith('/approvals') for _, path in paths)

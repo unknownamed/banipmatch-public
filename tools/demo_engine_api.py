@@ -76,9 +76,10 @@ def http_client(base_url: str, token: str):
 
 
 POLL_SECONDS = 1.0
+DEFAULT_TIME_LIMIT = 10
 
 
-def run_demo(call, snapshot: dict, *, time_limit=3, seed=42, record=None, review_only=False):
+def run_demo(call, snapshot: dict, *, time_limit=DEFAULT_TIME_LIMIT, seed=42, record=None, review_only=False):
     """call은 헤더를 저장하지 않는 HTTP 경계. 서버 시계와 원본 자료는 변경하지 않음."""
     evidence = []
 
@@ -116,7 +117,7 @@ def run_demo(call, snapshot: dict, *, time_limit=3, seed=42, record=None, review
             break
         if time.monotonic() >= deadline:
             raise TimeoutError("결과 조회 대기시간 초과")
-        # 서버는 202에 Retry-After: 1을 준다. 더 촘촘한 조회는 엔진 자식 프로세스를 느리게 해 3초 설정에서 B2 시간 초과를 낸다(PR #22 리뷰).
+        # 서버의 Retry-After: 1에 맞춰 조회 부하를 줄임. 짧은 프로세스 제한의 성공을 보장하는 것은 아님.
         time.sleep(POLL_SECONDS)
     save_step({"method": "GET", "path": path, "request": None, "status": status, "response": result})
     if status != 200:
@@ -175,7 +176,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--output", type=Path, help="새 증거 디렉터리. 기존 디렉터리 덮어쓰기 불가")
-    parser.add_argument("--time-limit", type=int, choices=range(1, 121), default=3)
+    parser.add_argument("--time-limit", type=int, choices=range(1, 121), default=DEFAULT_TIME_LIMIT)
     parser.add_argument("--review-only", action="store_true", help="계산·검사 후 멈추고 실제 승인은 화면에서 수행")
     args = parser.parse_args(argv)
     token = os.environ.get("BANIPMATCH_DEMO_TOKEN", "")
