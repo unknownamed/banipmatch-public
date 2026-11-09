@@ -4,7 +4,7 @@ ChatGPT·Claude 등 특정 구독으로 통일하지 않습니다. 같은 저장
 
 ## 시작 순서
 
-1. 저장소가 없으면 복제합니다. 이미 있으면 **매 작업 시작·재개 때 아래 절차로 원격 최신 main을 확인하고 작업 브랜치에 반영**합니다. 이전에 받은 파일만으로 최신이라고 판단하지 않습니다.
+1. 저장소가 없으면 복제합니다. 이미 있으면 **매 작업 시작·재개 때 아래 절차로 원격 최신 main을 확인하고 작업 브랜치에 반영**합니다. 열린 PR과 본인·관련 PR의 새 커밋·리뷰도 확인합니다. 이전에 받은 파일만으로 최신이라고 판단하지 않습니다.
 2. [README](README.md), [공통 AI 지침](AGENTS.md), [역할표](docs/team/roles.md), [현재 상태](docs/team/status.md)를 읽습니다.
    [리뷰·병합 기준](docs/team/review-policy.md)에서 이번 변경에 사람의 검토가 필요한지도 판단합니다.
    [기존 서비스 비교](docs/team/service-comparison.md)의 공통 결론과 본인 파트 적용사항도 확인합니다. 제품 비교 근거와 현재 구현 계약을 구분합니다.
@@ -35,6 +35,25 @@ git rev-parse origin/main
 
 이 절차는 기존 파일을 버리는 `reset --hard`, `clean`, 강제 push, 무조건적인 rebase·stash를 허용하지 않습니다. 기존 작업의 보존이나 충돌 판단이 불확실하면 상황을 공유합니다. 일반 웹 채팅 AI는 직접 Git을 갱신할 수 없으므로 사용자가 최신 파일과 기준 커밋을 전달해야 합니다.
 
+## 최신 PR을 확인하는 순서
+
+main은 병합된 공통 코드이고, 열린 PR의 수정은 아직 main에 없을 수 있습니다. 작업 시작·재개, PR 제출·검토·병합 직전에 둘 다 확인합니다. 다음 명령은 로그인된 GitHub CLI를 저장소 폴더에서 실행하는 예입니다. `123`은 실제 대상 번호로 바꿉니다.
+
+```sh
+gh pr list --state open --json number,title,headRefName,headRefOid,baseRefName
+gh pr view 123 --json state,headRefName,headRefOid,baseRefName,isCrossRepository,reviews,comments,statusCheckRollup
+```
+
+1. 본인 PR과 같은 파일·계약을 건드리는 PR을 찾아 중복 작업과 충돌 가능성을 확인합니다. 본문뿐 아니라 새 리뷰·인라인 지적·해결 상태도 확인합니다. 관련 없는 PR 전체를 매번 정밀 리뷰할 필요는 없습니다.
+2. 대상이 열려 있는지, 최신 소스 브랜치와 head 커밋이 무엇인지 확인합니다. 이미 병합됐으면 최신 main으로 이어가고, 닫힌 PR을 자동으로 재개하지 않습니다.
+3. **PR의 코드 검토·수정은 확인한 최신 head에서 시작합니다.** 같은 저장소의 PR이면 확인한 소스 브랜치를 `git fetch origin <소스-브랜치>`로 가져옵니다. 기존 변경을 보존한 깨끗한 상태에서 새 검토 브랜치를 `git switch -c codex/review-pr-123 FETCH_HEAD`로 만들거나 별도 작업트리를 사용합니다. `git rev-parse HEAD`가 방금 조회한 PR head와 같은지 확인합니다. 예시 브랜치명이 이미 있으면 다른 이름을 사용하며 덮어쓰지 않습니다.
+4. 기존 PR 작업 브랜치를 이어갈 때도 미커밋 변경과 로컬 전용 커밋을 먼저 확인합니다. 원격 변경을 정상 fast-forward 또는 검토한 merge로 반영합니다. `reset --hard`, 강제 push, 무조건적 stash로 다른 사람의 수정이나 진행 중 작업을 버리지 않습니다. fork PR이면 origin에 같은 이름이 있다고 그 브랜치로 간주하지 말고, PR의 실제 출처와 권한을 확인한 뒤 별도 검토 사본을 만듭니다.
+5. 검사·리뷰를 마친 뒤 PR head·새 지적·CI를 다시 조회합니다. head가 바뀌면 추가 차이와 관련 검사를 확인합니다. CI가 검사한 커밋이 현재 head와 같은지 확인하고, 병합할 때 그 head를 명시해 사이에 들어온 미검토 수정이 함께 병합되지 않도록 합니다. GitHub CLI의 `gh pr merge 123 --merge --match-head-commit <확인한-head>`를 사용할 수 있습니다. 실제 병합 허용 범위와 보호 규칙은 그대로 따릅니다.
+
+열린 PR 목록 확인은 미병합 PR을 전부 작업 브랜치에 합치라는 지시가 아닙니다. 필요한 PR 의존성만 담당자와 맞춥니다. 최신 head 확인 때문에 같은 사람에게 반복 리뷰를 요청하지 않으며, [현재 리뷰 기준](docs/team/review-policy.md)을 유지합니다. 접근할 수 없는 AI는 최신 확인·동기화를 했다고 하지 않고, 사용자가 최신 PR 내용과 기준 커밋을 전달하도록 안내합니다.
+
+작업 기록에는 확인한 main, 관련 PR 번호·head, 반영 여부, 실행한 검사와 미확인 범위를 남깁니다. 새 작업에 관련 PR이 없으면 ‘열린 관련 PR 없음’으로 기록하면 됩니다.
+
 ## 도구별로 지침 전달하기
 
 | 사용 방식 | 저장소에 둔 진입점 | 팀원이 확인할 것 |
@@ -55,6 +74,9 @@ git rev-parse origin/main
 새 작업은 최신 origin/main에서 시작하고, 진행 중인 작업은 내 변경을 보존한 뒤 최신 main을 합쳐줘.
 fetch만 했다고 반영 완료라 하지 말고, 기준 커밋과 작업 브랜치 반영 여부를 확인해줘.
 PR 제출·병합 직전에도 같은 확인을 해줘. 접근할 수 없거나 충돌 판단이 어려우면 알려줘.
+열린 PR과 내 PR의 최신 head·리뷰·CI도 확인하고, PR을 수정하거나 검토할 때는
+그 소스 브랜치 최신 커밋을 받아줘. main만 갱신하고 미병합 PR까지 최신이라 하지 마.
+다른 사람의 미병합 PR을 내 작업에 전부 합치지는 마.
 이 저장소의 AGENTS.md, README.md, docs/team/roles.md,
 docs/team/status.md와 관련 인계 기록을 읽어줘.
 docs/team/review-policy.md에 따라 작은 변경은 자체 검사 후 병합하고,
