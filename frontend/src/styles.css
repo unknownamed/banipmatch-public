@@ -25,7 +25,7 @@
 }
 
 body { margin: 0; }
-main { max-width: 1180px; margin: 0 auto; padding: 16px 20px 40px; display: grid; gap: 14px; }
+main { max-width: 1440px; margin: 0 auto; padding: 16px 20px 40px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
 h1 { font-size: 1.6rem; letter-spacing: -0.02em; margin: 0 0 6px; }
 h2 { font-size: 1.02rem; margin: 0 0 12px; letter-spacing: -0.01em; }
 code { font-size: 0.85em; background: var(--soft); border: 1px solid var(--line); padding: 1px 5px; border-radius: 6px; }
@@ -53,7 +53,21 @@ ul.warn { padding-left: 28px; }
 
 /* 변경 근거는 화면의 출발점이라 강조한다 */
 .card.evidence { border-left: 4px solid var(--accent); }
-.card.evidence .kv td b { color: var(--warn); font-size: 1.05rem; }
+.evidence-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.evidence-strip > div { padding: 10px 14px; border-right: 1px solid var(--line); }
+.evidence-strip > div:last-child { border-right: 0; }
+.evidence-strip dt { color: var(--muted); font-size: 0.8rem; margin-bottom: 4px; }
+.evidence-strip dd { margin: 0; font-weight: 600; }
+.evidence-new { background: var(--warn-soft); }
+.evidence-new b { color: var(--warn); font-size: 1.15rem; }
+
+/* 넓은 화면은 2단: 왼쪽 비교, 오른쪽 미해결·승인 */
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 14px; align-items: start; }
+.workspace > :only-child { grid-column: 1 / -1; }
+.side { display: grid; gap: 14px; }
+@media (max-width: 1100px) {
+  .workspace { grid-template-columns: minmax(0, 1fr); }
+}
 
 .banner { padding: 10px 14px; border-radius: 10px; background: var(--accent-soft); border: 1px solid var(--accent-line); font-size: 0.9rem; }
 .banner.fixture { background: var(--fixture-bg); border-color: var(--fixture-line); font-weight: 600; }
@@ -115,4 +129,5 @@ fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px
   .appbar { flex-wrap: wrap; gap: 8px; padding: 8px 16px; }
   .appbar-note { display: none; }
   .metric { border-right: 0; border-bottom: 1px solid var(--line); }
+  .evidence-strip > div { border-right: 0; border-bottom: 1px solid var(--line); }
 }
