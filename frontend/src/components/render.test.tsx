@@ -188,6 +188,20 @@ describe('차량별 일정', () => {
 })
 
 describe('작업별 표의 마감 초과 표시', () => {
+  it.each([
+    [-20, null], [0, null], [20, '1분 미만'], [59, '1분 미만'], [60, '1분'], [80, '1분 20초'],
+  ] as const)('마감 대비 %s초 도착의 초과 여부를 반올림으로 숨기지 않는다', (seconds, label) => {
+    const row = buildRows(snapshot, b0, b3).find((r) => r.job.job_id === 'J1')!
+    const arrival = new Date(Date.parse(row.window!.closes_at!) + seconds * 1000).toISOString()
+    const html = renderToStaticMarkup(<ComparisonTable rows={[{ ...row, baseline: { ...row.baseline!, gate_arrival_at: arrival } }]} asOf={snapshot.as_of} baseLabel="B0" candLabel={null} />)
+    if (label) {
+      expect(html).toContain(`(마감 ${label} 초과)`)
+      expect(html).toContain('class="late-time"')
+    } else {
+      expect(html).not.toContain('class="late-time"')
+    }
+  })
+
   it('도착이 마감보다 늦으면 넘은 분을 표시하고, 도착 시각이 없으면 계산하지 않는다', () => {
     const html = renderToStaticMarkup(<ComparisonTable rows={buildRows(snapshot, b0, b3)} asOf={snapshot.as_of} baseLabel="B0" candLabel="B3" />)
     expect(html).toContain('(마감 10분 초과)') // 원안 J1 도착 10:40, 마감 10:30

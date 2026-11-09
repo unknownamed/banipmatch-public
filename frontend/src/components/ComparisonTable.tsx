@@ -5,16 +5,20 @@ import { kstTimeWithDay } from '../lib/time'
 
 const CHANGE_LABEL: Record<ChangeKind, string> = { vehicle: '차량', order: '순서', time: '시각' }
 
-// 도착이 그 작업 시간창 마감보다 늦으면 몇 분 넘었는지 응답 시각으로 계산해 빨갛게 보여준다.
-function lateMinutes(a: Assignment, closesAt: string | null | undefined): number | null {
+// 초과 여부는 원래 시각으로 판정해 짧은 지연이 분 단위 반올림으로 사라지지 않게 한다.
+function lateDuration(a: Assignment, closesAt: string | null | undefined): string | null {
   if (!closesAt) return null
-  const diff = Math.round((Date.parse(a.gate_arrival_at) - Date.parse(closesAt)) / 60_000)
-  return diff > 0 ? diff : null
+  const diff = Date.parse(a.gate_arrival_at) - Date.parse(closesAt)
+  if (!Number.isFinite(diff) || diff <= 0) return null
+  if (diff < 60_000) return '1분 미만'
+  const seconds = Math.ceil(diff / 1000)
+  const remainder = seconds % 60
+  return `${Math.floor(seconds / 60)}분${remainder ? ` ${remainder}초` : ''}`
 }
 
 function Cell({ a, refUtc, closesAt }: { a: Assignment | undefined; refUtc: string; closesAt: string | null | undefined }) {
   if (!a) return <span className="muted">배정 없음</span>
-  const late = lateMinutes(a, closesAt)
+  const late = lateDuration(a, closesAt)
   return (
     <>
       <b>{a.vehicle_id}</b> #{a.sequence}
@@ -22,7 +26,7 @@ function Cell({ a, refUtc, closesAt }: { a: Assignment | undefined; refUtc: stri
         출발 {kstTimeWithDay(a.pickup_departure_at, refUtc)} · 도착{' '}
         <span className={late ? 'late-time' : undefined}>
           {kstTimeWithDay(a.gate_arrival_at, refUtc)}
-          {late && ` (마감 ${late}분 초과)`}
+          {late && ` (마감 ${late} 초과)`}
         </span>{' '}
         · 복귀 {kstTimeWithDay(a.return_at, refUtc)}
       </div>
