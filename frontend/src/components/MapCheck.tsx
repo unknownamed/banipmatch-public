@@ -49,7 +49,7 @@ export function MapCheck() {
           {status}
         </p>
         <p className="muted small">배경 지도만 표시합니다. 차량·선박 위치나 경로 자료가 아닙니다.</p>
-        <div ref={box} style={{ width: '100%', height: 420, borderRadius: tokens.radius.md, background: tokens.color.secondary }} />
+        <div ref={box} style={{ width: '100%', height: 420, borderRadius: tokens.radius.md, background: tokens.color.hover }} />
       </section>
     </main>
   )

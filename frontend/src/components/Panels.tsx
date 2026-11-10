@@ -174,26 +174,38 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
 // 모든 지표는 작을수록 좋다. 나빠진 값은 강조하고, 값이 없으면 비교하지 않는다.
 function Metric({ label, a, b, icon }: { label: string; a: number | null; b: number | null; icon: Parameters<typeof Icon>[0]['name'] }) {
   const trend = a === null || b === null || a === b ? '' : b > a ? 'worse' : 'better'
+  // 막대는 응답에 있는 원안·조정안 두 값만 같은 척도로 그린다. 값이 없으면 그리지 않는다.
+  const max = Math.max(a ?? 0, b ?? 0)
   return (
     <div className={`metric ${trend}`}>
-      <span className="metric-icon">
-        <Icon name={icon} size={18} />
-      </span>
-      <div className="metric-label">{label}</div>
-      <div className="metric-value">{b ?? '미제공'}</div>
-      <div className="metric-base">
-        원안 {a ?? '미제공'}
-        {trend && (
-          <span className="metric-delta">
-            {' '}
-            <Icon name={trend === 'worse' ? 'up' : 'down'} size={11} /> {Math.abs(b! - a!)}
+      <div className="metric-head">
+        <span className="metric-icon">
+          <Icon name={icon} size={14} />
+        </span>
+        <span className="metric-label">{label}</span>
+      </div>
+      <div className="metric-body">
+        <div>
+          <div className="metric-value">{b ?? '미제공'}</div>
+          <div className="metric-base">
+            {trend && (
+              <span className="metric-delta">
+                <Icon name={trend === 'worse' ? 'up' : 'down'} size={11} /> {Math.abs(b! - a!)}{' '}
+              </span>
+            )}
+            원안 {a ?? '미제공'}
+          </div>
+        </div>
+        {a !== null && b !== null && max > 0 && (
+          <span className="metric-bars" aria-hidden="true">
+            <i style={{ height: a ? `${Math.max(8, (a / max) * 100)}%` : '2px' }} />
+            <i className="now" style={{ height: b ? `${Math.max(8, (b / max) * 100)}%` : '2px' }} />
           </span>
         )}
       </div>
     </div>
   )
 }
-
 export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodResult }) {
   return (
     <div className="metrics">
