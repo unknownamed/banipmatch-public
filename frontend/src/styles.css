@@ -1,12 +1,12 @@
-/* 디자인: 핀터레스트 핀의 배송 대시보드(Shippera) 구성. 흰 사이드바 + 흰 본문, 얇은 회색 테두리 카드, 주황 강조,
-   상태는 연한 바탕 알약. 경고는 장밋빛으로 주황 강조와 구분한다. */
+/* 디자인: 항만 선석운영지원 화면 구성. 남색 사이드바 + 연한 파랑 바탕, 그림자로 떠 있는 흰 패널,
+   남색 알약 선택, 연한 파랑 머리의 표. 경고는 빨강, 변경·좋아짐은 초록으로 둔다. */
 @import './styles/tokens.css';
 
 :root {
   font-family: var(--font-sans);
   font-size: var(--fs-body);
   color: var(--color-text);
-  background: var(--color-bg);
+  background: var(--color-canvas);
 }
 body { margin: 0; }
 h1 { font-size: var(--fs-h2); font-weight: var(--fw-bold); letter-spacing: -0.01em; margin: 0 0 var(--space-1); }
@@ -21,20 +21,20 @@ a { color: inherit; text-decoration: none; }
 main { grid-column: 2; max-width: 1440px; width: 100%; box-sizing: border-box; margin: 0; padding: var(--space-6) var(--space-8) var(--space-8); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-content: start; }
 
 /* 사이드바 */
-.appbar { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 0; height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-5) var(--space-4); background: var(--color-bg); border-right: var(--border); }
+.appbar { grid-column: 1; grid-row: 1 / span 2; align-self: start; position: sticky; top: 0; height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-5) var(--space-4); background: var(--color-navy); color: var(--color-on-navy); }
 .brand { display: flex; align-items: center; gap: 10px; font-size: var(--fs-h3); font-weight: var(--fw-bold); padding: 0 var(--space-2); }
-.brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-md); background: var(--color-accent); color: var(--color-on-accent); font-size: var(--fs-body-sm); }
+.brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-pill); background: var(--color-primary-soft); color: var(--color-navy-deep); font-size: var(--fs-body-sm); }
 .side-nav { display: flex; flex-direction: column; gap: 2px; }
-.side-nav a { display: flex; align-items: center; gap: 10px; padding: 9px var(--space-3); border-radius: var(--radius-md); color: var(--color-text); font-weight: var(--fw-medium); transition: background-color var(--dur-base) ease; }
-.side-nav a .icon { color: var(--color-muted); vertical-align: 0; }
-.side-nav a:hover { background: var(--color-hover); }
-.side-nav a[aria-current='page'] { background: var(--color-hover); font-weight: var(--fw-bold); }
-.side-nav a[aria-current='page'] .icon { color: var(--color-accent); }
-.side-nav a.nav-cta { margin-bottom: var(--space-2); border: var(--border); justify-content: center; }
-.side-nav a.nav-cta .icon { color: var(--color-accent); }
-.nav-group { margin: var(--space-4) var(--space-3) var(--space-1); font-size: 11px; font-weight: var(--fw-medium); letter-spacing: 0.06em; color: var(--color-muted); text-transform: uppercase; }
+.side-nav a { display: flex; align-items: center; gap: 10px; padding: 9px var(--space-4); border-radius: var(--radius-pill); color: #d9e2f2; font-weight: var(--fw-medium); transition: background-color var(--dur-base) ease, color var(--dur-base) ease; }
+.side-nav a .icon { color: currentColor; vertical-align: 0; }
+.side-nav a:hover { background: rgba(255, 255, 255, 0.08); color: var(--color-on-navy); }
+.side-nav a[aria-current='page'] { background: var(--color-primary-soft); color: var(--color-navy-deep); font-weight: var(--fw-bold); }
+
+.side-nav a.nav-cta { margin-bottom: var(--space-2); border: 1px solid var(--color-navy-line); justify-content: center; color: var(--color-on-navy); }
+
+.nav-group { margin: var(--space-4) var(--space-3) var(--space-1); font-size: 11px; font-weight: var(--fw-medium); letter-spacing: 0.06em; color: #9aa7c2; text-transform: uppercase; }
 .side-nav > .nav-group:first-child { margin-top: 0; }
-.appbar-note { margin-top: auto; padding: var(--space-3); border: var(--border); border-radius: var(--radius-lg); font-size: var(--fs-body-sm); color: var(--color-muted); }
+.appbar-note { margin-top: auto; padding: var(--space-3); border: 1px solid var(--color-navy-line); border-radius: var(--radius-lg); font-size: var(--fs-body-sm); color: #d9e2f2; }
 
 /* 머리 */
 .top { display: flex; justify-content: flex-start; align-items: flex-start; gap: var(--space-3); }
@@ -42,7 +42,7 @@ main { grid-column: 2; max-width: 1440px; width: 100%; box-sizing: border-box; m
 .top p { margin: 0; font-size: var(--fs-body-sm); }
 
 /* 카드: 흰 바탕 + 얇은 테두리 */
-.card { background: var(--color-bg); border: var(--border); border-radius: var(--radius-lg); padding: var(--space-5); margin: 0; }
+.card { background: var(--color-bg); border: 0; border-radius: var(--radius-lg); padding: var(--space-5); margin: 0; box-shadow: var(--shadow-panel); }
 .card.comparison { border: 0; padding: 0; background: transparent; border-radius: 0; }
 .muted { color: var(--color-muted); }
 .small { font-size: var(--fs-body-sm); }
@@ -90,12 +90,12 @@ table { border-collapse: collapse; width: 100%; }
 .kv th { text-align: left; width: 170px; color: var(--color-muted); font-weight: var(--fw-medium); padding: 6px var(--space-2) 6px 0; vertical-align: top; }
 .kv td { padding: 6px 0; }
 .grid th, .grid td { border-bottom: var(--border); padding: 14px var(--space-3); text-align: left; vertical-align: top; font-size: var(--fs-body-sm); }
-.grid thead th { color: var(--color-muted); font-weight: var(--fw-medium); font-size: var(--fs-caption); padding-top: 10px; padding-bottom: 10px; }
+.grid thead th { background: var(--color-hover); color: var(--color-navy-deep); font-weight: var(--fw-bold); font-size: var(--fs-body-sm); padding-top: 9px; padding-bottom: 9px; border-bottom: 1px solid var(--color-blue); }
 .grid tbody tr:last-child td { border-bottom: 0; }
 .grid tbody tr:hover { background: var(--color-canvas); }
 .grid.small td, .grid.small th { padding: 10px var(--space-3); }
-.table-wrap { overflow-x: auto; border: var(--border); border-radius: var(--radius-lg); background: var(--color-bg); }
-.card .table-wrap { border: 0; border-radius: 0; border-top: var(--border); }
+.table-wrap { overflow-x: auto; border-radius: var(--radius-lg); background: var(--color-bg); box-shadow: var(--shadow-panel); }
+.card .table-wrap { border-radius: 0; box-shadow: none; }
 .late-time { color: var(--color-danger); font-weight: var(--fw-bold); }
 .issue-text { margin-top: var(--space-1); color: var(--color-text); }
 .row-locked td:first-child { box-shadow: inset 3px 0 0 var(--color-lock); }
@@ -103,9 +103,9 @@ table { border-collapse: collapse; width: 100%; }
 
 /* 요약 카드: 아이콘·라벨 → 큰 숫자 → 증감, 오른쪽에 원안·조정안 작은 막대 */
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
-.metric { display: grid; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg); border: var(--border); word-break: keep-all; }
+.metric { display: grid; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg); box-shadow: var(--shadow-panel); word-break: keep-all; }
 .metric-head { display: flex; align-items: center; gap: var(--space-2); }
-.metric-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-sm); border: var(--border); color: var(--color-muted); flex: none; }
+.metric-icon { display: grid; place-items: center; width: 26px; height: 26px; border-radius: var(--radius-pill); background: var(--color-hover); color: var(--color-navy); flex: none; }
 .metric-label { font-size: var(--fs-body-sm); font-weight: var(--fw-bold); }
 .metric-body { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-2); }
 .metric-value { font-size: var(--fs-kpi); font-weight: var(--fw-bold); line-height: 1.1; letter-spacing: -0.02em; }
@@ -119,10 +119,10 @@ table { border-collapse: collapse; width: 100%; }
 
 /* 탭: 테두리 버튼 묶음, 선택은 회색 바탕 */
 .tabs { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
-.tabs button { border: var(--border); background: var(--color-bg); padding: 6px var(--space-3); border-radius: var(--radius-md); cursor: pointer; color: var(--color-text); font-size: var(--fs-body-sm); font-weight: var(--fw-medium); transition: background-color var(--dur-base) ease, transform var(--dur-fast) ease-out; }
+.tabs button { border: var(--border); background: var(--color-bg); padding: 6px var(--space-4); border-radius: var(--radius-pill); cursor: pointer; color: var(--color-text); font-size: var(--fs-body-sm); font-weight: var(--fw-medium); transition: background-color var(--dur-base) ease, transform var(--dur-fast) ease-out; }
 .tabs button:hover { background: var(--color-hover); }
 .tabs button:active { transform: scale(0.97); }
-.tabs button[aria-selected='true'] { background: var(--color-hover); border-color: var(--color-line-strong); font-weight: var(--fw-bold); }
+.tabs button[aria-selected='true'] { background: var(--color-navy); border-color: var(--color-navy); color: var(--color-on-navy); font-weight: var(--fw-bold); }
 
 .issue { border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-2); background: var(--color-canvas); }
 .issue summary { cursor: pointer; }
@@ -150,7 +150,7 @@ fieldset { border: var(--border); border-radius: var(--radius-md); padding: var(
 .sw-late { background: var(--color-danger-soft); border: 1px solid var(--color-danger); }
 .sw-changed { background: var(--color-success-soft); border: 1.5px solid var(--color-success); }
 .sw-locked { width: 22px; height: 14px; background: var(--color-lock-soft); color: var(--color-lock); }
-.vehicle-card { border: var(--border); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); background: var(--color-bg); }
+.vehicle-card { border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); background: var(--color-bg); box-shadow: var(--shadow-panel); }
 .vehicle-card h3 { margin: 0 0 6px; }
 .lane { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: var(--space-2); min-height: 30px; }
 .lane-name { font-size: var(--fs-caption); color: var(--color-muted); }

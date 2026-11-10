@@ -1,34 +1,43 @@
-/* 디자인 토큰. 기준: 핀터레스트 핀의 배송 대시보드 이미지(Shippera)에서 영역별로 뽑은 색과 간격.
-   로고·이름·사진·데이터는 쓰지 않는다. 배지 글자색은 흰/연한 바탕 대비 4.5:1이 되도록 원본보다 조금 진하게 맞췄다. */
+/* 디자인 토큰. 기준: 항만 선석운영지원 화면(PortWise)의 추출값과 실제 계산 스타일.
+   로고·기관명·파비콘은 쓰지 않는다. 대비가 부족한 추출 색(#ff5f5f 빨강, #43b61a 초록)은 글자용으로 진하게 교정했다. */
 :root {
   /* 기본 */
   --color-bg: #ffffff;
-  --color-canvas: #fafafa;
-  --color-text: #141414;
-  --color-muted: #6f6d6e;
-  --color-line: #ececec;
-  --color-line-strong: #dcdcdc;
-  --color-hover: #f4f4f4;
+  --color-canvas: #f4f7fb;
+  --color-text: #1f2329;
+  --color-muted: #555555;
+  --color-line: #dddddd;
+  --color-line-strong: #aaaaaa;
+  --color-hover: #f6faff;
 
-  /* 강조: 로고·막대·아이콘(그래픽 전용 #ff3c00), 글자·버튼 바탕은 대비용 진한 주황 */
-  --color-accent: #ff3c00;
-  --color-accent-strong: #d23a06;
-  --color-accent-soft: #ffe3d8;
-  --color-on-accent: #ffffff;
+  /* 남색 계열 강조 */
+  --color-navy: #1b2750;
+  --color-navy-deep: #00164d;
+  --color-navy-line: #43536b;
+  --color-primary-soft: #d4eaff;
+  --color-blue: #006edb;
+  --color-blue-strong: #1e429b;
+  --color-on-navy: #ffffff;
 
-  /* 상태 알약(원본 배지 계열) */
-  --pill-orange-bg: #fdf0e8;
-  --pill-orange-text: #a8551f;
-  --pill-blue-bg: #e6f6fc;
-  --pill-blue-text: #2a6f8c;
-  --pill-green-bg: #e4fbef;
-  --pill-green-text: #237a4b;
-  --pill-rose-bg: #fde7ee;
-  --pill-rose-text: #b0365c;
-  --pill-gray-bg: #f2f2f2;
-  --pill-gray-text: #5f5d5e;
+  /* 화면 전체에서 쓰는 강조 이름(이전 테마와 같은 이름 유지) */
+  --color-accent: var(--color-blue-strong);
+  --color-accent-strong: var(--color-navy);
+  --color-accent-soft: var(--color-primary-soft);
+  --color-on-accent: var(--color-on-navy);
 
-  /* 업무 의미: 경고=장밋빛(주황 강조와 구분), 좋아짐·변경=초록, 고정=파랑, 설명용=노랑 */
+  /* 상태 알약 */
+  --pill-orange-bg: #fff3e0;
+  --pill-orange-text: #a05a00;
+  --pill-blue-bg: #e6f1ff;
+  --pill-blue-text: #1e429b;
+  --pill-green-bg: #e9f8e3;
+  --pill-green-text: #2f7d12;
+  --pill-rose-bg: #ffecec;
+  --pill-rose-text: #c62f2f;
+  --pill-gray-bg: #f1f3f5;
+  --pill-gray-text: #47556b;
+
+  /* 업무 의미: 경고=빨강(추출 #ff5f5f 계열), 좋아짐·변경=초록(#43b61a 계열), 고정=파랑, 설명용=노랑 */
   --color-danger: var(--pill-rose-text);
   --color-danger-soft: var(--pill-rose-bg);
   --color-success: var(--pill-green-text);
@@ -38,15 +47,15 @@
   --color-caution-bg: #fff6dc;
   --color-caution-line: #ecd28a;
 
-  --font-sans: 'Pretendard', system-ui, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  --font-sans: 'Noto Sans KR', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   --fs-caption: 12px;
   --fs-body-sm: 13px;
   --fs-body: 14px;
-  --fs-h3: 16px;
+  --fs-h3: 15px;
   --fs-h2: 20px;
-  --fs-kpi: 30px;
+  --fs-kpi: 27px;
   --fw-medium: 500;
-  --fw-bold: 600;
+  --fw-bold: 700;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -56,15 +65,17 @@
   --space-6: 24px;
   --space-8: 32px;
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-pill: 999px;
+  --radius-sm: 4px;
+  --radius-md: 7px;
+  --radius-lg: 8px;
+  --radius-pill: 50px;
 
   --border: 1px solid var(--color-line);
-  --focus-ring: 2px solid var(--color-accent-strong);
+  --shadow-panel: 0 1px 5px rgba(0, 0, 0, 0.1);
+  --shadow-float: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --focus-ring: 2px solid #1a6ec8;
 
   --dur-fast: 85ms;
-  --dur-base: 200ms;
+  --dur-base: 300ms;
   --sidebar-w: 236px;
 }
