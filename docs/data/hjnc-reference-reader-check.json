@@ -1,0 +1,61 @@
+{
+  "schema": "local-sample-verification-1",
+  "verified_pr": 42,
+  "verified_head": "122db8fae706316526092767dabad05913733e47",
+  "source_sha256": "a2f90a10eeeaa5d70798996280851ae10c64228518c3e207f425672067138743",
+  "source_bytes": 5739,
+  "sample_scope": "daegyeom-recorded-2026-11-09-not-minjun-initial-capture",
+  "verification": {
+    "model_version": "reference-read-preview-1",
+    "source": "hjnc",
+    "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+    "kind": "reference",
+    "checked_at": "2026-11-10T10:42:59.831726Z",
+    "last_attempt": {
+      "at": "2026-11-10T10:42:59.831726Z",
+      "status": "partial",
+      "error_code": null,
+      "attempts": 1
+    },
+    "last_success": {
+      "received_at": "2026-11-09T12:51:14Z",
+      "status": "partial",
+      "row_count": 10,
+      "item_count": 10
+    },
+    "engine_conversion": "blocked",
+    "approval_eligible": false,
+    "automatic_mock_fallback": false,
+    "current": {
+      "status": "partial",
+      "received_at": "2026-11-09T12:51:14Z",
+      "receipt_provenance": "caller_supplied_not_provider_observation_time",
+      "freshness": "stale",
+      "row_count": 10,
+      "reported_count": 24,
+      "excluded_rows": 0,
+      "blockers": [
+        "reference_only_not_engine_input",
+        "source_timezone_unconfirmed",
+        "coverage_not_established",
+        "window_change_not_confirmed"
+      ]
+    },
+    "cache_enabled": false
+  },
+  "projected_items": 10,
+  "checks": {
+    "raw_hash_matches_receipt": true,
+    "values_preserved_without_timezone_guess": true,
+    "receipt_not_replaced_by_check_time": true,
+    "old_sample_stale": true,
+    "partial_coverage_preserved": true,
+    "cache_disabled": true,
+    "engine_and_approval_blocked": true
+  },
+  "raw_rows_or_identifiers_published": false,
+  "external_requests_made": 0,
+  "source_authenticity": "local_archive_and_receipt_crosscheck_not_provider_signature",
+  "permissions": "local_review_only_not_provider_storage_or_redistribution_confirmation",
+  "integration_status": "draft_pr_local_mapping_not_main_app_integration"
+}
