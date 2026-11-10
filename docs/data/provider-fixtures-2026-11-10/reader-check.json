@@ -1,0 +1,65 @@
+{
+  "reviewed_pr": 42,
+  "reviewed_head": "122db8fae706316526092767dabad05913733e47",
+  "data_kind": "simulated",
+  "simulated_now_utc": "2026-11-10T03:00:00Z",
+  "cases": [
+    {
+      "id": "hjnc-normal",
+      "status": "received",
+      "item_count": 1,
+      "freshness": "fresh",
+      "engine_conversion": "blocked",
+      "approval_eligible": false
+    },
+    {
+      "id": "hjnc-empty",
+      "status": "empty",
+      "item_count": 0,
+      "freshness": "fresh",
+      "engine_conversion": "blocked",
+      "approval_eligible": false
+    },
+    {
+      "id": "hjnc-partial-page",
+      "status": "partial",
+      "item_count": 1,
+      "freshness": "fresh",
+      "engine_conversion": "blocked",
+      "approval_eligible": false
+    },
+    {
+      "id": "hjnc-missing-window",
+      "status": "partial",
+      "item_count": 0,
+      "freshness": "fresh",
+      "engine_conversion": "blocked",
+      "approval_eligible": false
+    },
+    {
+      "id": "hjnc-stale",
+      "status": "received",
+      "item_count": 1,
+      "freshness": "stale",
+      "engine_conversion": "blocked",
+      "approval_eligible": false
+    },
+    {
+      "id": "hjnc-format-changed",
+      "status": "failed",
+      "item_count": 0,
+      "freshness": null,
+      "engine_conversion": "blocked",
+      "approval_eligible": false
+    },
+    {
+      "id": "hjnc-http-error",
+      "status": "failed",
+      "item_count": 0,
+      "freshness": null,
+      "engine_conversion": "blocked",
+      "approval_eligible": false
+    }
+  ],
+  "kma_reader": "not_provided_in_PR42; existing_main_auditor_verified_separately"
+}

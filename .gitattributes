@@ -8,3 +8,6 @@
 
 # Preserve the versioned artifact bundle and its checksums byte-for-byte.
 docs/development/v0.1/** -text
+
+# Synthetic provider wire fixtures include CP949; retain exact bytes and hashes.
+docs/data/provider-fixtures-2026-11-10/wire/** -text

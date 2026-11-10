@@ -1,0 +1,4 @@
+#START7777
+# SYNTHETIC fixture, not a provider response
+
+#7777END
