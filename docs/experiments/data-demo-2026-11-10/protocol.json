@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "kind": "simulated",
+  "purpose": "data_gap_acceptance_not_field_evaluation",
+  "anchor": "2026-11-10T00:00:00Z",
+  "methods": [
+    "B0",
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "seed": 42,
+  "time_limit_seconds": 3,
+  "external_actions_enabled": false,
+  "source_hashes": {
+    "backend/engine/__init__.py": "3ed21e98995d9e9336fd4b48351d20e3e8663a9e3bed40074fed5386e2603c88",
+    "backend/engine/__main__.py": "d1e6cccca9e9f088c8663f16132382bc3fbec41d05b6a62938759107a5aa5f84",
+    "backend/engine/context.py": "7f705d19e52758356dc7687460e766ab602c985446f4ac1cc568991d81ee0959",
+    "backend/engine/metrics.py": "bec593bb167fe58e07b51088ca50a6d8cf9614ca670e7d2d51347839bc345b75",
+    "backend/engine/optimization.py": "b9dab812695ca2290aa21670bfadf9f06c03e4e8d4e9c8ce24b85a0a9467b084",
+    "backend/engine/solver.py": "34e2702f12332c6499bcb1e256a17249e57db5ef2e175beb1c35317112459344",
+    "backend/data/__init__.py": "53750a73fff1c8ce204fbeb4d6c430253b20066542e4376059ac74a825da09ea",
+    "backend/data/__main__.py": "8cda3bea6ddf12082f3fe2d8103535120a6c8ca027afb8c07f15ad746d4bbe55",
+    "backend/data/inputs.py": "3add355dd6ac3eeec4cb09be2930180ff1e1cbf867004864c0bc8f5339e6a8a7",
+    "backend/data/validation.py": "bf94396f296e81ab7e7c776959b0dbb8ef9a1f80e1cda533a7ba70b1f0c664d9",
+    "backend/api/input_preflight.py": "71c457298189de654839d32a384c770484b33105ed9df8befb66d8f67e78f0f3",
+    "backend/api/result_integrity.py": "abcc1b1ad3f04cbe644dfcfdd8f62a14593e1ca6faf9af488670a93325d58467",
+    "tools/evaluate_engine.py": "adb2f197e19610b932b7ec637a3b2b84ef05671ba1d88351409adc0642e21887",
+    "tools/data_demo_acceptance.py": "244fc240659582cfb4e4e20f075ad4dbc29fce88e326f1853c826b753c8f83cd"
+  },
+  "cases": [
+    {
+      "id": "cutoff",
+      "title": "확인된 마감 단축",
+      "expected_preflight": null,
+      "explanation": "원안·조정안의 처리 수준과 변경 부담을 비교한다.",
+      "input": "inputs/cutoff.json",
+      "canonical_sha256": "2d21972b07d73c32e432e1e560f90f58db7cb74e8b1d9a08252ca99c497b1186"
+    },
+    {
+      "id": "opening",
+      "title": "반입 시작 지연",
+      "expected_preflight": null,
+      "explanation": "조기 도착을 자동 대기 허용으로 해결하지 않는다.",
+      "input": "inputs/opening.json",
+      "canonical_sha256": "2e78a57e830399a1033a56ddd590fa79a70365e83bd8c77da5e770bee278b442"
+    },
+    {
+      "id": "fixed_risk",
+      "title": "출발 작업의 마감 위험",
+      "expected_preflight": null,
+      "explanation": "출발 작업을 보존하고 남은 위험을 따로 표시한다.",
+      "input": "inputs/fixed_risk.json",
+      "canonical_sha256": "e59fb0ef744a1d05c73aaa2c19b92b2298ef4b36c1520a095c0997c32c864872"
+    },
+    {
+      "id": "ready_missing",
+      "title": "화물 준비시각 없음",
+      "expected_preflight": "INPUT_INCOMPLETE",
+      "explanation": "운송사 확인이 필요하며 0시/현재시각으로 채우지 않는다.",
+      "input": "inputs/ready_missing.json",
+      "canonical_sha256": "be1dfe4cdaab17ceee1216b7627610a9c6b6c31e1c78447187870d495ccb8bc7"
+    },
+    {
+      "id": "ready_recovered",
+      "title": "준비시각을 확인한 모의 비교",
+      "expected_preflight": null,
+      "explanation": "추가 확인을 가정한 별도 입력이다. 실제 현장 개선량이 아니다.",
+      "input": "inputs/ready_recovered.json",
+      "canonical_sha256": "e4cb61578a81e5813e26875851db7bf0e30e63b07b4ad7632a607735f23ca4c0"
+    },
+    {
+      "id": "route_missing",
+      "title": "방향별 이동시간 없음",
+      "expected_preflight": "INPUT_INCOMPLETE",
+      "explanation": "반대 방향 값이나 0분으로 대체하지 않는다.",
+      "input": "inputs/route_missing.json",
+      "canonical_sha256": "36a07b13bba302e0fe5024c0273da2aa2f032e8855411ed096acf7b33b69db34"
+    },
+    {
+      "id": "return_unknown",
+      "title": "고정 작업 복귀 미확인",
+      "expected_preflight": "INPUT_INCOMPLETE",
+      "explanation": "차량을 즉시 가용으로 만들지 않는다.",
+      "input": "inputs/return_unknown.json",
+      "canonical_sha256": "0e79af9499764ca0fafd61bb00d0738ab68084d143b0d564ae5928e02be08ffe"
+    },
+    {
+      "id": "window_unconfirmed",
+      "title": "반입시간 변경 미확인",
+      "expected_preflight": "WINDOW_UNCONFIRMED",
+      "explanation": "선박 ETA·기상만으로 반입시간을 확정하지 않는다.",
+      "input": "inputs/window_unconfirmed.json",
+      "canonical_sha256": "e168a394bdc3a90ba3603a22a7ee95c1ad3153cd9f33f833a1151beec64a8b04"
+    },
+    {
+      "id": "future_evidence",
+      "title": "기준시각 이후 자료",
+      "expected_preflight": "INPUT_INVALID",
+      "explanation": "나중에 받은 근거를 당시 알았던 자료로 계산하지 않는다.",
+      "input": "inputs/future_evidence.json",
+      "canonical_sha256": "68dea2d805ae4b956054155dd5010a7e70d8752dc623b234c7a85ddff8623895"
+    }
+  ]
+}
