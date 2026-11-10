@@ -29,7 +29,7 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
   const candLabel = cand ? `${cand.method} 조정안` : null
   const baseLabel = base ? 'B0 원안' : '원안(입력)'
   return (
-    <section className="card">
+    <section className="card comparison">
       <h2>원안 · 조정안 비교</h2>
       {results.state === 'loading' && <p className="muted">결과 조회 중… 아래 원안은 입력 기준으로 먼저 보여줍니다.</p>}
       {results.state === 'pending' && <p className="muted">계산 중입니다. 결과가 도착하면 조정안을 자동으로 표시합니다.</p>}
