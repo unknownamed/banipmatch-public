@@ -14,6 +14,8 @@
 
 **11월10일 데이터 인계:** [PR42의 실제 표본 매핑 대조와 구역 참조](reference-handoff.md) · [인계 메타데이터](reference-data-handoff.json) · [대조 결과](reference-reader-check.json). 데이터 담당의 로컬 점검이며 PR42 병합·운영 연결·사용 권한 승인을 뜻하지 않는다.
 
+**대겸의 HJNC 추가 대조:** [수신기록이 있는 별도10행 표본 검증·엔진 채택 판단](hjnc-reference-verification.md) · [집계 결과](hjnc-reference-reader-check.json). PR42의 특정 head에서 원문 필드·수신시각 보존과 partial/stale·계산 차단을 확인했다. 민준 초기 표본의 수신시각을 보충하거나 실제 변경·혼합 계산 완료로 해석하지 않는다.
+
 ## 현재 사용할 수 있는 자료와 이용 조건
 
 | 자료 | 현재 보관·확인 범위 | 실제/모의·사용 범위 | 미확인·추가로 필요한 것 |
