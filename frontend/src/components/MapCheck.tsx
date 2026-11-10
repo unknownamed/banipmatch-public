@@ -1,5 +1,6 @@
 // AP-04 확인용: 카카오맵 Web SDK가 이 도메인·키로 뜨는지만 본다. ?view=map 으로 연다.
 // 지도는 배경이며 차량 GPS·선박 위치를 표시하지 않는다.
+import { tokens } from '../styles/tokens'
 import { useEffect, useRef, useState } from 'react'
 
 declare global {
@@ -48,7 +49,7 @@ export function MapCheck() {
           {status}
         </p>
         <p className="muted small">배경 지도만 표시합니다. 차량·선박 위치나 경로 자료가 아닙니다.</p>
-        <div ref={box} style={{ width: '100%', height: 420, borderRadius: 6, background: '#eef1f4' }} />
+        <div ref={box} style={{ width: '100%', height: 420, borderRadius: tokens.radius.md, background: tokens.color.secondary }} />
       </section>
     </main>
   )

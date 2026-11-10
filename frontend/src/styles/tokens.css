@@ -1,0 +1,56 @@
+/* 브랜드 토큰. 추출 원본: 핀터레스트 공개 페이지(색·크기·간격·모서리·움직임만 참고, 로고·폰트·이름은 쓰지 않음) */
+:root {
+  /* 브랜드 */
+  --color-primary: #211922;
+  --color-primary-hover: #433a44;
+  --color-on-primary: #ffffff;
+  --color-secondary: #e5e5e0;
+  --color-secondary-hover: #d6d6d0;
+  --color-bg: #ffffff;
+  --color-text: #211922;
+  --color-accent: #2b48d4;
+  --color-neutral-300: #91918c;
+  --color-neutral-500: #62625b;
+  --color-neutral-700: #474742;
+
+  /* 업무 의미 색: 브랜드 강조와 별개. 빨강은 경고 전용 */
+  --color-danger: #d1001f; /* 추출 #e60023은 연한 빨강 배경 위 대비 4.2:1이라 조금 진하게(흰 바탕 5.6:1, 연한 빨강 위 4.9:1) */
+  --color-danger-soft: #fdebee;
+  --color-success: #1f7a4d;
+  --color-success-soft: #e6f3ec;
+  --color-caution-bg: #fff6dc;
+  --color-caution-line: #e7c25a;
+
+  --font-sans: 'Pretendard', system-ui, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  --fs-caption: 12px;
+  --fs-body-sm: 14px;
+  --fs-body: 16px;
+  --fs-h3: 20px;
+  --fs-h2: 28px;
+  --fw-medium: 500;
+  --fw-bold: 700;
+
+  --space-0: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  --border: 1px solid var(--color-secondary);
+  --border-strong: 1px solid var(--color-neutral-300);
+  --focus-ring: 2px solid var(--color-accent);
+
+  --dur-fast: 85ms;
+  --dur-base: 200ms;
+  --ease-press: ease-out;
+  --ease-card: ease;
+}
