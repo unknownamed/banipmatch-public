@@ -1,0 +1,82 @@
+{
+  "check_scope": "data-owner offline compatibility assessment, not full PR review or provider permission",
+  "reviewed_pr": 42,
+  "reviewed_head": "122db8fae706316526092767dabad05913733e47",
+  "local_test_command": "python -m pytest tests/test_reference_reads.py tests/data/test_road_response.py -q",
+  "test_result": {
+    "passed": 61
+  },
+  "read_basis": "owner-directed local audit only; no redistribution or shared-server permission assertion",
+  "hjnc_runtime_check": "not_run_without_exact_receipt_record_for_locally_owned_capture",
+  "kma_reader_support": "not_available_in_reviewed_PR",
+  "cases": [
+    {
+      "case": "forward",
+      "raw_sha256": "d1a4d8bdca25cd9087b7393ade1b8f75d03061426df11909de643e2b7fb9bfe7",
+      "original_received_at": "2026-11-09T13:35:53.749694+00:00",
+      "reader_received_at": "2026-11-09T13:35:53.749694Z",
+      "checked_at": "2026-11-10T01:40:36.541470Z",
+      "status": "partial",
+      "row_count": 5,
+      "accepted_item_count": 0,
+      "excluded_rows": 5,
+      "freshness": "stale",
+      "error_code": null,
+      "cached": null,
+      "engine_conversion": "blocked",
+      "approval_eligible": false,
+      "automatic_mock_fallback": false
+    },
+    {
+      "case": "reverse",
+      "raw_sha256": "ecea618fdb679769bebd0a978874b059129c75e99319f382b1964383d9bec360",
+      "original_received_at": "2026-11-09T13:35:55.522687+00:00",
+      "reader_received_at": "2026-11-09T13:35:55.522687Z",
+      "checked_at": "2026-11-10T01:40:36.551805Z",
+      "status": "partial",
+      "row_count": 5,
+      "accepted_item_count": 0,
+      "excluded_rows": 5,
+      "freshness": "stale",
+      "error_code": null,
+      "cached": null,
+      "engine_conversion": "blocked",
+      "approval_eligible": false,
+      "automatic_mock_fallback": false
+    },
+    {
+      "case": "sample-example",
+      "raw_sha256": "54ddda89c5f207d6e5fdafe120a7917ed951d66c0e7acf02335088ccfec1d074",
+      "original_received_at": "2026-11-09T13:32:53.872243+00:00",
+      "reader_received_at": "2026-11-09T13:32:53.872243Z",
+      "checked_at": "2026-11-10T01:40:36.553518Z",
+      "status": "empty",
+      "row_count": 0,
+      "accepted_item_count": 0,
+      "excluded_rows": 0,
+      "freshness": "stale",
+      "error_code": null,
+      "cached": null,
+      "engine_conversion": "blocked",
+      "approval_eligible": false,
+      "automatic_mock_fallback": false
+    },
+    {
+      "case": "missing-key",
+      "raw_sha256": "f6eb45a2726cb4b8319cff1f61c55f76c5dac4b9c6191ab96cab64e696ff80fa",
+      "original_received_at": "2026-11-09T13:35:55.791129+00:00",
+      "reader_received_at": null,
+      "checked_at": "2026-11-10T01:40:36.554513Z",
+      "status": "failed",
+      "row_count": null,
+      "accepted_item_count": 0,
+      "excluded_rows": null,
+      "freshness": null,
+      "error_code": "provider_error",
+      "cached": null,
+      "engine_conversion": "blocked",
+      "approval_eligible": false,
+      "automatic_mock_fallback": false
+    }
+  ]
+}

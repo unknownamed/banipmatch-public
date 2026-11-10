@@ -1,5 +1,9 @@
 # 현재 구현 상태
 
+## 2026-11-10 데이터 인계
+
+민준은 Draft PR42의 고정 head에 실제 도로 표본4종을 대조하고 [출처/필드/보류 조건과 기상 구역 참조](../data/reference-handoff.md)를 정리했다. 양방향5행씩은 집계 누락으로 유효 투영0개이며 계산 자료로 채택하지 않는다. HJNC 초기 표본의 정밀 수신시각 공백과 KMA 어댑터 미지원도 인계했다. PR42 병합·전체 API 검토나 외부 사용 허가를 뜻하지 않는다.
+
 **최신 개인 신청 배정:** [기상청·민준 #35](https://github.com/unknownamed/banipmatch/issues/35), [AIS·선효 #36](https://github.com/unknownamed/banipmatch/issues/36), [ORS·길웅 #37](https://github.com/unknownamed/banipmatch/issues/37). [링크·한도·완료 기준](personal-api-signup.md)에 따라 진행합니다. 기상청은 본인 발급·활용신청·첫 응답을 [확인](../data/kma-response-verification.md)했으며 AIS·ORS 발급은 이번 데이터 작업에서 미확인입니다. 기존 도로 #30·카카오맵은 유지합니다. 카카오 REST는 저장 금지로 저장형 자료 채택을 보류합니다. 생산 코드·공통 계약은 유지합니다.
 
 기준일: 2026-11-09. 소스·검수·병합 기록으로 확인한 상태만 갱신합니다. B2/B3와 프론트 #7/#8 통합은 [직전 인계](handoffs/2026-11-08-main-integration.md), 최신 엔진0.2.3은 [진단 보완 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)를 따릅니다. #9는 선효의 지적 수정과 재시도 오류 보완 후 사용자가 보류를 해제해 병합했습니다.

@@ -1,0 +1,114 @@
+{
+  "packet_version": "local-data-handoff-1-not-a-public-contract",
+  "baseline_main": "8c9fcfc",
+  "source_reports": [
+    {
+      "path": "docs/data/collected-samples-audit.json",
+      "sha256": "205c5b0d43d56f8844eca82b74ab143c1ab77a982aef245a5756e26a6bdb64ad"
+    },
+    {
+      "path": "docs/data/road-api-audit.json",
+      "sha256": "7b0c0cd636c05364d421675342a4add7e9a03c85a89c60e78343c6180934ec07"
+    },
+    {
+      "path": "docs/data/kma-response-audit.json",
+      "sha256": "0939353ba5a237fac4648b24f5d3e0aded904f45af0babf426b449135d43268b"
+    },
+    {
+      "path": "docs/data/reference-reader-check.json",
+      "sha256": "c8b515a2cd778733f0f5854cf968c7f4a14a57c2006e43633cc0da5dfa5524fc"
+    }
+  ],
+  "raw_responses_in_shared_packet": false,
+  "engine_eligible": false,
+  "approval_eligible": false,
+  "provider_redistribution_permission": "unconfirmed",
+  "shared_server_key_use": "unconfirmed",
+  "hjnc": {
+    "local_capture": "2026-11-09 10-row initial sample",
+    "received_at": null,
+    "readiness": "audit_only",
+    "blockers": [
+      "exact_receipt_missing",
+      "source_timezone_unconfirmed",
+      "page_coverage_unconfirmed",
+      "confirmed_change_not_established",
+      "provider_usage_scope_unconfirmed"
+    ]
+  },
+  "road": {
+    "readiness": "quality_audit_only",
+    "reader_preview_accepted_items": 0,
+    "blockers": [
+      "duration_unit_unconfirmed",
+      "aggregation_code_null_in_both_directions",
+      "target_Busan_Gyeongnam_pair_not_verified",
+      "sample_is_passenger_car_not_truck_validation",
+      "some_min_mean_max_inconsistency",
+      "source_time_and_usage_scope_unconfirmed"
+    ]
+  },
+  "kma": {
+    "readiness": "reference_summary_only_not_live_service",
+    "source_timezone": "KST",
+    "wave_unit": "m",
+    "wind_unit": "m/s",
+    "blockers": [
+      "reader_adapter_not_in_PR42",
+      "actual_missing_value_convention_not_confirmed",
+      "geographic_coverage_not_terminal_measurement",
+      "query_time_semantics_difference",
+      "shared_server_and_redistribution_scope_unconfirmed"
+    ]
+  },
+  "warning_region_reference": {
+    "source_ref": "https://apihub.kma.go.kr/getAttachFile.do?fileName=%ED%8A%B9%EB%B3%B4%EA%B5%AC%EC%97%AD+%EC%BD%94%EB%93%9C.csv",
+    "local_metadata_capture_date": "2026-11-09",
+    "raw_sha256": "6edd931f664a2f1855528963c343b1c65e6552d4ac64fbb4983e58bb520f4b54",
+    "regions": [
+      {
+        "region_id": "L1080600",
+        "parent_region_id": "L1080000",
+        "name": "창원",
+        "category": "land"
+      },
+      {
+        "region_id": "L1082700",
+        "parent_region_id": "L1150000",
+        "name": "부산서부",
+        "category": "land"
+      },
+      {
+        "region_id": "S1311000",
+        "parent_region_id": "S1310000",
+        "name": "남해동부앞바다",
+        "category": "sea"
+      },
+      {
+        "region_id": "S1311100",
+        "parent_region_id": "S1311000",
+        "name": "부산앞바다",
+        "category": "sea"
+      },
+      {
+        "region_id": "S2310100",
+        "parent_region_id": "S2000000",
+        "name": "부산앞바다중 동부평수구역",
+        "category": "sea"
+      },
+      {
+        "region_id": "S2310200",
+        "parent_region_id": "S2000000",
+        "name": "부산앞바다중 서부평수구역",
+        "category": "sea"
+      },
+      {
+        "region_id": "S2320100",
+        "parent_region_id": "S2000000",
+        "name": "부산앞바다중 연안바다",
+        "category": "sea"
+      }
+    ],
+    "scope": "candidate regions, not a verified HJNC footprint or an inheritance rule"
+  }
+}

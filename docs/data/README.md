@@ -12,6 +12,8 @@
 
 **기상청 첫 실응답:** [신청 준비 기록](kma-first-response-plan.md) 이후 본인 가입·발급·활용신청과 [지점·해양·특보 검증](kma-response-verification.md)을 완료했다. [공유 감사](kma-response-audit.json)는 이전403과 이후200·KST 변환·예비 시간코드를 구분한다. 지역 대표성·실제 결측/공유 조건 및 운영 앱 연결은 별도다.
 
+**11월10일 데이터 인계:** [PR42의 실제 표본 매핑 대조와 구역 참조](reference-handoff.md) · [인계 메타데이터](reference-data-handoff.json) · [대조 결과](reference-reader-check.json). 데이터 담당의 로컬 점검이며 PR42 병합·운영 연결·사용 권한 승인을 뜻하지 않는다.
+
 ## 현재 사용할 수 있는 자료와 이용 조건
 
 | 자료 | 현재 보관·확인 범위 | 실제/모의·사용 범위 | 미확인·추가로 필요한 것 |
