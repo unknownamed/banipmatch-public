@@ -53,3 +53,5 @@ result = solve(snapshot, "B1", {"seed": 0, "time_limit_seconds": 10})
 보고서 삽입용 [기존156회 요약 PDF4쪽](../../docs/experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)과 [후속72회 PDF2쪽](../../docs/experiments/engine-report-2026-11-08/engine-performance-followup.pdf)을 별도로 제공합니다. 해당 PDF는 각 실행 당시 결과이며 최신 API 연결 완료 여부를 소급해서 바꾸지 않습니다. 현재 연결 검수는 [PR12·14 통합 인계](../../docs/team/handoffs/2026-11-08-pr12-pr14-integration.md)를 따릅니다.
 
 추가 [80회 새 모의 평가](../../docs/experiments/engine-evaluation-2026-11-08/README.md)는 계산 전에 입력과 설정을 고정하고 결과를 API의 별도 검사기로 대조합니다. 같은 미처리 수와 같은 처리 작업 집합을 구분해 B2/B3의 변경·이동 부담을 비교합니다. 실제 현장 효과·상용 제품 우위나 제한시간 내 모든 입력의 최적성을 보장하지 않습니다.
+
+조건 보완 전후 비교는 `backend.engine.recalculation`의 `validate_condition_revision`과 `compare_recalculation`을 사용합니다. 기존 Snapshot/Results를 받아 허용 수정·입력 해시·독립 일정을 검사하고 새 배정/미처리/위험과 지표 차이를 반환합니다. [함수 사용·연결 조건](../../docs/team/handoffs/2026-11-10-unknownamed-recalculation.md). HTTP/DB·승인·전송을 수행하는 함수는 아닙니다.
