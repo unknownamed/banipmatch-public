@@ -13,6 +13,8 @@
 | E07 | 실표본 존재와 필드/권한·공백 | [HJNC](../data/hjnc-reference-verification.md), [KMA](../data/kma-response-verification.md), [도로](../data/road-api-verification.md), [자료 실행 계획](../team/data-demo-sprint-2026-11-10.md) | 민준·선효·길웅의 새 실제 연결/ORS/AIS/화면 결과를 인계 후 확정 |
 | E08 | 공개 계산 앱의 동작·세션 격리·실배포 | [완료 계획 F07~F11](../team/completion-plan.md), [검수표](../team/release-acceptance-template.md) | **아직 증거 없음.** 대겸 통합/배포·팀원 시험·대겸 보완 후 채움 |
 | E09 | 보고서/데이터·코드 제출 규칙 | [공식 보존 원본·요건](../team/completion-plan.md#8-공식-제출-요건과-현재-범위) | 새 공지/회신 재확인. PDF/ZIP/파일명은 팀 방침 |
+| E10 | 차량별 정확한 변경 명세·미해결 근거/확인 안내 로직 | [B1 계산·명세·해시](../experiments/dispatch-response-2026-11-10/README.md), [구현·검수 인계](../team/handoffs/2026-11-10-unknownamed-dispatch-response.md) | 모의 입력 로직 검수. 현재 DB 승인/전송 권한·화면 연결·실수신 증거 아님 |
+| E11 | 조건 재계산→확정→대상 전달→수신자 응답의 전체 흐름 | [확정 범위 R1~R8](../team/dispatcher-response-scope.md), [A15~A19 검수표](../team/release-acceptance-template.md) | **전체 구현/실기기 증거 아직 없음.** #54~#57 구현 후 대겸 통합·실배포/팀원 검수 필요 |
 
 현재 할 수 있는 본문을 먼저 작성했고 E07의 새 연동·E08은 미완료로 남겼다. 팀원이 인계할 때 위 ID와 해당 이슈·검증 버전을 연결하면 대겸이 본문/최종 PDF에 반영한다. 숫자·그림이 바뀌면 입력/실행 버전도 함께 대조하며 동결 결과 원본은 수정하지 않는다.
 
