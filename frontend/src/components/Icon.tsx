@@ -8,6 +8,9 @@ const PATHS = {
   swap: 'M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7',
   truck: 'M2 6h11v10H2zM13 10h4l4 4v2h-8M6.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM17.5 19a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
   check: 'M5 12l5 5 9-10',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  map: 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14',
+  plus: 'M12 5v14M5 12h14',
 } as const
 
 export function Icon({ name, size = 13 }: { name: keyof typeof PATHS; size?: number }) {

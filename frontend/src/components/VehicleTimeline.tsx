@@ -114,10 +114,15 @@ export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]
   if (!model) return <p className="muted">배정된 작업이 없어 차량별 일정을 그릴 수 없습니다.</p>
   return (
     <div className="timeline">
-      <div className="timeline-legend small muted">
-        막대: 출발~복귀 · 점: 게이트 도착 · <span className="legend-deadline">세로선</span>: 반입 마감 ·{' '}
-        <span className="legend-late">빨강</span>: 마감 초과 · <span className="legend-changed">초록 테두리</span>: 조정안에서 변경 · <Icon name="lock" size={11} /> 고정
-      </div>
+      {/* 범례는 실제 막대와 같은 모양의 견본으로 보여준다 */}
+      <ul className="timeline-legend small muted">
+        <li><i className="sw sw-bar" />출발~복귀</li>
+        <li><i className="sw sw-dot" />게이트 도착</li>
+        <li><i className="sw sw-deadline" />반입 마감</li>
+        <li><i className="sw sw-late" />마감 초과</li>
+        <li><i className="sw sw-changed" />조정안 변경</li>
+        <li><i className="sw sw-locked"><Icon name="lock" size={10} /></i>고정</li>
+      </ul>
       <div className="lane axis">
         <span className="lane-name" />
         <div className="lane-track">
