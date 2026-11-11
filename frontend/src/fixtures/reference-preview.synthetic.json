@@ -1,0 +1,426 @@
+{
+ "notice": "합성 예제. PR #42(head 122db8f) backend.references 읽기 모델에 직접 만든 합성 응답을 넣어 생성한 출력. 실제 HJNC 응답·수신 기록이 아님.",
+ "generated_from": "feat/he6venly-reference-inputs@122db8f",
+ "cases": [
+  {
+   "id": "received",
+   "label": "정상 수신",
+   "view": {
+    "model_version": "reference-read-preview-1",
+    "source": "hjnc",
+    "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+    "kind": "simulated",
+    "checked_at": "2026-11-11T01:00:10Z",
+    "sample_permission_ref": "synthetic-example",
+    "cache_policy": {
+     "fresh_for_seconds": 300,
+     "retain_for_seconds": 600,
+     "permission_ref": "synthetic-example-only"
+    },
+    "last_attempt": {
+     "at": "2026-11-11T01:00:10Z",
+     "status": "received",
+     "error_code": null,
+     "attempts": 1
+    },
+    "last_success": {
+     "received_at": "2026-11-11T01:00:00Z",
+     "status": "received",
+     "row_count": 2,
+     "item_count": 2
+    },
+    "current": {
+     "status": "received",
+     "items": [
+      {
+       "values": {
+        "VOY_NO": "SYN-V1",
+        "YARD_OPEN": "2026-11-10 00:00",
+        "YARD_CLOSE": "2026-11-13 01:00",
+        "ETB": "2026-11-13 11:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      },
+      {
+       "values": {
+        "VOY_NO": "SYN-V2",
+        "YARD_OPEN": "2026-11-11 06:00",
+        "YARD_CLOSE": "2026-11-14 06:00",
+        "ETB": "2026-11-14 18:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      }
+     ],
+     "row_count": 2,
+     "reported_count": 2,
+     "excluded_rows": 0,
+     "blockers": [
+      "reference_only_not_engine_input",
+      "source_timezone_unconfirmed",
+      "coverage_not_established",
+      "window_change_not_confirmed"
+     ],
+     "received_at": "2026-11-11T01:00:00Z",
+     "receipt_provenance": "caller_supplied_not_provider_observation_time",
+     "freshness": "fresh"
+    },
+    "cached": {
+     "status": "received",
+     "items": [
+      {
+       "values": {
+        "VOY_NO": "SYN-V1",
+        "YARD_OPEN": "2026-11-10 00:00",
+        "YARD_CLOSE": "2026-11-13 01:00",
+        "ETB": "2026-11-13 11:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      },
+      {
+       "values": {
+        "VOY_NO": "SYN-V2",
+        "YARD_OPEN": "2026-11-11 06:00",
+        "YARD_CLOSE": "2026-11-14 06:00",
+        "ETB": "2026-11-14 18:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      }
+     ],
+     "row_count": 2,
+     "reported_count": 2,
+     "excluded_rows": 0,
+     "blockers": [
+      "reference_only_not_engine_input",
+      "source_timezone_unconfirmed",
+      "coverage_not_established",
+      "window_change_not_confirmed"
+     ],
+     "received_at": "2026-11-11T01:00:00Z",
+     "receipt_provenance": "caller_supplied_not_provider_observation_time",
+     "freshness": "fresh"
+    },
+    "engine_conversion": "blocked",
+    "approval_eligible": false,
+    "automatic_mock_fallback": false
+   }
+  },
+  {
+   "id": "stale",
+   "label": "오래됨(새 조회 없음)",
+   "view": {
+    "model_version": "reference-read-preview-1",
+    "source": "hjnc",
+    "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+    "kind": "simulated",
+    "checked_at": "2026-11-11T01:06:50Z",
+    "sample_permission_ref": "synthetic-example",
+    "cache_policy": {
+     "fresh_for_seconds": 300,
+     "retain_for_seconds": 600,
+     "permission_ref": "synthetic-example-only"
+    },
+    "last_attempt": {
+     "at": "2026-11-11T01:00:10Z",
+     "status": "received",
+     "error_code": null,
+     "attempts": 1
+    },
+    "last_success": {
+     "received_at": "2026-11-11T01:00:00Z",
+     "status": "received",
+     "row_count": 2,
+     "item_count": 2
+    },
+    "current": null,
+    "cached": {
+     "status": "received",
+     "items": [
+      {
+       "values": {
+        "VOY_NO": "SYN-V1",
+        "YARD_OPEN": "2026-11-10 00:00",
+        "YARD_CLOSE": "2026-11-13 01:00",
+        "ETB": "2026-11-13 11:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      },
+      {
+       "values": {
+        "VOY_NO": "SYN-V2",
+        "YARD_OPEN": "2026-11-11 06:00",
+        "YARD_CLOSE": "2026-11-14 06:00",
+        "ETB": "2026-11-14 18:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      }
+     ],
+     "row_count": 2,
+     "reported_count": 2,
+     "excluded_rows": 0,
+     "blockers": [
+      "reference_only_not_engine_input",
+      "source_timezone_unconfirmed",
+      "coverage_not_established",
+      "window_change_not_confirmed"
+     ],
+     "received_at": "2026-11-11T01:00:00Z",
+     "receipt_provenance": "caller_supplied_not_provider_observation_time",
+     "freshness": "stale"
+    },
+    "engine_conversion": "blocked",
+    "approval_eligible": false,
+    "automatic_mock_fallback": false
+   }
+  },
+  {
+   "id": "failed_cached",
+   "label": "조회 실패 · 이전 표본 있음",
+   "view": {
+    "model_version": "reference-read-preview-1",
+    "source": "hjnc",
+    "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+    "kind": "simulated",
+    "checked_at": "2026-11-11T01:06:50Z",
+    "sample_permission_ref": "synthetic-example",
+    "cache_policy": {
+     "fresh_for_seconds": 300,
+     "retain_for_seconds": 600,
+     "permission_ref": "synthetic-example-only"
+    },
+    "last_attempt": {
+     "at": "2026-11-11T01:06:50Z",
+     "status": "failed",
+     "error_code": "http_error",
+     "attempts": 1
+    },
+    "last_success": {
+     "received_at": "2026-11-11T01:00:00Z",
+     "status": "received",
+     "row_count": 2,
+     "item_count": 2
+    },
+    "current": null,
+    "cached": {
+     "status": "received",
+     "items": [
+      {
+       "values": {
+        "VOY_NO": "SYN-V1",
+        "YARD_OPEN": "2026-11-10 00:00",
+        "YARD_CLOSE": "2026-11-13 01:00",
+        "ETB": "2026-11-13 11:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      },
+      {
+       "values": {
+        "VOY_NO": "SYN-V2",
+        "YARD_OPEN": "2026-11-11 06:00",
+        "YARD_CLOSE": "2026-11-14 06:00",
+        "ETB": "2026-11-14 18:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      }
+     ],
+     "row_count": 2,
+     "reported_count": 2,
+     "excluded_rows": 0,
+     "blockers": [
+      "reference_only_not_engine_input",
+      "source_timezone_unconfirmed",
+      "coverage_not_established",
+      "window_change_not_confirmed"
+     ],
+     "received_at": "2026-11-11T01:00:00Z",
+     "receipt_provenance": "caller_supplied_not_provider_observation_time",
+     "freshness": "stale"
+    },
+    "engine_conversion": "blocked",
+    "approval_eligible": false,
+    "automatic_mock_fallback": false
+   }
+  },
+  {
+   "id": "empty",
+   "label": "정상 0건",
+   "view": {
+    "model_version": "reference-read-preview-1",
+    "source": "hjnc",
+    "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+    "kind": "simulated",
+    "checked_at": "2026-11-11T01:00:10Z",
+    "sample_permission_ref": "synthetic-example",
+    "cache_policy": {
+     "fresh_for_seconds": 300,
+     "retain_for_seconds": 0,
+     "permission_ref": null
+    },
+    "last_attempt": {
+     "at": "2026-11-11T01:00:10Z",
+     "status": "empty",
+     "error_code": null,
+     "attempts": 1
+    },
+    "last_success": {
+     "received_at": "2026-11-11T01:00:00Z",
+     "status": "empty",
+     "row_count": 0,
+     "item_count": 0
+    },
+    "current": {
+     "status": "empty",
+     "items": [],
+     "row_count": 0,
+     "reported_count": 0,
+     "excluded_rows": 0,
+     "blockers": [
+      "reference_only_not_engine_input",
+      "source_timezone_unconfirmed",
+      "coverage_not_established",
+      "window_change_not_confirmed"
+     ],
+     "received_at": "2026-11-11T01:00:00Z",
+     "receipt_provenance": "caller_supplied_not_provider_observation_time",
+     "freshness": "fresh"
+    },
+    "cached": null,
+    "engine_conversion": "blocked",
+    "approval_eligible": false,
+    "automatic_mock_fallback": false
+   }
+  },
+  {
+   "id": "partial",
+   "label": "부분 응답",
+   "view": {
+    "model_version": "reference-read-preview-1",
+    "source": "hjnc",
+    "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+    "kind": "simulated",
+    "checked_at": "2026-11-11T01:00:10Z",
+    "sample_permission_ref": "synthetic-example",
+    "cache_policy": {
+     "fresh_for_seconds": 300,
+     "retain_for_seconds": 0,
+     "permission_ref": null
+    },
+    "last_attempt": {
+     "at": "2026-11-11T01:00:10Z",
+     "status": "partial",
+     "error_code": null,
+     "attempts": 1
+    },
+    "last_success": {
+     "received_at": "2026-11-11T01:00:00Z",
+     "status": "partial",
+     "row_count": 1,
+     "item_count": 1
+    },
+    "current": {
+     "status": "partial",
+     "items": [
+      {
+       "values": {
+        "VOY_NO": "SYN-V1",
+        "YARD_OPEN": "2026-11-10 00:00",
+        "YARD_CLOSE": "2026-11-13 01:00",
+        "ETB": "2026-11-13 11:00"
+       },
+       "provenance": {
+        "kind": "simulated",
+        "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+        "received_at": "2026-11-11T01:00:00Z",
+        "observed_at": null
+       }
+      }
+     ],
+     "row_count": 1,
+     "reported_count": 3,
+     "excluded_rows": 0,
+     "blockers": [
+      "reference_only_not_engine_input",
+      "source_timezone_unconfirmed",
+      "coverage_not_established",
+      "window_change_not_confirmed"
+     ],
+     "received_at": "2026-11-11T01:00:00Z",
+     "receipt_provenance": "caller_supplied_not_provider_observation_time",
+     "freshness": "fresh"
+    },
+    "cached": null,
+    "engine_conversion": "blocked",
+    "approval_eligible": false,
+    "automatic_mock_fallback": false
+   }
+  },
+  {
+   "id": "failed",
+   "label": "조회 실패 · 이전 표본 없음",
+   "view": {
+    "model_version": "reference-read-preview-1",
+    "source": "hjnc",
+    "source_ref": "https://www.hjnc.co.kr/esvc/vessel/berthScheduleT",
+    "kind": "simulated",
+    "checked_at": "2026-11-11T01:00:10Z",
+    "sample_permission_ref": "synthetic-example",
+    "cache_policy": {
+     "fresh_for_seconds": 300,
+     "retain_for_seconds": 0,
+     "permission_ref": null
+    },
+    "last_attempt": {
+     "at": "2026-11-11T01:00:10Z",
+     "status": "failed",
+     "error_code": "http_error",
+     "attempts": 1
+    },
+    "last_success": null,
+    "current": null,
+    "cached": null,
+    "engine_conversion": "blocked",
+    "approval_eligible": false,
+    "automatic_mock_fallback": false
+   }
+  }
+ ]
+}

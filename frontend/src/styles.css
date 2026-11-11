@@ -272,3 +272,13 @@ button.secondary:hover { background: var(--color-hover); }
 
 .rev-add select, .rev-add .rev-field input:not([type]) { font: inherit; padding: 6px 8px; border: var(--border); border-radius: var(--radius-sm); }
 .rev-add .rev-row label.small { display: inline-flex; gap: 4px; align-items: center; }
+/* 참고 자료 상태(#32) */
+.reference .tabs { margin: var(--space-3) 0; }
+.ref-headline { font-weight: var(--fw-bold); margin: var(--space-3) 0 var(--space-2); }
+.ref-headline.tone-danger { color: var(--color-danger); }
+.ref-headline.tone-warn { color: var(--pill-orange-text); }
+.ref-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-2) var(--space-4); margin: 0 0 var(--space-3); }
+.ref-meta dt { color: var(--color-muted); }
+.ref-meta dd { margin: 0; }
+.ref-blockers { padding-left: var(--space-5); }
+.reference caption { text-align: left; padding-bottom: var(--space-1); }

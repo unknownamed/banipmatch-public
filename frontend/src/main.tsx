@@ -11,6 +11,7 @@ import { RecipientApp } from './components/RecipientApp'
 import { createRecipientClient } from './api/recipient'
 import { createDemoRecipientClient } from './api/recipientDemo'
 import { takeFragment } from './lib/recipient'
+import { ReferencePanel } from './components/ReferencePanel'
 import './styles.css'
 
 // VITE_API_MODE=http 이면 /v1, v2 이면 담당자 대응 API(/v2, 세션 쿠키)에 연결한다. 기본은 공통 예제(fixture).
@@ -63,7 +64,7 @@ createRoot(document.getElementById('root')!).render(
     ) : (
       <>
         <AppBar mode={mode} />
-        {params.get('view') === 'map' ? <MapCheck /> : <Root />}
+        {params.get('view') === 'map' ? <MapCheck /> : params.get('view') === 'reference' ? <ReferencePanel /> : <Root />}
       </>
     )}
   </StrictMode>,
