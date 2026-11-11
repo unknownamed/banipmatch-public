@@ -13,7 +13,7 @@ const isCode = (e: unknown, ...codes: string[]) => e instanceof ApiRequestError 
  * 기사 역할 시험 수신자 화면. 내 차량의 확정 변경만 보고 확인·수행 가능·곤란을 답한다.
  * 다른 차량·기사의 일정은 서버가 가리고, 전화번호·이름은 받지 않는다.
  */
-export function RecipientApp({ client, boot, env = platform(navigator, window) }: { client: RecipientClient; boot: Fragment; env?: PlatformInfo }) {
+export function RecipientApp({ client, boot, env = platform(navigator, window), demo = false }: { client: RecipientClient; boot: Fragment; env?: PlatformInfo; demo?: boolean }) {
   const [invite, setInvite] = useState<string | null>(boot.invite)
   const [session, setSession] = useState<RecipientSession | null | undefined>(undefined)
   const [error, setError] = useState<unknown>(null)
@@ -36,12 +36,12 @@ export function RecipientApp({ client, boot, env = platform(navigator, window) }
     }
   }
 
-  if (session === undefined) return <Shell><p className="muted" role="status">연결 확인 중…</p></Shell>
-  if (session) return <Shell><Connected client={client} session={session} env={env} focus={boot.notification} onLeave={() => setSession(null)} /></Shell>
+  if (session === undefined) return <Shell demo={demo}><p className="muted" role="status">연결 확인 중…</p></Shell>
+  if (session) return <Shell demo={demo}><Connected client={client} session={session} env={env} demo={demo} focus={boot.notification} onLeave={() => setSession(null)} /></Shell>
 
   const install = mustInstallFirst(env)
   return (
-    <Shell>
+    <Shell demo={demo}>
       <section className="card">
         <h2>시험 수신 연결</h2>
         <p className="small muted">배차 담당자가 확정한 <b>모의</b> 변경을 받아 보고 응답하는 시험 화면입니다. 실제 운송 지시가 아닙니다.</p>
@@ -71,10 +71,15 @@ export function RecipientApp({ client, boot, env = platform(navigator, window) }
   )
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, demo }: { children: React.ReactNode; demo: boolean }) {
   return (
     <main className="recipient">
       <header className="recipient-head"><span className="brand-mark" aria-hidden="true">반</span> 반입맞춤 <span className="badge mode-simulated">시험 수신</span></header>
+      {demo && (
+        <div className="banner fixture" role="note">
+          모의 화면입니다. 서버·웹 푸시 없이 이 탭의 가짜 자료로만 동작하며, 응답은 어디에도 전달·저장되지 않습니다.
+        </div>
+      )}
       {children}
     </main>
   )
@@ -110,7 +115,7 @@ function PasteInvite({ busy, onInvite }: { busy: boolean; onInvite: (token: stri
   )
 }
 
-function Connected({ client, session, env, focus, onLeave }: { client: RecipientClient; session: RecipientSession; env: PlatformInfo; focus: string | null; onLeave: () => void }) {
+function Connected({ client, session, env, demo, focus, onLeave }: { client: RecipientClient; session: RecipientSession; env: PlatformInfo; demo: boolean; focus: string | null; onLeave: () => void }) {
   const [inbox, setInbox] = useState<{ items?: RecipientNotification[]; error?: unknown }>({})
   const [selected, setSelected] = useState<string | null>(focus)
   const load = useCallback(() => client.inbox().then((r) => setInbox({ items: r.notifications }), (error) => setInbox((s) => ({ ...s, error }))), [client])
@@ -136,7 +141,7 @@ function Connected({ client, session, env, focus, onLeave }: { client: Recipient
       <section className="card">
         <h2>내 차량 {session.vehicle_ids.join(', ')}</h2>
         <p className="small muted">연결 만료 {kstDateTime(session.expires_at)} · 모의 배차 시험</p>
-        <PushControl client={client} session={session} env={env} />
+        {demo ? <p className="small muted">모의 화면에서는 알림 권한을 묻거나 구독하지 않습니다.</p> : <PushControl client={client} session={session} env={env} />}
       </section>
 
       {inbox.error !== undefined && <p className="card warn small" role="alert">알림 목록 조회 실패: {errText(inbox.error)}</p>}

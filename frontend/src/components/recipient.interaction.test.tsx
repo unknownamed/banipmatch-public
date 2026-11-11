@@ -7,6 +7,7 @@ import { ApiRequestError } from '../api/client'
 import type { RecipientClient, RecipientNotification, RecipientSession } from '../api/recipient'
 import { claimKey, takeFragment, type PlatformInfo } from '../lib/recipient'
 import { RecipientApp } from './RecipientApp'
+import { createDemoRecipientClient } from '../api/recipientDemo'
 
 const android: PlatformInfo = { ios: false, standalone: false, pushSupported: false }
 const iphoneSafari: PlatformInfo = { ios: true, standalone: false, pushSupported: false }
@@ -105,5 +106,21 @@ describe('수신자 화면', () => {
     expect(container.textContent).toContain('이전 계획의 알림')
     expect(button('수행 가능')).toBeUndefined()
     expect(client.opened).not.toHaveBeenCalled()
+  })
+
+  it('모의 링크는 서버 없이 수락→변경→응답까지 보여주고 모의임을 밝힌다', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    await act(async () => root.render(<RecipientApp client={createDemoRecipientClient()} boot={{ invite: 'demo-invite', notification: null }} env={android} demo />))
+    await flush()
+    expect(container.textContent).toContain('모의 화면입니다')
+    await act(async () => button('초대 수락')!.click())
+    await flush()
+    await flush()
+    expect(container.textContent).toContain('J2')
+    await act(async () => button('수행 가능')!.click())
+    await flush()
+    expect(container.textContent).toContain('현재: 수행 가능')
+    expect(fetchSpy).not.toHaveBeenCalled()
+    fetchSpy.mockRestore()
   })
 })

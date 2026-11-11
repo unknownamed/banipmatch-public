@@ -9,6 +9,7 @@ import { MapCheck } from './components/MapCheck'
 import { StartRunPanel } from './components/StartRunPanel'
 import { RecipientApp } from './components/RecipientApp'
 import { createRecipientClient } from './api/recipient'
+import { createDemoRecipientClient } from './api/recipientDemo'
 import { takeFragment } from './lib/recipient'
 import './styles.css'
 
@@ -48,11 +49,17 @@ if (recipient) {
 }
 // React(StrictMode는 초기화를 두 번 실행)보다 먼저 한 번만 읽고 지운다.
 const recipientBoot = recipient ? takeFragment() : null
+// ?demo=1: 서버 없이 수신자 화면을 보는 모의 링크(가짜 초대가 미리 들어 있음).
+const recipientDemo = recipient && params.get('demo') === '1'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     {recipient ? (
-      <RecipientApp client={createRecipientClient()} boot={recipientBoot!} />
+      recipientDemo ? (
+        <RecipientApp client={createDemoRecipientClient()} boot={{ invite: 'demo-invite', notification: null }} demo />
+      ) : (
+        <RecipientApp client={createRecipientClient()} boot={recipientBoot!} />
+      )
     ) : (
       <>
         <AppBar mode={mode} />
