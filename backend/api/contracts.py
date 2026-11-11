@@ -18,10 +18,12 @@ OPENAPI = json.loads((DRAFT / "공통 규격" / "openapi.json").read_text(encodi
 
 
 class ApiError(Exception):
-    def __init__(self, status: int, code: str, message: str, details: list | None = None):
+    def __init__(self, status: int, code: str, message: str, details: list | None = None,
+                 *, headers: dict | None = None):
         super().__init__(code)
         self.status, self.code, self.message = status, code, message
         self.details = details or []
+        self.headers = headers or {}
 
     def body(self, request_id: str | None = None) -> dict:
         return {"request_id": request_id or uuid4().hex, "code": self.code,

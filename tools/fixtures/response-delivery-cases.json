@@ -1,0 +1,25 @@
+{
+  "kind": "simulated",
+  "purpose": "acceptance_expectations_not_recorded_API_responses",
+  "contract_reference": "PR61 head 558c7828ce8596c0cea640e10a2faee59b549920; not yet main or agreed UI contract",
+  "real_phone_verified": false,
+  "external_actions_performed": false,
+  "identities": {"vehicle_ids": ["T1", "T2"], "recipient_ids": ["SIM-RECIPIENT-A", "SIM-RECIPIENT-B"], "relationship": "explicit mapping; vehicle ID is not recipient ID"},
+  "cases": [
+    {"id": "permission-denied", "precondition": "기사 역할 시험자가 알림 권한을 거절", "action": "구독 요청을 만들지 않고 담당자 상태 확인", "expected": {"subscription_created": false, "human_response": "none", "requires_manual_followup": true}, "must_not_claim": ["push_received", "acknowledged"]},
+    {"id": "invitation-expired", "precondition": "서버 시계가 초대 만료시각 경과", "action": "POST /v2/recipient/session", "expected": {"http_status": 410, "code": "INVITATION_EXPIRED", "recipient_created": false}, "must_not_claim": ["subscribed"]},
+    {"id": "unlinked", "precondition": "확정 변경 대상 차량에 동의한 수신자 연결 없음", "action": "명시 전달 후 담당자 조회", "expected": {"delivery_status": "unlinked", "response": "none", "requires_manual_followup": true}, "must_not_claim": ["accepted", "driver_contacted"]},
+    {"id": "old-plan", "precondition": "발송한 뒤 새 입력 또는 계획 확정", "action": "이전 알림 상세 조회 및 응답 시도", "expected": {"delivery_status": "superseded", "payload": null, "http_status": 409, "code": "NOTIFICATION_SUPERSEDED"}, "must_not_claim": ["current_instruction", "response_saved"]},
+    {"id": "duplicate-send", "precondition": "같은 승인에 이미 전달 이력 존재", "action": "같은 멱등 키로 전달 요청 반복", "expected": {"same_dispatch_id": true, "additional_provider_calls": 0}, "must_not_claim": ["second_delivery"]},
+    {"id": "failed", "precondition": "가짜 전송기가 확실한 실패 반환", "action": "담당자 상태 조회", "expected": {"delivery_status": "failed", "response": "none", "requires_manual_followup": true}, "must_not_claim": ["received", "automatic_retry"]},
+    {"id": "unknown", "precondition": "가짜 전송기의 결과 불명 또는 sending 중 재시작", "action": "상태 조회 후 재시도 요청", "expected": {"delivery_status": "unknown", "response": "none", "http_status": 409, "code": "DELIVERY_UNCERTAIN", "additional_provider_calls": 0}, "must_not_claim": ["failed_definitively", "automatic_retry", "acknowledged"]},
+    {"id": "accepted-unread", "precondition": "가짜 중계망 접수, 사용자 화면 방문 없음", "action": "담당자 상태 조회", "expected": {"delivery_status": "accepted", "opened_at": null, "response": "none"}, "must_not_claim": ["phone_received", "read", "acknowledged", "can_perform"]},
+    {"id": "opened-only", "precondition": "권한 있는 최신 알림 상세 열기", "action": "POST /v2/recipient/notifications/{id}/opened", "expected": {"opened_at_present": true, "response": "none"}, "must_not_claim": ["acknowledged", "can_perform", "transport_completed"]},
+    {"id": "acknowledged", "precondition": "권한 있는 최신 알림, 명시 확인", "action": "POST responses with response=acknowledged", "expected": {"response": "acknowledged", "response_history_preserved": true}, "must_not_claim": ["can_perform", "transport_completed"]},
+    {"id": "cannot-perform", "precondition": "권한 있는 최신 알림, 명시 수행 곤란", "action": "POST responses with response=cannot_perform", "expected": {"response": "cannot_perform", "requires_manual_followup": true, "automatic_recalculation": false}, "must_not_claim": ["reassigned", "transport_cancelled"]},
+    {"id": "can-perform", "precondition": "권한 있는 최신 알림, 명시 수행 가능", "action": "POST responses with response=can_perform", "expected": {"response": "can_perform", "response_history_preserved": true}, "must_not_claim": ["transport_started", "transport_completed"]},
+    {"id": "subscription-expired", "precondition": "가짜 중계망이 만료 구독을 반환", "action": "전달 상태 및 구독 해제 확인", "expected": {"delivery_status": "expired", "response": "none", "subscription_removed": true}, "must_not_claim": ["accepted", "automatic_retry"]},
+    {"id": "other-recipient", "precondition": "SIM-RECIPIENT-B가 A의 알림 ID를 사용", "action": "상세 조회 또는 명시 응답", "expected": {"http_status": 404, "code": "NOT_FOUND", "details_exposed": false, "response_saved": false}, "must_not_claim": ["authorized_by_vehicle_id"]},
+    {"id": "assumed-conditions", "precondition": "ready_at 수정 또는 추가 차량이 시연 가정으로 등록됨", "action": "계산/비교 후 확정 시도", "expected": {"http_status": 422, "code": "ASSUMPTION_NOT_APPROVABLE", "delivery_authorized": false}, "must_not_claim": ["field_confirmed", "vehicle_recruited", "approved", "sent"]}
+  ]
+}

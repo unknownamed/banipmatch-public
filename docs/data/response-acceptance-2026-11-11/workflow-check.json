@@ -1,0 +1,19 @@
+{
+  "pr": 61,
+  "head": "558c7828ce8596c0cea640e10a2faee59b549920",
+  "kind": "simulated",
+  "transport": "injected; no provider network",
+  "real_phone_verified": false,
+  "fixture_cases_matched": [
+    "accepted-unread",
+    "duplicate-send",
+    "opened-only",
+    "acknowledged",
+    "can-perform",
+    "cannot-perform",
+    "failed",
+    "unknown",
+    "unlinked"
+  ],
+  "remaining_examples": "covered by existing workflow regression or frontend/manual acceptance; not full device verification"
+}

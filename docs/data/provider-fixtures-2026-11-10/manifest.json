@@ -1,0 +1,411 @@
+{
+  "bundle_version": 1,
+  "data_kind": "simulated",
+  "simulated_now_utc": "2026-11-10T03:00:00Z",
+  "freshness_seconds": 300,
+  "freshness_policy": "fixture display test only, not provider update guarantee",
+  "generator_sha256": "0ddc634d8ce395a87d8684479f28956a484a8c24ad3653e0087c6f47a1b4845b",
+  "real_responses_or_keys_copied": false,
+  "cases": [
+    {
+      "id": "hjnc-normal",
+      "source": "hjnc",
+      "data_kind": "simulated",
+      "wire": "wire/hjnc-normal.json",
+      "encoding": "utf-8",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "a2ae9ae32288f5ea4819761882ac2c7c1f09834c3d78122aa9b752caa264211e",
+      "engine_eligible": false,
+      "expected": {
+        "status": "received",
+        "audit": {
+          "row_count": 1
+        }
+      }
+    },
+    {
+      "id": "hjnc-empty",
+      "source": "hjnc",
+      "data_kind": "simulated",
+      "wire": "wire/hjnc-empty.json",
+      "encoding": "utf-8",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "105ebcb6602ac7c03e7f848776a9c09de23ff1b12900fa8f74e005ee56d86c4c",
+      "engine_eligible": false,
+      "expected": {
+        "status": "empty",
+        "audit": {
+          "row_count": 0
+        }
+      }
+    },
+    {
+      "id": "hjnc-partial-page",
+      "source": "hjnc",
+      "data_kind": "simulated",
+      "wire": "wire/hjnc-partial-page.json",
+      "encoding": "utf-8",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "376c7b2358b01a9e332399fcb44cdc6a9d7e2cc7175c23f154e87563bdf3cc71",
+      "engine_eligible": false,
+      "expected": {
+        "status": "partial",
+        "audit": {
+          "reported_total_matches_rows": false
+        }
+      }
+    },
+    {
+      "id": "hjnc-missing-window",
+      "source": "hjnc",
+      "data_kind": "simulated",
+      "wire": "wire/hjnc-missing-window.json",
+      "encoding": "utf-8",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "ea114b05ffffc13d53c4c4dbfc57129b9217c82f826005b1e238cd704cbc6428",
+      "engine_eligible": false,
+      "expected": {
+        "status": "partial",
+        "audit": {
+          "missing_or_nontext": {
+            "YARD_CLOSE": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "hjnc-stale",
+      "source": "hjnc",
+      "data_kind": "simulated",
+      "wire": "wire/hjnc-stale.json",
+      "encoding": "utf-8",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T02:00:00Z",
+      "raw_sha256": "a2ae9ae32288f5ea4819761882ac2c7c1f09834c3d78122aa9b752caa264211e",
+      "engine_eligible": false,
+      "expected": {
+        "status": "received",
+        "freshness": "stale"
+      }
+    },
+    {
+      "id": "hjnc-format-changed",
+      "source": "hjnc",
+      "data_kind": "simulated",
+      "wire": "wire/hjnc-format-changed.json",
+      "encoding": "utf-8",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "bc20a2f45de8a3b177d4fa230121e1dd7b96eaf98f055e2125ec1a34dc7a5caf",
+      "engine_eligible": false,
+      "expected": {
+        "status": "format_error"
+      }
+    },
+    {
+      "id": "hjnc-http-error",
+      "source": "hjnc",
+      "data_kind": "simulated",
+      "wire": "wire/hjnc-http-error.json",
+      "encoding": "utf-8",
+      "http_status": 503,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "99360db17dc7676158dc96cc215395b02aec89bf9ba7ce878bc8362a63600d2b",
+      "engine_eligible": false,
+      "expected": {
+        "status": "http_error"
+      }
+    },
+    {
+      "id": "kma-station-normal",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-station-normal.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "d4dad0776dbcebcbf5589b0c08eab09cbde17037a688ce03648e0b2541f76e26",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "row_count": 1,
+          "station_mismatch_rows": 0
+        }
+      },
+      "kind": "station",
+      "station": "99999"
+    },
+    {
+      "id": "kma-sea-normal",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-sea-normal.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "a5a9a017bc0295874d8b4be6e3383fdcf902d8dcd5d2823390c68160b7e83d89",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "row_count": 1,
+          "future_observation_rows": 0
+        }
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-sea-empty",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-sea-empty.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "34b225804050639e086ba9e7329bdb8d333a44c9ce6cc72cd1527d94cc514395",
+      "engine_eligible": false,
+      "expected": {
+        "status": "empty_framed_response",
+        "audit": {
+          "row_count": 0
+        }
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-sea-missing",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-sea-missing.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "32a09520bfd789e33b5a1902f873366ec1cde52ec8f109a6b5cadd625c95c232",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "observations": [
+            {
+              "ws_m_s_original": "",
+              "missing_or_invalid_nonnegative_fields": [
+                "WS"
+              ]
+            }
+          ]
+        }
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-sea-unknown-negative",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-sea-unknown-negative.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "367115860cae3f1cd28d182bfc48395a1c99c0adc25c8813ac93bc90f7abc6eb",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "observations": [
+            {
+              "ws_m_s_original": "-99.0",
+              "missing_or_invalid_nonnegative_fields": [
+                "WS"
+              ]
+            }
+          ]
+        }
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-sea-future",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-sea-future.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "6c0e2e5da70c9316c250e0a4ba855b9e232843e04fc974d3e4e00c60668a61de",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "future_observation_rows": 1
+        }
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-sea-wrong-station",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-sea-wrong-station.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "c7d9403418c9aa4e2264403d24bf6cc45cbdc5e5cbe2131ef640fde5fa9927e3",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "station_mismatch_rows": 1
+        }
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-sea-stale",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-sea-stale.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T02:00:00Z",
+      "raw_sha256": "d877ea677e86ea0158cfb2ae0aae95adffdddd9d9e63fdd1e01606ed2be1cc5f",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "freshness": "stale"
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-application-required",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-application-required.json",
+      "encoding": "utf-8",
+      "http_status": 403,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "894c3244c03596a8cc00667195f8837a4444a86a86821acb183ce7e0bacb7d54",
+      "engine_eligible": false,
+      "expected": {
+        "status": "application_required"
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-rate-limited",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-rate-limited.json",
+      "encoding": "utf-8",
+      "http_status": 429,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "9e2c6c5216fa01249d2df108d0f9cd8c22c007caad7ae853d8094f5f4ed891a4",
+      "engine_eligible": false,
+      "expected": {
+        "status": "http_error"
+      },
+      "kind": "sea",
+      "station": "99999"
+    },
+    {
+      "id": "kma-warning-normal",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-warning-normal.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "5dcb1cc909dd293eb28a79d54191d2978543c8d720cbc463b0aae1ad6753e2d1",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "selected_row_count": 1,
+          "selected_records": [
+            {
+              "effective_at_utc": "2026-11-10T03:00:00Z"
+            }
+          ]
+        }
+      },
+      "kind": "warning",
+      "regions": [
+        "S9999900"
+      ]
+    },
+    {
+      "id": "kma-warning-preliminary",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-warning-preliminary.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "03abb10b5065f19f18c725aa5a3b45964d7b040e4202e9dd35d8e7dd1a0362ec",
+      "engine_eligible": false,
+      "expected": {
+        "status": "sample_received",
+        "audit": {
+          "selected_records": [
+            {
+              "effective_at_utc": null,
+              "effective_representation": "preliminary_period_code"
+            }
+          ]
+        }
+      },
+      "kind": "warning",
+      "regions": [
+        "S9999900"
+      ]
+    },
+    {
+      "id": "kma-warning-empty",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-warning-empty.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "34b225804050639e086ba9e7329bdb8d333a44c9ce6cc72cd1527d94cc514395",
+      "engine_eligible": false,
+      "expected": {
+        "status": "empty_framed_response",
+        "audit": {
+          "selected_row_count": 0
+        }
+      },
+      "kind": "warning",
+      "regions": [
+        "S9999900"
+      ]
+    },
+    {
+      "id": "kma-truncated",
+      "source": "kma",
+      "data_kind": "simulated",
+      "wire": "wire/kma-truncated.txt",
+      "encoding": "cp949",
+      "http_status": 200,
+      "simulated_received_at": "2026-11-10T03:00:00Z",
+      "raw_sha256": "dde5604d317cf665d0c42731e2b23cd9552946205a66a54c8a3b775a8e53994e",
+      "engine_eligible": false,
+      "expected": {
+        "status": "format_error"
+      },
+      "kind": "sea",
+      "station": "99999"
+    }
+  ]
+}

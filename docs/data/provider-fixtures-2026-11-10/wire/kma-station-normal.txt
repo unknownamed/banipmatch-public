@@ -1,0 +1,4 @@
+#START7777
+# SYNTHETIC fixture, not a provider response
+99999 128.0000 35.0000 24000000 0.0 999 합성지점 SyntheticStation SYNTHETIC
+#7777END

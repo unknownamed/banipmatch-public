@@ -57,23 +57,28 @@ def same_baseline(snapshot: dict, plan: dict) -> bool:
 
 
 class Store:
-    def __init__(self, database: Database):
+    def __init__(self, database: Database, *, actor_id: str = DEMO_ACTOR, max_operations: int | None = None):
         self.db = database
+        self.actor_id = actor_id
+        self.max_operations = max_operations
 
     def idempotent(self, route: str, key: str, body: dict, operation) -> tuple[int, dict]:
         request_hash = digest(body)
         with self.db.transaction() as conn:
             previous = conn.execute(
                 "SELECT * FROM idempotency_records WHERE actor_id=? AND route=? AND idempotency_key=?",
-                (DEMO_ACTOR, route, key),
+                (self.actor_id, route, key),
             ).fetchone()
             if previous:
                 if previous["request_sha256"] != request_hash:
                     raise ApiError(409, "IDEMPOTENCY_CONFLICT", "같은 멱등키를 다른 요청에 사용할 수 없음")
                 return previous["response_status"], json.loads(previous["response_json"])
+            if self.max_operations is not None and conn.execute(
+                    "SELECT count(*) FROM idempotency_records WHERE actor_id=?", (self.actor_id,)).fetchone()[0] >= self.max_operations:
+                raise ApiError(429, "WRITE_LIMIT", "세션 변경 이력 보관 상한에 도달함")
             status, response = operation(conn)
             insert(conn, "idempotency_records", {
-                "actor_id": DEMO_ACTOR, "route": route, "idempotency_key": key,
+                "actor_id": self.actor_id, "route": route, "idempotency_key": key,
                 "request_sha256": request_hash, "response_status": status,
                 "response_json": canonical(response), "created_at": utc_now(),
             })
@@ -93,7 +98,8 @@ class Store:
             raise ApiError(404, "SCENARIO_NOT_FOUND", "입력을 찾을 수 없음")
         return json.loads(row["snapshot_json"])
 
-    def register(self, snapshot: dict, key: str) -> tuple[int, dict]:
+    def register(self, snapshot: dict, key: str, *, on_registered=None,
+                 route="POST /v1/scenarios", idempotency_body=None) -> tuple[int, dict]:
         def operation(conn):
             sid, pid, version = (snapshot[k] for k in ("scenario_id", "plan_id", "base_plan_version"))
             version = integer_binding(version, "/base_plan_version")
@@ -138,8 +144,11 @@ class Store:
             else:
                 conn.execute("UPDATE plan_heads SET active_scenario_id=?, updated_at=? WHERE plan_id=?",
                              (sid, now, pid))
-            return 201, {"scenario_id": sid, "plan_id": pid, "base_plan_version": version, "input_sha256": sha}
-        return self.idempotent("POST /v1/scenarios", key, snapshot, operation)
+            response = {"scenario_id": sid, "plan_id": pid, "base_plan_version": version, "input_sha256": sha}
+            if on_registered:
+                response.update(on_registered(conn))
+            return 201, response
+        return self.idempotent(route, key, snapshot if idempotency_body is None else idempotency_body, operation)
 
     def get_snapshot(self, scenario_id: str) -> dict:
         with self.db.connect() as conn:
@@ -203,7 +212,7 @@ class Store:
                          "base_plan_version": run["base_plan_version"], "input_sha256": sha,
                          "results": [indexed[m] for m in run["methods"]]}
 
-    def approve(self, plan_id: str, request: dict, key: str) -> tuple[int, dict]:
+    def approve(self, plan_id: str, request: dict, key: str, *, before_approve=None) -> tuple[int, dict]:
         """단일 로컬 모의 주체의 내부 승인. 버전 갱신과 멱등 응답을 원자적으로 저장."""
         from backend.api.input_preflight import check_input
         from backend.api.result_integrity import verify_schedule
@@ -225,6 +234,8 @@ class Store:
             if result["result_origin"] != "computed":
                 raise ApiError(422, "RESULT_NOT_COMPUTED", "설명용 결과는 승인할 수 없음")
             snapshot = self.snapshot(conn, run["scenario_id"])
+            if before_approve:
+                before_approve(conn, snapshot)
             if (request["method"] == "B0" or not result["approval_eligible"]
                     or result["validation_status"] != "passed" or not verify_schedule(snapshot, result)):
                 raise ApiError(422, "RESULT_NOT_ELIGIBLE", "독립 검증을 통과한 조정 결과만 승인 가능")
@@ -243,7 +254,7 @@ class Store:
                 raise ApiError(422, "ACKNOWLEDGEMENT_REQUIRED", "미처리·고정 위험 작업을 확인해야 함")
             version, sid, approval_id = head["current_version"] + 1, run["scenario_id"], "A-" + uuid4().hex
             approval = {"approval_id": approval_id, "plan_id": plan_id, "version": version,
-                        "run_id": run["run_id"], "method": request["method"], "approved_by": DEMO_ACTOR,
+                        "run_id": run["run_id"], "method": request["method"], "approved_by": self.actor_id,
                         "approved_at": now, "external_actions_performed": False}
             plan = {"plan_id": plan_id, "version": version, "scenario_id": sid,
                     "assignments": result["assignments"], "unassigned_job_ids": result["unassigned_job_ids"],
@@ -254,7 +265,7 @@ class Store:
                 insert(conn, "assignments", {"plan_id": plan_id, "version": version, "scenario_id": sid, **assignment})
             insert(conn, "approvals", {"approval_id": approval_id, "plan_id": plan_id, "version": version,
                    "scenario_id": sid, "run_id": run["run_id"], "method": request["method"],
-                   "expected_version": request["expected_version"], "approved_by": DEMO_ACTOR, "approved_at": now,
+                   "expected_version": request["expected_version"], "approved_by": self.actor_id, "approved_at": now,
                    "acknowledged_job_ids_json": canonical(request["acknowledged_job_ids"]), "external_actions_performed": False})
             updated = conn.execute("UPDATE plan_heads SET current_version=?, updated_at=? WHERE plan_id=? "
                                    "AND current_version=? AND active_scenario_id=?",

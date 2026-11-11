@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반입맞춤 · 모의 AIS 시연</title>
+<style>
+:root{color-scheme:light;font-family:"Segoe UI","Malgun Gothic",sans-serif;color:#162c39;background:#f3f6f7}
+*{box-sizing:border-box}body{margin:0}main{max-width:1200px;margin:0 auto;padding:32px 28px 50px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}.brand{font-weight:750;font-size:17px;letter-spacing:-.6px}.tag{color:#176047;background:#e3f1e9;border:1px solid #bed8ca;border-radius:5px;padding:7px 12px;font-size:13px;font-weight:700}
+.eyebrow{color:#527487;font-size:12px;font-weight:750;letter-spacing:2px}h1{font-size:34px;letter-spacing:-1.7px;margin:10px 0 12px}p{line-height:1.7;margin:0;color:#5b707e;font-size:14px}.intro{margin-bottom:24px}.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:17px 20px;background:white;border:1px solid #dfe6e9;border-radius:9px;margin-bottom:18px}label{font-size:13px;color:#536b79}select,button{font:inherit;font-size:13px;border:1px solid #cbd7de;background:white;border-radius:5px;padding:9px 12px;color:#173a4c;cursor:pointer}button:hover{background:#edf3f6}button.primary{background:#155c73;color:#fff;border-color:#155c73}input[type=range]{accent-color:#155c73;flex:1;min-width:120px}output{font-family:monospace;font-size:13px;color:#415b6b;min-width:76px}.content{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px}.card{background:#fff;border:1px solid #dfe6e9;border-radius:9px;overflow:hidden}.card-title{padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}h2{font-size:16px;letter-spacing:-.5px;margin:0}.small{font-size:12px;color:#67808f}.plot{display:block;width:100%;background:#102c3d}.caption{font-size:12px;padding:12px 20px;color:#5f7785;background:#f9fbfc;line-height:1.6}.metrics{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e4eaee}.metric{padding:18px 20px}.metric:nth-child(odd){border-right:1px solid #e4eaee}.metric span{display:block;font-size:12px;color:#667f8e;margin-bottom:9px}.metric strong{font-size:28px;font-weight:650}.ships{padding:5px 20px 18px}.ship{padding:16px 0;border-bottom:1px solid #e5ecef}.ship:last-child{border-bottom:0}.ship strong{font-size:14px}.ship p{font-size:12px;margin-top:5px;line-height:1.65}.pill{display:inline-block;border-radius:4px;padding:3px 7px;margin-left:7px;font-size:11px;background:#e5f2ec;color:#226c50}.pill.stale{background:#fff0da;color:#9b631e}.pill.missing{background:#edf0f3;color:#5a6d7b}.limits{margin-top:18px;padding:15px 19px;background:#eaf0f3;border:1px solid #dbe5ea;border-radius:7px;font-size:12px;line-height:1.8;color:#546d7b}.wire{margin-top:18px}.wire summary{padding:18px 20px;cursor:pointer;font-size:14px;font-weight:650}.wire-body{padding:0 20px 20px}.wire pre{font:12px/1.6 Consolas,monospace;overflow:auto;max-height:340px;background:#f3f7f9;border-radius:6px;padding:16px}.wire p{font-size:12px;margin:10px 0}a{color:#20677f}.empty{padding:20px 0;color:#6b818e;font-size:13px;line-height:1.7}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #7ebbd2;outline-offset:3px}@media(max-width:850px){main{padding:22px 16px}.content{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(4,1fr)}.metric{padding:14px}.metric strong{font-size:24px}h1{font-size:27px}.controls{padding:14px}.ships{padding-bottom:8px}}
+</style>
+</head>
+<body><main>
+<header><div class="brand">반입맞춤 <span class="small">/ AIS 참고 자료</span></div><div class="tag">모의 데이터 100%</div></header>
+<div class="intro"><div class="eyebrow">AIS MESSAGE REPLAY</div><h1>수신이 멈춰도, 상태는 분명하게.</h1><p>공식 AIS 메시지 형식으로 만든 선박 2척의 재생 시연. 선박명·식별자·좌표·시각은 모두 생성값임.</p></div>
+<section class="controls" aria-label="모의 재생 제어">
+<label for="scenario">시연 사례</label><select id="scenario"><option value="normal">정상 수신</option><option value="stale">한 선박의 위치 수신 중단</option><option value="missing-static">정적 정보 누락</option><option value="invalid">잘못된 위치·식별자</option><option value="empty">위치 수신 없음</option></select>
+<button id="play" class="primary">재생</button><button id="step">15초 진행</button><button id="reset">처음으로</button>
+<input id="timeline" type="range" min="0" max="180" value="20" aria-label="재생 시각 초"><output id="elapsed">20 / 180초</output>
+</section>
+<div class="content"><section class="card"><div class="card-title"><h2>합성 선박 위치</h2><span id="clock" class="small"></span></div>
+<svg id="plot" class="plot" viewBox="0 0 820 420" role="img" aria-label="부산 신항 주변 좌표 범위를 사용한 합성 선박 위치 개념도">
+<defs><pattern id="grid" width="92.5" height="75" patternUnits="userSpaceOnUse" x="55" y="30"><path d="M 92.5 0 L 0 0 0 75" fill="none" stroke="#315064" stroke-width=".7"/></pattern></defs>
+<rect x="55" y="30" width="740" height="300" fill="url(#grid)" stroke="#315064"/>
+<g fill="#8daabd" font-size="11" font-family="monospace"><text x="8" y="39">35.13</text><text x="8" y="185">35.07</text><text x="8" y="330">35.00</text><text x="55" y="355">128.72</text><text x="398" y="355">128.81</text><text x="745" y="355">128.90</text></g>
+<g id="tracks"></g><text id="plot-empty" x="425" y="175" fill="#b2c8d5" font-size="16" text-anchor="middle"></text>
+<text x="55" y="394" fill="#7899ad" font-size="12">좌표 개념도 · 실제 해안선/항로 아님 · 이동은 수신된 합성 점만 표시</text>
+</svg><div class="caption" id="case-description"></div></section>
+<aside class="card"><div class="card-title"><h2>수신 상태</h2><span class="small">합성 시계 · KST</span></div>
+<div class="metrics"><div class="metric"><span>유효한 위치</span><strong id="fresh">0</strong></div><div class="metric"><span>오래된 위치</span><strong id="stale">0</strong></div><div class="metric"><span>정적 정보 누락</span><strong id="missing">0</strong></div><div class="metric"><span>거부한 메시지</span><strong id="rejected">0</strong></div></div><div id="ships" class="ships" aria-live="polite"></div>
+</aside></div>
+<div class="limits">위치 신선도는 <strong>마지막 유효 위치의 수신시각</strong>으로 계산함. 시연용 기준은 90초이며 공급자 갱신 주기의 보장값이 아님.<br>선박 AIS는 참고 자료임. 반입시간 확정 변경·항차 연결·트럭/컨테이너 위치·배차 승인에 사용하지 않음. 무수신은 선박 부재의 증거가 아님.</div>
+<details class="card wire"><summary>메시지 JSON 형식 보기</summary><div class="wire-body"><label for="wire-kind">메시지 종류 </label><select id="wire-kind"><option>PositionReport</option><option>ShipStaticData</option><option>StaticDataReport</option></select><p>아래는 합성 예제임. 해외 실응답의 값을 부산 좌표로 바꾼 자료가 아님. 수신시각·모의 표시는 별도 메타데이터로 관리함.</p><pre id="wire"></pre><a href="https://aisstream.io/documentation" target="_blank" rel="noreferrer">AISstream 공식 형식</a></div></details>
+</main>
+<script type="application/json" id="demo-data">__AIS_DEMO_DATA__</script>
+<script>
+'use strict';
+const demo=JSON.parse(document.getElementById('demo-data').textContent);
+if(demo.kind!=='simulated')throw new Error('Explicit simulated bundle required');
+const el=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+const descriptions={normal:'위치 메시지와 정적 정보를 같은 합성 MMSI로 연결함. 정적 메시지의 마지막 알려진 좌표는 이동 위치로 쓰지 않음.',stale:'두 번째 선박은 35초 이후 위치 수신 중단. 160초에 정적 정보가 와도 오래된 위치가 정상으로 돌아가지 않음. 사라지거나 보간 이동하지 않음.','missing-static':'두 번째 선박의 위치는 들어오지만 이름을 담은 정적 메시지는 없음. MetaData의 이름으로 누락을 감추지 않음.',invalid:'60초의 범위 밖 위도와 90초의 MMSI 불일치 메시지를 거부함. 마지막 유효 위치와 원래 수신시각을 유지함.',empty:'구독 확인만 있고 위치 메시지가 없는 합성 사례. 수신 없음으로 표시하며 선박 없음으로 해석하지 않음.'};
+let second=20,timer=null;
+const kst=value=>new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(value));
+function svg(tag,attrs){const n=document.createElementNS(NS,tag);for(const [key,value]of Object.entries(attrs))n.setAttribute(key,String(value));return n}
+function point(lat,lon){const[s,w,n,e]=demo.bbox;return[55+(lon-w)/(e-w)*740,30+(n-lat)/(n-s)*300]}
+function stop(){if(timer!==null)clearInterval(timer);timer=null;el('play').textContent='재생'}
+function wire(){const rows=demo.scenarios[el('scenario').value].events;const kind=el('wire-kind').value;const row=rows.find(r=>r.event.MessageType===kind);el('wire').textContent=row?JSON.stringify(row.event,null,2):'이 합성 사례에는 해당 메시지를 생성하지 않았음.'}
+function render(){
+ const name=el('scenario').value,frame=demo.scenarios[name].frames[second];
+ el('timeline').value=String(second);el('elapsed').textContent=second+' / 180초';el('clock').textContent=kst(frame.at)+' KST';el('case-description').textContent=descriptions[name];
+ const counts={fresh:0,stale:0,missing:0};for(const ship of frame.ships){if(ship.position_status==='fresh')counts.fresh++;if(ship.position_status==='stale')counts.stale++;if(ship.static_status==='missing')counts.missing++}
+ for(const key of Object.keys(counts))el(key).textContent=String(counts[key]);el('rejected').textContent=String(frame.rejected);
+ el('tracks').replaceChildren();el('ships').replaceChildren();
+ frame.ships.forEach((ship,index)=>{
+  const color=index===0?'#63dfc3':'#8dbbff',stale=ship.position_status==='stale';
+  if(ship.position){const group=svg('g',{opacity:stale?.42:1});const points=ship.track.map(p=>point(...p).join(',')).join(' ');group.append(svg('polyline',{points,fill:'none',stroke:color,'stroke-width':2,'stroke-dasharray':stale?'4 5':'none'}));const[x,y]=point(ship.position.latitude,ship.position.longitude);group.append(svg('circle',{cx:x,cy:y,r:18,fill:color,'fill-opacity':.12}));group.append(svg('polygon',{points:'0,-10 7,9 0,5 -7,9',fill:color,transform:'translate('+x+' '+y+') rotate('+ship.position.cog_degrees+')'}));const text=svg('text',{x:x+22,y:y+4,fill:color,'font-size':12});text.textContent=ship.name||'정적 정보 대기';group.append(text);el('tracks').append(group)}
+  const row=document.createElement('div');row.className='ship';const heading=document.createElement('strong');heading.textContent=ship.name||'이름 미수신';const badge=document.createElement('span');badge.className='pill '+ship.position_status;badge.textContent=stale?'오래된 위치':ship.position_status==='fresh'?'위치 수신':'위치 대기';row.append(heading,badge);
+  const id=document.createElement('p');id.textContent='모의 MMSI '+ship.mmsi+' · '+(ship.static_status==='joined'?'정적 정보 연결':'정적 정보 누락');row.append(id);
+  const detail=document.createElement('p');detail.textContent=ship.position?'마지막 유효 수신 '+kst(ship.position.received_at)+' · '+ship.age_seconds+'초 경과 / '+ship.position.sog_knots+' kn':'위치 생성/즉시 가용으로 채우지 않음';row.append(detail);el('ships').append(row);
+ });
+ const positions=frame.ships.filter(s=>s.position);el('plot-empty').textContent=positions.length?'':'수신된 위치 없음';
+ if(!frame.ships.length){const p=document.createElement('p');p.className='empty';p.textContent='구독 확인 '+(frame.subscription_confirmed?'완료':'대기')+' · 위치 메시지 없음. 선박 부재를 뜻하지 않음.';el('ships').append(p)}
+ wire();
+}
+el('scenario').addEventListener('change',()=>{stop();second=20;render()});
+el('timeline').addEventListener('input',()=>{stop();second=Number(el('timeline').value);render()});
+el('reset').addEventListener('click',()=>{stop();second=0;render()});
+el('step').addEventListener('click',()=>{stop();second=Math.min(180,second+15);render()});
+el('wire-kind').addEventListener('change',wire);
+el('play').addEventListener('click',()=>{if(timer!==null){stop();return}if(second===180)second=0;el('play').textContent='일시정지';timer=setInterval(()=>{second=Math.min(180,second+1);render();if(second===180)stop()},100)});
+render();
+</script></body></html>

@@ -24,24 +24,31 @@ from backend.db.database import Database
 from backend.db.store import Store
 
 
-def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None = None,
+               workflow_replay=None, push_sender=None, workflow_clock=None) -> FastAPI:
     settings = settings or Settings.from_env()
     database = Database(settings.db_path)
     store = Store(database)
     adapter = replay or (EngineReplay() if settings.run_mode == "engine" else FixtureReplay())
+    workflow = None
 
     @asynccontextmanager
     async def lifespan(app):
         settings.check()
-        database.acquire()
         jobs = None
         try:
-            database.initialize()
-            jobs = ReplayJobs(store, adapter)
-            jobs.recover()
-            app.state.jobs = jobs
+            if not settings.public_enabled:
+                database.acquire()
+                database.initialize()
+                jobs = ReplayJobs(store, adapter)
+                jobs.recover()
+                app.state.jobs = jobs
+            if workflow is not None:
+                workflow.start()
             yield
         finally:
+            if workflow is not None:
+                workflow.close()
             if jobs is not None:
                 jobs.close()
             database.release()
@@ -50,9 +57,13 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
                   swagger_ui_parameters={"persistAuthorization": False})
     app.state.store = store
     app.openapi = lambda: runtime_openapi(settings.run_mode)
+    if settings.workflow_enabled:
+        from backend.workflow.middleware import BodyLimit
+        app.add_middleware(BodyLimit)
     app.add_middleware(CORSMiddleware, allow_origins=list(settings.cors_origins),
-                       allow_methods=["GET", "POST"],
-                       allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
+                       allow_methods=["GET", "POST", "DELETE"],
+                       allow_credentials=settings.workflow_enabled,
+                       allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-CSRF-Token"],
                        expose_headers=["X-Request-ID", "Retry-After"])
 
     @app.middleware("http")
@@ -62,15 +73,23 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
             loopback = request.client is not None and ipaddress.ip_address(request.client.host).is_loopback
         except ValueError:
             loopback = False
-        if request.url.hostname not in {"localhost", "127.0.0.1", "::1"}:
+        public = settings.public_enabled
+        v2 = settings.workflow_enabled and request.url.path.startswith("/v2/")
+        origin = request.headers.get("origin")
+        origin_allowed = origin in settings.cors_origins or origin == str(request.base_url).rstrip("/")
+        if public and (request.url.hostname not in settings.public_hosts or request.url.scheme != "https"):
+            response = JSONResponse(ApiError(400, "INVALID_PUBLIC_ORIGIN", "설정한 HTTPS Host로 접근해야 함").body(
+                request.state.request_id), status_code=400)
+        elif public and not v2 and request.url.path not in {"/health", "/docs", "/openapi.json", "/docs/oauth2-redirect"}:
+            response = JSONResponse(ApiError(404, "HTTP_ERROR", "공개 모드에서 제공하지 않는 경로").body(
+                request.state.request_id), status_code=404)
+        elif not public and request.url.hostname not in {"localhost", "127.0.0.1", "::1"}:
             response = JSONResponse(ApiError(400, "INVALID_HOST", "로컬 호스트 주소가 필요함").body(
                 request.state.request_id), status_code=400)
-        elif not loopback:
+        elif not public and not loopback:
             response = JSONResponse(ApiError(403, "LOCAL_DEMO_ONLY", "모의 API는 로컬 연결만 허용").body(
                 request.state.request_id), status_code=403)
-        elif ((origin := request.headers.get("origin"))
-              and origin not in settings.cors_origins
-              and origin != str(request.base_url).rstrip("/")):
+        elif (origin and not origin_allowed) or (v2 and request.method in {"POST", "DELETE"} and not origin_allowed):
             response = JSONResponse(ApiError(403, "ORIGIN_NOT_ALLOWED", "허용하지 않은 브라우저 출처").body(
                 request.state.request_id), status_code=403)
         else:
@@ -81,12 +100,15 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
 
     @app.exception_handler(ApiError)
     async def api_error(request: Request, error: ApiError):
-        headers = {"WWW-Authenticate": "Bearer"} if error.status == 401 else None
+        headers = {"WWW-Authenticate": "Bearer"} if error.status == 401 and not request.url.path.startswith("/v2/") else {}
+        headers.update(error.headers)
+        if error.code == "PUSH_RATE_LIMITED":
+            headers.setdefault("Retry-After","60")
         return JSONResponse(error.body(request.state.request_id), status_code=error.status, headers=headers)
 
     @app.exception_handler(RequestValidationError)
     async def request_error(request: Request, error: RequestValidationError):
-        details = [{"path": "/" + "/".join(map(str, item["loc"])),
+        details = [{"path": "/request" if request.url.path.startswith("/v2/") else "/" + "/".join(map(str, item["loc"])),
                     "reason": "필수 요청 본문 또는 JSON 형식 확인 필요"} for item in error.errors()[:20]]
         return JSONResponse(ApiError(422, "REQUEST_VALIDATION_FAILED", "요청 형식 오류", details).body(
             request.state.request_id), status_code=422)
@@ -165,5 +187,38 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
         validate("ApprovalRequest", body)
         status, response = store.approve(plan_id, body, key(request))
         return JSONResponse(response, status_code=status)
+
+    @app.get("/health")
+    def health():
+        healthy = workflow is None or not getattr(workflow, "maintenance_failed", False)
+        return JSONResponse({"status": "ok" if healthy else "degraded", "workflow_enabled": settings.workflow_enabled},
+                            status_code=200 if healthy else 503)
+
+    if settings.workflow_enabled:
+        from backend.workflow.routes import install
+        from fastapi.openapi.utils import get_openapi
+        workflow = install(app, settings, replay=workflow_replay, sender=push_sender, clock=workflow_clock)
+        def workflow_openapi():
+            if app.openapi_schema is not None:
+                return app.openapi_schema
+            base = runtime_openapi(settings.run_mode)
+            added = get_openapi(title="반입맞춤 담당자 대응", version="0.2.0", routes=[
+                r for r in app.routes if getattr(r, "path", "").startswith("/v2/")])
+            base["paths"].update(added["paths"])
+            base.setdefault("components", {}).setdefault("schemas", {}).update(added.get("components", {}).get("schemas", {}))
+            schemes = base["components"].setdefault("securitySchemes", {})
+            schemes["DispatcherCookie"] = {"type": "apiKey", "in": "cookie", "name": "banipmatch_session"}
+            schemes["RecipientCookie"] = {"type": "apiKey", "in": "cookie", "name": "banipmatch_recipient"}
+            for path, operations in added["paths"].items():
+                for verb in operations:
+                    anonymous = verb == "post" and path in {"/v2/session", "/v2/recipient/session"}
+                    base["paths"][path][verb]["security"] = [] if anonymous else [
+                        {"RecipientCookie" if path.startswith("/v2/recipient/") else "DispatcherCookie": []}]
+            base["info"]["version"] = "0.2.0"
+            base["info"]["description"] += " v0.2는 격리된 모의 세션/수신자 흐름. 공개 모드에서 v0.1은 비활성. 실제 기기 검수 별도."
+            from backend.workflow.openapi import augment
+            app.openapi_schema = augment(base)
+            return app.openapi_schema
+        app.openapi = workflow_openapi
 
     return app

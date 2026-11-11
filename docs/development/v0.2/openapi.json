@@ -1,0 +1,4840 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "반입맞춤 내부 API 초안",
+    "version": "0.2.0",
+    "description": "로컬 모의 API. B0~B3 실계산 모드. 단일 로컬 모의 주체의 내부 승인만 지원하며 운영 인증·외부 반영은 제공하지 않음. v0.2는 격리된 모의 세션/수신자 흐름. 공개 모드에서 v0.1은 비활성. 실제 기기 검수 별도."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "현재 로컬 API 서버"
+    }
+  ],
+  "paths": {
+    "/v2/session": {
+      "get": {
+        "summary": "Get Session",
+        "operationId": "get_session_v2_session_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionState"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create Session",
+        "operationId": "create_session_v2_session_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionState"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete Session",
+        "operationId": "delete_session_v2_session_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
+    "/v2/examples/default": {
+      "get": {
+        "summary": "Example",
+        "operationId": "example_v2_examples_default_get",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/scenarios": {
+      "post": {
+        "summary": "Register",
+        "operationId": "register_v2_scenarios_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionSnapshot"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisteredScenario"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
+    "/v2/scenarios/{scenario_id}": {
+      "get": {
+        "summary": "Snapshot",
+        "operationId": "snapshot_v2_scenarios__scenario_id__get",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/scenarios/{scenario_id}/revisions": {
+      "post": {
+        "summary": "Revise",
+        "operationId": "revise_v2_scenarios__scenario_id__revisions_post",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Revision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevisionState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/runs": {
+      "post": {
+        "summary": "Run",
+        "operationId": "run_v2_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "202": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
+    "/v2/runs/{run_id}": {
+      "get": {
+        "summary": "Get Run",
+        "operationId": "get_run_v2_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/runs/{run_id}/results": {
+      "get": {
+        "summary": "Results",
+        "operationId": "results_v2_runs__run_id__results_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Results"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "queued/running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Run"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/revisions/{revision_id}/comparison": {
+      "get": {
+        "summary": "Compare",
+        "operationId": "compare_v2_revisions__revision_id__comparison_get",
+        "parameters": [
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Revision Id"
+            }
+          },
+          {
+            "name": "after_run_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "After Run Id"
+            }
+          },
+          {
+            "name": "method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "B1",
+                "B2",
+                "B3"
+              ],
+              "type": "string",
+              "default": "B1",
+              "title": "Method"
+            }
+          },
+          {
+            "name": "before_run_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Before Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComparisonState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/revisions/{revision_id}": {
+      "get": {
+        "summary": "Get Revision",
+        "operationId": "get_revision_v2_revisions__revision_id__get",
+        "parameters": [
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Revision Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevisionRecord"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{plan_id}": {
+      "get": {
+        "summary": "Plan",
+        "operationId": "plan_v2_plans__plan_id__get",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plan Id"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{plan_id}/next-input": {
+      "get": {
+        "summary": "Next Input",
+        "operationId": "next_input_v2_plans__plan_id__next_input_get",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plan Id"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{plan_id}/approvals": {
+      "post": {
+        "summary": "Approve",
+        "operationId": "approve_v2_plans__plan_id__approvals_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprovalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Approval"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{plan_id}/dispatch-preview": {
+      "get": {
+        "summary": "Preview",
+        "operationId": "preview_v2_plans__plan_id__dispatch_preview_get",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plan Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/invitations": {
+      "post": {
+        "summary": "Invitation",
+        "operationId": "invitation_v2_invitations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Invitation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
+    "/v2/recipients": {
+      "get": {
+        "summary": "Recipients",
+        "operationId": "recipients_v2_recipients_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientsState"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/recipients/{recipient_id}/revoke": {
+      "post": {
+        "summary": "Revoke",
+        "operationId": "revoke_v2_recipients__recipient_id__revoke_post",
+        "parameters": [
+          {
+            "name": "recipient_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Recipient Id"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/plans/{plan_id}/dispatches": {
+      "post": {
+        "summary": "Dispatch",
+        "operationId": "dispatch_v2_plans__plan_id__dispatches_post",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plan Id"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Dispatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchReceipt"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchReceipt"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/dispatches/{dispatch_id}": {
+      "get": {
+        "summary": "Get Dispatch",
+        "operationId": "get_dispatch_v2_dispatches__dispatch_id__get",
+        "parameters": [
+          {
+            "name": "dispatch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Dispatch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DispatchState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/notifications/{notification_id}/retry": {
+      "post": {
+        "summary": "Retry",
+        "operationId": "retry_v2_notifications__notification_id__retry_post",
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Notification Id"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Retry"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetryReceipt"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/recipient/session": {
+      "get": {
+        "summary": "Recipient Session",
+        "operationId": "recipient_session_v2_recipient_session_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientState"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Claim",
+        "operationId": "claim_v2_recipient_session_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Claim"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecipientState"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Recipient Exit",
+        "operationId": "recipient_exit_v2_recipient_session_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
+    "/v2/recipient/push-config": {
+      "get": {
+        "summary": "Push Config",
+        "operationId": "push_config_v2_recipient_push_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PushConfig"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/recipient/subscription": {
+      "post": {
+        "summary": "Subscription",
+        "operationId": "subscription_v2_recipient_subscription_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Subscription"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Unsubscribe",
+        "operationId": "unsubscribe_v2_recipient_subscription_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
+    "/v2/recipient/notifications": {
+      "get": {
+        "summary": "Inbox",
+        "operationId": "inbox_v2_recipient_notifications_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationInbox"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/recipient/notifications/{notification_id}": {
+      "get": {
+        "summary": "Notification",
+        "operationId": "notification_v2_recipient_notifications__notification_id__get",
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Notification Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/recipient/notifications/{notification_id}/opened": {
+      "post": {
+        "summary": "Opened",
+        "operationId": "opened_v2_recipient_notifications__notification_id__opened_post",
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Notification Id"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/recipient/notifications/{notification_id}/responses": {
+      "post": {
+        "summary": "Respond",
+        "operationId": "respond_v2_recipient_notifications__notification_id__responses_post",
+        "parameters": [
+          {
+            "name": "notification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Notification Id"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecipientResponse"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "DispatcherCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "banipmatch_session"
+      },
+      "RecipientCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "banipmatch_recipient"
+      }
+    },
+    "schemas": {
+      "Evidence": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "observed",
+              "simulated",
+              "assumed",
+              "inferred",
+              "manual_verified"
+            ]
+          },
+          "source_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          }
+        },
+        "required": [
+          "kind",
+          "source_ref",
+          "observed_at",
+          "received_at"
+        ],
+        "additionalProperties": false
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "location_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "depot",
+              "origin",
+              "terminal"
+            ]
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": -180,
+            "maximum": 180
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "required": [
+          "location_id",
+          "name",
+          "kind",
+          "latitude",
+          "longitude",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "Vehicle": {
+        "type": "object",
+        "properties": {
+          "vehicle_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "start_location_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "available_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shift_end_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "capacity_kg": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "equipment_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "DRY20",
+                "DRY40"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "required": [
+          "vehicle_id",
+          "start_location_id",
+          "available_at",
+          "shift_end_at",
+          "capacity_kg",
+          "equipment_types",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "voyage_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "origin_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "terminal_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "return_location_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "ready_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gross_weight_kg": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "equipment_type": {
+            "type": "string",
+            "enum": [
+              "DRY20",
+              "DRY40"
+            ]
+          },
+          "service_minutes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "departed"
+            ]
+          },
+          "frozen": {
+            "type": "boolean"
+          },
+          "freeze_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "required": [
+          "job_id",
+          "voyage_id",
+          "origin_id",
+          "terminal_id",
+          "return_location_id",
+          "ready_at",
+          "gross_weight_kg",
+          "equipment_type",
+          "service_minutes",
+          "state",
+          "frozen",
+          "freeze_reason",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "Window": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "voyage_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "terminal_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "verification": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "unconfirmed",
+              "conflict"
+            ]
+          },
+          "confirmed_by": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "required": [
+          "window_id",
+          "voyage_id",
+          "terminal_id",
+          "opens_at",
+          "closes_at",
+          "verification",
+          "confirmed_by",
+          "confirmed_at",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "TravelTime": {
+        "type": "object",
+        "properties": {
+          "from_location_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "to_location_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "minutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "required": [
+          "from_location_id",
+          "to_location_id",
+          "minutes",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "Assignment": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "vehicle_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pickup_departure_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "gate_arrival_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "return_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "job_id",
+          "vehicle_id",
+          "sequence",
+          "pickup_departure_at",
+          "gate_arrival_at",
+          "return_at"
+        ],
+        "additionalProperties": false
+      },
+      "Change": {
+        "type": "object",
+        "properties": {
+          "change_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "voyage_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "terminal_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "previous_opens_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "previous_closes_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "new_window_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "verification": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "unconfirmed",
+              "conflict"
+            ]
+          },
+          "confirmed_by": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "required": [
+          "change_id",
+          "voyage_id",
+          "terminal_id",
+          "previous_opens_at",
+          "previous_closes_at",
+          "new_window_id",
+          "verification",
+          "confirmed_by",
+          "confirmed_at",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "Policy": {
+        "type": "object",
+        "properties": {
+          "buffer_minutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "time_change_tolerance_minutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "input_valid_until": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "allow_wait_before_open": {
+            "const": false
+          },
+          "external_actions_enabled": {
+            "const": false
+          }
+        },
+        "required": [
+          "buffer_minutes",
+          "time_change_tolerance_minutes",
+          "input_valid_until",
+          "allow_wait_before_open",
+          "external_actions_enabled"
+        ],
+        "additionalProperties": false
+      },
+      "Snapshot": {
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "const": "0.1.0"
+          },
+          "scenario_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "base_plan_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "data_mode": {
+            "type": "string",
+            "enum": [
+              "simulated",
+              "observed",
+              "mixed"
+            ]
+          },
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            },
+            "minItems": 1
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Vehicle"
+            },
+            "minItems": 1
+          },
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            },
+            "minItems": 1
+          },
+          "windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Window"
+            },
+            "minItems": 1
+          },
+          "travel_times": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TravelTime"
+            },
+            "minItems": 1
+          },
+          "baseline_assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Assignment"
+            }
+          },
+          "change": {
+            "$ref": "#/components/schemas/Change"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/Policy"
+          },
+          "baseline_unassigned_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "schema_version",
+          "scenario_id",
+          "plan_id",
+          "base_plan_version",
+          "data_mode",
+          "as_of",
+          "locations",
+          "vehicles",
+          "jobs",
+          "windows",
+          "travel_times",
+          "baseline_assignments",
+          "change",
+          "policy",
+          "baseline_unassigned_job_ids"
+        ],
+        "additionalProperties": false
+      },
+      "RunRequest": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "base_plan_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "B0",
+                "B1",
+                "B2",
+                "B3"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "time_limit_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          },
+          "seed": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "scenario_id",
+          "base_plan_version",
+          "methods",
+          "time_limit_seconds",
+          "seed"
+        ],
+        "additionalProperties": false
+      },
+      "Run": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "scenario_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "base_plan_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "completed",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$",
+                "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "B0",
+                "B1",
+                "B2",
+                "B3"
+              ]
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "time_limit_seconds": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 120
+              },
+              "seed": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "time_limit_seconds",
+              "seed"
+            ],
+            "additionalProperties": false
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Error"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "run_id",
+          "scenario_id",
+          "plan_id",
+          "base_plan_version",
+          "status",
+          "created_at",
+          "started_at",
+          "finished_at",
+          "methods",
+          "config",
+          "error"
+        ],
+        "additionalProperties": false
+      },
+      "Issue": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "INPUT_MISSING",
+              "OUT_OF_SCOPE",
+              "WINDOW_UNCONFIRMED",
+              "EARLY_ARRIVAL",
+              "CUTOFF_EXCEEDED",
+              "READY_TOO_LATE",
+              "VEHICLE_UNAVAILABLE",
+              "INCOMPATIBLE_EQUIPMENT",
+              "CAPACITY_EXCEEDED",
+              "SHIFT_EXCEEDED",
+              "FIXED_RESIDUAL_RISK",
+              "SEARCH_LIMIT",
+              "MODEL_INVALID"
+            ]
+          },
+          "explanation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proof_level": {
+            "type": "string",
+            "enum": [
+              "input_validation",
+              "constraint_check",
+              "solver_proven",
+              "not_proven"
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "job_id",
+          "code",
+          "explanation",
+          "proof_level",
+          "evidence_refs"
+        ],
+        "additionalProperties": false
+      },
+      "Metrics": {
+        "type": "object",
+        "properties": {
+          "unassigned_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "feasible_movable_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "movable_violation_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fixed_risk_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "changed_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          },
+          "vehicle_changed_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          },
+          "order_changed_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          },
+          "time_changed_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          },
+          "movable_travel_minutes": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "elapsed_ms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "newly_assigned_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "unassigned_count",
+          "feasible_movable_count",
+          "movable_violation_count",
+          "fixed_risk_count",
+          "changed_job_ids",
+          "vehicle_changed_job_ids",
+          "order_changed_job_ids",
+          "time_changed_job_ids",
+          "movable_travel_minutes",
+          "elapsed_ms",
+          "newly_assigned_job_ids"
+        ],
+        "additionalProperties": false
+      },
+      "MethodResult": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "B0",
+              "B1",
+              "B2",
+              "B3"
+            ]
+          },
+          "result_origin": {
+            "type": "string",
+            "enum": [
+              "illustrative_fixture",
+              "computed"
+            ]
+          },
+          "solution_status": {
+            "type": "string",
+            "enum": [
+              "BASELINE",
+              "HEURISTIC",
+              "OPTIMAL",
+              "FEASIBLE",
+              "INFEASIBLE",
+              "UNKNOWN",
+              "MODEL_INVALID",
+              "INPUT_INCOMPLETE"
+            ]
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Assignment"
+            }
+          },
+          "unassigned_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            }
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/Metrics"
+          },
+          "objective_proven": {
+            "type": "boolean"
+          },
+          "approval_eligible": {
+            "type": "boolean"
+          },
+          "engine_version": {
+            "type": "string",
+            "minLength": 1
+          },
+          "solver_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "objective_stages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "objective": {
+                  "type": "string",
+                  "enum": [
+                    "unassigned",
+                    "changed",
+                    "travel"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "OPTIMAL",
+                    "FEASIBLE",
+                    "UNKNOWN",
+                    "NOT_RUN"
+                  ]
+                },
+                "value": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "best_bound": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "objective",
+                "status",
+                "value",
+                "best_bound"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "validation_status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "not_run"
+            ]
+          },
+          "execution_metadata": {
+            "type": "object",
+            "properties": {
+              "solver_settings": {
+                "type": "object",
+                "additionalProperties": true
+              },
+              "initial_solution_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "worker_count": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              }
+            },
+            "required": [
+              "solver_settings",
+              "initial_solution_ref",
+              "worker_count"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "method",
+          "result_origin",
+          "solution_status",
+          "assignments",
+          "unassigned_job_ids",
+          "issues",
+          "metrics",
+          "objective_proven",
+          "approval_eligible",
+          "engine_version",
+          "solver_version",
+          "objective_stages",
+          "validation_status",
+          "execution_metadata"
+        ],
+        "additionalProperties": false
+      },
+      "Results": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "scenario_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "base_plan_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "input_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MethodResult"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "run_id",
+          "scenario_id",
+          "base_plan_version",
+          "input_sha256",
+          "results"
+        ],
+        "additionalProperties": false
+      },
+      "ApprovalRequest": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "B1",
+              "B2",
+              "B3"
+            ]
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "acknowledged_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "run_id",
+          "method",
+          "expected_version",
+          "acknowledged_job_ids"
+        ],
+        "additionalProperties": false
+      },
+      "Approval": {
+        "type": "object",
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "run_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "B1",
+              "B2",
+              "B3"
+            ]
+          },
+          "approved_by": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$",
+            "description": "UTC RFC3339, Z suffix; UI shows Asia/Seoul."
+          },
+          "external_actions_performed": {
+            "const": false
+          }
+        },
+        "required": [
+          "approval_id",
+          "plan_id",
+          "version",
+          "run_id",
+          "method",
+          "approved_by",
+          "approved_at",
+          "external_actions_performed"
+        ],
+        "additionalProperties": false
+      },
+      "Plan": {
+        "type": "object",
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "scenario_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "assignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Assignment"
+            }
+          },
+          "unassigned_job_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+            },
+            "uniqueItems": true
+          },
+          "approval_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "plan_id",
+          "version",
+          "scenario_id",
+          "assignments",
+          "unassigned_job_ids",
+          "approval_id"
+        ],
+        "additionalProperties": false
+      },
+      "RegisteredScenario": {
+        "type": "object",
+        "properties": {
+          "scenario_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "plan_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "base_plan_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "input_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "scenario_id",
+          "plan_id",
+          "base_plan_version",
+          "input_sha256"
+        ],
+        "additionalProperties": false
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "path",
+                "reason"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "request_id",
+          "code",
+          "message",
+          "details"
+        ],
+        "additionalProperties": false
+      },
+      "Claim": {
+        "properties": {
+          "invitation_token": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 100,
+            "title": "Invitation Token"
+          },
+          "accept_test_invitation": {
+            "type": "boolean",
+            "const": true,
+            "title": "Accept Test Invitation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "invitation_token",
+          "accept_test_invitation"
+        ],
+        "title": "Claim"
+      },
+      "ComparisonState": {
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "title": "Revision Id"
+          },
+          "confirmation": {
+            "type": "string",
+            "enum": [
+              "confirmed_simulation",
+              "assumed"
+            ],
+            "title": "Confirmation"
+          },
+          "comparison": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Comparison"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "revision_id",
+          "confirmation",
+          "comparison"
+        ],
+        "title": "ComparisonState"
+      },
+      "Dispatch": {
+        "properties": {
+          "approval_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Approval Id"
+          },
+          "expected_version": {
+            "type": "integer",
+            "maximum": 2147483648.0,
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "confirm_test_send": {
+            "type": "boolean",
+            "const": true,
+            "title": "Confirm Test Send"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "approval_id",
+          "expected_version",
+          "confirm_test_send"
+        ],
+        "title": "Dispatch"
+      },
+      "DispatchReceipt": {
+        "properties": {
+          "dispatch_id": {
+            "type": "string",
+            "title": "Dispatch Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dispatch_id"
+        ],
+        "title": "DispatchReceipt"
+      },
+      "DispatchState": {
+        "properties": {
+          "dispatch_id": {
+            "type": "string",
+            "title": "Dispatch Id"
+          },
+          "approval_id": {
+            "type": "string",
+            "title": "Approval Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "plan_version": {
+            "type": "integer",
+            "title": "Plan Version"
+          },
+          "scenario_id": {
+            "type": "string",
+            "title": "Scenario Id"
+          },
+          "is_current": {
+            "type": "boolean",
+            "title": "Is Current"
+          },
+          "notifications": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationState"
+            },
+            "type": "array",
+            "title": "Notifications"
+          },
+          "followups": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Followups"
+          },
+          "external_transport_completed": {
+            "type": "boolean",
+            "const": false,
+            "title": "External Transport Completed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dispatch_id",
+          "approval_id",
+          "plan_id",
+          "plan_version",
+          "scenario_id",
+          "is_current",
+          "notifications",
+          "followups",
+          "external_transport_completed"
+        ],
+        "title": "DispatchState"
+      },
+      "Empty": {
+        "properties": {},
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Empty"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Invitation": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "vehicle_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "minItems": 1,
+            "title": "Vehicle Ids"
+          },
+          "consent_acknowledged": {
+            "type": "boolean",
+            "const": true,
+            "title": "Consent Acknowledged"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "vehicle_ids",
+          "consent_acknowledged"
+        ],
+        "title": "Invitation"
+      },
+      "InvitationState": {
+        "properties": {
+          "invitation_id": {
+            "type": "string",
+            "title": "Invitation Id"
+          },
+          "invitation_token": {
+            "type": "string",
+            "title": "Invitation Token",
+            "description": "일회 초대 비밀. URL query/로그/storage로 전달하지 않음"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "invitation_id",
+          "invitation_token",
+          "expires_at"
+        ],
+        "title": "InvitationState"
+      },
+      "NotificationInbox": {
+        "properties": {
+          "notifications": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationState"
+            },
+            "type": "array",
+            "title": "Notifications"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "notifications"
+        ],
+        "title": "NotificationInbox"
+      },
+      "NotificationState": {
+        "properties": {
+          "notification_id": {
+            "type": "string",
+            "title": "Notification Id"
+          },
+          "dispatch_id": {
+            "type": "string",
+            "title": "Dispatch Id"
+          },
+          "recipient_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient Id"
+          },
+          "delivery_status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "sending",
+              "accepted",
+              "failed",
+              "unknown",
+              "expired",
+              "unsubscribed",
+              "unlinked",
+              "superseded"
+            ],
+            "title": "Delivery Status"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
+          "opened_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opened At"
+          },
+          "retry_not_before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry Not Before"
+          },
+          "response": {
+            "type": "string",
+            "enum": [
+              "none",
+              "acknowledged",
+              "can_perform",
+              "cannot_perform"
+            ],
+            "title": "Response"
+          },
+          "responded_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responded At"
+          },
+          "is_current": {
+            "type": "boolean",
+            "title": "Is Current"
+          },
+          "vehicle_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Vehicle Ids"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipientPayload"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "response_history": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseEvent"
+            },
+            "type": "array",
+            "title": "Response History"
+          },
+          "needs_followup": {
+            "type": "boolean",
+            "title": "Needs Followup"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "notification_id",
+          "dispatch_id",
+          "recipient_id",
+          "delivery_status",
+          "error_code",
+          "attempts",
+          "created_at",
+          "accepted_at",
+          "opened_at",
+          "retry_not_before",
+          "response",
+          "responded_at",
+          "is_current",
+          "vehicle_ids",
+          "payload",
+          "response_history",
+          "needs_followup"
+        ],
+        "title": "NotificationState"
+      },
+      "PushConfig": {
+        "properties": {
+          "configured": {
+            "type": "boolean",
+            "title": "Configured"
+          },
+          "application_server_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Application Server Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "configured",
+          "application_server_key"
+        ],
+        "title": "PushConfig"
+      },
+      "RecipientPayload": {
+        "properties": {
+          "data_mode": {
+            "type": "string",
+            "const": "simulated",
+            "title": "Data Mode"
+          },
+          "stage": {
+            "type": "string",
+            "const": "approved_simulation_change",
+            "title": "Stage"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "plan_version": {
+            "type": "integer",
+            "title": "Plan Version"
+          },
+          "approval_id": {
+            "type": "string",
+            "title": "Approval Id"
+          },
+          "scenario_id": {
+            "type": "string",
+            "title": "Scenario Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "vehicle_changes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Vehicle Changes"
+          },
+          "transport_completion": {
+            "type": "string",
+            "const": "not_claimed",
+            "title": "Transport Completion"
+          },
+          "external_booking_changed": {
+            "type": "boolean",
+            "const": false,
+            "title": "External Booking Changed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "data_mode",
+          "stage",
+          "plan_id",
+          "plan_version",
+          "approval_id",
+          "scenario_id",
+          "run_id",
+          "vehicle_changes",
+          "transport_completion",
+          "external_booking_changed"
+        ],
+        "title": "RecipientPayload"
+      },
+      "RecipientResponse": {
+        "properties": {
+          "response": {
+            "type": "string",
+            "enum": [
+              "acknowledged",
+              "can_perform",
+              "cannot_perform"
+            ],
+            "title": "Response"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "response"
+        ],
+        "title": "RecipientResponse"
+      },
+      "RecipientState": {
+        "properties": {
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id"
+          },
+          "vehicle_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Vehicle Ids"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          },
+          "subscription_status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "revoked",
+              "expired",
+              "missing"
+            ],
+            "title": "Subscription Status"
+          },
+          "data_mode": {
+            "type": "string",
+            "const": "simulated",
+            "title": "Data Mode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recipient_id",
+          "vehicle_ids",
+          "expires_at",
+          "csrf_token",
+          "subscription_status",
+          "data_mode"
+        ],
+        "title": "RecipientState"
+      },
+      "RecipientSummary": {
+        "properties": {
+          "recipient_id": {
+            "type": "string",
+            "title": "Recipient Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "revoked": {
+            "type": "boolean",
+            "title": "Revoked"
+          },
+          "vehicle_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Vehicle Ids"
+          },
+          "subscription_status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "revoked",
+              "expired",
+              "missing"
+            ],
+            "title": "Subscription Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recipient_id",
+          "plan_id",
+          "expires_at",
+          "revoked",
+          "vehicle_ids",
+          "subscription_status"
+        ],
+        "title": "RecipientSummary"
+      },
+      "RecipientsState": {
+        "properties": {
+          "recipients": {
+            "items": {
+              "$ref": "#/components/schemas/RecipientSummary"
+            },
+            "type": "array",
+            "title": "Recipients"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recipients"
+        ],
+        "title": "RecipientsState"
+      },
+      "ResponseEvent": {
+        "properties": {
+          "response": {
+            "type": "string",
+            "enum": [
+              "acknowledged",
+              "can_perform",
+              "cannot_perform"
+            ],
+            "title": "Response"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "response",
+          "note",
+          "created_at"
+        ],
+        "title": "ResponseEvent"
+      },
+      "Retry": {
+        "properties": {
+          "confirm_test_send": {
+            "type": "boolean",
+            "const": true,
+            "title": "Confirm Test Send"
+          },
+          "recipient_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recipient Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "confirm_test_send"
+        ],
+        "title": "Retry"
+      },
+      "RetryReceipt": {
+        "properties": {
+          "dispatch_id": {
+            "type": "string",
+            "title": "Dispatch Id"
+          },
+          "notification_id": {
+            "type": "string",
+            "title": "Notification Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dispatch_id",
+          "notification_id"
+        ],
+        "title": "RetryReceipt"
+      },
+      "Revision": {
+        "properties": {
+          "snapshot": {
+            "$ref": "#/components/schemas/SessionSnapshot"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason"
+          },
+          "confirmation": {
+            "type": "string",
+            "enum": [
+              "confirmed_simulation",
+              "assumed"
+            ],
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "snapshot",
+          "reason",
+          "confirmation"
+        ],
+        "title": "Revision"
+      },
+      "RevisionRecord": {
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "title": "Revision Id"
+          },
+          "before_scenario_id": {
+            "type": "string",
+            "title": "Before Scenario Id"
+          },
+          "after_scenario_id": {
+            "type": "string",
+            "title": "After Scenario Id"
+          },
+          "confirmation": {
+            "type": "string",
+            "enum": [
+              "confirmed_simulation",
+              "assumed"
+            ],
+            "title": "Confirmation"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "revision": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Revision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "revision_id",
+          "before_scenario_id",
+          "after_scenario_id",
+          "confirmation",
+          "reason",
+          "created_at",
+          "revision"
+        ],
+        "title": "RevisionRecord"
+      },
+      "RevisionState": {
+        "properties": {
+          "scenario_id": {
+            "type": "string",
+            "title": "Scenario Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "base_plan_version": {
+            "type": "integer",
+            "title": "Base Plan Version"
+          },
+          "input_sha256": {
+            "type": "string",
+            "title": "Input Sha256"
+          },
+          "revision_id": {
+            "type": "string",
+            "title": "Revision Id"
+          },
+          "confirmation": {
+            "type": "string",
+            "enum": [
+              "confirmed_simulation",
+              "assumed"
+            ],
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "scenario_id",
+          "plan_id",
+          "base_plan_version",
+          "input_sha256",
+          "revision_id",
+          "confirmation"
+        ],
+        "title": "RevisionState"
+      },
+      "SessionPlan": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "scenario_id": {
+            "type": "string",
+            "title": "Scenario Id"
+          },
+          "latest_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Run Id"
+          },
+          "latest_revision_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Revision Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "version",
+          "scenario_id",
+          "latest_run_id",
+          "latest_revision_id"
+        ],
+        "title": "SessionPlan"
+      },
+      "SessionState": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          },
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          },
+          "push_test_authorized": {
+            "type": "boolean",
+            "title": "Push Test Authorized"
+          },
+          "data_mode": {
+            "type": "string",
+            "const": "simulated",
+            "title": "Data Mode"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/SessionPlan"
+            },
+            "type": "array",
+            "title": "Plans"
+          },
+          "limits": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Limits"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "expires_at",
+          "csrf_token",
+          "push_test_authorized",
+          "data_mode",
+          "plans",
+          "limits"
+        ],
+        "title": "SessionState"
+      },
+      "Subscription": {
+        "properties": {
+          "subscription": {
+            "$ref": "#/components/schemas/PushSubscription"
+          },
+          "notification_permission": {
+            "type": "string",
+            "const": "granted",
+            "title": "Notification Permission"
+          },
+          "consent": {
+            "type": "boolean",
+            "const": true,
+            "title": "Consent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "subscription",
+          "notification_permission",
+          "consent"
+        ],
+        "title": "Subscription"
+      },
+      "SubscriptionState": {
+        "properties": {
+          "subscription_status": {
+            "type": "string",
+            "const": "active",
+            "title": "Subscription Status"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "subscription_status",
+          "expires_at"
+        ],
+        "title": "SubscriptionState"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "SessionSnapshot": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Snapshot"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "data_mode": {
+                "const": "simulated"
+              },
+              "jobs": {
+                "type": "array",
+                "maxItems": 20
+              },
+              "vehicles": {
+                "type": "array",
+                "maxItems": 10
+              },
+              "locations": {
+                "type": "array",
+                "maxItems": 32
+              },
+              "windows": {
+                "type": "array",
+                "maxItems": 20
+              },
+              "travel_times": {
+                "type": "array",
+                "maxItems": 1024
+              },
+              "baseline_assignments": {
+                "type": "array",
+                "maxItems": 20
+              },
+              "baseline_unassigned_job_ids": {
+                "type": "array",
+                "maxItems": 20
+              }
+            }
+          }
+        ],
+        "description": "모의/가정 근거만 허용. 등록과 계산 가능 검사는 별개. v0.1 의미검사·보호 조건 유지."
+      },
+      "SessionRunRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RunRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "time_limit_seconds": {
+                "maximum": 10
+              },
+              "seed": {
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            }
+          }
+        ]
+      },
+      "PushSubscription": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "endpoint",
+          "keys"
+        ],
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "format": "uri",
+            "maxLength": 2048,
+            "description": "허용한 HTTPS 푸시 중계망만. 전송 때 DNS 공인주소 검사·IP pinning, redirect 금지."
+          },
+          "keys": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "p256dh",
+              "auth"
+            ],
+            "properties": {
+              "p256dh": {
+                "type": "string",
+                "description": "URL-safe base64 P-256 공개키"
+              },
+              "auth": {
+                "type": "string",
+                "description": "URL-safe base64 16byte 인증 비밀"
+              }
+            }
+          },
+          "expirationTime": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "responses": {
+      "WorkflowError": {
+        "description": "ApiError code로 구분",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "WorkflowOrigin": {
+        "name": "Origin",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "WorkflowKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "WorkflowCsrf": {
+        "name": "X-CSRF-Token",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

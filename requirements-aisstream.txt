@@ -1,0 +1,2 @@
+# Optional server-side probe dependency; core API does not import this package.
+websockets==17.3

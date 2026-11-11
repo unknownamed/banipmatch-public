@@ -8,7 +8,8 @@ from backend.api.settings import Settings
 def main() -> None:
     settings = Settings.from_env()
     settings.check()
-    uvicorn.run(create_app(settings), host="127.0.0.1", port=8000, workers=1)
+    uvicorn.run(create_app(settings), host="127.0.0.1", port=8000, workers=1,
+                access_log=not settings.workflow_enabled)
 
 
 if __name__ == "__main__":

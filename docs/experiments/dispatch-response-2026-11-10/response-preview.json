@@ -1,0 +1,270 @@
+{
+  "artifact_version": "response-preview-0.1",
+  "stage": "review_before_approval",
+  "plan_id": "P001",
+  "scenario_id": "S001",
+  "base_plan_version": 1,
+  "input_sha256": "8840e50f163956a31c609c4a20e65a02261dfe446cfb56a0e6812d00f09f7a9c",
+  "method": "B1",
+  "result_sha256": "6dbf73ef257b1db6546283bc5761677f92736a5b0445ba72e5ac4a31645d42d8",
+  "data_mode": "simulated",
+  "delivery_authorized": false,
+  "external_actions_performed": false,
+  "change_reference": {
+    "change_id": "C001",
+    "verification": "confirmed",
+    "evidence": {
+      "kind": "simulated",
+      "source_ref": "fixture:scenario_001",
+      "observed_at": null,
+      "received_at": "2026-11-07T00:00:00Z"
+    }
+  },
+  "changes": [
+    {
+      "job_id": "J1",
+      "kind": "reassigned",
+      "changed_fields": [
+        "gate_arrival_at",
+        "pickup_departure_at",
+        "return_at",
+        "sequence",
+        "vehicle_id"
+      ],
+      "before": {
+        "job_id": "J1",
+        "vehicle_id": "T1",
+        "sequence": 2,
+        "pickup_departure_at": "2026-11-07T01:10:00Z",
+        "gate_arrival_at": "2026-11-07T01:40:00Z",
+        "return_at": "2026-11-07T02:20:00Z"
+      },
+      "after": {
+        "job_id": "J1",
+        "vehicle_id": "T2",
+        "sequence": 1,
+        "pickup_departure_at": "2026-11-07T00:10:00Z",
+        "gate_arrival_at": "2026-11-07T00:40:00Z",
+        "return_at": "2026-11-07T01:20:00Z"
+      },
+      "instruction": "담당자 확인 전에는 운송 지시가 아닙니다."
+    },
+    {
+      "job_id": "J2",
+      "kind": "reassigned",
+      "changed_fields": [
+        "gate_arrival_at",
+        "pickup_departure_at",
+        "return_at",
+        "sequence",
+        "vehicle_id"
+      ],
+      "before": {
+        "job_id": "J2",
+        "vehicle_id": "T2",
+        "sequence": 1,
+        "pickup_departure_at": "2026-11-07T00:20:00Z",
+        "gate_arrival_at": "2026-11-07T00:50:00Z",
+        "return_at": "2026-11-07T01:30:00Z"
+      },
+      "after": {
+        "job_id": "J2",
+        "vehicle_id": "T1",
+        "sequence": 2,
+        "pickup_departure_at": "2026-11-07T01:10:00Z",
+        "gate_arrival_at": "2026-11-07T01:40:00Z",
+        "return_at": "2026-11-07T02:20:00Z"
+      },
+      "instruction": "담당자 확인 전에는 운송 지시가 아닙니다."
+    },
+    {
+      "job_id": "J3",
+      "kind": "removed_from_plan",
+      "changed_fields": [
+        "gate_arrival_at",
+        "pickup_departure_at",
+        "return_at",
+        "sequence",
+        "vehicle_id"
+      ],
+      "before": {
+        "job_id": "J3",
+        "vehicle_id": "T2",
+        "sequence": 2,
+        "pickup_departure_at": "2026-11-07T02:00:00Z",
+        "gate_arrival_at": "2026-11-07T02:30:00Z",
+        "return_at": "2026-11-07T03:10:00Z"
+      },
+      "after": null,
+      "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+    }
+  ],
+  "vehicle_changes": [
+    {
+      "vehicle_id": "T1",
+      "changes": [
+        {
+          "job_id": "J1",
+          "kind": "reassigned",
+          "changed_fields": [
+            "gate_arrival_at",
+            "pickup_departure_at",
+            "return_at",
+            "sequence",
+            "vehicle_id"
+          ],
+          "before": {
+            "job_id": "J1",
+            "vehicle_id": "T1",
+            "sequence": 2,
+            "pickup_departure_at": "2026-11-07T01:10:00Z",
+            "gate_arrival_at": "2026-11-07T01:40:00Z",
+            "return_at": "2026-11-07T02:20:00Z"
+          },
+          "after": {
+            "job_id": "J1",
+            "vehicle_id": "T2",
+            "sequence": 1,
+            "pickup_departure_at": "2026-11-07T00:10:00Z",
+            "gate_arrival_at": "2026-11-07T00:40:00Z",
+            "return_at": "2026-11-07T01:20:00Z"
+          },
+          "instruction": "담당자 확인 전에는 운송 지시가 아닙니다."
+        },
+        {
+          "job_id": "J2",
+          "kind": "reassigned",
+          "changed_fields": [
+            "gate_arrival_at",
+            "pickup_departure_at",
+            "return_at",
+            "sequence",
+            "vehicle_id"
+          ],
+          "before": {
+            "job_id": "J2",
+            "vehicle_id": "T2",
+            "sequence": 1,
+            "pickup_departure_at": "2026-11-07T00:20:00Z",
+            "gate_arrival_at": "2026-11-07T00:50:00Z",
+            "return_at": "2026-11-07T01:30:00Z"
+          },
+          "after": {
+            "job_id": "J2",
+            "vehicle_id": "T1",
+            "sequence": 2,
+            "pickup_departure_at": "2026-11-07T01:10:00Z",
+            "gate_arrival_at": "2026-11-07T01:40:00Z",
+            "return_at": "2026-11-07T02:20:00Z"
+          },
+          "instruction": "담당자 확인 전에는 운송 지시가 아닙니다."
+        }
+      ]
+    },
+    {
+      "vehicle_id": "T2",
+      "changes": [
+        {
+          "job_id": "J1",
+          "kind": "reassigned",
+          "changed_fields": [
+            "gate_arrival_at",
+            "pickup_departure_at",
+            "return_at",
+            "sequence",
+            "vehicle_id"
+          ],
+          "before": {
+            "job_id": "J1",
+            "vehicle_id": "T1",
+            "sequence": 2,
+            "pickup_departure_at": "2026-11-07T01:10:00Z",
+            "gate_arrival_at": "2026-11-07T01:40:00Z",
+            "return_at": "2026-11-07T02:20:00Z"
+          },
+          "after": {
+            "job_id": "J1",
+            "vehicle_id": "T2",
+            "sequence": 1,
+            "pickup_departure_at": "2026-11-07T00:10:00Z",
+            "gate_arrival_at": "2026-11-07T00:40:00Z",
+            "return_at": "2026-11-07T01:20:00Z"
+          },
+          "instruction": "담당자 확인 전에는 운송 지시가 아닙니다."
+        },
+        {
+          "job_id": "J2",
+          "kind": "reassigned",
+          "changed_fields": [
+            "gate_arrival_at",
+            "pickup_departure_at",
+            "return_at",
+            "sequence",
+            "vehicle_id"
+          ],
+          "before": {
+            "job_id": "J2",
+            "vehicle_id": "T2",
+            "sequence": 1,
+            "pickup_departure_at": "2026-11-07T00:20:00Z",
+            "gate_arrival_at": "2026-11-07T00:50:00Z",
+            "return_at": "2026-11-07T01:30:00Z"
+          },
+          "after": {
+            "job_id": "J2",
+            "vehicle_id": "T1",
+            "sequence": 2,
+            "pickup_departure_at": "2026-11-07T01:10:00Z",
+            "gate_arrival_at": "2026-11-07T01:40:00Z",
+            "return_at": "2026-11-07T02:20:00Z"
+          },
+          "instruction": "담당자 확인 전에는 운송 지시가 아닙니다."
+        },
+        {
+          "job_id": "J3",
+          "kind": "removed_from_plan",
+          "changed_fields": [
+            "gate_arrival_at",
+            "pickup_departure_at",
+            "return_at",
+            "sequence",
+            "vehicle_id"
+          ],
+          "before": {
+            "job_id": "J3",
+            "vehicle_id": "T2",
+            "sequence": 2,
+            "pickup_departure_at": "2026-11-07T02:00:00Z",
+            "gate_arrival_at": "2026-11-07T02:30:00Z",
+            "return_at": "2026-11-07T03:10:00Z"
+          },
+          "after": null,
+          "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+        }
+      ]
+    }
+  ],
+  "followups": [
+    {
+      "job_id": "J3",
+      "code": "READY_TOO_LATE",
+      "explanation": "준비 2026-11-07T02:00:00Z + 적재 30분 + 여유 10분 = 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.",
+      "proof_level": "constraint_check",
+      "evidence_refs": [
+        "fixture:scenario_001"
+      ],
+      "contact_role": "화주·상차지 확인 담당",
+      "check_next": "상차 준비 완료 시각을 확인하세요. 앞당길 수 있다고 확인된 경우에만 새 ready_at으로 다시 계산하세요.",
+      "action_kind": "manual_check",
+      "automatic_resolution": false
+    }
+  ],
+  "unassigned_job_ids": [
+    "J3"
+  ],
+  "limits": [
+    "자료 파일의 검수 결과이며 현재 서버 계획·권한·유효기간의 확인을 대신하지 않습니다.",
+    "확인할 사항은 담당자 판단을 돕는 안내이며 현장의 원인·해결 가능성·연락 결과를 증명하지 않습니다.",
+    "차량별 변경은 수신자 명단이 아닙니다. 기사 배정·동의·연락 경로는 별도 확인해야 합니다."
+  ]
+}

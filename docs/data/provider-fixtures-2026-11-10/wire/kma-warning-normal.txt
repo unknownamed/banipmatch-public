@@ -1,0 +1,4 @@
+#START7777
+# SYNTHETIC fixture, not a provider response
+S9999000,합성상위구역,S9999900,합성앞바다,202611101100,202611101200,풍랑,주의,발표, ,=
+#7777END

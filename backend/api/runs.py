@@ -8,9 +8,11 @@ from backend.db.store import Store, insert
 
 
 class ReplayJobs:
-    def __init__(self, store: Store, replay):
+    def __init__(self, store: Store, replay, *, executor=None, before_execute=None):
         self.store, self.replay = store, replay
-        self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="fixture-replay")
+        self.owns_executor = executor is None
+        self.executor = executor or ThreadPoolExecutor(max_workers=1, thread_name_prefix="fixture-replay")
+        self.before_execute = before_execute
 
     def recover(self) -> None:
         error = ApiError(503, "RUN_INTERRUPTED", "이전 서버 실행이 중단됨. 새 멱등키로 다시 요청 필요").body()
@@ -19,10 +21,11 @@ class ReplayJobs:
                          "WHERE status IN ('queued','running')", (utc_now(), canonical(error)))
 
     def submit(self, run_id: str) -> None:
-        self.executor.submit(self._execute, run_id)
+        return self.executor.submit(self._execute, run_id)
 
     def close(self) -> None:
-        self.executor.shutdown(wait=True)
+        if self.owns_executor:
+            self.executor.shutdown(wait=True)
 
     def _execute(self, run_id: str) -> None:
         try:
@@ -33,6 +36,8 @@ class ReplayJobs:
                     return
                 run = self.store.run(conn, run_id)
                 snapshot = self.store.snapshot(conn, run["scenario_id"])
+            if self.before_execute:
+                self.before_execute(run)
             results = self.replay.replay(snapshot, run["methods"], run["config"])
             if [r["method"] for r in results] != run["methods"]:
                 raise ValueError("fixture method mismatch")

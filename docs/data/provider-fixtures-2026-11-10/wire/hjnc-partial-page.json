@@ -1,0 +1,6 @@
+{
+  "content": [],
+  "stringContent": "[{\"VOY_NO\": \"SYNTHETIC-VOYAGE-01\", \"VSL_NM\": \"SYNTHETIC VESSEL\", \"YARD_OPEN\": \"2026-11-10 09:00\", \"YARD_CLOSE\": \"2026-11-10 18:00\", \"ETB\": \"2026-11-11 02:00\"}]",
+  "totalElements": 3,
+  "hasNext": false
+}

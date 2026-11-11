@@ -1,0 +1,136 @@
+{
+  "kind": "simulated",
+  "purpose": "data_gap_acceptance_not_field_evaluation",
+  "protocol_sha256": "eb9116e4c7e4a3ffbfd48cd63878dfe9ed85b404de0259076f46af0bac79f764",
+  "cases": [
+    {
+      "case_id": "cutoff",
+      "preflight": null,
+      "expected": null,
+      "passed": true,
+      "solver_calls": 4
+    },
+    {
+      "case_id": "opening",
+      "preflight": null,
+      "expected": null,
+      "passed": true,
+      "solver_calls": 4
+    },
+    {
+      "case_id": "fixed_risk",
+      "preflight": null,
+      "expected": null,
+      "passed": true,
+      "solver_calls": 4
+    },
+    {
+      "case_id": "ready_missing",
+      "preflight": "INPUT_INCOMPLETE",
+      "expected": "INPUT_INCOMPLETE",
+      "passed": true,
+      "solver_calls": 0
+    },
+    {
+      "case_id": "ready_recovered",
+      "preflight": null,
+      "expected": null,
+      "passed": true,
+      "solver_calls": 4
+    },
+    {
+      "case_id": "route_missing",
+      "preflight": "INPUT_INCOMPLETE",
+      "expected": "INPUT_INCOMPLETE",
+      "passed": true,
+      "solver_calls": 0
+    },
+    {
+      "case_id": "return_unknown",
+      "preflight": "INPUT_INCOMPLETE",
+      "expected": "INPUT_INCOMPLETE",
+      "passed": true,
+      "solver_calls": 0
+    },
+    {
+      "case_id": "window_unconfirmed",
+      "preflight": "WINDOW_UNCONFIRMED",
+      "expected": "WINDOW_UNCONFIRMED",
+      "passed": true,
+      "solver_calls": 0
+    },
+    {
+      "case_id": "future_evidence",
+      "preflight": "INPUT_INVALID",
+      "expected": "INPUT_INVALID",
+      "passed": true,
+      "solver_calls": 0
+    }
+  ],
+  "passed": true,
+  "solver_calls": 16,
+  "pairs": [
+    {
+      "case_id": "cutoff",
+      "input_sha256": "2d21972b07d73c32e432e1e560f90f58db7cb74e8b1d9a08252ca99c497b1186",
+      "budget_seconds": 3,
+      "seed": 42,
+      "B2_unassigned": 1,
+      "B3_unassigned": 1,
+      "identical_assigned_set": true,
+      "changed_delta": 0,
+      "travel_minutes_delta": 0,
+      "wall_ms_delta": -1.261000000000001,
+      "equal_count_comparable": true,
+      "exclusion_reason": ""
+    },
+    {
+      "case_id": "opening",
+      "input_sha256": "2e78a57e830399a1033a56ddd590fa79a70365e83bd8c77da5e770bee278b442",
+      "budget_seconds": 3,
+      "seed": 42,
+      "B2_unassigned": 0,
+      "B3_unassigned": 0,
+      "identical_assigned_set": true,
+      "changed_delta": -2,
+      "travel_minutes_delta": 0,
+      "wall_ms_delta": 1.8819999999999997,
+      "equal_count_comparable": true,
+      "exclusion_reason": ""
+    },
+    {
+      "case_id": "fixed_risk",
+      "input_sha256": "e59fb0ef744a1d05c73aaa2c19b92b2298ef4b36c1520a095c0997c32c864872",
+      "budget_seconds": 3,
+      "seed": 42,
+      "B2_unassigned": 2,
+      "B3_unassigned": 2,
+      "identical_assigned_set": true,
+      "changed_delta": -1,
+      "travel_minutes_delta": 0,
+      "wall_ms_delta": 1.327,
+      "equal_count_comparable": true,
+      "exclusion_reason": ""
+    },
+    {
+      "case_id": "ready_recovered",
+      "input_sha256": "e4cb61578a81e5813e26875851db7bf0e30e63b07b4ad7632a607735f23ca4c0",
+      "budget_seconds": 3,
+      "seed": 42,
+      "B2_unassigned": 1,
+      "B3_unassigned": 1,
+      "identical_assigned_set": true,
+      "changed_delta": 0,
+      "travel_minutes_delta": 0,
+      "wall_ms_delta": 2.8839999999999986,
+      "equal_count_comparable": true,
+      "exclusion_reason": ""
+    }
+  ],
+  "limitations": [
+    "not_live_api_or_browser_test",
+    "not_field_effect",
+    "no_approval_or_external_action",
+    "reference_panels_are_separate_from_engine_snapshot"
+  ]
+}

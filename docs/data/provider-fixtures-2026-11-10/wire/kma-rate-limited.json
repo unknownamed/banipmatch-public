@@ -1,0 +1,6 @@
+{
+  "result": {
+    "status": 429,
+    "message": "SYNTHETIC rate limit"
+  }
+}

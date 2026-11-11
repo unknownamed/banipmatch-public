@@ -1,5 +1,11 @@
 # 팀 역할과 담당 범위
 
+**2026-11-10 대응 흐름 추가 확정:** [완성 범위](dispatcher-response-scope.md)에 따라 기존 담당을 유지하면서 선효 [#54](https://github.com/unknownamed/banipmatch/issues/54) 서버·푸시/응답, 길웅 [#55](https://github.com/unknownamed/banipmatch/issues/55) 조건 편집/담당·수신자 화면, 민준 [#56](https://github.com/unknownamed/banipmatch/issues/56) 사례/자료, 대겸 [#57](https://github.com/unknownamed/banipmatch/issues/57) 변경 명세·판정/최종 통합을 맡는다. 모두 완료 대상이며 실제 현장 권한이 없는 차량 확보/예약 변경과 전화·채팅은 제외한다.
+
+**최신 역할 확정:** [F01~F12 전체 계획](completion-plan.md)·[#50](https://github.com/unknownamed/banipmatch/issues/50). 민준=자료·입력검증, 선효=API·DB·실자료 연결/공개 계산 보호, 길웅=프론트·지도·ORS, **대겸=엔진·최종 통합·수정/보완·최종 코드/자료·보고서·배포**입니다. #47은 대겸 담당입니다. 실제 서버 준비/실행·주소·배포는 대겸이 직접 합니다. 팀원은 각자 검사 후 인계하고 통합/배포본을 시험해 재현 근거를 대겸에게 전달합니다. 대겸이 수정·보완하면 수정 버전을 재확인합니다. 보고서는 각자 본문/근거를 주고 대겸이 편집하며 발표 #49는 이번 범위에서 보류했습니다.
+
+**현재 작업은 [2026-11-10 실행 계획](data-demo-sprint-2026-11-10.md)이 우선합니다.** 4개 파트 담당은 유지하며, 실제 API→화면 연결·공식 형식의 모의 자료·데이터 공백 설명까지 완료 기준을 갱신했습니다. 아래의 초기 작업과 과거 신청 대기 설명은 이력으로 읽습니다. 민준=실제/합성 자료, 선효=서버 읽기/AIS, 길웅=실제·모의 UI/지도·ORS, 대겸=데이터 공백9사례/계산·비교 검증입니다.
+
 기준일: 2026-11-07. 기존 개발 초안 v0.1의 네 파트에 아래 초기 개발 담당을 연결합니다.
 진행 중 담당을 바꿀 때는 영향을 받는 팀원과 조정하고 이 문서와 README를 함께 갱신합니다.
 배포한 PDF는 당시 기록으로 보존합니다. PDF 묶음의 “실명 담당자 미정” 문구는 작성 당시 상태이며, 현재 담당은 이 문서를 따릅니다.
@@ -66,7 +72,7 @@ AI가 PDF를 읽기 어려우면 같은 본문의 [common_pages.json](../develop
 
 - 구현 범위: B0 원안 위험 진단·B1 마감순 삽입·B2 이동 최소화·B3 변경 최소화를 비교합니다. 모든 조정 방법은 미처리 수를 우선하며, 고정 작업 보존과 미처리 근거를 확인합니다.
 - B0~B3 구현·실험은 [엔진0.2.3 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)를 따릅니다. 완전한 초기안 힌트·probing0으로 탐색을 보완했고 엔진89개 검사를 통과한 기록입니다. 추가 평가 도구 검사는 아래 최신 인계를 따릅니다. 최신 API·데이터 연결 후 전체 검수는 [통합 인계](handoffs/2026-11-08-pr12-pr14-integration.md)에 있습니다. [기존0.2.1·156회](../experiments/engine-sensitivity-2026-11-08/README.md)는 보존하며 [후속72회](../experiments/engine-profile-2026-11-08/README.md)와 구분합니다.
-- 후속20건 B3는3초에서 변경2건의 최적성을 증명했고10초 호출 중앙값은5.21→2.42초입니다. 50건10초 B2는 전체 최적, B3는 미처리26/변경23/이동1,440분의 FEASIBLE로 전체 미증명입니다. [기존156회 PDF](../experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)와 [후속72회 PDF](../experiments/engine-report-2026-11-08/engine-performance-followup.pdf)를 활용하되 모의 한계를 유지합니다. API·독립 검사 연결은 이후 검수했습니다. 새 [80회 평가와 독립 대조](handoffs/2026-11-08-unknownamed-evaluation.md)에서 같은 처리 작업과 다른 작업을 구분하고 이동 증가까지 제시했습니다. 다음은 대표 사례의 화면 대조·보고서 설명, 별도 개발 자료를 사용한50건 탐색 보완입니다.
+- 후속20건 B3는3초에서 변경2건의 최적성을 증명했고10초 호출 중앙값은5.21→2.42초입니다. 50건10초 B2는 전체 최적, B3는 미처리26/변경23/이동1,440분의 FEASIBLE로 전체 미증명입니다. [기존156회 PDF](../experiments/engine-report-2026-11-08/engine-experiment-summary.pdf)와 [후속72회 PDF](../experiments/engine-report-2026-11-08/engine-performance-followup.pdf)를 활용하되 모의 한계를 유지합니다. API·독립 검사 연결은 이후 검수했습니다. 새 [80회 평가와 독립 대조](handoffs/2026-11-08-unknownamed-evaluation.md)에서 같은 처리 작업과 다른 작업을 구분하고 이동 증가까지 제시했습니다. 대표 화면 대조·평가 설명의 완료 상태와 이후 과제는 다음 항목을 따릅니다.
 - 위 후속 중 대표 화면 대조와 평가 수치·절충 설명은 [평가 근거 연결](handoffs/2026-11-09-unknownamed-showcase-evidence.md) 및 PR24~26에서 완료했습니다. 이를 재구현하지 않습니다. 추가로 [고정 작업의 작은 사례 독립 검산](handoffs/2026-11-09-unknownamed-frozen-oracle.md)을 보강했습니다. 최종 제출용 보고서·발표 통합과 별도 개발 자료의50건 탐색 연구는 남아 있습니다.
 - `solve(snapshot, method, config) → result`의 경계를 유지합니다. 엔진 안에서 DB·웹·외부 API를 호출하거나 입력을 수정하지 않습니다.
 - 출발·고정 작업의 차량·순서·시각을 보존하고, 위험이 생겨도 작업을 삭제하거나 미처리로 바꿔 지표를 좋게 만들지 않습니다.
