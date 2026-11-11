@@ -36,14 +36,14 @@ function KakaoMapCheck() {
 
   useEffect(() => {
     if (!key) {
-      setStatus('VITE_KAKAO_MAP_KEY가 없습니다. frontend/.env.local 을 확인하고 개발 서버를 다시 시작하세요.')
+      setStatus('지도 연결 설정이 아직 준비되지 않았습니다. 담당자에게 알려 주세요.')
       return
     }
     const s = document.createElement('script')
     s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(key)}&autoload=false`
     s.onload = () => {
       if (!window.kakao?.maps) {
-        setStatus('SDK 응답은 왔지만 kakao.maps가 없습니다. 키 종류(JavaScript 키)와 카카오맵 사용 설정을 확인하세요.')
+        setStatus('지도 응답을 확인하지 못했습니다. 담당자가 연결 설정을 확인해야 합니다.')
         return
       }
       window.kakao.maps.load(() => {
@@ -54,7 +54,7 @@ function KakaoMapCheck() {
       })
     }
     s.onerror = () =>
-      setStatus(`SDK 로드 실패. JavaScript SDK 도메인에 ${location.origin} 이 등록됐는지, 키가 JavaScript 키인지 확인하세요.`)
+      setStatus('지도에 연결하지 못했습니다. 인터넷 연결을 확인하거나 담당자에게 알려 주세요.')
     document.head.appendChild(s)
     return () => s.remove()
   }, [key])
@@ -66,7 +66,7 @@ function KakaoMapCheck() {
   return (
     <main>
       <section className="card">
-        <h2>카카오맵 연결 확인 (AP-04)</h2>
+        <h2>부산 신항 · 일반·위성 지도</h2>
         <p className={status.startsWith('지도 표시 성공') ? 'ok' : 'muted'} data-testid="map-status">
           {status}
         </p>

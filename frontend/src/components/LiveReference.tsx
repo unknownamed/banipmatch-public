@@ -3,6 +3,7 @@ import { createV2Client } from '../api/v2'
 import type { ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
 import { ReferenceStatus } from './ReferencePanel'
+import { RoadReference, type RoadData } from './RoadReference'
 
 interface Weather {
   kind: 'sea' | 'warning'; status: string; received_at: string | null; http_status: number | null
@@ -10,7 +11,7 @@ interface Weather {
     observations: { station_id: string; observed_at_utc: string; wh_m_original: string; ws_m_s_original: string; gust_m_s_original: string; missing_or_invalid_nonnegative_fields: string[] }[]
     selected_records: { region_name: string; kind: string; level: string; command: string; published_at_utc: string; effective_time_original_kst: string }[] }
 }
-interface LiveData { checked_at: string; hjnc: ReferenceView; weather: Weather[]; ais: null | {
+interface LiveData { checked_at: string; hjnc: ReferenceView; weather: Weather[]; road?: RoadData | null; ais: null | {
   status: string; finished_at: string; max_seconds: number; subscription_confirmed: boolean; valid_position_events: number; unique_position_mmsi_count: number; connection_closed: boolean
 } }
 
@@ -46,6 +47,7 @@ export function LiveReference() {
       <p className="small"><a href="https://apihub.kma.go.kr/" target="_blank" rel="noreferrer">자료: 기상청 API허브</a> · 관측·발표·발효·수신 시각을 구분합니다. 배차 계산에는 넣지 않았습니다.</p>
       <h3>AIS · 부산 제한 수신 시험</h3>
       {data.ais ? <p className="small">{data.ais.subscription_confirmed ? '구독 응답 확인' : '구독 확인 안 됨'} · {data.ais.max_seconds}초 동안 위치 {data.ais.valid_position_events}건 / 선박 {data.ais.unique_position_mmsi_count}척 · 상태 {data.ais.status}<br/>시험 종료 {kstDateTime(data.ais.finished_at)} · {data.ais.connection_closed ? '연결 종료 확인' : '종료 확인 필요'}<br/>무수신은 부산에 선박이 없다는 뜻이 아닙니다. 지도에서 모의 재생을 별도로 선택할 수 있습니다.</p> : <p>실제 AIS 시험 기록이 아직 없습니다.</p>}
+      <RoadReference road={data.road} />
     </>}
   </>
 }

@@ -4220,6 +4220,16 @@
                 "type": "null"
               }
             ]
+          },
+          "road": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Road"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -4926,6 +4936,239 @@
           "confirmation"
         ],
         "title": "RevisionState"
+      },
+      "Road": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "openrouteservice",
+            "title": "Source"
+          },
+          "kind": {
+            "type": "string",
+            "const": "reference",
+            "title": "Kind"
+          },
+          "profile": {
+            "type": "string",
+            "const": "driving-hgv",
+            "title": "Profile"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "key_missing",
+              "received",
+              "partial",
+              "auth_error",
+              "rate_limited",
+              "http_error",
+              "invalid_response"
+            ],
+            "title": "Status"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "http_status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Http Status"
+          },
+          "retry_after_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 86400.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry After Seconds"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/RoadPoint"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Points"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/RoadCell"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "title": "Cells"
+          },
+          "engine_conversion": {
+            "type": "string",
+            "const": "blocked",
+            "title": "Engine Conversion"
+          },
+          "approval_eligible": {
+            "type": "boolean",
+            "const": false,
+            "title": "Approval Eligible"
+          },
+          "automatic_mock_fallback": {
+            "type": "boolean",
+            "const": false,
+            "title": "Automatic Mock Fallback"
+          },
+          "coordinates_are_approximate": {
+            "type": "boolean",
+            "const": true,
+            "title": "Coordinates Are Approximate"
+          },
+          "realtime_traffic": {
+            "type": "boolean",
+            "const": false,
+            "title": "Realtime Traffic"
+          },
+          "truck_access_verified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Truck Access Verified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "kind",
+          "profile",
+          "status",
+          "received_at",
+          "http_status",
+          "retry_after_seconds",
+          "points",
+          "cells",
+          "engine_conversion",
+          "approval_eligible",
+          "automatic_mock_fallback",
+          "coordinates_are_approximate",
+          "realtime_traffic",
+          "truck_access_verified"
+        ],
+        "title": "Road"
+      },
+      "RoadCell": {
+        "properties": {
+          "origin": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Origin"
+          },
+          "destination": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Destination"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "distance_meters": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Meters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "origin",
+          "destination",
+          "duration_seconds",
+          "distance_meters"
+        ],
+        "title": "RoadCell"
+      },
+      "RoadPoint": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude"
+          },
+          "latitude": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude"
+          },
+          "source_snap_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Snap M"
+          },
+          "destination_snap_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destination Snap M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "longitude",
+          "latitude",
+          "source_snap_m",
+          "destination_snap_m"
+        ],
+        "title": "RoadPoint"
       },
       "Sample": {
         "properties": {

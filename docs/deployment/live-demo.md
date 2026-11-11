@@ -37,10 +37,14 @@ HTTPS 중계는 공식 공급자 프로그램으로 `cloudflared tunnel --url ht
 키는 `local/secrets/` 등 Git 제외 파일에 저장한다. 읽기 경로는 서버 설정만 사용하며 공개 화면에서 경로/URL/키를 지정할 수 없다.
 
 ```powershell
-python -m tools.collect_live_reference --kma-key-file local/secrets/kma-api-key.txt --output local/live-reference/current.json --ais-report local/ais-live-probe.json
+python -m tools.collect_live_reference --kma-key-file local/secrets/kma-api-key.txt --ors-key-file local/secrets/ors-api-key.txt --output local/live-reference/current.json --ais-report local/ais-live-probe-20261111-b.json
 ```
 
-KMA 키나 AIS 시험 결과가 없으면 해당 인수를 생략한다. HJNC1회+KMA2회, 요청별15초·1MB·재시도 없음이다. 원문/키가 든 URL은 저장하지 않고 허용 필드만 기록한다. 자동 반복 호출은 없다. 방문자의 ‘수신 결과 새로 읽기’는 보관 결과만 읽는다. 키 이용자·약관/표시 허용 범위는 운영자가 확인한다. 개인 키를 번들·Git·이슈에 올리거나 무료 한도를 피하려고 여러 키를 돌리지 않는다.
+KMA·ORS 키나 AIS 시험 결과가 없으면 해당 인수를 생략한다. HJNC1회+KMA2회+ORS1회, 요청별15초·1MB·재시도 없음이다. 원문/키가 든 URL은 저장하지 않고 허용 필드만 기록한다. 자동 반복 호출은 없다. 방문자의 ‘수신 결과 새로 읽기’는 보관 결과만 읽는다. 키 이용자·약관/표시 허용 범위는 운영자가 확인한다. 서버용 비밀 키를 번들·Git·이슈에 올리거나 무료 한도를 피하려고 여러 키를 돌리지 않는다.
+
+ORS는 고정된 부산 근사 좌표3곳을 `driving-hgv` Matrix로 조회한다. 시간은 초, 거리는 미터로 보존하고 화면에서 분/km로 환산한다. `null`을0이나 역방향으로 채우지 않는다. 401/403·429·형식오류를 구분하고 호출 실패 때 이전/모의 수치를 새 실제 응답으로 표시하지 않는다. 실제 게이트/상차지·현재 교통·화물차 적법 통행·배차 입력은 검증되지 않았으며, 계산 입력 자동 전환은 차단한다. 출력은 출처·CC-BY-SA4.0·단위변경을 표시한다.
+
+카카오 지도는 기존 팀 앱의 **JavaScript 키**를 `frontend/.env.local`의 `VITE_KAKAO_MAP_KEY`에 설정해 빌드한다. 이 키는 브라우저용 공개 식별자이고 JS SDK 허용 도메인으로 제한한다. REST/Admin 키나 ORS·KMA·AIS 비밀 키를 이 설정에 넣지 않는다. 개발 주소를 보존한 채 현재 HTTPS 주소를 등록하며, 임시 주소가 바뀌면 등록도 갱신한다. 일반·위성·위성+지명 배경은 실제 SDK로 읽고, 위성 사진을 실시간 선박/트럭 영상으로 표현하지 않는다. 현재 OSM 모의 선박 재생과 카카오 배경 지도는 별도 화면이다.
 
 ## 동의한 기기 알림 시험
 

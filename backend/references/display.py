@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 from typing import Literal
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, FiniteFloat
 from backend.api.contracts import ApiError
 
 
@@ -110,6 +110,39 @@ class Weather(PublicModel):
     report: WeatherReport | None
 
 
+class RoadPoint(PublicModel):
+    label: str
+    longitude: FiniteFloat = Field(ge=-180, le=180)
+    latitude: FiniteFloat = Field(ge=-90, le=90)
+    source_snap_m: FiniteFloat | None = Field(ge=0)
+    destination_snap_m: FiniteFloat | None = Field(ge=0)
+
+
+class RoadCell(PublicModel):
+    origin: int = Field(ge=0, le=2)
+    destination: int = Field(ge=0, le=2)
+    duration_seconds: FiniteFloat | None = Field(ge=0)
+    distance_meters: FiniteFloat | None = Field(ge=0)
+
+
+class Road(PublicModel):
+    source: Literal['openrouteservice']
+    kind: Literal['reference']
+    profile: Literal['driving-hgv']
+    status: Literal['key_missing', 'received', 'partial', 'auth_error', 'rate_limited', 'http_error', 'invalid_response']
+    received_at: str | None
+    http_status: int | None
+    retry_after_seconds: int | None = Field(ge=0, le=86400)
+    points: list[RoadPoint] = Field(max_length=3)
+    cells: list[RoadCell] = Field(max_length=9)
+    engine_conversion: Literal['blocked']
+    approval_eligible: Literal[False]
+    automatic_mock_fallback: Literal[False]
+    coordinates_are_approximate: Literal[True]
+    realtime_traffic: Literal[False]
+    truck_access_verified: Literal[False]
+
+
 class LiveDisplay(PublicModel):
     schema_version: Literal['reference-display-1']
     kind: Literal['reference']
@@ -120,6 +153,7 @@ class LiveDisplay(PublicModel):
     hjnc: Hjnc
     weather: list[Weather] = Field(max_length=2)
     ais: 'AisStatus | None' = None
+    road: Road | None = None
 
 
 class AisStatus(PublicModel):

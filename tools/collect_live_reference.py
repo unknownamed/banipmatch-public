@@ -40,7 +40,7 @@ def fetch(url):
         return 503, b''
 
 
-def collect(key: str | None, transport=fetch):
+def collect(key: str | None, transport=fetch, *, ors_key=None, ors_transport=None):
     result = {'schema_version': 'reference-display-1', 'kind': 'reference', 'checked_at': now(),
               'engine_conversion': 'blocked', 'approval_eligible': False,
               'automatic_mock_fallback': False, 'weather': []}
@@ -65,6 +65,8 @@ def collect(key: str | None, transport=fetch):
             except Exception:
                 item['status'] = 'parse_error'
         result['weather'].append(item)
+    from backend.references.ors import collect_ors
+    result['road'] = collect_ors(ors_key, **({'transport': ors_transport} if ors_transport else {}))
     result['checked_at'] = now()
     return result
 
@@ -72,6 +74,7 @@ def collect(key: str | None, transport=fetch):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--kma-key-file', type=Path)
+    parser.add_argument('--ors-key-file', type=Path)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--ais-report', type=Path)
     args = parser.parse_args()
@@ -80,17 +83,22 @@ def main():
         if not output.is_relative_to((ROOT / 'local').resolve()):
             raise ValueError('local output only')
         key = args.kma_key_file.read_text(encoding='utf-8-sig').strip() if args.kma_key_file else None
-        result = collect(key)
+        ors_key = args.ors_key_file.read_text(encoding='utf-8-sig').strip() if args.ors_key_file else None
+        ais = None
         if args.ais_report:
             from backend.references.display import AisStatus
-            result['ais'] = AisStatus.model_validate_json(args.ais_report.read_bytes()).model_dump()
-        if key and key in json.dumps(result, ensure_ascii=False):
+            ais = AisStatus.model_validate_json(args.ais_report.read_bytes()).model_dump()
+        result = collect(key, ors_key=ors_key)
+        if ais is not None:
+            result['ais'] = ais
+        if any(secret and secret in json.dumps(result, ensure_ascii=False) for secret in (key, ors_key)):
             raise ValueError('credential reflection refused')
         output.parent.mkdir(parents=True, exist_ok=True)
         temporary = output.with_suffix('.pending')
         temporary.write_text(json.dumps(result, ensure_ascii=False, allow_nan=False), encoding='utf-8')
         temporary.replace(output)
         print(json.dumps({'hjnc': result['hjnc']['last_attempt']['status'],
+                          'road': {'status': result['road']['status'], 'http_status': result['road']['http_status']},
                           'weather': [{'kind': x['kind'], 'status': x['status'], 'http_status': x['http_status']} for x in result['weather']]}, ensure_ascii=False))
         return 0
     except Exception:
