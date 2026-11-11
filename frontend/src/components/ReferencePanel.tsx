@@ -67,7 +67,7 @@ export function ReferenceStatus({ view: v }: { view: ReferenceView }) {
         <>
           {d.sample.status === 'partial' && (
             <p className="warn small">
-              제공자가 알린 {d.sample.reported_count ?? '?'}건 중 {d.sample.row_count}건만 읽었습니다(제외 {d.sample.excluded_rows}건). 읽은 행만 참고로 표시합니다.
+              부분 응답 · 제공자 표기 {d.sample.reported_count ?? '미표기'}건 · 수신 행 {d.sample.row_count}건 · 표시 가능 {d.sample.items.length}건 · 제외 {d.sample.excluded_rows}건. 표시 가능한 행만 참고로 보여줍니다.
             </p>
           )}
           {d.sample.items.length ? (
@@ -89,7 +89,12 @@ export function ReferenceStatus({ view: v }: { view: ReferenceView }) {
               </tbody>
             </table>
           ) : (
-            <p className="small">제공자가 정상 응답으로 0건을 보냈습니다. 이전 자료를 대신 보여주지 않습니다.</p>
+            // 정상 0건은 status=empty일 때만. 부분 응답에서 모두 제외된 경우와 구분한다.
+            <p className="small">
+              {d.sample.status === 'empty'
+                ? '제공자가 정상 응답으로 0건을 보냈습니다. 이전 자료를 대신 보여주지 않습니다.'
+                : '받은 행이 필드 누락 등으로 모두 제외돼 표시할 행이 없습니다. 정상 0건이 아닙니다.'}
+            </p>
           )}
           {d.sample.blockers.length > 0 && (
             <ul className="small muted ref-blockers">
