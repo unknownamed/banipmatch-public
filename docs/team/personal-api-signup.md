@@ -12,7 +12,7 @@
 |---|---|---|---|
 | 도로공사 영업소간 통행시간 | 심민준 | [기존 #30](https://github.com/unknownamed/banipmatch/issues/30), [인증키 발급](https://data.ex.co.kr/openapi/apikey/requestKey). 기존 보유 확인→없으면 신청→구간/단위 검증 | 본인 발급·소량 응답 확인. [단위/품질·필요 구간 검증](../data/road-api-verification.md)은 남음 |
 | 기상청 API허브 | 심민준 | [일반회원 가입](https://apihub.kma.go.kr/join.do)→본인 휴대전화 인증→키 확인→서비스별 활용신청→해양 관측/특보 작은 표본 | 본인 발급·활용신청 후 [3개 HTTP200 응답 검증](../data/kma-response-verification.md). 결측/조회 범위·공유 환경 등은 남음 |
-| AISstream | 안선효 | [계정](https://aisstream.io/account)에서 본인 GitHub 로그인→키 생성→부산 신항 주변 짧은 서버 수신 시험 | 신규 신청 작업 배정, 발급/대상 해역 수신 미확인 |
+| AISstream | 안선효 | [계정](https://aisstream.io/account)에서 본인 GitHub 로그인→키 확인→부산 신항 주변 짧은 서버 수신 시험 | 11월10일 인증·구독 정상. 부산45초/확대90초0건, 해외 대조4건. 부산 수신 범위/표본·항차/신선도·이용조건은 미검증 |
 | openrouteservice(ORS) Standard | 최길웅 / 선효 서버·대겸 적합성 협조 | [개인 가입](https://account.heigit.org/signup)→무료 Standard 키→공공 항만/도로 좌표의 거리·시간 수치 소량 검증 | 신규 준비 대상, 발급/부산 경로 품질 미확인 |
 | 카카오맵 Web SDK | 최길웅 | 기존 앱/지도를 재사용. [개발자 콘솔](https://developers.kakao.com/)에서 기존 도메인·무료량 확인 | 로컬 표시 확인된 기존 항목, 재가입 불필요 |
 

@@ -30,6 +30,8 @@
 
 대겸의 [데이터 공백9사례](../experiments/data-demo-2026-11-10/README.md)는 별도 모의 검수입니다. 입력 부족/미확정/미래자료 차단과 고정 보존을 확인하며 실제 응답이나 현장 효과로 합산하지 않습니다. PR42/43 준비 코드의 초안/검토 대기는 유지합니다. 기존 동결80회·생산 API/DB/엔진·승인 계약 변경은 없습니다.
 
+**11월10일 선효 AIS 후속:** 인증/구독·마이애미4건 수신 확인, 부산45초/확대90초0건으로 부산 채택은 보류. 별도 [합성 AIS 시연](../data/aisstream-synthetic-demo.md)에서 선박2척·정상/중단/누락/오류/무수신5사례를 재생할 수 있음. 모의 성공을 부산 실수신·항차/확정 반입 변경 연결로 표현하지 않음.
+
 ## 2026-11-10 데이터 인계
 
 민준은 F01 후속으로 [공급자 형식 합성 예제 21종](../data/provider-fixtures-2026-11-10/README.md), 생성/검사 도구와 [보고서용 본문·자료 공백 표](../report/data-part.md)를 작성했다. 데이터 검사 153개·하위 121개와 합성 예제 재현 검사가 통과했다. HJNC 7종은 PR42 고정 head의 읽기 모듈과 모의 시계로 대조했으며 KMA는 기존 감사기로 검사했다. [담당 인계](handoffs/2026-11-10-s-minjun-provider-fixtures.md)에 실행법과 남은 일을 기록했다.
@@ -38,7 +40,7 @@
 
 민준은 Draft PR42의 고정 head에 실제 도로 표본4종을 대조하고 [출처/필드/보류 조건과 기상 구역 참조](../data/reference-handoff.md)를 정리했다. 양방향5행씩은 집계 누락으로 유효 투영0개이며 계산 자료로 채택하지 않는다. HJNC 초기 표본의 정밀 수신시각 공백과 KMA 어댑터 미지원도 인계했다. PR42 병합·전체 API 검토나 외부 사용 허가를 뜻하지 않는다.
 
-**최신 개인 신청 배정:** [기상청·민준 #35](https://github.com/unknownamed/banipmatch/issues/35), [AIS·선효 #36](https://github.com/unknownamed/banipmatch/issues/36), [ORS·길웅 #37](https://github.com/unknownamed/banipmatch/issues/37). [링크·한도·완료 기준](personal-api-signup.md)에 따라 진행합니다. 기상청은 본인 발급·활용신청·첫 응답을 [확인](../data/kma-response-verification.md)했으며 AIS·ORS 발급은 이번 데이터 작업에서 미확인입니다. 기존 도로 #30·카카오맵은 유지합니다. 카카오 REST는 저장 금지로 저장형 자료 채택을 보류합니다. 생산 코드·공통 계약은 유지합니다.
+**최신 개인 신청 배정:** [기상청·민준 #35](https://github.com/unknownamed/banipmatch/issues/35), [AIS·선효 #36](https://github.com/unknownamed/banipmatch/issues/36), [ORS·길웅 #37](https://github.com/unknownamed/banipmatch/issues/37). [링크·한도·완료 기준](personal-api-signup.md)에 따라 진행합니다. 기상청은 본인 발급·활용신청·첫 응답을 [확인](../data/kma-response-verification.md)했습니다. AIS는 위 시험에서 인증·구독과 해외 대조 수신을 확인했지만 부산 실수신은 미확보이며, ORS 발급·표본은 미확인입니다. 기존 도로 #30·카카오맵은 유지합니다. 카카오 REST는 저장 금지로 저장형 자료 채택을 보류합니다. 생산 코드·공통 계약은 유지합니다.
 
 기준일: 2026-11-09. 소스·검수·병합 기록으로 확인한 상태만 갱신합니다. B2/B3와 프론트 #7/#8 통합은 [직전 인계](handoffs/2026-11-08-main-integration.md), 최신 엔진0.2.3은 [진단 보완 인계](handoffs/2026-11-08-unknownamed-engine-diagnostics.md)를 따릅니다. #9는 선효의 지적 수정과 재시도 오류 보완 후 사용자가 보류를 해제해 병합했습니다.
 
