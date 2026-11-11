@@ -3,11 +3,14 @@ import { Icon } from './Icon'
 /** 왼쪽 사이드바: 서비스 이름과 화면 이동. 화면 전환은 기존 쿼리 규칙(?run=, ?view=map)을 그대로 쓴다. */
 export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
   const params = new URLSearchParams(location.search)
-  const current = params.get('view') === 'map' ? 'map' : mode === 'http' && !params.get('run') ? 'start' : 'review'
+  const view = params.get('view')
+  const current = view === 'map' ? 'map' : view === 'reference' ? 'reference' : mode === 'http' && !params.get('run') ? 'start' : 'review'
   const reviewParams = new URLSearchParams(params)
   reviewParams.delete('view')
   const mapParams = new URLSearchParams(reviewParams)
   mapParams.set('view', 'map')
+  const refParams = new URLSearchParams(reviewParams)
+  refParams.set('view', 'reference')
   const link = (id: string, label: string, href: string, icon: Parameters<typeof Icon>[0]['name'], className?: string) => (
     <a key={id} className={className} href={href} aria-current={id === current ? 'page' : undefined}>
       <Icon name={icon} size={16} />
@@ -26,6 +29,7 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
         {link('review', '비교 · 승인', `?${reviewParams.toString()}`, 'grid')}
         <p className="nav-group">확인</p>
         {link('map', '지도 확인', `?${mapParams.toString()}`, 'map')}
+        {link('reference', '참고 자료', `?${refParams.toString()}`, 'clock')}
       </nav>
       <span className="appbar-note">{mode === 'http' ? '로컬 모의 API' : '공통 예제'}</span>
     </header>

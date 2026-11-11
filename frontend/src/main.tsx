@@ -7,6 +7,7 @@ import { createV2Client } from './api/v2'
 import { AppBar } from './components/AppBar'
 import { MapCheck } from './components/MapCheck'
 import { StartRunPanel } from './components/StartRunPanel'
+import { ReferencePanel } from './components/ReferencePanel'
 import { RecipientApp } from './components/RecipientApp'
 import { createRecipientClient } from './api/recipient'
 import { createDemoRecipientClient } from './api/recipientDemo'
@@ -63,7 +64,7 @@ createRoot(document.getElementById('root')!).render(
     ) : (
       <>
         <AppBar mode={mode} />
-        {params.get('view') === 'map' ? <MapCheck /> : <Root />}
+        {params.get('view') === 'map' ? <MapCheck /> : params.get('view') === 'reference' ? <ReferencePanel /> : <Root />}
       </>
     )}
   </StrictMode>,
