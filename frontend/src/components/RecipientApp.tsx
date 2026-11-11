@@ -305,7 +305,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
       <p className="small">현재: <b>{RESPONSE_LABEL[d.response]}</b>{d.responded_at && ` · ${kstTime(d.responded_at)}`}</p>
       <label className="rev-reason">
         메모 (선택 · 개인정보 쓰지 않기)
-        <textarea rows={2} maxLength={500} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} />
+        <textarea rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} />
       </label>
       <div className="respond-buttons">
         <button type="button" disabled={busy} onClick={() => respond('acknowledged')}>확인함</button>

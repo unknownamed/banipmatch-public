@@ -56,7 +56,7 @@ export function createRecipientClient(base = '') {
     pushConfig: () => get<{ configured: boolean; application_server_key: string | null }>('/v2/recipient/push-config'),
     subscribe: (subscription: PushSubscriptionJSON) =>
       write<{ subscription_status: string }>('POST', '/v2/recipient/subscription', {
-        subscription: { endpoint: subscription.endpoint, keys: subscription.keys, expirationTime: null },
+        subscription: { endpoint: subscription.endpoint, keys: subscription.keys, expirationTime: subscription.expirationTime ?? null },
         notification_permission: 'granted',
         consent: true,
       }, `subscribe-${crypto.randomUUID()}`),
