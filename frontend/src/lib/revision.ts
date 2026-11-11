@@ -29,11 +29,18 @@ export interface FieldChange {
   after: string
 }
 
-/** 입력과 다른 값만 변경으로 본다. 빈 칸(값 지우기)은 변경으로 보내지 않는다. */
+/** 완성된 KST 입력(YYYY-MM-DDTHH:mm, 24시간제)인지. 입력 중인 값은 변경으로 보내지 않는다. */
+export const isCompleteInput = (value: string) => /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d$/.test(value) && !Number.isNaN(Date.parse(`${value}:00Z`))
+
+/** 알려진 고정 사유 코드는 한국어로. 모르는 값은 원문 그대로 보여준다(임의 해석하지 않음). */
+const FREEZE_LABEL: Record<string, string> = { ALREADY_DEPARTED: '이미 출발', DEPARTED: '출발', FIXED_RESERVATION: '예약 고정' }
+export const freezeLabel = (reason: string | null) => (reason ? (FREEZE_LABEL[reason] ?? reason) : '사유 미기재')
+
+/** 입력과 다른 값만 변경으로 본다. 빈 칸(값 지우기)·입력 중인 값은 변경으로 보내지 않는다. */
 export function listChanges(s: Snapshot, edits: Edits): FieldChange[] {
   const out: FieldChange[] = []
   for (const [key, value] of Object.entries(edits)) {
-    if (!value) continue
+    if (!isCompleteInput(value)) continue
     const [entity, id, field] = key.split(':') as [FieldChange['entity'], string, FieldChange['field']]
     const row = entity === 'job' ? s.jobs.find((j) => j.job_id === id) : s.vehicles?.find((v) => v.vehicle_id === id)
     if (!row || (entity === 'job' && (row as Snapshot['jobs'][number]).frozen)) continue

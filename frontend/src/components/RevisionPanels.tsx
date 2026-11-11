@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { Run, Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
-import { listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits } from '../lib/revision'
+import { freezeLabel, isCompleteInput, listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits } from '../lib/revision'
 import { kstDateTime } from '../lib/time'
 
 const FIELD_LABEL = { ready_at: '상차 준비시각', available_at: '차량 가용 시작', shift_end_at: '근무 종료' } as const
@@ -22,6 +22,8 @@ export function ConditionRevisionPanel({ client, snapshot, run }: { client: V2Cl
   const attempt = useRef<{ sig: string; id: string } | null>(null)
   const changes = listChanges(snapshot, edits)
   const sending = status.state === 'sending'
+  // 입력 중이거나 잘못된 시각이 있으면 그 값만 빼고 보내지 않도록 전체 제출을 막는다.
+  const anyInvalid = Object.values(edits).some((v) => v && !isCompleteInput(v))
   const set = (key: string, value: string) => {
     setEdits((e) => ({ ...e, [key]: value }))
     if (status.state === 'error') setStatus({ state: 'idle' })
@@ -52,12 +54,26 @@ export function ConditionRevisionPanel({ client, snapshot, run }: { client: V2Cl
 
   const movable = snapshot.jobs.filter((j) => !j.frozen)
   const frozen = snapshot.jobs.filter((j) => j.frozen)
-  const field = (key: string, current: string | null, label: string) => (
-    <label className="rev-field">
-      <span className="small muted">{label} · 현재 {current ? kstDateTime(current) : '미확인'}</span>
-      <input type="datetime-local" value={edits[key] ?? toKstInput(current)} disabled={sending} onChange={(e) => set(key, e.target.value)} />
-    </label>
-  )
+  // 브라우저 기본 시각 입력은 기기 설정에 따라 오전/오후로 보인다. 화면 표기와 같은 24시간제로 받기 위해 날짜+시각(HH:MM)으로 나눈다.
+  const field = (key: string, current: string | null, label: string) => {
+    const value = edits[key] ?? toKstInput(current)
+    const [date, time = ''] = value.split('T')
+    const invalid = !!value && !isCompleteInput(value)
+    return (
+      <div className="rev-field" role="group" aria-label={`${label} (KST)`}>
+        <span className="small muted">{label} · 현재 {current ? kstDateTime(current) : '미확인'}</span>
+        <span className="rev-inputs">
+          <input type="date" aria-label="날짜" value={date} disabled={sending} onChange={(e) => set(key, `${e.target.value}T${time}`)} />
+          <input
+            type="text" inputMode="numeric" aria-label="시각(24시간제)" placeholder="13:40" maxLength={5} size={5}
+            value={time} aria-invalid={invalid} disabled={sending}
+            onChange={(e) => set(key, `${date}T${e.target.value}`)}
+          />
+        </span>
+        {invalid && <span className="small warn">시각은 00:00~23:59 형식으로 입력하세요.</span>}
+      </div>
+    )
+  }
 
   return (
     <section className="card revision" aria-labelledby="rev-title">
@@ -70,7 +86,7 @@ export function ConditionRevisionPanel({ client, snapshot, run }: { client: V2Cl
       <fieldset disabled={sending}>
         <legend>작업 준비시각</legend>
         {movable.map((j) => <div key={j.job_id} className="rev-row"><b>{j.job_id}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>)}
-        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b>{j.job_id}</b><span className="small">고정 · {j.freeze_reason ?? '출발'} — 수정 불가</span></div>)}
+        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b>{j.job_id}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
       </fieldset>
 
       {!!snapshot.vehicles?.length && (
@@ -111,7 +127,7 @@ export function ConditionRevisionPanel({ client, snapshot, run }: { client: V2Cl
         </ul>
       )}
 
-      <button type="button" disabled={sending || !changes.length || !reason.trim()} onClick={submit}>
+      <button type="button" disabled={sending || anyInvalid || !changes.length || !reason.trim()} onClick={submit}>
         {sending ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '새 입력으로 재계산'}
       </button>
       {!changes.length && <p className="small muted">바꿀 값을 하나 이상 입력하세요.</p>}

@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import snapshotJson from '@examples/01_snapshot.json'
 import type { Snapshot } from '../api/types'
-import { fromKstInput, hasAssumedCondition, listChanges, revisedSnapshot, toKstInput } from './revision'
+import { freezeLabel, fromKstInput, hasAssumedCondition, listChanges, revisedSnapshot, toKstInput } from './revision'
 
 const s = snapshotJson as unknown as Snapshot
 const movable = s.jobs.find((j) => !j.frozen)!
 const frozen = s.jobs.find((j) => j.frozen)!
 
 describe('조건 보완 입력', () => {
+  it('고정 사유 코드를 한국어로, 모르는 값은 원문 그대로 보여준다', () => {
+    expect(freezeLabel('ALREADY_DEPARTED')).toBe('이미 출발')
+    expect(freezeLabel('NEW_CODE')).toBe('NEW_CODE')
+    expect(freezeLabel(null)).toBe('사유 미기재')
+  })
+
   it('KST 입력값과 UTC를 왕복한다', () => {
     expect(fromKstInput('2026-11-11T13:30')).toBe('2026-11-11T04:30:00Z')
     expect(toKstInput('2026-11-11T04:30:00Z')).toBe('2026-11-11T13:30')
@@ -19,6 +25,8 @@ describe('조건 보완 입력', () => {
       [`job:${movable.job_id}:ready_at`]: toKstInput(movable.ready_at),
       [`job:${frozen.job_id}:ready_at`]: '2026-11-11T09:00',
       'vehicle:T1:shift_end_at': '',
+      'vehicle:T2:shift_end_at': '2026-11-11T13:4', // 입력 중
+      'vehicle:T2:available_at': '2026-11-11T25:00', // 없는 시각
     })
     expect(changes).toEqual([])
   })
