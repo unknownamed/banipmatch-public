@@ -1,0 +1,3 @@
+# Optional v0.2 isolated sessions / Web Push. No provider account required.
+cryptography==50.0.2
+pywebpush==2.5.0

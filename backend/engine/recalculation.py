@@ -45,7 +45,7 @@ def validate_condition_revision(before: dict, after: dict, *, reason: str) -> di
         raise RecalculationError("조건 보완 이유가 필요합니다(1~1000자).")
     validate("Snapshot", before)
     validate("Snapshot", after)
-    mutable = {"as_of", "jobs", "vehicles", "locations", "travel_times", "windows",
+    mutable = {"scenario_id", "as_of", "jobs", "vehicles", "locations", "travel_times", "windows",
                "baseline_assignments", "baseline_unassigned_job_ids"}
     if {k: v for k, v in before.items() if k not in mutable} != {
             k: v for k, v in after.items() if k not in mutable}:

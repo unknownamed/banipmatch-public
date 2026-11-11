@@ -1,4 +1,5 @@
 -r requirements.txt
+-r requirements-workflow.txt
 -r backend/engine/requirements.txt
 -r docs/development/v0.1/검수/requirements-validation.txt
 httpx2==2.16.0
