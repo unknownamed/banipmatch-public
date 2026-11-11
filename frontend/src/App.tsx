@@ -6,6 +6,10 @@ import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
 import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
 import { acknowledgeIds, approvalGate, approvalIdempotencyKey, type ApprovalGate } from './lib/approval'
 import { buildRows } from './lib/compare'
+import { hasAssumedCondition } from './lib/revision'
+import type { V2Client } from './api/v2'
+import { ConditionRevisionPanel, NextInputCard, RevisionComparison } from './components/RevisionPanels'
+import { DispatchPanel } from './components/DispatchPanel'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
@@ -30,8 +34,15 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
     client.getPlan(run.plan_id).then((p) => live && p.plan_id === run.plan_id && setPlanNow({ planId: p.plan_id, version: p.version })).catch(() => {})
     return () => { live = false }
   }, [client, run?.plan_id, approval.value?.status.state])
+  // 이 결과 이후 계획 버전이 올라갔는지(이번 화면 승인 또는 이미 승인됨). 이전 버전 입력으로는 조건 보완을 보내지 않는다.
+  const planAdvanced = !!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))
   const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
+  const v2 = 'session' in client ? (client as V2Client) : null
+  const params = new URLSearchParams(location.search)
+  const revisionId = params.get('revision')
+  const beforeRunId = params.get('before')
+  const assumed = snapshot ? hasAssumedCondition(snapshot) : false
   const approvalKey = run && cand ? approvalIdempotencyKey(approvalKeys, run.plan_id, {
     run_id: run.run_id, method: cand.method, expected_version: run.base_plan_version, acknowledged_job_ids: acknowledgeIds(cand),
   }) : undefined
@@ -62,6 +73,14 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {view.run.state === 'loading' && <Skeleton label="실행 상태 조회 중…" lines={2} />}
       {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
       {run && <RunStatusPanel run={run} results={results} />}
+      {assumed && (
+        <div className="banner fixture" role="alert">
+          가정 시험 입력입니다. 준비·가용 조건에 가정이 섞여 있어 비교만 할 수 있고 승인·전달할 수 없습니다.
+        </div>
+      )}
+      {v2 && revisionId && run && cand && view.results.state === 'ready' && (
+        <RevisionComparison client={v2} revisionId={revisionId} beforeRunId={beforeRunId} afterRunId={run.run_id} method={cand.method} />
+      )}
 
       {/* 넓은 화면: 왼쪽 비교, 오른쪽 미해결·승인. 좁으면 위아래로 쌓인다. */}
       <div className="workspace">
@@ -82,7 +101,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             <UnresolvedPanel rows={rows} cand={cand} />
             <ApprovalPanel
               key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
-              gate={withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null)}
+              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null), assumed ? '가정 시험 입력이라 승인할 수 없습니다. 확인된 조건으로 다시 보완해 계산하세요.' : null)}
               client={client} run={run} result={cand} idempotencyKey={approvalKey}
               shared={approval.key === approvalScope ? approval.value : null}
               onShared={(value) => setApproval({ key: approvalScope, value })}
@@ -90,6 +109,17 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
           </aside>
         )}
       </div>
+
+      {/* 승인 뒤(이번 화면에서 승인했거나 계획 버전이 이미 올라간 경우) 전달 단계. 최종 확인은 서버의 dispatch-preview가 한다. */}
+      {v2 && run && planAdvanced && (
+        <DispatchPanel key={`${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
+      )}
+
+      {v2 && snapshot && run && view.results.state === 'ready' && (planAdvanced ? (
+        <NextInputCard client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed }} />
+      ) : (
+        <ConditionRevisionPanel client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />
+      ))}
     </main>
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import s01 from '@examples/01_snapshot.json'
 import s07 from '@examples/07_snapshot_입력누락.json'
 import s08 from '@examples/08_snapshot_미확인변경.json'
@@ -6,6 +6,9 @@ import runRequestJson from '@examples/02_run_request.json'
 import type { ApiClient, RunRequest } from '../api/client'
 import { ApiRequestError } from '../api/client'
 import type { Snapshot } from '../api/types'
+import type { V2Client } from '../api/v2'
+import { shiftSnapshot } from '../lib/shift'
+import { ConditionRevisionPanel } from './RevisionPanels'
 import { buildRows } from '../lib/compare'
 import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type StartAttempt } from '../lib/startRun'
 import { ComparisonSection } from './ComparisonSection'
@@ -37,12 +40,29 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   const [status, setStatus] = useState<Status>({ state: 'idle' })
   // B0는 비교 기준이라 항상 포함한다. 기본은 명세대로 B0~B3 전체.
   const [picked, setPicked] = useState<ReadonlySet<MethodId>>(() => new Set(ALL_METHODS))
+  // v2 서버는 예제 01을 현재 시연 시각으로 옮겨 준다(기준시각 경과로 승인이 막히지 않게). 모의 자료라는 점은 같다.
+  const v2 = 'defaultExample' in client ? (client as V2Client) : null
+  const [fresh, setFresh] = useState<{ snapshot?: Snapshot; error?: unknown }>({})
+  useEffect(() => {
+    v2?.defaultExample().then((snapshot) => setFresh({ snapshot }), (error) => setFresh({ error }))
+  }, [v2])
   const example = EXAMPLES.find((e) => e.id === exampleId)!
-  if (!attempts.has(exampleId))
-    attempts.set(exampleId, newAttempt(example.snapshot as unknown as Snapshot, runRequestJson as unknown as RunRequest))
-  const attempt = attempts.get(exampleId)!
+  // 07·08도 같은 규칙으로 지금 시각에 옮긴다(만료가 아니라 원래 의도한 입력 누락·미확인 변경으로 막히게).
+  const source = !v2 ? (example.snapshot as unknown as Snapshot) : exampleId === '01' ? fresh.snapshot : shiftSnapshot(example.snapshot as unknown as Snapshot, new Date())
+  if (source && !attempts.has(exampleId)) attempts.set(exampleId, newAttempt(source, runRequestJson as unknown as RunRequest))
+  const attempt = attempts.get(exampleId)
+
+  if (!attempt)
+    return (
+      <main>
+        <p className={fresh.error ? 'card warn' : 'card'} role={fresh.error ? 'alert' : 'status'}>
+          {fresh.error ? `시연 예제를 받지 못했습니다: ${fresh.error instanceof Error ? fresh.error.message : String(fresh.error)}. 백엔드 실행(BANIPMATCH_WORKFLOW=1)을 확인하세요.` : '시연 세션과 예제 준비 중…'}
+        </p>
+      </main>
+    )
 
   async function start() {
+    if (!attempt) return
     let step = '입력 등록'
     try {
       setStatus({ state: 'sending', step })
@@ -65,13 +85,15 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   return (
     <main>
       <div className="banner" role="note">
-        로컬 모의 API에 연결된 화면입니다. 공통 예제 입력을 새 ID({attempt.snapshot.scenario_id})로 등록하고 선택한 방법으로 계산을 요청합니다.
+        로컬 모의 API{v2 && '(v0.2 세션)'}에 연결된 화면입니다. 공통 예제 입력을 새 ID({attempt.snapshot.scenario_id})로 등록하고 선택한 방법으로 계산을 요청합니다.
       </div>
       <section className="card">
         <h2>예제로 계산 요청</h2>
         <p className="muted">
           서버 설정에 따라 설명용 결과(illustrative_fixture, 승인 불가) 또는 엔진 실계산 결과를 돌려줍니다. 결과 화면의 &lsquo;결과 출처&rsquo;로 구분하세요.
-          공통 예제는 기준시각이 지난 모의 자료라 실계산이어도 승인은 입력 유효기간 만료(503 INPUT_EXPIRED)로 거절될 수 있습니다.
+          {v2
+            ? '예제는 모두 현재 시연 시각으로 옮긴 모의 자료입니다(01은 서버, 07·08은 같은 규칙으로 화면에서 이동). 07은 준비시각 누락으로 계산이 막히며, 아래에서 확인한 값을 보완해 다시 계산할 수 있습니다.'
+            : '공통 예제는 기준시각이 지난 모의 자료라 실계산이어도 승인은 입력 유효기간 만료(503 INPUT_EXPIRED)로 거절될 수 있습니다.'}
         </p>
         <p>
           <label>
@@ -161,6 +183,13 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         )}
       </section>
       {status.state === 'rejected' && <RejectedInput snapshot={status.snapshot} reason={status.error.message} />}
+      {status.state === 'rejected' && v2 && (
+        <ConditionRevisionPanel
+          client={v2}
+          snapshot={status.snapshot}
+          rerun={{ ...pick(runFor(attempt, picked).body), beforeRunId: null }}
+        />
+      )}
     </main>
   )
 }
@@ -183,3 +212,5 @@ function RejectedInput({ snapshot, reason }: { snapshot: Snapshot; reason: strin
     </>
   )
 }
+
+const pick = (r: RunRequest) => ({ methods: r.methods, time_limit_seconds: r.time_limit_seconds, seed: r.seed })

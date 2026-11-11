@@ -1,0 +1,16 @@
+{
+  "name": "반입맞춤 시험 수신",
+  "short_name": "반입맞춤",
+  "description": "배차 담당자가 확정한 모의 변경을 받아 보고 응답하는 시험 화면",
+  "lang": "ko",
+  "id": "/recipient",
+  "start_url": "/recipient",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d23a06",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
