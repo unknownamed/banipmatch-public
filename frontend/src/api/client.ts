@@ -30,7 +30,7 @@ export class ApiRequestError extends Error {
   }
 }
 
-async function readJson<T>(res: Response): Promise<T> {
+export async function readJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let body: ApiError | null = null
     try {
