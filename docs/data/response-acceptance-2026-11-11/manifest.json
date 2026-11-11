@@ -1,0 +1,56 @@
+{
+  "kind": "simulated",
+  "source_main": "e18b77f",
+  "external_actions_performed": false,
+  "method": "B1",
+  "config": {
+    "seed": 42,
+    "time_limit_seconds": 10
+  },
+  "cases": [
+    "cases/sequence-resolves.json",
+    "cases/ready-too-late.json",
+    "cases/equipment-shortage.json",
+    "cases/fixed-risk.json",
+    "cases/missing-ready.json",
+    "cases/unconfirmed-window.json",
+    "cases/search-limit.json",
+    "cases/unchanged-vehicles.json",
+    "cases/reassigned-both-vehicles.json"
+  ],
+  "pairs": [
+    "pairs/ready-only.json",
+    "pairs/extra-vehicle.json",
+    "pairs/missing-repaired.json",
+    "pairs/later-ready.json"
+  ],
+  "sha256": {
+    "cases/sequence-resolves.json": "621eee4812438cd8dd6963b3b158fe9a6c41e83fa9f778062eb9a277198bb06e",
+    "results/sequence-resolves.json": "9c6a4c5e455550c2d99f2a06eb1adf43fd4aea89ceb3adc445d27235d9e0d996",
+    "cases/ready-too-late.json": "da44c34be70af79f2245017fa1f7fa9098bbaf083472f138c637b3c29cb21426",
+    "results/ready-too-late.json": "ee76e2028a7658f931698c810536f5790f9d762af48655e5da2f32ab52e1222f",
+    "cases/equipment-shortage.json": "4375d6731fcbba0e03987a3d6a62b3ca0999e310c7084123b27362375ba84871",
+    "results/equipment-shortage.json": "cbc93bff25b4e61cfe685dc11e80c925d8f829eadfbf99a89e4b5dbb417fa7ce",
+    "cases/fixed-risk.json": "d97d2ca6d95946e5f88a0ac3b71d365dc3c513b4238937df291b50ba83a3509e",
+    "results/fixed-risk.json": "662ea66da7e86d44e1060e03a4a937e27a02de8dcf2ca4d4ea19cf0ea7d746ba",
+    "cases/missing-ready.json": "91a805fda4313a9b0ad005c51dea4247f651cae7d1eed25590cf4f46910c1982",
+    "results/missing-ready.json": "32898d1f3f769d5da461d16b10bd0e8a8898dc2ed5521bc33a1016ef82f6cacf",
+    "cases/unconfirmed-window.json": "bde6cd5fd6d4a0f71dde4febea9ab357d41b264f4c729ce1aab537f98c552664",
+    "results/unconfirmed-window.json": "e4317ed56962c5315fa66c999be612ed6952a5e5e1afda52b59cee910453952b",
+    "cases/search-limit.json": "61f2270e8fa280c8c9e2758f072d00bea646203b0cfe0927fd98f941bf54d09b",
+    "results/search-limit.json": "fcd0c1ae9859e757e8c1ddc13fb179201ab5f222fa02019c559e41aa151f5006",
+    "cases/unchanged-vehicles.json": "1b318f8768a790c3e8e03b55057330bcfad55c49a1dfa704083704e7654d2e3d",
+    "results/unchanged-vehicles.json": "6004fc9f870cfdaf15df999ca9824546ea39f28fc68ec7d3a09211aed2df0351",
+    "cases/reassigned-both-vehicles.json": "241cf050039689f217a8148d861ef26cdf955cd92e676b434d27f680297a7457",
+    "results/reassigned-both-vehicles.json": "6d678294de3ff91c43e88d86215bc20d9f95993f6a9834cbd076e34487bbfb30",
+    "pairs/ready-only.json": "819c317303ffc014e18be602adde79c00f8091cc4adee4909736ea3c72e7f247",
+    "results/ready-only.json": "332fcfaf298f04c3346f3a2db8129ef13d14a89798077d216be55fcde4956dd0",
+    "pairs/extra-vehicle.json": "ff77aabac2a78d223ee2a34ae42d3b3dea41e3cfea84cead10c75ae3d9dcb48d",
+    "results/extra-vehicle.json": "04377a5c3cf61f967b18d963ed24807761d57813e0c8d67609dd57e7b5d78fcd",
+    "pairs/missing-repaired.json": "e1aa400a58891ef74a96061845f61a3f417f1a0d99deec68444882ae54ba5117",
+    "results/missing-repaired.json": "02c96d62e2cd464fd1c3d9eac79fbfdab83d23b219f7a1bd6bc88b9bac109853",
+    "pairs/later-ready.json": "d29f4ea9d3b24feee62bc80df508c0cd7808dd7b58d2d4b62340ccb4b25bfcc8",
+    "results/later-ready.json": "b3f18e4cb2c42a502d060b39d699fbefa700aaeb879839807ed3e5e1c6ae3685",
+    "delivery-cases.json": "405ab1a0d9542ab3eb21b0e4acca24c9e631a6c99bce8bbe3e1958a5b6810d58"
+  }
+}

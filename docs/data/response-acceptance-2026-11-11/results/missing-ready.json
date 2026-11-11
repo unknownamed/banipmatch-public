@@ -1,0 +1,10 @@
+{
+  "status": "input_blocked",
+  "code": "INPUT_INCOMPLETE",
+  "details": [
+    {
+      "path": "/jobs/3/ready_at",
+      "reason": "INPUT_MISSING: 계산에 필요한 값이 미확인입니다."
+    }
+  ]
+}

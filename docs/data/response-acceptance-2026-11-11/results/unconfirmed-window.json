@@ -1,0 +1,14 @@
+{
+  "status": "input_blocked",
+  "code": "WINDOW_UNCONFIRMED",
+  "details": [
+    {
+      "path": "/windows/0/verification",
+      "reason": "WINDOW_UNCONFIRMED: 반입시간 변경 또는 시간창이 미확인입니다."
+    },
+    {
+      "path": "/change/verification",
+      "reason": "WINDOW_UNCONFIRMED: 반입시간 변경 또는 시간창이 미확인입니다."
+    }
+  ]
+}

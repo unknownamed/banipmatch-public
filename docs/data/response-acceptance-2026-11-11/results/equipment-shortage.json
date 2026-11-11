@@ -1,0 +1,319 @@
+{
+  "status": "computed",
+  "result": {
+    "method": "B1",
+    "result_origin": "computed",
+    "solution_status": "HEURISTIC",
+    "assignments": [
+      {
+        "job_id": "J0",
+        "vehicle_id": "T1",
+        "sequence": 1,
+        "pickup_departure_at": "2026-11-06T23:50:00Z",
+        "gate_arrival_at": "2026-11-07T00:20:00Z",
+        "return_at": "2026-11-07T01:00:00Z"
+      }
+    ],
+    "unassigned_job_ids": [
+      "J1",
+      "J2",
+      "J3"
+    ],
+    "issues": [
+      {
+        "job_id": "J0",
+        "code": "FIXED_RESIDUAL_RISK",
+        "explanation": "INCOMPATIBLE_EQUIPMENT: T1 장비 ['DRY20']에 DRY40 없음",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ]
+      },
+      {
+        "job_id": "J1",
+        "code": "INCOMPATIBLE_EQUIPMENT",
+        "explanation": "DRY40 호환 차량이 없습니다.",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ]
+      },
+      {
+        "job_id": "J3",
+        "code": "READY_TOO_LATE",
+        "explanation": "준비 2026-11-07T02:00:00Z + 적재 30분 + 여유 10분 = 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ]
+      },
+      {
+        "job_id": "J2",
+        "code": "INCOMPATIBLE_EQUIPMENT",
+        "explanation": "DRY40 호환 차량이 없습니다.",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ]
+      }
+    ],
+    "metrics": {
+      "unassigned_count": 3,
+      "feasible_movable_count": 0,
+      "movable_violation_count": 0,
+      "fixed_risk_count": 1,
+      "changed_job_ids": [],
+      "vehicle_changed_job_ids": [],
+      "order_changed_job_ids": [],
+      "time_changed_job_ids": [],
+      "movable_travel_minutes": 0,
+      "elapsed_ms": 2,
+      "newly_assigned_job_ids": []
+    },
+    "objective_proven": false,
+    "approval_eligible": true,
+    "engine_version": "0.2.3-b0-b3",
+    "solver_version": null,
+    "objective_stages": [],
+    "validation_status": "passed",
+    "execution_metadata": {
+      "solver_settings": {
+        "seed": 42,
+        "seed_used": false,
+        "time_limit_seconds": 10,
+        "algorithm": "deadline-insertion",
+        "tie_break": "arrival, vehicle_id, insertion_position",
+        "time_limit_reached": false
+      },
+      "initial_solution_ref": "snapshot.baseline_assignments",
+      "worker_count": 1
+    }
+  },
+  "preview": {
+    "artifact_version": "response-preview-0.1",
+    "stage": "review_before_approval",
+    "plan_id": "P001",
+    "scenario_id": "S56-equipment-shortage",
+    "base_plan_version": 1,
+    "input_sha256": "7b626465d349f496e5b0ff63888fa5422e5dddd560e2d63fede2a110c27fd1c2",
+    "method": "B1",
+    "result_sha256": "26f8b504dcbb1d62468a85f9de508a46eed91f69ea69a63ec9c232fe991dc0b3",
+    "data_mode": "simulated",
+    "delivery_authorized": false,
+    "external_actions_performed": false,
+    "change_reference": {
+      "change_id": "C001",
+      "verification": "confirmed",
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:scenario_001",
+        "observed_at": null,
+        "received_at": "2026-11-07T00:00:00Z"
+      }
+    },
+    "changes": [
+      {
+        "job_id": "J1",
+        "kind": "removed_from_plan",
+        "changed_fields": [
+          "gate_arrival_at",
+          "pickup_departure_at",
+          "return_at",
+          "sequence",
+          "vehicle_id"
+        ],
+        "before": {
+          "job_id": "J1",
+          "vehicle_id": "T1",
+          "sequence": 2,
+          "pickup_departure_at": "2026-11-07T01:10:00Z",
+          "gate_arrival_at": "2026-11-07T01:40:00Z",
+          "return_at": "2026-11-07T02:20:00Z"
+        },
+        "after": null,
+        "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+      },
+      {
+        "job_id": "J2",
+        "kind": "removed_from_plan",
+        "changed_fields": [
+          "gate_arrival_at",
+          "pickup_departure_at",
+          "return_at",
+          "sequence",
+          "vehicle_id"
+        ],
+        "before": {
+          "job_id": "J2",
+          "vehicle_id": "T2",
+          "sequence": 1,
+          "pickup_departure_at": "2026-11-07T00:20:00Z",
+          "gate_arrival_at": "2026-11-07T00:50:00Z",
+          "return_at": "2026-11-07T01:30:00Z"
+        },
+        "after": null,
+        "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+      },
+      {
+        "job_id": "J3",
+        "kind": "removed_from_plan",
+        "changed_fields": [
+          "gate_arrival_at",
+          "pickup_departure_at",
+          "return_at",
+          "sequence",
+          "vehicle_id"
+        ],
+        "before": {
+          "job_id": "J3",
+          "vehicle_id": "T2",
+          "sequence": 2,
+          "pickup_departure_at": "2026-11-07T02:00:00Z",
+          "gate_arrival_at": "2026-11-07T02:30:00Z",
+          "return_at": "2026-11-07T03:10:00Z"
+        },
+        "after": null,
+        "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+      }
+    ],
+    "vehicle_changes": [
+      {
+        "vehicle_id": "T1",
+        "changes": [
+          {
+            "job_id": "J1",
+            "kind": "removed_from_plan",
+            "changed_fields": [
+              "gate_arrival_at",
+              "pickup_departure_at",
+              "return_at",
+              "sequence",
+              "vehicle_id"
+            ],
+            "before": {
+              "job_id": "J1",
+              "vehicle_id": "T1",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T01:10:00Z",
+              "gate_arrival_at": "2026-11-07T01:40:00Z",
+              "return_at": "2026-11-07T02:20:00Z"
+            },
+            "after": null,
+            "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+          }
+        ]
+      },
+      {
+        "vehicle_id": "T2",
+        "changes": [
+          {
+            "job_id": "J2",
+            "kind": "removed_from_plan",
+            "changed_fields": [
+              "gate_arrival_at",
+              "pickup_departure_at",
+              "return_at",
+              "sequence",
+              "vehicle_id"
+            ],
+            "before": {
+              "job_id": "J2",
+              "vehicle_id": "T2",
+              "sequence": 1,
+              "pickup_departure_at": "2026-11-07T00:20:00Z",
+              "gate_arrival_at": "2026-11-07T00:50:00Z",
+              "return_at": "2026-11-07T01:30:00Z"
+            },
+            "after": null,
+            "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+          },
+          {
+            "job_id": "J3",
+            "kind": "removed_from_plan",
+            "changed_fields": [
+              "gate_arrival_at",
+              "pickup_departure_at",
+              "return_at",
+              "sequence",
+              "vehicle_id"
+            ],
+            "before": {
+              "job_id": "J3",
+              "vehicle_id": "T2",
+              "sequence": 2,
+              "pickup_departure_at": "2026-11-07T02:00:00Z",
+              "gate_arrival_at": "2026-11-07T02:30:00Z",
+              "return_at": "2026-11-07T03:10:00Z"
+            },
+            "after": null,
+            "instruction": "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
+          }
+        ]
+      }
+    ],
+    "followups": [
+      {
+        "job_id": "J0",
+        "code": "FIXED_RESIDUAL_RISK",
+        "explanation": "INCOMPATIBLE_EQUIPMENT: T1 장비 ['DRY20']에 DRY40 없음",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ],
+        "contact_role": "배차 담당자·해당 기사",
+        "check_next": "출발·고정 작업은 유지하고 실제 진행 상황과 대응 가능 여부를 확인하세요. 자동 취소·재배정하지 마세요.",
+        "action_kind": "manual_check",
+        "automatic_resolution": false
+      },
+      {
+        "job_id": "J1",
+        "code": "INCOMPATIBLE_EQUIPMENT",
+        "explanation": "DRY40 호환 차량이 없습니다.",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ],
+        "contact_role": "운송사 차량 담당",
+        "check_next": "작업에 맞는 장비를 갖춘 가용 차량이 있는지 확인하세요.",
+        "action_kind": "manual_check",
+        "automatic_resolution": false
+      },
+      {
+        "job_id": "J3",
+        "code": "READY_TOO_LATE",
+        "explanation": "준비 2026-11-07T02:00:00Z + 적재 30분 + 여유 10분 = 2026-11-07T02:40:00Z > 마감 2026-11-07T01:30:00Z. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ],
+        "contact_role": "화주·상차지 확인 담당",
+        "check_next": "상차 준비 완료 시각을 확인하세요. 앞당길 수 있다고 확인된 경우에만 새 ready_at으로 다시 계산하세요.",
+        "action_kind": "manual_check",
+        "automatic_resolution": false
+      },
+      {
+        "job_id": "J2",
+        "code": "INCOMPATIBLE_EQUIPMENT",
+        "explanation": "DRY40 호환 차량이 없습니다.",
+        "proof_level": "constraint_check",
+        "evidence_refs": [
+          "fixture:scenario_001"
+        ],
+        "contact_role": "운송사 차량 담당",
+        "check_next": "작업에 맞는 장비를 갖춘 가용 차량이 있는지 확인하세요.",
+        "action_kind": "manual_check",
+        "automatic_resolution": false
+      }
+    ],
+    "unassigned_job_ids": [
+      "J1",
+      "J2",
+      "J3"
+    ],
+    "limits": [
+      "자료 파일의 검수 결과이며 현재 서버 계획·권한·유효기간의 확인을 대신하지 않습니다.",
+      "확인할 사항은 담당자 판단을 돕는 안내이며 현장의 원인·해결 가능성·연락 결과를 증명하지 않습니다.",
+      "차량별 변경은 수신자 명단이 아닙니다. 기사 배정·동의·연락 경로는 별도 확인해야 합니다."
+    ]
+  }
+}
