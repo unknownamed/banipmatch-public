@@ -2,13 +2,14 @@ import { useState } from 'react'
 import fixture from '../fixtures/reference-preview.synthetic.json'
 import { BLOCKER_LABEL, KIND_LABEL, display, type ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
+import { LiveReference } from './LiveReference'
 
 type Source = 'live' | 'replay' | 'mock'
 const cases = fixture.cases as unknown as { id: string; label: string; view: ReferenceView }[]
 
 /**
  * #32 실제·재생·모의 자료 구분 화면. 사용자가 자료 종류를 직접 고르며, 실패해도 다른 종류로 자동 전환하지 않는다.
- * 지금은 서버 읽기 경로가 없어(PR #42는 내부 모듈) 실제 조회·재생은 '연결 전'으로만 보여준다.
+ * 실제 수신 결과는 인증된 /v2/references/current에서 읽는다. 과거 재생과 모의 예제는 구분한다.
  */
 export function ReferencePanel() {
   const [source, setSource] = useState<Source>('mock')
@@ -23,14 +24,14 @@ export function ReferencePanel() {
           항차별 반입 시작·마감과 접안 예정(ETB)을 참고로 보여줍니다. 참고 자료는 배차 계산 입력이 아니며, 접안 예정 변화를 반입 마감 변경으로 바꾸지 않습니다.
         </p>
         <div className="tabs" role="radiogroup" aria-label="자료 종류">
-          {([['live', '실제 현재 조회'], ['replay', '저장 자료 재생'], ['mock', '모의 시연']] as const).map(([id, label]) => (
+          {([['live', '마지막 실제 수신'], ['replay', '저장 자료 재생'], ['mock', '모의 시연']] as const).map(([id, label]) => (
             <button key={id} type="button" role="radio" aria-checked={source === id} aria-selected={source === id} onClick={() => setSource(id)}>{label}</button>
           ))}
         </div>
 
-        {source !== 'mock' ? (
+        {source === 'live' ? <LiveReference /> : source !== 'mock' ? (
           <p className="warn small" role="status">
-            {source === 'live' ? '실제 조회는' : '저장 자료 재생은'} 아직 연결되지 않았습니다. 서버의 읽기 경로가 생기기 전에는 결과를 보여주지 않으며, 모의 자료로 대신 채우지 않습니다.
+            과거 저장 자료 재생은 아직 연결되지 않았습니다. 마지막 실제 수신 자료는 첫 번째 탭에서 확인할 수 있습니다. 모의 자료로 대신 채우지 않습니다.
           </p>
         ) : (
           <>

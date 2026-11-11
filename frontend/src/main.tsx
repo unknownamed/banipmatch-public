@@ -1,11 +1,11 @@
-import { StrictMode, useMemo } from 'react'
+import { StrictMode, Suspense, lazy, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
 import { createHttpClient } from './api/client'
 import { createFixtureClient, FIXTURE_IDS } from './api/fixtureClient'
 import { createV2Client } from './api/v2'
 import { AppBar } from './components/AppBar'
-import { MapCheck } from './components/MapCheck'
+const MapCheck = lazy(() => import('./components/MapCheck').then(m => ({ default: m.MapCheck })))
 import { StartRunPanel } from './components/StartRunPanel'
 import { RecipientApp } from './components/RecipientApp'
 import { createRecipientClient } from './api/recipient'
@@ -64,7 +64,7 @@ createRoot(document.getElementById('root')!).render(
     ) : (
       <>
         <AppBar mode={mode} />
-        {params.get('view') === 'map' ? <MapCheck /> : params.get('view') === 'reference' ? <ReferencePanel /> : <Root />}
+        <Suspense fallback={<main><p role="status">지도 불러오는 중…</p></main>}>{params.get('view') === 'map' ? <MapCheck /> : params.get('view') === 'reference' ? <ReferencePanel /> : <Root />}</Suspense>
       </>
     )}
   </StrictMode>,

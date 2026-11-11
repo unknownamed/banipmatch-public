@@ -154,6 +154,13 @@ def install(app, settings, *, replay=None, sender=None, clock=None):
         source = json.loads((DRAFT / "예제 데이터" / "01_snapshot.json").read_text(encoding="utf-8"))
         return prepare_snapshot(source, hub.clock().replace(second=0, microsecond=0), uuid4().hex[:12])
 
+    from backend.references.display import LiveDisplay, read_display
+
+    @app.get('/v2/references/current', response_model=LiveDisplay)
+    def reference_display(request: Request):
+        manager(request)
+        return read_display(settings.reference_file)
+
     @app.post("/v2/scenarios")
     def register(request: Request, body: dict = Body(...)):
         domain, _ = manager(request, write=True)

@@ -2,6 +2,7 @@
 // 지도는 배경이며 차량 GPS·선박 위치를 표시하지 않는다.
 import { tokens } from '../styles/tokens'
 import { useEffect, useRef, useState } from 'react'
+import { FleetMap } from './FleetMap'
 
 declare global {
   interface Window {
@@ -21,6 +22,11 @@ const MAP_TYPES = [
 type MapType = (typeof MAP_TYPES)[number][0]
 
 export function MapCheck() {
+  const [satellite, setSatellite] = useState(false)
+  return <><div className="map-choice"><button className="secondary" onClick={()=>setSatellite(!satellite)}>{satellite?'모의 선박 지도':'카카오 일반·위성 지도 연결'}</button></div>{satellite?<KakaoMapCheck/>:<FleetMap/>}</>
+}
+
+function KakaoMapCheck() {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<any>(null)
   const [status, setStatus] = useState('지도 SDK 불러오는 중…')

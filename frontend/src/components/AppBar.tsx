@@ -31,7 +31,7 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
         {link('map', '지도 확인', `?${mapParams.toString()}`, 'map')}
         {link('reference', '참고 자료', `?${refParams.toString()}`, 'clock')}
       </nav>
-      <span className="appbar-note">{mode === 'http' ? '로컬 모의 API' : '공통 예제'}</span>
+      <span className="appbar-note">{mode === 'http' ? '모의 배차 · 서버 계산' : '공통 예제'}</span>
     </header>
   )
 }

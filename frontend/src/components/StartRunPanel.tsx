@@ -85,7 +85,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   return (
     <main>
       <div className="banner" role="note">
-        로컬 모의 API{v2 && '(v0.2 세션)'}에 연결된 화면입니다. 공통 예제 입력을 새 ID({attempt.snapshot.scenario_id})로 등록하고 선택한 방법으로 계산을 요청합니다.
+        모의 배차를 서버에서 직접 계산합니다. 예제를 고른 뒤 계산을 요청하면 원안과 조정안을 비교할 수 있습니다. {v2 && '다른 방문자의 배차와는 분리됩니다.'}
       </div>
       <section className="card">
         <h2>예제로 계산 요청</h2>
