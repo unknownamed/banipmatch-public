@@ -56,6 +56,7 @@ export function createRecipientClient(base = '') {
     pushConfig: () => get<{ configured: boolean; application_server_key: string | null }>('/v2/recipient/push-config'),
     subscribe: (subscription: PushSubscriptionJSON) =>
       write<{ subscription_status: string }>('POST', '/v2/recipient/subscription', {
+        // 브라우저가 만료시각을 주면 그대로 보낸다(서버가 만료된 구독을 정리할 수 있게). 없을 때만 null.
         subscription: { endpoint: subscription.endpoint, keys: subscription.keys, expirationTime: subscription.expirationTime ?? null },
         notification_permission: 'granted',
         consent: true,
