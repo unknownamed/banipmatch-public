@@ -30,7 +30,8 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
     client.get<DispatchPreview>(`/v2/plans/${enc(planId)}/dispatch-preview`).then((data) => live && setPreview({ data }), (error) => live && setPreview({ error }))
     client.session().then((s) => live && setSession(s), () => {})
     loadRecipients()
-    return () => { live = false }
+    const timer = setInterval(loadRecipients, 5000)
+    return () => { live = false; clearInterval(timer) }
   }, [client, planId, loadRecipients])
 
   if (preview.error) {

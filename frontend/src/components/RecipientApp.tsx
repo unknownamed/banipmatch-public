@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { RecipientClient, RecipientNotification, RecipientSession } from '../api/recipient'
 import { CHANGE_LABEL, RESPONSE_LABEL } from '../lib/dispatch'
@@ -118,6 +118,15 @@ function PasteInvite({ busy, onInvite }: { busy: boolean; onInvite: (token: stri
 function Connected({ client, session, env, demo, focus, onLeave }: { client: RecipientClient; session: RecipientSession; env: PlatformInfo; demo: boolean; focus: string | null; onLeave: () => void }) {
   const [inbox, setInbox] = useState<{ items?: RecipientNotification[]; error?: unknown }>({})
   const [selected, setSelected] = useState<string | null>(focus)
+  const [leaving, setLeaving] = useState(false)
+  const [leaveError, setLeaveError] = useState<unknown>(null)
+  async function leave() {
+    setLeaving(true)
+    setLeaveError(null)
+    try { await client.leave(); onLeave() }
+    catch (e) { setLeaveError(e) }
+    finally { setLeaving(false) }
+  }
   const load = useCallback(() => client.inbox().then((r) => setInbox({ items: r.notifications }), (error) => setInbox((s) => ({ ...s, error }))), [client])
   useEffect(() => {
     load()
@@ -155,9 +164,10 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
           ))}
         </nav>
       )}
-      {current && <NotificationDetail key={current.notification_id} client={client} id={current.notification_id} onChanged={load} />}
+      {current && <NotificationDetail key={current.notification_id} client={client} summary={current} onChanged={load} />}
 
-      <p className="small"><button type="button" className="secondary" onClick={() => client.leave().finally(onLeave)}>이 기기 연결 해제</button></p>
+      <p className="small"><button type="button" className="secondary" disabled={leaving} onClick={leave}>이 기기 연결 해제</button></p>
+      {leaveError !== null && <p className="warn small" role="alert">연결 해제 실패: {errText(leaveError)}. 연결은 유지됩니다. 다시 시도해 주세요.</p>}
     </>
   )
 }
@@ -221,11 +231,13 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
   )
 }
 
-function NotificationDetail({ client, id, onChanged }: { client: RecipientClient; id: string; onChanged: () => void }) {
+function NotificationDetail({ client, summary, onChanged }: { client: RecipientClient; summary: RecipientNotification; onChanged: () => void }) {
+  const id = summary.notification_id
   const [n, setN] = useState<{ data?: RecipientNotification; error?: unknown }>({})
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [sendError, setSendError] = useState<unknown>(null)
+  const attempt = useRef<{ body: string; key: string } | null>(null)
 
   useEffect(() => {
     let live = true
@@ -236,13 +248,16 @@ function NotificationDetail({ client, id, onChanged }: { client: RecipientClient
       if (data.is_current && data.payload && !data.opened_at) client.opened(id).then((d) => live && setN({ data: d }), () => {})
     }, (error) => live && setN({ error }))
     return () => { live = false }
-  }, [client, id])
+  }, [client, id, summary])
 
   async function respond(response: 'acknowledged' | 'can_perform' | 'cannot_perform') {
     setBusy(true)
     setSendError(null)
+    const body = JSON.stringify([id, response, note.trim()])
+    if (attempt.current?.body !== body) attempt.current = { body, key: `respond-${id}-${crypto.randomUUID()}` }
     try {
-      setN({ data: await client.respond(id, response, note.trim(), `respond-${id}-${crypto.randomUUID()}`) })
+      setN({ data: await client.respond(id, response, note.trim(), attempt.current.key) })
+      attempt.current = null
       setNote('')
       onChanged()
     } catch (e) {
@@ -255,7 +270,7 @@ function NotificationDetail({ client, id, onChanged }: { client: RecipientClient
   if (n.error) return <p className="card warn small" role="alert">변경 내용 조회 실패: {errText(n.error)}</p>
   if (!n.data) return <p className="card muted" role="status">변경 내용 불러오는 중…</p>
   const d = n.data
-  if (!d.is_current || !d.payload)
+  if (!summary.is_current || !d.is_current || !d.payload || isCode(sendError, 'NOTIFICATION_SUPERSEDED'))
     return (
       <section className="card">
         <h2>이전 계획의 알림</h2>

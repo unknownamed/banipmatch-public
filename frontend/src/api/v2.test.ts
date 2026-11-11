@@ -42,7 +42,7 @@ describe('v2 세션', () => {
     const calls = stubFetch(
       [200, session('old')],
       [410, { code: 'SESSION_EXPIRED', message: '만료' }],
-      [401, { code: 'SESSION_REQUIRED', message: '' }],
+      [410, { code: 'SESSION_EXPIRED', message: '만료된 쿠키' }],
       [201, session('new')],
       [202, { run_id: 'R' }],
     )
