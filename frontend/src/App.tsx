@@ -8,7 +8,7 @@ import { acknowledgeIds, approvalGate, approvalIdempotencyKey, type ApprovalGate
 import { buildRows } from './lib/compare'
 import { hasAssumedCondition } from './lib/revision'
 import type { V2Client } from './api/v2'
-import { ConditionRevisionPanel, RevisionComparison } from './components/RevisionPanels'
+import { ConditionRevisionPanel, NextPlanPanel, RevisionComparison } from './components/RevisionPanels'
 import { DispatchPanel } from './components/DispatchPanel'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
@@ -35,6 +35,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
     return () => { live = false }
   }, [client, run?.plan_id, approval.value?.status.state])
   const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
+  const approvedPlan = approval.value?.status.state === 'done' || !!(run && planNow?.planId === run.plan_id && planNow.version > run.base_plan_version)
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
   const v2 = 'session' in client ? (client as V2Client) : null
   const params = new URLSearchParams(location.search)
@@ -113,7 +114,9 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         <DispatchPanel key={`${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
       )}
 
-      {v2 && snapshot && run && view.results.state === 'ready' && <ConditionRevisionPanel client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />}
+      {v2 && snapshot && run && view.results.state === 'ready' && (approvedPlan
+        ? <NextPlanPanel key={`${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: null }} />
+        : <ConditionRevisionPanel key={snapshot.scenario_id} client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />)}
     </main>
   )
 }

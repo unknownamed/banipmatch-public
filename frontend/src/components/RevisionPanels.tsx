@@ -23,7 +23,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   const [draft, setDraft] = useState<VehicleDraft>(EMPTY_DRAFT)
   const [status, setStatus] = useState<{ state: 'idle' } | { state: 'sending'; step: string } | { state: 'error'; step: string; error: unknown }>({ state: 'idle' })
   // 같은 내용으로 다시 시도하면 같은 멱등키를 쓴다. 내용이 바뀌면 새 키.
-  const attempt = useRef<{ sig: string; id: string } | null>(null)
+  const attempt = useRef<{ sig: string; id: string; body: { snapshot: Snapshot; reason: string; confirmation: Confirmation }; revision?: RevisionState } | null>(null)
   const changes = listChanges(snapshot, edits)
   const sending = status.state === 'sending'
   // 입력 중이거나 잘못된 시각이 있으면 그 값만 빼고 보내지 않도록 전체 제출을 막는다.
@@ -43,14 +43,19 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   }
 
   async function submit() {
-    const sig = JSON.stringify([changes, added, reason.trim(), confirmation])
-    if (attempt.current?.sig !== sig) attempt.current = { sig, id: crypto.randomUUID() }
-    const id = attempt.current.id
+    const sig = JSON.stringify([snapshot, changes, added, reason.trim(), confirmation, rerun])
     let step = '새 입력 저장'
     try {
       setStatus({ state: 'sending', step })
-      const after = revisedSnapshot(snapshot, changes, confirmation, new Date(), added)
-      const rev = await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, { snapshot: after, reason: reason.trim(), confirmation }, `revision-${id}`)
+      // 시각까지 첫 요청 그대로 유지한다. 응답 유실 후 재시도에서도 같은 키/본문이어야 한다.
+      if (attempt.current?.sig !== sig) attempt.current = {
+        sig, id: crypto.randomUUID(),
+        body: { snapshot: revisedSnapshot(snapshot, changes, confirmation, new Date(), added), reason: reason.trim(), confirmation },
+      }
+      const current = attempt.current
+      const { id } = current
+      current.revision ??= await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, current.body, `revision-${id}`)
+      const rev = current.revision
       step = '재계산 요청'
       setStatus({ state: 'sending', step })
       // 전후 비교가 공정하도록 이전 실행과 같은 방법·제한시간·seed를 쓴다.
@@ -185,6 +190,39 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
       {status.state === 'error' && <ErrorNote step={status.step} error={status.error} />}
     </section>
   )
+}
+
+/** 승인된 배정을 새 원안으로 삼는다. 응답 유실 시 첫 next-input/등록 요청을 그대로 재사용한다. */
+export function NextPlanPanel({ client, planId, rerun }: { client: V2Client; planId: string; rerun: Rerun }) {
+  const attempt = useRef<{ id: string; snapshot?: Snapshot; registered?: boolean } | null>(null)
+  const [status, setStatus] = useState<{ busy: boolean; step: string; error?: unknown }>({ busy: false, step: '' })
+  async function start() {
+    attempt.current ??= { id: crypto.randomUUID() }
+    const current = attempt.current
+    let step = '확정 계획 조회'
+    try {
+      setStatus({ busy: true, step })
+      current.snapshot ??= await client.get<Snapshot>(`/v2/plans/${encodeURIComponent(planId)}/next-input`)
+      step = '새 원안 등록'
+      setStatus({ busy: true, step })
+      if (!current.registered) {
+        await client.registerScenario!(current.snapshot, `next-input-${current.id}`)
+        current.registered = true
+      }
+      step = '새 기준 계산'
+      setStatus({ busy: true, step })
+      const next = await client.createRun!({ scenario_id: current.snapshot.scenario_id, base_plan_version: current.snapshot.base_plan_version,
+        methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed }, `next-run-${current.id}`)
+      location.search = `?${new URLSearchParams({ scenario: next.scenario_id, run: next.run_id })}`
+    } catch (error) { setStatus({ busy: false, step, error }) }
+  }
+  return <section className="card">
+    <h2>확정된 계획에서 이어서 점검</h2>
+    <p>승인 전 입력은 그대로 보존됩니다. 다음 점검은 확정된 차량별 배정과 미처리 작업을 새 원안으로 가져옵니다.</p>
+    <p className="small muted">새 점검을 시작하면 이전 변경 알림은 지난 지시로 표시됩니다. 필요한 전달·응답 확인을 마친 뒤 진행하세요.</p>
+    <button type="button" disabled={status.busy} onClick={start}>{status.busy ? `${status.step} 중…` : status.error ? '다시 시도' : '확정 계획으로 새 점검 시작'}</button>
+    {status.error != null && <ErrorNote step={status.step} error={status.error} />}
+  </section>
 }
 
 function ErrorNote({ step, error }: { step: string; error: unknown }) {
