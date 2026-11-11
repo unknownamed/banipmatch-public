@@ -8,7 +8,7 @@ import { acknowledgeIds, approvalGate, approvalIdempotencyKey, type ApprovalGate
 import { buildRows } from './lib/compare'
 import { hasAssumedCondition } from './lib/revision'
 import type { V2Client } from './api/v2'
-import { ConditionRevisionPanel, RevisionComparison } from './components/RevisionPanels'
+import { ConditionRevisionPanel, NextInputCard, RevisionComparison } from './components/RevisionPanels'
 import { DispatchPanel } from './components/DispatchPanel'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
@@ -34,6 +34,8 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
     client.getPlan(run.plan_id).then((p) => live && p.plan_id === run.plan_id && setPlanNow({ planId: p.plan_id, version: p.version })).catch(() => {})
     return () => { live = false }
   }, [client, run?.plan_id, approval.value?.status.state])
+  // 이 결과 이후 계획 버전이 올라갔는지(이번 화면 승인 또는 이미 승인됨). 이전 버전 입력으로는 조건 보완을 보내지 않는다.
+  const planAdvanced = !!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))
   const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
   const v2 = 'session' in client ? (client as V2Client) : null
@@ -109,11 +111,15 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       </div>
 
       {/* 승인 뒤(이번 화면에서 승인했거나 계획 버전이 이미 올라간 경우) 전달 단계. 최종 확인은 서버의 dispatch-preview가 한다. */}
-      {v2 && run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version)) && (
+      {v2 && run && planAdvanced && (
         <DispatchPanel key={`${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
       )}
 
-      {v2 && snapshot && run && view.results.state === 'ready' && <ConditionRevisionPanel client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />}
+      {v2 && snapshot && run && view.results.state === 'ready' && (planAdvanced ? (
+        <NextInputCard client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed }} />
+      ) : (
+        <ConditionRevisionPanel client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />
+      ))}
     </main>
   )
 }

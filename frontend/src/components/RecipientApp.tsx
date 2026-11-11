@@ -155,9 +155,9 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
           ))}
         </nav>
       )}
-      {current && <NotificationDetail key={current.notification_id} client={client} id={current.notification_id} onChanged={load} />}
+      {current && <NotificationDetail key={current.notification_id} client={client} id={current.notification_id} listCurrent={current.is_current} onChanged={load} />}
 
-      <p className="small"><button type="button" className="secondary" onClick={() => client.leave().finally(onLeave)}>이 기기 연결 해제</button></p>
+      <LeaveButton client={client} onLeave={onLeave} />
     </>
   )
 }
@@ -221,7 +221,30 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
   )
 }
 
-function NotificationDetail({ client, id, onChanged }: { client: RecipientClient; id: string; onChanged: () => void }) {
+/** 연결 해제는 서버가 성공을 돌려준 뒤에만 화면을 바꾼다. 실패하면 연결·구독이 남아 있으므로 여기서 다시 시도하게 한다. */
+function LeaveButton({ client, onLeave }: { client: RecipientClient; onLeave: () => void }) {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<unknown>(null)
+  async function leave() {
+    setBusy(true)
+    setError(null)
+    try {
+      await client.leave()
+      onLeave()
+    } catch (e) {
+      setError(e)
+      setBusy(false)
+    }
+  }
+  return (
+    <div className="small">
+      <button type="button" className="secondary" disabled={busy} onClick={leave}>{busy ? '해제 중…' : '이 기기 연결 해제'}</button>
+      {error !== null && <p className="warn" role="alert">연결 해제 실패: {errText(error)}. 아직 연결돼 있어 알림이 올 수 있습니다. 다시 시도하세요.</p>}
+    </div>
+  )
+}
+
+function NotificationDetail({ client, id, listCurrent, onChanged }: { client: RecipientClient; id: string; listCurrent: boolean; onChanged: () => void }) {
   const [n, setN] = useState<{ data?: RecipientNotification; error?: unknown }>({})
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
@@ -246,6 +269,8 @@ function NotificationDetail({ client, id, onChanged }: { client: RecipientClient
       setNote('')
       onChanged()
     } catch (e) {
+      // 서버가 이전 계획이라고 하면 화면에 남은 상세·응답 버튼도 바로 지운다.
+      if (isCode(e, 'NOTIFICATION_SUPERSEDED')) setN((x) => (x.data ? { data: { ...x.data, is_current: false, payload: null } } : x))
       setSendError(e)
     } finally {
       setBusy(false)
@@ -255,7 +280,8 @@ function NotificationDetail({ client, id, onChanged }: { client: RecipientClient
   if (n.error) return <p className="card warn small" role="alert">변경 내용 조회 실패: {errText(n.error)}</p>
   if (!n.data) return <p className="card muted" role="status">변경 내용 불러오는 중…</p>
   const d = n.data
-  if (!d.is_current || !d.payload)
+  // 목록 재조회에서 이전 계획이 됐으면(같은 알림 ID여도) 열어 둔 상세를 가린다.
+  if (!listCurrent || !d.is_current || !d.payload)
     return (
       <section className="card">
         <h2>이전 계획의 알림</h2>
@@ -289,8 +315,8 @@ function NotificationDetail({ client, id, onChanged }: { client: RecipientClient
       <h3>응답</h3>
       <p className="small">현재: <b>{RESPONSE_LABEL[d.response]}</b>{d.responded_at && ` · ${kstTime(d.responded_at)}`}</p>
       <label className="rev-reason">
-        메모 (선택 · 개인정보 쓰지 않기)
-        <textarea rows={2} maxLength={500} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} />
+        메모 (선택 · 300자 · 개인정보 쓰지 않기)
+        <textarea rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} />
       </label>
       <div className="respond-buttons">
         <button type="button" disabled={busy} onClick={() => respond('acknowledged')}>확인함</button>

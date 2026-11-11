@@ -123,4 +123,46 @@ describe('수신자 화면', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
     fetchSpy.mockRestore()
   })
+
+  it('목록에서 이전 계획이 된 알림은 상세가 아직 최신으로 와도 가린다', async () => {
+    const client = fake({ restore: vi.fn().mockResolvedValue(session), inbox: vi.fn().mockResolvedValue({ notifications: [note({ is_current: false, payload: null })] }), notification: vi.fn().mockResolvedValue(note({})) })
+    await act(async () => root.render(<RecipientApp client={client} boot={{ invite: null, notification: 'N1' }} env={android} />))
+    await flush()
+    await flush()
+    expect(container.textContent).toContain('이전 계획의 알림')
+    expect(button('수행 가능')).toBeUndefined()
+  })
+
+  it('응답 중 NOTIFICATION_SUPERSEDED면 상세와 응답 버튼을 바로 지운다', async () => {
+    const client = fake({
+      restore: vi.fn().mockResolvedValue(session), inbox: vi.fn().mockResolvedValue({ notifications: [note({})] }), notification: vi.fn().mockResolvedValue(note({})),
+      respond: vi.fn().mockRejectedValue(new ApiRequestError(409, { code: 'NOTIFICATION_SUPERSEDED', message: '' })),
+    })
+    await act(async () => root.render(<RecipientApp client={client} boot={{ invite: null, notification: null }} env={android} />))
+    await flush()
+    await flush()
+    await act(async () => button('수행 가능')!.click())
+    await flush()
+    expect(container.textContent).toContain('이전 계획의 알림')
+    expect(button('수행 가능')).toBeUndefined()
+  })
+
+  it('연결 해제가 실패하면 화면을 바꾸지 않고 다시 시도하게 한다', async () => {
+    const client = fake({ restore: vi.fn().mockResolvedValue(session), leave: vi.fn().mockRejectedValue(new Error('network')) })
+    await act(async () => root.render(<RecipientApp client={client} boot={{ invite: null, notification: null }} env={android} />))
+    await flush()
+    await act(async () => button('이 기기 연결 해제')!.click())
+    await flush()
+    expect(container.textContent).toContain('내 차량 T1')
+    expect(container.textContent).toContain('연결 해제 실패')
+  })
+
+  it('메모는 서버 한도와 같은 300자까지만 받는다', async () => {
+    const client = fake({ restore: vi.fn().mockResolvedValue(session), inbox: vi.fn().mockResolvedValue({ notifications: [note({})] }), notification: vi.fn().mockResolvedValue(note({})) })
+    await act(async () => root.render(<RecipientApp client={client} boot={{ invite: null, notification: null }} env={android} />))
+    await flush()
+    await flush()
+    expect(container.querySelector('textarea')!.maxLength).toBe(300)
+  })
 })
+

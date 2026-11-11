@@ -22,8 +22,9 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   const [confirmation, setConfirmation] = useState<Confirmation>('confirmed_simulation')
   const [draft, setDraft] = useState<VehicleDraft>(EMPTY_DRAFT)
   const [status, setStatus] = useState<{ state: 'idle' } | { state: 'sending'; step: string } | { state: 'error'; step: string; error: unknown }>({ state: 'idle' })
-  // 같은 내용으로 다시 시도하면 같은 멱등키를 쓴다. 내용이 바뀌면 새 키.
-  const attempt = useRef<{ sig: string; id: string } | null>(null)
+  // 같은 내용으로 다시 시도하면 같은 멱등키와 **첫 본문**을 그대로 쓴다(분이 바뀌어 as_of가 달라지면 409가 나므로).
+  // 저장이 이미 끝났으면 저장은 건너뛰고 계산 요청만 다시 한다. 내용이 바뀌면 새 시도.
+  const attempt = useRef<{ sig: string; id: string; body?: unknown; rev?: RevisionState } | null>(null)
   const changes = listChanges(snapshot, edits)
   const sending = status.state === 'sending'
   // 입력 중이거나 잘못된 시각이 있으면 그 값만 빼고 보내지 않도록 전체 제출을 막는다.
@@ -45,12 +46,14 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   async function submit() {
     const sig = JSON.stringify([changes, added, reason.trim(), confirmation])
     if (attempt.current?.sig !== sig) attempt.current = { sig, id: crypto.randomUUID() }
-    const id = attempt.current.id
+    const a = attempt.current
+    const id = a.id
     let step = '새 입력 저장'
     try {
       setStatus({ state: 'sending', step })
-      const after = revisedSnapshot(snapshot, changes, confirmation, new Date(), added)
-      const rev = await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, { snapshot: after, reason: reason.trim(), confirmation }, `revision-${id}`)
+      a.body ??= { snapshot: revisedSnapshot(snapshot, changes, confirmation, new Date(), added), reason: reason.trim(), confirmation }
+      a.rev ??= await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, a.body, `revision-${id}`)
+      const rev = a.rev
       step = '재계산 요청'
       setStatus({ state: 'sending', step })
       // 전후 비교가 공정하도록 이전 실행과 같은 방법·제한시간·seed를 쓴다.
@@ -182,6 +185,49 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
         {sending ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '새 입력으로 재계산'}
       </button>
       {!changes.length && !added.length && <p className="small muted">바꿀 값을 하나 이상 입력하거나 차량을 추가하세요.</p>}
+      {status.state === 'error' && <ErrorNote step={status.step} error={status.error} />}
+    </section>
+  )
+}
+
+/**
+ * 승인 뒤 조건 보완: 이전 버전 입력은 서버가 409로 막으므로 편집하지 않는다.
+ * 승인 배정·미처리·현재 버전을 보존한 다음 원안(next-input)을 등록하고 같은 방법으로 계산한 뒤, 그 화면에서 보완한다.
+ */
+export function NextInputCard({ client, planId, rerun }: { client: V2Client; planId: string; rerun: Omit<Rerun, 'beforeRunId'> }) {
+  const [status, setStatus] = useState<{ state: 'idle' } | { state: 'sending'; step: string } | { state: 'error'; step: string; error: unknown }>({ state: 'idle' })
+  // next-input은 부를 때마다 새 ID를 주므로, 한 번 받은 원안과 키를 재시도 동안 그대로 쓴다.
+  const attempt = useRef<{ id: string; snapshot?: Snapshot; registered?: boolean }>({ id: crypto.randomUUID() })
+  async function start() {
+    const a = attempt.current
+    let step = '최신 원안 받기'
+    try {
+      setStatus({ state: 'sending', step })
+      a.snapshot ??= await client.get<Snapshot>(`/v2/plans/${encodeURIComponent(planId)}/next-input`)
+      step = '원안 등록'
+      setStatus({ state: 'sending', step })
+      if (!a.registered) {
+        await client.registerScenario!(a.snapshot, `next-input-${a.id}`)
+        a.registered = true
+      }
+      step = '계산 요청'
+      setStatus({ state: 'sending', step })
+      const run = await client.createRun!({ scenario_id: a.snapshot.scenario_id, base_plan_version: a.snapshot.base_plan_version, ...rerun }, `next-input-run-${a.id}`)
+      location.search = `?${new URLSearchParams({ scenario: run.scenario_id, run: run.run_id })}`
+    } catch (error) {
+      setStatus({ state: 'error', step, error })
+    }
+  }
+  return (
+    <section className="card revision">
+      <h2>조건 보완 · 재계산</h2>
+      <p className="muted small">
+        이 계획은 이미 내부 승인돼 버전이 올라갔습니다. 이 화면의 입력은 이전 버전이라 조건을 보완할 수 없습니다.
+        승인된 배정·미처리를 그대로 이어받은 최신 원안을 만들어 같은 방법으로 계산한 뒤, 그 화면에서 보완하세요. 기존 승인·전달 기록은 바뀌지 않습니다.
+      </p>
+      <button type="button" disabled={status.state === 'sending'} onClick={start}>
+        {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '최신 승인 계획으로 새 원안 만들기'}
+      </button>
       {status.state === 'error' && <ErrorNote step={status.step} error={status.error} />}
     </section>
   )
