@@ -56,6 +56,22 @@ PR과 main 변경마다 위 테스트·빌드를 GitHub Actions가 실행한다.
 - `npm test`에는 jsdom의 실제 React DOM 클릭·상태 전이 회귀가 포함된다. 승인 성공·응답 유실·버전 충돌은 모의 HTTP 클라이언트로 검증한 것으로, 서버의 승인 저장·인증·동시성 구현이 완료됐다는 의미는 아니다.
 
 
+## 담당자 대응 흐름 (v0.2 · #55)
+
+`VITE_API_MODE=v2`로 개발 서버를 켜면 `/v2`(담당자 대응 API)에 연결한다. 서버는 `BANIPMATCH_WORKFLOW=1`로 실행한다([서버 안내](../backend/workflow/README.md)). 관리자 토큰을 쓰지 않고 서버가 주는 HttpOnly 세션 쿠키를 쓰며, CSRF 값은 화면 메모리에만 둔다. 개발 서버 주소는 서버 허용 출처인 `localhost:5173`이어야 한다.
+
+| 화면 | 하는 일 | 파일 |
+|---|---|---|
+| 계산 요청 | 서버가 현재 시각으로 옮긴 모의 예제 01을 등록·계산(07·08은 원래 시각 그대로) | `api/v2.ts`, `StartRunPanel.tsx` |
+| 조건 보완·재계산(R4) | 준비·가용·근무 시각만 24시간제로 수정, 확인된 조건(모의)/가정 시험 구분, 수정 이유 필수 → 새 입력 저장 후 같은 방법·예산·seed로 재계산 → 서버 전후 비교와 한계 표시. 가정 시험은 승인 차단 | `RevisionPanels.tsx`, `lib/revision.ts` |
+| 변경 전달·응답(R5~R7) | 승인 뒤 차량별 변경 명세·확인할 사항, 시험 수신자 초대(허가 세션만, 비밀은 링크 `#`), 확인 체크 후 전달(승인당 멱등키 1개), 대상별 전달·사람 응답 상태 5초 갱신, 확실한 실패만 재시도 | `DispatchPanel.tsx`, `lib/dispatch.ts` |
+| 수신자 `/recipient` | 초대 수락(링크 `#invite=`를 시작 시 한 번 읽고 주소에서 지움, 해시 기반 수락 키), iPhone Safari는 홈 화면 추가 안내만, 알림 허용·끄기, 내 차량 변경만 보기, 확인·수행 가능·곤란 응답, 이전 계획은 상세·응답 차단 | `RecipientApp.tsx`, `api/recipient.ts`, `lib/recipient.ts` |
+| 수신자 모의 `/recipient?demo=1` | 서버·푸시 없이 탭 메모리의 가짜 자료로 수신자 화면 확인 | `api/recipientDemo.ts` |
+
+`public/sw.js`는 푸시를 받으면 일반 문구만 보여주고 알림을 누르면 `/recipient#notification=ID`를 연다. `public/manifest.webmanifest`·아이콘은 수신자 화면에서만 연결한다.
+
+배포 시 확인할 것: `/v2/*`는 백엔드로 전달하고 `/recipient` 직접 방문·새로고침은 `index.html`로 돌려준다(API 오류를 HTML 200으로 바꾸지 않음). `sw.js`는 사이트 루트에서 제공해야 한다. 실제 알림은 HTTPS와 서버 VAPID 설정이 있어야 하며 로컬 HTTP에서는 확인하지 않았다.
+
 ## 공개용 읽기 전용 계산 기록
 
 `npm run build:showcase`는 `dist-showcase/`에 별도 정적 사이트를 만듭니다.
