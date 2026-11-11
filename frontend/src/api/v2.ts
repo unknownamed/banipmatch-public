@@ -38,7 +38,7 @@ export function createV2Client(base = ''): V2Client {
 
   async function open(): Promise<SessionState> {
     const res = await fetch(`${base}/v2/session`)
-    if (res.status !== 401) return readJson<SessionState>(res)
+    if (res.status !== 401 && res.status !== 410) return readJson<SessionState>(res)
     // 쿠키가 없거나 만료됨 → 새 세션. 생성 요청은 Origin만 검사한다(브라우저가 자동으로 붙임).
     return readJson<SessionState>(await fetch(`${base}/v2/session`, { method: 'POST' }))
   }
