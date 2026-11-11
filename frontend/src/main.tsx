@@ -6,6 +6,7 @@ import { createFixtureClient, FIXTURE_IDS } from './api/fixtureClient'
 import { AppBar } from './components/AppBar'
 import { MapCheck } from './components/MapCheck'
 import { StartRunPanel } from './components/StartRunPanel'
+import { ReferencePanel } from './components/ReferencePanel'
 import './styles.css'
 
 // VITE_API_MODE=http 이면 /v1 백엔드에 연결한다. 기본은 공통 예제(fixture).
@@ -28,6 +29,6 @@ function Root() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppBar mode={mode} />
-    {params.get('view') === 'map' ? <MapCheck /> : <Root />}
+    {params.get('view') === 'map' ? <MapCheck /> : params.get('view') === 'reference' ? <ReferencePanel /> : <Root />}
   </StrictMode>,
 )
