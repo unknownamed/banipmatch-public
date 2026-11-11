@@ -9,6 +9,7 @@ import { buildRows } from './lib/compare'
 import { hasAssumedCondition } from './lib/revision'
 import type { V2Client } from './api/v2'
 import { ConditionRevisionPanel, RevisionComparison } from './components/RevisionPanels'
+import { DispatchPanel } from './components/DispatchPanel'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
@@ -106,6 +107,11 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
           </aside>
         )}
       </div>
+
+      {/* 승인 뒤(이번 화면에서 승인했거나 계획 버전이 이미 올라간 경우) 전달 단계. 최종 확인은 서버의 dispatch-preview가 한다. */}
+      {v2 && run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version)) && (
+        <DispatchPanel key={`${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
+      )}
 
       {v2 && snapshot && run && view.results.state === 'ready' && <ConditionRevisionPanel client={v2} snapshot={snapshot} run={run} />}
     </main>
