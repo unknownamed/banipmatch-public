@@ -7,6 +7,8 @@ import type { ApiClient, RunRequest } from '../api/client'
 import { ApiRequestError } from '../api/client'
 import type { Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
+import { shiftSnapshot } from '../lib/shift'
+import { ConditionRevisionPanel } from './RevisionPanels'
 import { buildRows } from '../lib/compare'
 import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type StartAttempt } from '../lib/startRun'
 import { ComparisonSection } from './ComparisonSection'
@@ -45,7 +47,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
     v2?.defaultExample().then((snapshot) => setFresh({ snapshot }), (error) => setFresh({ error }))
   }, [v2])
   const example = EXAMPLES.find((e) => e.id === exampleId)!
-  const source = v2 && exampleId === '01' ? fresh.snapshot : (example.snapshot as unknown as Snapshot)
+  // 07·08도 같은 규칙으로 지금 시각에 옮긴다(만료가 아니라 원래 의도한 입력 누락·미확인 변경으로 막히게).
+  const source = !v2 ? (example.snapshot as unknown as Snapshot) : exampleId === '01' ? fresh.snapshot : shiftSnapshot(example.snapshot as unknown as Snapshot, new Date())
   if (source && !attempts.has(exampleId)) attempts.set(exampleId, newAttempt(source, runRequestJson as unknown as RunRequest))
   const attempt = attempts.get(exampleId)
 
@@ -89,7 +92,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         <p className="muted">
           서버 설정에 따라 설명용 결과(illustrative_fixture, 승인 불가) 또는 엔진 실계산 결과를 돌려줍니다. 결과 화면의 &lsquo;결과 출처&rsquo;로 구분하세요.
           {v2
-            ? '예제 01은 서버가 현재 시연 시각으로 옮긴 모의 자료입니다. 07·08은 원래 기준시각 그대로라 입력 유효기간 만료로 거절될 수 있습니다.'
+            ? '예제는 모두 현재 시연 시각으로 옮긴 모의 자료입니다(01은 서버, 07·08은 같은 규칙으로 화면에서 이동). 07은 준비시각 누락으로 계산이 막히며, 아래에서 확인한 값을 보완해 다시 계산할 수 있습니다.'
             : '공통 예제는 기준시각이 지난 모의 자료라 실계산이어도 승인은 입력 유효기간 만료(503 INPUT_EXPIRED)로 거절될 수 있습니다.'}
         </p>
         <p>
@@ -180,6 +183,13 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         )}
       </section>
       {status.state === 'rejected' && <RejectedInput snapshot={status.snapshot} reason={status.error.message} />}
+      {status.state === 'rejected' && v2 && (
+        <ConditionRevisionPanel
+          client={v2}
+          snapshot={status.snapshot}
+          rerun={{ ...pick(runFor(attempt, picked).body), beforeRunId: null }}
+        />
+      )}
     </main>
   )
 }
@@ -202,3 +212,5 @@ function RejectedInput({ snapshot, reason }: { snapshot: Snapshot; reason: strin
     </>
   )
 }
+
+const pick = (r: RunRequest) => ({ methods: r.methods, time_limit_seconds: r.time_limit_seconds, seed: r.seed })

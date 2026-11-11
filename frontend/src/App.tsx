@@ -76,7 +76,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
           가정 시험 입력입니다. 준비·가용 조건에 가정이 섞여 있어 비교만 할 수 있고 승인·전달할 수 없습니다.
         </div>
       )}
-      {v2 && revisionId && beforeRunId && run && cand && view.results.state === 'ready' && (
+      {v2 && revisionId && run && cand && view.results.state === 'ready' && (
         <RevisionComparison client={v2} revisionId={revisionId} beforeRunId={beforeRunId} afterRunId={run.run_id} method={cand.method} />
       )}
 
@@ -113,7 +113,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         <DispatchPanel key={`${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
       )}
 
-      {v2 && snapshot && run && view.results.state === 'ready' && <ConditionRevisionPanel client={v2} snapshot={snapshot} run={run} />}
+      {v2 && snapshot && run && view.results.state === 'ready' && <ConditionRevisionPanel client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />}
     </main>
   )
 }

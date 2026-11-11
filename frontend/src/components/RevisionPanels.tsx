@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
-import type { Run, Snapshot } from '../api/types'
+import type { Method, Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
 import { freezeLabel, isCompleteInput, listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits } from '../lib/revision'
 import { kstDateTime } from '../lib/time'
@@ -13,7 +13,10 @@ interface RevisionState { scenario_id: string; plan_id: string; base_plan_versio
  * R4 조건 보완: 확인한 준비·가용·근무 시각만 바꿔 새 입력으로 저장하고 같은 방법·예산으로 다시 계산한다.
  * 원본 입력과 이전 결과는 서버에 그대로 남는다. 고정 작업·마감·이동시간은 바꿀 수 없다.
  */
-export function ConditionRevisionPanel({ client, snapshot, run }: { client: V2Client; snapshot: Snapshot; run: Run }) {
+/** 재계산 조건. 이전 실행이 있으면 그 방법·예산·seed, 입력 부족으로 계산이 막혔으면 막힌 요청의 값(이전 실행 없음). */
+export interface Rerun { methods: Method[]; time_limit_seconds: number; seed: number; beforeRunId: string | null }
+
+export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2Client; snapshot: Snapshot; rerun: Rerun }) {
   const [edits, setEdits] = useState<Edits>({})
   const [reason, setReason] = useState('')
   const [confirmation, setConfirmation] = useState<Confirmation>('confirmed_simulation')
@@ -42,10 +45,11 @@ export function ConditionRevisionPanel({ client, snapshot, run }: { client: V2Cl
       setStatus({ state: 'sending', step })
       // 전후 비교가 공정하도록 이전 실행과 같은 방법·제한시간·seed를 쓴다.
       const next = await client.createRun!(
-        { scenario_id: rev.scenario_id, base_plan_version: rev.base_plan_version, methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed },
+        { scenario_id: rev.scenario_id, base_plan_version: rev.base_plan_version, methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed },
         `revision-run-${id}`,
       )
-      const q = new URLSearchParams({ scenario: rev.scenario_id, run: next.run_id, revision: rev.revision_id, before: run.run_id })
+      const q = new URLSearchParams({ scenario: rev.scenario_id, run: next.run_id, revision: rev.revision_id })
+      if (rerun.beforeRunId) q.set('before', rerun.beforeRunId)
       location.search = `?${q}`
     } catch (error) {
       setStatus({ state: 'error', step, error })
@@ -175,12 +179,14 @@ const DELTAS = [
 ] as const
 
 /** 조건 보완 전후 비교(대겸 비교 로직의 서버 결과). 개선율로 해석하지 못하는 경우는 서버가 준 한계를 그대로 보여준다. */
-export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId, method }: { client: V2Client; revisionId: string; beforeRunId: string; afterRunId: string; method: string }) {
+export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId, method }: { client: V2Client; revisionId: string; beforeRunId: string | null; afterRunId: string; method: string }) {
   const [state, setState] = useState<{ data?: { confirmation: Confirmation; comparison: Comparison }; error?: unknown }>({})
   useEffect(() => {
     let live = true
     setState({})
-    const q = new URLSearchParams({ before_run_id: beforeRunId, after_run_id: afterRunId, method })
+    // 이전 입력이 부족해 계산되지 않았으면 이전 실행 없이 비교한다(서버가 '이전 계산 없음'으로 표시).
+    const q = new URLSearchParams({ after_run_id: afterRunId, method })
+    if (beforeRunId) q.set('before_run_id', beforeRunId)
     client.get<{ confirmation: Confirmation; comparison: Comparison }>(`/v2/revisions/${encodeURIComponent(revisionId)}/comparison?${q}`)
       .then((data) => live && setState({ data }), (error) => live && setState({ error }))
     return () => { live = false }
