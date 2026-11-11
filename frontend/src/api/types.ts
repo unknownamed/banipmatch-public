@@ -79,11 +79,16 @@ export interface Snapshot {
   policy: { buffer_minutes: number; external_actions_enabled: boolean; input_valid_until: UtcString | null }
   /** 조건 보완(R4)에서 가용·근무 시각만 쓴다. 나머지 필드는 원본 그대로 보존한다. */
   vehicles?: Vehicle[]
-  // locations / travel_times 는 이번 화면에서 쓰지 않아 생략.
+  /** 차량 추가 시 시작 위치를 고르는 데만 쓴다. */
+  locations?: { location_id: string; name: string; kind: string }[]
+  // travel_times 는 이번 화면에서 쓰지 않아 생략.
 }
 
 export interface Vehicle {
   vehicle_id: string
+  start_location_id: string
+  capacity_kg: number
+  equipment_types: string[]
   available_at: UtcString | null
   shift_end_at: UtcString | null
   evidence: Evidence

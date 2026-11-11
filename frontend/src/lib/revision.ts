@@ -1,6 +1,6 @@
 // 조건 보완(R4): 담당자가 확인한 준비·가용·근무 시각만 바꿔 새 입력을 만든다.
 // 서버가 다시 검사하지만, 화면도 고정 작업·허용 밖 필드를 바꾸지 않는다. 빈 값으로 지우는 것도 하지 않는다.
-import type { Evidence, Snapshot } from '../api/types'
+import type { Evidence, Snapshot, Vehicle } from '../api/types'
 
 export type Confirmation = 'confirmed_simulation' | 'assumed'
 /** 편집 키: `job:J1:ready_at`, `vehicle:T1:available_at` 같은 형식. 값은 KST datetime-local 문자열. */
@@ -56,7 +56,7 @@ export function listChanges(s: Snapshot, edits: Edits): FieldChange[] {
  * 가정 시험은 kind=assumed라서 서버가 승인·전달을 막는다. 확인된 조건도 모의 배차에서의 확인일 뿐 실제 현장 확인이 아니므로
  * 원래 근거 종류(모의 등)는 유지하고 출처만 바꾼다.
  */
-export function revisedSnapshot(s: Snapshot, changes: FieldChange[], confirmation: Confirmation, now: Date): Snapshot {
+export function revisedSnapshot(s: Snapshot, changes: FieldChange[], confirmation: Confirmation, now: Date, added: VehicleDraft[] = []): Snapshot {
   const next = structuredClone(s)
   // 입력 시각은 분 단위이고, 기준시각(as_of) 이후 수신한 근거는 쓸 수 없다.
   // 지금 확인한 값이므로 기준시각을 확인 시각으로 옮긴다(되돌리지는 않음). 서버 비교가 '기준시각도 바뀜'을 한계로 표시한다.
@@ -77,8 +77,44 @@ export function revisedSnapshot(s: Snapshot, changes: FieldChange[], confirmatio
     row[c.field] = c.after
     row.evidence = evidence(row.evidence)
   }
+  // 추가 차량의 근거는 기존 차량과 같은 자료 종류(모의 등)에 담당자 확인 출처를 붙인다. 가정이면 assumed.
+  const base = s.vehicles?.[0]?.evidence ?? { kind: 'simulated', source_ref: '', observed_at: null, received_at: receivedAt }
+  for (const d of added) next.vehicles = [...(next.vehicles ?? []), { ...draftVehicle(d), evidence: evidence({ ...base, observed_at: null }) }]
   return next
 }
+
+/** 추가 차량 입력. 숫자·시각은 입력칸 그대로 받고, 비어 있으면 채우지 않고 추가를 막는다. */
+export interface VehicleDraft { vehicle_id: string; start_location_id: string; capacity_kg: string; equipment_types: string[]; available_at: string; shift_end_at: string }
+export const EMPTY_DRAFT: VehicleDraft = { vehicle_id: '', start_location_id: '', capacity_kg: '', equipment_types: [], available_at: '', shift_end_at: '' }
+
+/**
+ * 추가 차량에 빠진 값. 다른 차량 값을 복사해 채우지 않는다.
+ * 시작 위치는 기존 위치만 고른다(그 위치의 방향별 이동시간이 이미 있으므로 새 경로를 지어내지 않음).
+ */
+export function draftProblems(s: Snapshot, d: VehicleDraft): string[] {
+  const out: string[] = []
+  const id = d.vehicle_id.trim()
+  if (!/^[A-Za-z0-9_-]{1,32}$/.test(id)) out.push('차량 ID(영문·숫자·-·_ 32자 이내)')
+  else if (s.vehicles?.some((v) => v.vehicle_id === id)) out.push('이미 있는 차량 ID')
+  if (!s.locations?.some((l) => l.location_id === d.start_location_id)) out.push('시작 위치')
+  if (!/^[1-9]\d{0,6}$/.test(d.capacity_kg.trim())) out.push('적재 가능 중량(kg, 양의 정수)')
+  if (!d.equipment_types.length) out.push('장비 종류')
+  if (!isCompleteInput(d.available_at)) out.push('가용 시작 시각')
+  if (!isCompleteInput(d.shift_end_at)) out.push('근무 종료 시각')
+  else if (isCompleteInput(d.available_at) && Date.parse(`${d.shift_end_at}:00Z`) <= Date.parse(`${d.available_at}:00Z`)) out.push('근무 종료가 가용 시작보다 늦어야 함')
+  return out
+}
+
+export const isBlankDraft = (d: VehicleDraft) => JSON.stringify(d) === JSON.stringify(EMPTY_DRAFT)
+
+const draftVehicle = (d: VehicleDraft): Omit<Vehicle, 'evidence'> => ({
+  vehicle_id: d.vehicle_id.trim(),
+  start_location_id: d.start_location_id,
+  available_at: fromKstInput(d.available_at),
+  shift_end_at: fromKstInput(d.shift_end_at),
+  capacity_kg: Number(d.capacity_kg),
+  equipment_types: [...d.equipment_types].sort(),
+})
 
 /** 준비·가용 조건에 가정이 섞인 입력. 서버도 422 ASSUMPTION_NOT_APPROVABLE로 막는다. */
 export const hasAssumedCondition = (s: Snapshot) =>

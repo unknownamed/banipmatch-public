@@ -269,3 +269,6 @@ button.secondary:hover { background: var(--color-hover); }
 .recipient-list button[aria-current='true'] { border-color: var(--color-accent-strong); font-weight: var(--fw-bold); }
 .recipient-detail ul { padding-left: var(--space-5); }
 .recipient-detail li { margin-bottom: var(--space-3); }
+
+.rev-add select, .rev-add .rev-field input:not([type]) { font: inherit; padding: 6px 8px; border: var(--border); border-radius: var(--radius-sm); }
+.rev-add .rev-row label.small { display: inline-flex; gap: 4px; align-items: center; }

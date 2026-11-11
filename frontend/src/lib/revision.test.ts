@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import snapshotJson from '@examples/01_snapshot.json'
 import type { Snapshot } from '../api/types'
-import { freezeLabel, fromKstInput, hasAssumedCondition, listChanges, revisedSnapshot, toKstInput } from './revision'
+import { EMPTY_DRAFT, draftProblems, freezeLabel, fromKstInput, hasAssumedCondition, listChanges, revisedSnapshot, toKstInput } from './revision'
 
 const s = snapshotJson as unknown as Snapshot
 const movable = s.jobs.find((j) => !j.frozen)!
@@ -56,5 +56,25 @@ describe('조건 보완 입력', () => {
     const changes = listChanges(s, { [`job:${movable.job_id}:ready_at`]: '2026-11-07T09:30' })
     const next = revisedSnapshot(s, changes, 'assumed', new Date('2026-11-07T00:10:00Z'))
     expect(hasAssumedCondition(next)).toBe(true)
+  })
+})
+
+describe('차량 추가', () => {
+  const ok = { vehicle_id: 'T9', start_location_id: 'D', capacity_kg: '30000', equipment_types: ['DRY40'], available_at: '2026-11-07T09:30', shift_end_at: '2026-11-07T18:00' }
+  it('빠진 값은 채우지 않고 무엇이 빠졌는지 알려준다', () => {
+    expect(draftProblems(s, EMPTY_DRAFT)).toHaveLength(6)
+    expect(draftProblems(s, { ...ok, vehicle_id: 'T1' })).toEqual(['이미 있는 차량 ID'])
+    expect(draftProblems(s, { ...ok, start_location_id: 'NEW' })).toEqual(['시작 위치'])
+    expect(draftProblems(s, { ...ok, shift_end_at: '2026-11-07T09:00' })).toEqual(['근무 종료가 가용 시작보다 늦어야 함'])
+    expect(draftProblems(s, ok)).toEqual([])
+  })
+  it('추가 차량은 입력한 값 그대로 들어가고 기존 차량·원본은 바뀌지 않는다', () => {
+    const next = revisedSnapshot(s, [], 'confirmed_simulation', new Date('2026-11-07T00:10:00Z'), [ok])
+    const added = next.vehicles!.find((v) => v.vehicle_id === 'T9')!
+    expect(added).toMatchObject({ start_location_id: 'D', capacity_kg: 30000, equipment_types: ['DRY40'], available_at: '2026-11-07T00:30:00Z', shift_end_at: '2026-11-07T09:00:00Z' })
+    expect(added.evidence.source_ref).toBe('dispatcher:condition-revision')
+    expect(next.vehicles!.length).toBe(s.vehicles!.length + 1)
+    expect(s.vehicles!.some((v) => v.vehicle_id === 'T9')).toBe(false)
+    expect(hasAssumedCondition(revisedSnapshot(s, [], 'assumed', new Date('2026-11-07T00:10:00Z'), [ok]))).toBe(true)
   })
 })
