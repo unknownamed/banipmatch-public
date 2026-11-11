@@ -21,3 +21,5 @@
 E07 민준 인계: [데이터 파트 본문·자료/공백/추가자료 표](data-part.md), [합성wire21종](../data/provider-fixtures-2026-11-10/README.md). 합성 공급자 예제·기존 모의 계산·실관측 건수를 분리한다. 실제 서버→화면·공개 URL 검수는 인계 후 확인할 항목으로 유지한다.
 
 E10/E11 민준 추가 근거: [대응 검수 9사례·조건 전후 4쌍·전달 기대 15종](../data/response-acceptance-2026-11-11/README.md), [PR61 고정 head의 주입 전송 API 대조 9종](../data/response-acceptance-2026-11-11/workflow-check.json). 모의 계산/로컬 API 검수이며 E11의 전체 화면·실기기 증거를 채우지 않는다.
+
+E11 길웅 인계: [화면·사용성 파트 본문](frontend-part.md), [#55 화면 인계](../team/handoffs/2026-11-11-choigilung-dispatch-response.md)(PR #64). 조건 보완·재계산·차량별 명세·전달 상태·수신자 화면의 구현과 로컬 실제 서버 검수다. 실제 서버 초대→응답 왕복, 실기기 푸시 수신, 사용자 시험은 아직 없으므로 E11을 완료로 채우지 않는다.
