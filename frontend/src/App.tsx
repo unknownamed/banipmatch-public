@@ -6,6 +6,9 @@ import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
 import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
 import { acknowledgeIds, approvalGate, approvalIdempotencyKey, type ApprovalGate } from './lib/approval'
 import { buildRows } from './lib/compare'
+import { hasAssumedCondition } from './lib/revision'
+import type { V2Client } from './api/v2'
+import { ConditionRevisionPanel, RevisionComparison } from './components/RevisionPanels'
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
@@ -32,6 +35,11 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   }, [client, run?.plan_id, approval.value?.status.state])
   const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
+  const v2 = 'session' in client ? (client as V2Client) : null
+  const params = new URLSearchParams(location.search)
+  const revisionId = params.get('revision')
+  const beforeRunId = params.get('before')
+  const assumed = snapshot ? hasAssumedCondition(snapshot) : false
   const approvalKey = run && cand ? approvalIdempotencyKey(approvalKeys, run.plan_id, {
     run_id: run.run_id, method: cand.method, expected_version: run.base_plan_version, acknowledged_job_ids: acknowledgeIds(cand),
   }) : undefined
@@ -62,6 +70,14 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {view.run.state === 'loading' && <Skeleton label="실행 상태 조회 중…" lines={2} />}
       {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
       {run && <RunStatusPanel run={run} results={results} />}
+      {assumed && (
+        <div className="banner fixture" role="alert">
+          가정 시험 입력입니다. 준비·가용 조건에 가정이 섞여 있어 비교만 할 수 있고 승인·전달할 수 없습니다.
+        </div>
+      )}
+      {v2 && revisionId && beforeRunId && run && cand && view.results.state === 'ready' && (
+        <RevisionComparison client={v2} revisionId={revisionId} beforeRunId={beforeRunId} afterRunId={run.run_id} method={cand.method} />
+      )}
 
       {/* 넓은 화면: 왼쪽 비교, 오른쪽 미해결·승인. 좁으면 위아래로 쌓인다. */}
       <div className="workspace">
@@ -82,7 +98,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             <UnresolvedPanel rows={rows} cand={cand} />
             <ApprovalPanel
               key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
-              gate={withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null)}
+              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null), assumed ? '가정 시험 입력이라 승인할 수 없습니다. 확인된 조건으로 다시 보완해 계산하세요.' : null)}
               client={client} run={run} result={cand} idempotencyKey={approvalKey}
               shared={approval.key === approvalScope ? approval.value : null}
               onShared={(value) => setApproval({ key: approvalScope, value })}
@@ -90,6 +106,8 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
           </aside>
         )}
       </div>
+
+      {v2 && snapshot && run && view.results.state === 'ready' && <ConditionRevisionPanel client={v2} snapshot={snapshot} run={run} />}
     </main>
   )
 }

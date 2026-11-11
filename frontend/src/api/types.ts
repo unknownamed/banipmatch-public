@@ -77,7 +77,16 @@ export interface Snapshot {
   baseline_unassigned_job_ids: string[]
   change: WindowChange
   policy: { buffer_minutes: number; external_actions_enabled: boolean; input_valid_until: UtcString | null }
-  // locations / vehicles / travel_times 는 이번 화면에서 쓰지 않아 생략.
+  /** 조건 보완(R4)에서 가용·근무 시각만 쓴다. 나머지 필드는 원본 그대로 보존한다. */
+  vehicles?: Vehicle[]
+  // locations / travel_times 는 이번 화면에서 쓰지 않아 생략.
+}
+
+export interface Vehicle {
+  vehicle_id: string
+  available_at: UtcString | null
+  shift_end_at: UtcString | null
+  evidence: Evidence
 }
 
 export type RunStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'

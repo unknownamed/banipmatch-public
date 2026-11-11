@@ -1,0 +1,211 @@
+import { useEffect, useRef, useState } from 'react'
+import { ApiRequestError } from '../api/client'
+import type { Run, Snapshot } from '../api/types'
+import type { V2Client } from '../api/v2'
+import { listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits } from '../lib/revision'
+import { kstDateTime } from '../lib/time'
+
+const FIELD_LABEL = { ready_at: '상차 준비시각', available_at: '차량 가용 시작', shift_end_at: '근무 종료' } as const
+
+interface RevisionState { scenario_id: string; plan_id: string; base_plan_version: number; revision_id: string; confirmation: Confirmation }
+
+/**
+ * R4 조건 보완: 확인한 준비·가용·근무 시각만 바꿔 새 입력으로 저장하고 같은 방법·예산으로 다시 계산한다.
+ * 원본 입력과 이전 결과는 서버에 그대로 남는다. 고정 작업·마감·이동시간은 바꿀 수 없다.
+ */
+export function ConditionRevisionPanel({ client, snapshot, run }: { client: V2Client; snapshot: Snapshot; run: Run }) {
+  const [edits, setEdits] = useState<Edits>({})
+  const [reason, setReason] = useState('')
+  const [confirmation, setConfirmation] = useState<Confirmation>('confirmed_simulation')
+  const [status, setStatus] = useState<{ state: 'idle' } | { state: 'sending'; step: string } | { state: 'error'; step: string; error: unknown }>({ state: 'idle' })
+  // 같은 내용으로 다시 시도하면 같은 멱등키를 쓴다. 내용이 바뀌면 새 키.
+  const attempt = useRef<{ sig: string; id: string } | null>(null)
+  const changes = listChanges(snapshot, edits)
+  const sending = status.state === 'sending'
+  const set = (key: string, value: string) => {
+    setEdits((e) => ({ ...e, [key]: value }))
+    if (status.state === 'error') setStatus({ state: 'idle' })
+  }
+
+  async function submit() {
+    const sig = JSON.stringify([changes, reason.trim(), confirmation])
+    if (attempt.current?.sig !== sig) attempt.current = { sig, id: crypto.randomUUID() }
+    const id = attempt.current.id
+    let step = '새 입력 저장'
+    try {
+      setStatus({ state: 'sending', step })
+      const after = revisedSnapshot(snapshot, changes, confirmation, new Date())
+      const rev = await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, { snapshot: after, reason: reason.trim(), confirmation }, `revision-${id}`)
+      step = '재계산 요청'
+      setStatus({ state: 'sending', step })
+      // 전후 비교가 공정하도록 이전 실행과 같은 방법·제한시간·seed를 쓴다.
+      const next = await client.createRun!(
+        { scenario_id: rev.scenario_id, base_plan_version: rev.base_plan_version, methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed },
+        `revision-run-${id}`,
+      )
+      const q = new URLSearchParams({ scenario: rev.scenario_id, run: next.run_id, revision: rev.revision_id, before: run.run_id })
+      location.search = `?${q}`
+    } catch (error) {
+      setStatus({ state: 'error', step, error })
+    }
+  }
+
+  const movable = snapshot.jobs.filter((j) => !j.frozen)
+  const frozen = snapshot.jobs.filter((j) => j.frozen)
+  const field = (key: string, current: string | null, label: string) => (
+    <label className="rev-field">
+      <span className="small muted">{label} · 현재 {current ? kstDateTime(current) : '미확인'}</span>
+      <input type="datetime-local" value={edits[key] ?? toKstInput(current)} disabled={sending} onChange={(e) => set(key, e.target.value)} />
+    </label>
+  )
+
+  return (
+    <section className="card revision" aria-labelledby="rev-title">
+      <h2 id="rev-title">조건 보완 · 재계산</h2>
+      <p className="muted small">
+        담당자가 확인한 상차 준비·차량 가용·근무 시각만 바꿔 <b>새 입력</b>으로 다시 계산합니다. 원래 입력과 이전 결과는 그대로 남습니다.
+        고정·출발 작업, 반입 마감, 이동시간은 바꿀 수 없습니다. 실제 차량을 확보하거나 준비를 완료시키는 기능이 아닙니다.
+      </p>
+
+      <fieldset disabled={sending}>
+        <legend>작업 준비시각</legend>
+        {movable.map((j) => <div key={j.job_id} className="rev-row"><b>{j.job_id}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>)}
+        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b>{j.job_id}</b><span className="small">고정 · {j.freeze_reason ?? '출발'} — 수정 불가</span></div>)}
+      </fieldset>
+
+      {!!snapshot.vehicles?.length && (
+        <fieldset disabled={sending}>
+          <legend>차량 가용 · 근무</legend>
+          {snapshot.vehicles.map((v) => (
+            <div key={v.vehicle_id} className="rev-row">
+              <b>{v.vehicle_id}</b>
+              {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
+              {field(`vehicle:${v.vehicle_id}:shift_end_at`, v.shift_end_at, FIELD_LABEL.shift_end_at)}
+            </div>
+          ))}
+        </fieldset>
+      )}
+
+      <fieldset disabled={sending}>
+        <legend>조건 구분</legend>
+        <label className="rev-choice">
+          <input type="radio" name="confirmation" checked={confirmation === 'confirmed_simulation'} onChange={() => setConfirmation('confirmed_simulation')} />
+          확인된 조건 <span className="small muted">— 모의 배차에서 담당자가 확인한 값. 실제 현장 확인과는 다릅니다.</span>
+        </label>
+        <label className="rev-choice">
+          <input type="radio" name="confirmation" checked={confirmation === 'assumed'} onChange={() => setConfirmation('assumed')} />
+          가정 시험 <span className="small muted">— &lsquo;이렇게 되면?&rsquo; 비교만. 승인·전달할 수 없습니다.</span>
+        </label>
+      </fieldset>
+
+      <label className="rev-reason">
+        수정 이유 (필수)
+        <textarea value={reason} maxLength={1000} rows={2} disabled={sending} placeholder="예: 화주에게 J3 상차 준비 13:40 완료 확인" onChange={(e) => setReason(e.target.value)} />
+      </label>
+
+      {changes.length > 0 && (
+        <ul className="rev-diff" aria-label="바뀌는 조건">
+          {changes.map((c) => (
+            <li key={c.key}>{c.id} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
+          ))}
+        </ul>
+      )}
+
+      <button type="button" disabled={sending || !changes.length || !reason.trim()} onClick={submit}>
+        {sending ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '새 입력으로 재계산'}
+      </button>
+      {!changes.length && <p className="small muted">바꿀 값을 하나 이상 입력하세요.</p>}
+      {status.state === 'error' && <ErrorNote step={status.step} error={status.error} />}
+    </section>
+  )
+}
+
+function ErrorNote({ step, error }: { step: string; error: unknown }) {
+  return (
+    <div className="warn" role="alert">
+      <p>
+        {step} 실패: {error instanceof ApiRequestError && error.body ? `HTTP ${error.status} ${error.body.code} — ${error.message}` : error instanceof Error ? error.message : String(error)}
+      </p>
+      {error instanceof ApiRequestError && error.body?.details?.map((d) => <p key={d.path} className="small"><code>{d.path}</code> {d.reason}</p>)}
+    </div>
+  )
+}
+
+interface Comparison {
+  revision: { reason: string; changes: { entity: string; entity_id: string; field: keyof typeof FIELD_LABEL; before: string | null; after: string | null }[]; added_vehicles: unknown[] }
+  before: { status: 'computed' | 'input_blocked'; error?: { code: string; message: string } }
+  after: { status: string }
+  job_transitions: Record<'became_assigned' | 'became_unassigned' | 'remained_unassigned' | 'changed_assignments' | 'fixed_risks_added' | 'fixed_risks_removed' | 'fixed_risks_remaining', string[]> | null
+  metric_deltas: Record<string, number> | null
+  comparison_limits: string[]
+}
+
+const TRANSITIONS = [
+  ['became_assigned', '새로 배정됨'],
+  ['became_unassigned', '새로 미처리됨'],
+  ['remained_unassigned', '계속 미처리'],
+  ['changed_assignments', '배정 바뀜'],
+  ['fixed_risks_added', '고정 위험 생김'],
+  ['fixed_risks_removed', '고정 위험 없어짐'],
+  ['fixed_risks_remaining', '고정 위험 남음'],
+] as const
+
+const DELTAS = [
+  ['unassigned_count', '미처리'],
+  ['movable_violation_count', '제약 위반'],
+  ['fixed_risk_count', '고정 위험'],
+  ['changed_job_count', '변경 작업'],
+  ['movable_travel_minutes', '이동(분)'],
+] as const
+
+/** 조건 보완 전후 비교(대겸 비교 로직의 서버 결과). 개선율로 해석하지 못하는 경우는 서버가 준 한계를 그대로 보여준다. */
+export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId, method }: { client: V2Client; revisionId: string; beforeRunId: string; afterRunId: string; method: string }) {
+  const [state, setState] = useState<{ data?: { confirmation: Confirmation; comparison: Comparison }; error?: unknown }>({})
+  useEffect(() => {
+    let live = true
+    setState({})
+    const q = new URLSearchParams({ before_run_id: beforeRunId, after_run_id: afterRunId, method })
+    client.get<{ confirmation: Confirmation; comparison: Comparison }>(`/v2/revisions/${encodeURIComponent(revisionId)}/comparison?${q}`)
+      .then((data) => live && setState({ data }), (error) => live && setState({ error }))
+    return () => { live = false }
+  }, [client, revisionId, beforeRunId, afterRunId, method])
+
+  if (state.error) return <section className="card"><h2>조건 보완 전후 비교 ({method})</h2><ErrorNote step="비교 조회" error={state.error} /></section>
+  if (!state.data) return <section className="card" role="status"><h2>조건 보완 전후 비교 ({method})</h2><p className="muted">비교 불러오는 중…</p></section>
+  const { confirmation, comparison: c } = state.data
+  return (
+    <section className="card revision-compare" aria-labelledby="revcmp-title">
+      <h2 id="revcmp-title">
+        조건 보완 전후 비교 ({method}){' '}
+        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정 시험 · 승인 불가' : '확인된 조건(모의)'}</span>
+      </h2>
+      <p className="small">수정 이유: {c.revision.reason}</p>
+      <ul className="rev-diff">
+        {c.revision.changes.map((x) => (
+          <li key={`${x.entity_id}:${x.field}`}>{x.entity_id} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
+        ))}
+      </ul>
+      {c.before.status === 'input_blocked' && (
+        <p className="warn small">이전 입력은 {c.before.error?.code} 때문에 계산되지 않았습니다. 이전 미처리를 0건으로 보고 비교하지 않습니다.</p>
+      )}
+      {c.job_transitions && (
+        <dl className="rev-transitions">
+          {TRANSITIONS.filter(([k]) => c.job_transitions![k].length).map(([k, label]) => (
+            <div key={k}><dt>{label}</dt><dd>{c.job_transitions![k].join(', ')}</dd></div>
+          ))}
+        </dl>
+      )}
+      {c.metric_deltas && (
+        <table className="grid small rev-deltas">
+          <thead><tr>{DELTAS.map(([, l]) => <th key={l} scope="col">{l}</th>)}</tr></thead>
+          <tbody><tr>{DELTAS.map(([k]) => <td key={k}>{signed(c.metric_deltas![k])}</td>)}</tr></tbody>
+        </table>
+      )}
+      <ul className="small muted">
+        {c.comparison_limits.map((l) => <li key={l}>{l}</li>)}
+      </ul>
+    </section>
+  )
+}
+
+const signed = (n: number | undefined) => (n === undefined ? '—' : n > 0 ? `+${n}` : String(n))
