@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import s01 from '@examples/01_snapshot.json'
 import s07 from '@examples/07_snapshot_입력누락.json'
 import s08 from '@examples/08_snapshot_미확인변경.json'
+import s02 from '../fixtures/demo-02-evening.synthetic.json'
 import runRequestJson from '@examples/02_run_request.json'
 import type { ApiClient, RunRequest } from '../api/client'
 import { ApiRequestError } from '../api/client'
@@ -13,12 +14,22 @@ import { buildRows } from '../lib/compare'
 import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type StartAttempt } from '../lib/startRun'
 import { ComparisonSection } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
+import { withQueueRetry } from '../lib/queueRetry'
+import { NowPanel } from './NowPanel'
+import { Icon } from './Icon'
 
 const EXAMPLES = [
-  { id: '01', label: '01 정상 입력', snapshot: s01 },
-  { id: '07', label: '07 입력 누락 (J1 준비시각 미확인)', snapshot: s07 },
-  { id: '08', label: '08 미확인 변경 (반입시간 변경 미확정)', snapshot: s08 },
+  { id: '02', icon: 'truck', stats: ['트럭 8', '컨테이너 20', '마감 넘김 4'], label: '신항 저녁 배차', size: '트럭 8대 · 컨테이너 20개 · HJNC·PNIT', what: '모선 BM 하모니호(BH045E)의 HJNC 반입 마감(컷오프)이 2시간 30분 앞당겨졌습니다. 원래 배차로는 컨테이너 4개가 마감을 넘깁니다. PNIT 작업은 영향이 없습니다.', tag: '추천', snapshot: s02 },
+  { id: '01', icon: 'box', stats: ['트럭 2', '작업 4'], label: '작은 배차', size: '트럭 2대 · 작업 4건', what: 'V1 반입 마감이 앞당겨진 간단한 상황입니다. 흐름을 빠르게 확인할 때 씁니다.', tag: '', snapshot: s01 },
+  { id: '07', icon: 'edit', stats: ['준비 시각 비어 있음'], label: '입력이 빠진 경우', size: '준비 시각 미확인', what: '상차 준비 시각이 비어 있어 계산이 멈춥니다. 확인한 값을 넣어 다시 계산하는 과정을 봅니다.', tag: '', snapshot: s07 },
+  { id: '08', icon: 'octagon', stats: ['공지 미확정'], label: '확정되지 않은 변경', size: '터미널 공지 미확정', what: '변경이 확정되지 않아 계산하지 않습니다. 잘못된 정보로 배차를 바꾸지 않도록 막는 예입니다.', tag: '', snapshot: s08 },
 ] as const
+const METHOD_TEXT: Record<string, string> = {
+  B0: '원래 배차 그대로 점검(항상 포함)',
+  B1: '마감 빠른 순 재배치',
+  B2: '전체 재최적화',
+  B3: '최소 변경 최적화',
+}
 
 type Status =
   | { state: 'idle' }
@@ -34,7 +45,7 @@ export const isInputRejection = (e: unknown): e is ApiRequestError =>
 
 /** http 모드에서 run 파라미터가 없을 때: 공통 예제로 입력 등록 → 계산 요청 → 결과 화면으로 이동. */
 export function StartRunPanel({ client }: { client: ApiClient }) {
-  const [exampleId, setExampleId] = useState<(typeof EXAMPLES)[number]['id']>('01')
+  const [exampleId, setExampleId] = useState<(typeof EXAMPLES)[number]['id']>('02')
   // 예제마다 한 시도를 유지한다. 실패 후 "다시 시도"는 같은 본문·같은 멱등키. 새 시도는 새로고침.
   const [attempts] = useState(() => new Map<string, StartAttempt>())
   const [status, setStatus] = useState<Status>({ state: 'idle' })
@@ -70,7 +81,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       step = '계산 요청'
       setStatus({ state: 'sending', step })
       const { body, key } = runFor(attempt, picked)
-      const run = await client.createRun!(body, key)
+      const run = await withQueueRetry(() => client.createRun!(body, key), () => setStatus({ state: 'sending', step: '다른 사용자 계산을 기다리는' }))
       location.search = `?scenario=${encodeURIComponent(run.scenario_id)}&run=${encodeURIComponent(run.run_id)}`
     } catch (error) {
       if (step === '계산 요청' && isInputRejection(error)) {
@@ -84,60 +95,63 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   const err = status.state === 'error' ? status.error : null
   return (
     <main>
-      <div className="banner" role="note">
-        로컬 모의 API{v2 && '(v0.2 세션)'}에 연결된 화면입니다. 공통 예제 입력을 새 ID({attempt.snapshot.scenario_id})로 등록하고 선택한 방법으로 계산을 요청합니다.
-      </div>
-      <section className="card">
-        <h2>예제로 계산 요청</h2>
-        <p className="muted">
-          서버 설정에 따라 설명용 결과(illustrative_fixture, 승인 불가) 또는 엔진 실계산 결과를 돌려줍니다. 결과 화면의 &lsquo;결과 출처&rsquo;로 구분하세요.
-          {v2
-            ? '예제는 모두 현재 시연 시각으로 옮긴 모의 자료입니다(01은 서버, 07·08은 같은 규칙으로 화면에서 이동). 07은 준비시각 누락으로 계산이 막히며, 아래에서 확인한 값을 보완해 다시 계산할 수 있습니다.'
-            : '공통 예제는 기준시각이 지난 모의 자료라 실계산이어도 승인은 입력 유효기간 만료(503 INPUT_EXPIRED)로 거절될 수 있습니다.'}
-        </p>
-        <p>
-          <label>
-            입력 예제{' '}
-            <select
-              value={exampleId}
+      <section className="start-hero">
+        <h1>반입 마감이 바뀌었을 때, 남은 배차를 다시 맞춥니다</h1>
+        <ol className="start-steps">
+          <li className="on"><b>1</b> 상황 선택</li>
+          <li><b>2</b> 영향 확인 · 조정안 비교</li>
+          <li><b>3</b> 확정 · 기사 전달</li>
+        </ol>
+      </section>
+      <div className="start-grid">
+      <section className="card start-main">
+        <h2>어떤 상황인가요?</h2>
+        <div className="scenario-cards" role="radiogroup" aria-label="상황 선택">
+          {EXAMPLES.map((e) => (
+            <button
+              key={e.id}
+              type="button"
+              role="radio"
+              aria-checked={exampleId === e.id}
+              className={`scenario-card${exampleId === e.id ? ' on' : ''}`}
               disabled={status.state === 'sending'}
-              onChange={(e) => {
-                setExampleId(e.target.value as typeof exampleId)
+              onClick={() => {
+                setExampleId(e.id)
                 setStatus({ state: 'idle' })
               }}
             >
-              {EXAMPLES.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </p>
-        <fieldset disabled={status.state === 'sending'}>
-          <legend>계산 방법</legend>
-          {ALL_METHODS.map((m) => (
-            <label key={m} style={{ marginRight: '1em' }}>
-              <input
-                type="checkbox"
-                checked={m === 'B0' || picked.has(m)}
-                disabled={m === 'B0'}
-                onChange={(e) => {
-                  const next = new Set(picked)
-                  if (e.target.checked) next.add(m)
-                  else next.delete(m)
-                  setPicked(next)
-                  if (status.state === 'error') setStatus({ state: 'idle' })
-                }}
-              />{' '}
-              {m}
-              {m === 'B0' && ' (원안 진단 · 항상 포함)'}
-            </label>
+              <span className="sc-top"><span className="sc-icon"><Icon name={e.icon} size={18} /></span><b>{e.label}</b>{e.tag && <span className="sc-tag">{e.tag}</span>}</span>
+              <span className="sc-what">{e.what}</span>
+              <span className="sc-stats">{e.stats.map((t) => <span key={t}>{t}</span>)}</span>
+            </button>
           ))}
-        </fieldset>
+        </div>
+        <details className="tech-info start-advanced">
+          <summary>고급 설정 · 계산 방법</summary>
+          <fieldset disabled={status.state === 'sending'}>
+            {ALL_METHODS.map((m) => (
+              <label key={m} className="method-pick">
+                <input
+                  type="checkbox"
+                  checked={m === 'B0' || picked.has(m)}
+                  disabled={m === 'B0'}
+                  onChange={(e) => {
+                    const next = new Set(picked)
+                    if (e.target.checked) next.add(m)
+                    else next.delete(m)
+                    setPicked(next)
+                    if (status.state === 'error') setStatus({ state: 'idle' })
+                  }}
+                />{' '}
+                <b>{m}</b> {METHOD_TEXT[m]}
+              </label>
+            ))}
+            {!v2 && <p className="muted small">공통 예제는 기준시각이 지난 모의 자료라 승인이 입력 유효기간 만료로 거절될 수 있습니다.</p>}
+          </fieldset>
+        </details>
         {status.state !== 'rejected' && (
           <button type="button" disabled={status.state === 'sending'} onClick={start}>
-            {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '입력 등록 후 계산 요청'}
+            {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '배차 점검 시작'}
           </button>
         )}
         {err !== null && (
@@ -164,7 +178,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
             {err instanceof ApiRequestError && isMethodRejection(err.body?.code) ? (
               <p>서버가 이 방법을 계산하지 않습니다. 설명용 모드는 B0·B3만 제공합니다. 방법 선택을 바꾼 뒤 다시 요청하세요.</p>
             ) : (
-              <p className="muted small">다시 시도하면 같은 요청·같은 멱등키로 보내 중복 등록·중복 실행이 생기지 않습니다.</p>
+              <p className="muted small">다시 시도해도 중복으로 등록되지 않습니다.</p>
             )}
           </div>
         )}
@@ -182,6 +196,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
           </div>
         )}
       </section>
+      <NowPanel />
+      </div>
       {status.state === 'rejected' && <RejectedInput snapshot={status.snapshot} reason={status.error.message} />}
       {status.state === 'rejected' && v2 && (
         <ConditionRevisionPanel

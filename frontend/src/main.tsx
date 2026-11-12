@@ -1,17 +1,17 @@
-import { StrictMode, useMemo } from 'react'
+import { StrictMode, Suspense, lazy, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './App'
 import { createHttpClient } from './api/client'
 import { createFixtureClient, FIXTURE_IDS } from './api/fixtureClient'
 import { createV2Client } from './api/v2'
 import { AppBar } from './components/AppBar'
-import { MapCheck } from './components/MapCheck'
+const MapCheck = lazy(() => import('./components/MapCheck').then(m => ({ default: m.MapCheck })))
 import { StartRunPanel } from './components/StartRunPanel'
-import { ReferencePanel } from './components/ReferencePanel'
 import { RecipientApp } from './components/RecipientApp'
 import { createRecipientClient } from './api/recipient'
 import { createDemoRecipientClient } from './api/recipientDemo'
 import { takeFragment } from './lib/recipient'
+import { ReferencePanel } from './components/ReferencePanel'
 import './styles.css'
 
 // VITE_API_MODE=http 이면 /v1, v2 이면 담당자 대응 API(/v2, 세션 쿠키)에 연결한다. 기본은 공통 예제(fixture).
@@ -64,7 +64,7 @@ createRoot(document.getElementById('root')!).render(
     ) : (
       <>
         <AppBar mode={mode} />
-        {params.get('view') === 'map' ? <MapCheck /> : params.get('view') === 'reference' ? <ReferencePanel /> : <Root />}
+        <Suspense fallback={<main><p role="status">지도 불러오는 중…</p></main>}>{params.get('view') === 'map' ? <MapCheck /> : params.get('view') === 'reference' ? <ReferencePanel /> : <Root />}</Suspense>
       </>
     )}
   </StrictMode>,

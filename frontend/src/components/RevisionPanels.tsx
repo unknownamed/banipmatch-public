@@ -4,6 +4,9 @@ import type { Method, Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
 import { EMPTY_DRAFT, draftProblems, freezeLabel, isBlankDraft, isCompleteInput, listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits, type VehicleDraft } from '../lib/revision'
 import { kstDateTime } from '../lib/time'
+import { jobName, vehicleName } from '../lib/labels'
+import { Hint } from './Hint'
+import { withQueueRetry } from '../lib/queueRetry'
 
 const FIELD_LABEL = { ready_at: '상차 준비시각', available_at: '차량 가용 시작', shift_end_at: '근무 종료' } as const
 
@@ -22,9 +25,8 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   const [confirmation, setConfirmation] = useState<Confirmation>('confirmed_simulation')
   const [draft, setDraft] = useState<VehicleDraft>(EMPTY_DRAFT)
   const [status, setStatus] = useState<{ state: 'idle' } | { state: 'sending'; step: string } | { state: 'error'; step: string; error: unknown }>({ state: 'idle' })
-  // 같은 내용으로 다시 시도하면 같은 멱등키와 **첫 본문**을 그대로 쓴다(분이 바뀌어 as_of가 달라지면 409가 나므로).
-  // 저장이 이미 끝났으면 저장은 건너뛰고 계산 요청만 다시 한다. 내용이 바뀌면 새 시도.
-  const attempt = useRef<{ sig: string; id: string; body?: unknown; rev?: RevisionState } | null>(null)
+  // 같은 내용으로 다시 시도하면 같은 멱등키를 쓴다. 내용이 바뀌면 새 키.
+  const attempt = useRef<{ sig: string; id: string; body: { snapshot: Snapshot; reason: string; confirmation: Confirmation }; revision?: RevisionState } | null>(null)
   const changes = listChanges(snapshot, edits)
   const sending = status.state === 'sending'
   // 입력 중이거나 잘못된 시각이 있으면 그 값만 빼고 보내지 않도록 전체 제출을 막는다.
@@ -44,23 +46,26 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   }
 
   async function submit() {
-    const sig = JSON.stringify([changes, added, reason.trim(), confirmation])
-    if (attempt.current?.sig !== sig) attempt.current = { sig, id: crypto.randomUUID() }
-    const a = attempt.current
-    const id = a.id
+    const sig = JSON.stringify([snapshot, changes, added, reason.trim(), confirmation, rerun])
     let step = '새 입력 저장'
     try {
       setStatus({ state: 'sending', step })
-      a.body ??= { snapshot: revisedSnapshot(snapshot, changes, confirmation, new Date(), added), reason: reason.trim(), confirmation }
-      a.rev ??= await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, a.body, `revision-${id}`)
-      const rev = a.rev
+      // 시각까지 첫 요청 그대로 유지한다. 응답 유실 후 재시도에서도 같은 키/본문이어야 한다.
+      if (attempt.current?.sig !== sig) attempt.current = {
+        sig, id: crypto.randomUUID(),
+        body: { snapshot: revisedSnapshot(snapshot, changes, confirmation, new Date(), added), reason: reason.trim(), confirmation },
+      }
+      const current = attempt.current
+      const { id } = current
+      current.revision ??= await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, current.body, `revision-${id}`)
+      const rev = current.revision
       step = '재계산 요청'
       setStatus({ state: 'sending', step })
       // 전후 비교가 공정하도록 이전 실행과 같은 방법·제한시간·seed를 쓴다.
-      const next = await client.createRun!(
+      const next = await withQueueRetry(() => client.createRun!(
         { scenario_id: rev.scenario_id, base_plan_version: rev.base_plan_version, methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed },
         `revision-run-${id}`,
-      )
+      ), () => setStatus({ state: 'sending', step: '다른 사용자 계산을 기다리는' }))
       const q = new URLSearchParams({ scenario: rev.scenario_id, run: next.run_id, revision: rev.revision_id })
       if (rerun.beforeRunId) q.set('before', rerun.beforeRunId)
       location.search = `?${q}`
@@ -95,16 +100,13 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
 
   return (
     <section className="card revision" aria-labelledby="rev-title">
-      <h2 id="rev-title">조건 보완 · 재계산</h2>
-      <p className="muted small">
-        담당자가 확인한 상차 준비·차량 가용·근무 시각만 바꿔 <b>새 입력</b>으로 다시 계산합니다. 원래 입력과 이전 결과는 그대로 남습니다.
-        고정·출발 작업, 반입 마감, 이동시간은 바꿀 수 없습니다. 실제 차량을 확보하거나 준비를 완료시키는 기능이 아닙니다.
-      </p>
+      <h2 id="rev-title">조건 보완 · 재계산 <Hint text="화주·기사에게 확인한 상차 준비·차량 가용·근무 시각만 바꿔 새 입력으로 다시 계산합니다. 원래 입력과 결과는 그대로 남습니다. 출발한 작업·반입 마감·이동시간은 바꿀 수 없습니다." /></h2>
+      <p className="small">보류된 작업을 살릴 수 있는지, 확인한 값으로 다시 계산해 봅니다.</p>
 
       <fieldset disabled={sending}>
         <legend>작업 준비시각</legend>
-        {movable.map((j) => <div key={j.job_id} className="rev-row"><b>{j.job_id}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>)}
-        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b>{j.job_id}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
+        {movable.map((j) => <div key={j.job_id} className="rev-row"><b title={j.job_id}>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>)}
+        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b title={j.job_id}>{jobName(j.job_id)}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
       </fieldset>
 
       {!!snapshot.vehicles?.length && (
@@ -112,7 +114,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
           <legend>차량 가용 · 근무</legend>
           {snapshot.vehicles.map((v) => (
             <div key={v.vehicle_id} className="rev-row">
-              <b>{v.vehicle_id}</b>
+              <b title={v.vehicle_id}>{vehicleName(v.vehicle_id)}</b>
               {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
               {field(`vehicle:${v.vehicle_id}:shift_end_at`, v.shift_end_at, FIELD_LABEL.shift_end_at)}
             </div>
@@ -127,7 +129,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
           시작 위치는 이동시간이 이미 있는 기존 위치에서만 고를 수 있습니다.
         </p>
         <div className="rev-row">
-          <label className="rev-field"><span className="small muted">차량 ID</span><input value={draft.vehicle_id} maxLength={32} placeholder="예: T3" onChange={(e) => setD({ vehicle_id: e.target.value })} /></label>
+          <label className="rev-field"><span className="small muted">차량 ID</span><input value={draft.vehicle_id} maxLength={32} placeholder="예: T9 (내부 관리 번호)" onChange={(e) => setD({ vehicle_id: e.target.value })} /></label>
           <label className="rev-field">
             <span className="small muted">시작 위치</span>
             <select value={draft.start_location_id} onChange={(e) => setD({ start_location_id: e.target.value })}>
@@ -157,11 +159,11 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
         <legend>조건 구분</legend>
         <label className="rev-choice">
           <input type="radio" name="confirmation" checked={confirmation === 'confirmed_simulation'} onChange={() => setConfirmation('confirmed_simulation')} />
-          확인된 조건 <span className="small muted">— 모의 배차에서 담당자가 확인한 값. 실제 현장 확인과는 다릅니다.</span>
+          확인된 조건 <span className="small muted">— 화주·기사에게 확인한 값</span>
         </label>
         <label className="rev-choice">
           <input type="radio" name="confirmation" checked={confirmation === 'assumed'} onChange={() => setConfirmation('assumed')} />
-          가정 시험 <span className="small muted">— &lsquo;이렇게 되면?&rsquo; 비교만. 승인·전달할 수 없습니다.</span>
+          가정 시험 <span className="small muted">— 비교만 가능, 확정 불가</span>
         </label>
       </fieldset>
 
@@ -190,47 +192,37 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   )
 }
 
-/**
- * 승인 뒤 조건 보완: 이전 버전 입력은 서버가 409로 막으므로 편집하지 않는다.
- * 승인 배정·미처리·현재 버전을 보존한 다음 원안(next-input)을 등록하고 같은 방법으로 계산한 뒤, 그 화면에서 보완한다.
- */
-export function NextInputCard({ client, planId, rerun }: { client: V2Client; planId: string; rerun: Omit<Rerun, 'beforeRunId'> }) {
-  const [status, setStatus] = useState<{ state: 'idle' } | { state: 'sending'; step: string } | { state: 'error'; step: string; error: unknown }>({ state: 'idle' })
-  // next-input은 부를 때마다 새 ID를 주므로, 한 번 받은 원안과 키를 재시도 동안 그대로 쓴다.
-  const attempt = useRef<{ id: string; snapshot?: Snapshot; registered?: boolean }>({ id: crypto.randomUUID() })
+/** 승인된 배정을 새 원안으로 삼는다. 응답 유실 시 첫 next-input/등록 요청을 그대로 재사용한다. */
+export function NextPlanPanel({ client, planId, rerun }: { client: V2Client; planId: string; rerun: Rerun }) {
+  const attempt = useRef<{ id: string; snapshot?: Snapshot; registered?: boolean } | null>(null)
+  const [status, setStatus] = useState<{ busy: boolean; step: string; error?: unknown }>({ busy: false, step: '' })
   async function start() {
-    const a = attempt.current
-    let step = '최신 원안 받기'
+    attempt.current ??= { id: crypto.randomUUID() }
+    const current = attempt.current
+    let step = '확정 계획 조회'
     try {
-      setStatus({ state: 'sending', step })
-      a.snapshot ??= await client.get<Snapshot>(`/v2/plans/${encodeURIComponent(planId)}/next-input`)
-      step = '원안 등록'
-      setStatus({ state: 'sending', step })
-      if (!a.registered) {
-        await client.registerScenario!(a.snapshot, `next-input-${a.id}`)
-        a.registered = true
+      setStatus({ busy: true, step })
+      current.snapshot ??= await client.get<Snapshot>(`/v2/plans/${encodeURIComponent(planId)}/next-input`)
+      step = '새 원안 등록'
+      setStatus({ busy: true, step })
+      if (!current.registered) {
+        await client.registerScenario!(current.snapshot, `next-input-${current.id}`)
+        current.registered = true
       }
-      step = '계산 요청'
-      setStatus({ state: 'sending', step })
-      const run = await client.createRun!({ scenario_id: a.snapshot.scenario_id, base_plan_version: a.snapshot.base_plan_version, ...rerun }, `next-input-run-${a.id}`)
-      location.search = `?${new URLSearchParams({ scenario: run.scenario_id, run: run.run_id })}`
-    } catch (error) {
-      setStatus({ state: 'error', step, error })
-    }
+      step = '새 기준 계산'
+      setStatus({ busy: true, step })
+      const snap = current.snapshot!
+      const next = await withQueueRetry(() => client.createRun!({ scenario_id: snap.scenario_id, base_plan_version: snap.base_plan_version,
+        methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed }, `next-run-${current.id}`), () => setStatus({ busy: true, step: '다른 사용자 계산을 기다리는' }))
+      location.search = `?${new URLSearchParams({ scenario: next.scenario_id, run: next.run_id })}`
+    } catch (error) { setStatus({ busy: false, step, error }) }
   }
-  return (
-    <section className="card revision">
-      <h2>조건 보완 · 재계산</h2>
-      <p className="muted small">
-        이 계획은 이미 내부 승인돼 버전이 올라갔습니다. 이 화면의 입력은 이전 버전이라 조건을 보완할 수 없습니다.
-        승인된 배정·미처리를 그대로 이어받은 최신 원안을 만들어 같은 방법으로 계산한 뒤, 그 화면에서 보완하세요. 기존 승인·전달 기록은 바뀌지 않습니다.
-      </p>
-      <button type="button" disabled={status.state === 'sending'} onClick={start}>
-        {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '최신 승인 계획으로 새 원안 만들기'}
-      </button>
-      {status.state === 'error' && <ErrorNote step={status.step} error={status.error} />}
-    </section>
-  )
+  return <section className="card">
+    <h2>확정된 계획에서 이어서 점검 <Hint text="확정한 배정과 보류 작업을 새 원안으로 가져옵니다. 새 점검을 시작하면 이전 변경 알림은 지난 지시로 표시되니, 기사 응답 확인을 마친 뒤 진행하세요." /></h2>
+    <p className="small">추가 변경이 생기면 지금 확정한 계획을 기준으로 다시 점검합니다.</p>
+    <button type="button" disabled={status.busy} onClick={start}>{status.busy ? `${status.step} 중…` : status.error ? '다시 시도' : '확정 계획으로 새 점검 시작'}</button>
+    {status.error != null && <ErrorNote step={status.step} error={status.error} />}
+  </section>
 }
 
 function ErrorNote({ step, error }: { step: string; error: unknown }) {

@@ -8,6 +8,25 @@ import sqlite3
 from backend.api.contracts import DRAFT
 
 
+# 2026-11-12 현장 식별 필드(선택). 이미 만들어진 v1 DB에도 같은 열을 덧붙인다(값은 비어 있음, 기존 행 보존).
+FIELD_COLUMNS = {
+    "jobs": {"container_no": "TEXT CHECK(container_no IS NULL OR length(container_no)=11)",
+             "booking_no": "TEXT CHECK(booking_no IS NULL OR length(booking_no) BETWEEN 1 AND 35)",
+             "cargo_owner": "TEXT CHECK(cargo_owner IS NULL OR length(cargo_owner) BETWEEN 1 AND 60)"},
+    "vehicles": {"plate_no": "TEXT CHECK(plate_no IS NULL OR length(plate_no) BETWEEN 1 AND 20)"},
+}
+
+
+def ensure_field_columns(conn) -> None:
+    for table, columns in FIELD_COLUMNS.items():
+        present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if not present:
+            continue
+        for name, ddl in columns.items():
+            if name not in present:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}")
+
+
 class Database:
     """연결마다 외래키/재귀 트리거를 설정하고 성공한 쓰기만 원자적으로 저장."""
 
@@ -72,4 +91,5 @@ class Database:
                 conn.executescript((DRAFT / "공통 규격" / "schema.sql").read_text(encoding="utf-8"))
             elif version != 1:
                 raise RuntimeError("지원하지 않는 DB 버전. 별도 이전 필요")
+            ensure_field_columns(conn)
             conn.execute("PRAGMA journal_mode=WAL")

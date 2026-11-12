@@ -2,6 +2,8 @@ import type { Assignment } from '../api/types'
 import { ISSUE_LABEL, lockedPreserved, type ChangeKind, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
 import { kstTimeWithDay } from '../lib/time'
+import { jobName, vehicleName } from '../lib/labels'
+import { useState } from 'react'
 
 const CHANGE_LABEL: Record<ChangeKind, string> = { vehicle: '차량', order: '순서', time: '시각' }
 
@@ -21,7 +23,7 @@ function Cell({ a, refUtc, closesAt }: { a: Assignment | undefined; refUtc: stri
   const late = lateDuration(a, closesAt)
   return (
     <>
-      <b>{a.vehicle_id}</b> #{a.sequence}
+      <b title={a.vehicle_id}>{vehicleName(a.vehicle_id)}</b> <span className="muted small">{a.sequence}번째</span>
       <div className="muted small">
         출발 {kstTimeWithDay(a.pickup_departure_at, refUtc)} · 도착{' '}
         <span className={late ? 'late-time' : undefined}>
@@ -40,16 +42,35 @@ export function ComparisonTable({
   asOf,
   baseLabel,
   candLabel,
+  selectedJob = null,
+  onSelectJob,
 }: {
   rows: JobRow[]
   asOf: string
   baseLabel: string
   candLabel: string | null
+  selectedJob?: string | null
+  onSelectJob?: (jobId: string) => void
 }) {
   const hasCand = candLabel !== null
+  // 영향 있는 작업: 바뀌었거나, 원안에서 문제가 있었거나, 보류됐거나, 출발한 고정 작업. 나머지는 접어 둔다.
+  const affected = (r: JobRow) => r.locked || r.job.ready_at === null || r.changes.length > 0 || r.baselineIssues.length > 0
+    || r.candidateUnassigned || r.candidateMissing || r.candidateIssues.length > 0
+  const [onlyAffected, setOnlyAffected] = useState(true)
+  // 조정안이 있을 때만 접는다(원안만 있을 때는 전부 보여 준다).
+  const filtering = hasCand && onlyAffected
+  const shown = filtering ? rows.filter(affected) : rows
+  const hidden = hasCand ? rows.length - rows.filter(affected).length : 0
   return (
+    <>
+    {hidden > 0 && (
+      <div className="table-filter small">
+        <label><input type="checkbox" checked={onlyAffected} onChange={(e) => setOnlyAffected(e.target.checked)} /> 영향 있는 작업만 보기</label>
+        <span className="muted">{onlyAffected ? `변경·문제 없는 ${hidden}건 숨김` : `전체 ${rows.length}건`}</span>
+      </div>
+    )}
     <div className="table-wrap">
-      <table className="grid">
+      <table className="grid stack">
         <thead>
           <tr>
             <th>작업</th>
@@ -60,14 +81,19 @@ export function ComparisonTable({
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => {
+          {shown.map((r) => {
             const preserved = lockedPreserved(r, hasCand)
             return (
-              <tr key={r.job.job_id} className={r.candidateUnassigned ? 'row-unassigned' : r.locked ? 'row-locked' : ''}>
+              <tr
+                key={r.job.job_id}
+                className={`${r.candidateUnassigned ? 'row-unassigned' : r.locked ? 'row-locked' : ''}${selectedJob === r.job.job_id ? ' row-picked' : ''}${onSelectJob ? ' row-click' : ''}`}
+                onClick={onSelectJob ? () => onSelectJob(r.job.job_id) : undefined}
+                aria-selected={onSelectJob ? selectedJob === r.job.job_id : undefined}
+              >
                 <td className="job-cell">
-                  <b>{r.job.job_id}</b>
+                  <b>{jobName(r.job.job_id)}</b>
                   <div className="muted small">
-                    {r.job.voyage_id} · {r.job.terminal_id}
+                    {r.job.voyage_id} · {r.job.terminal_id}{r.job.cargo_owner ? ` · ${r.job.cargo_owner}` : ''}{jobName(r.job.job_id) !== r.job.job_id ? ` · ${r.job.job_id}` : ''}
                   </div>
                   {r.job.ready_at === null && <div className="warn small">준비시각 미확인</div>}
                   {r.locked && (
@@ -78,8 +104,8 @@ export function ComparisonTable({
                     </div>
                   )}
                 </td>
-                <td>{kstTimeWithDay(r.window?.closes_at ?? null, asOf)}</td>
-                <td>
+                <td data-label="마감">{kstTimeWithDay(r.window?.closes_at ?? null, asOf)}</td>
+                <td data-label={baseLabel}>
                   <Cell a={r.baseline} refUtc={asOf} closesAt={r.window?.closes_at} />
                   {r.baselineIssues.map((i, k) => (
                     <div key={k} className="warn small">
@@ -88,7 +114,7 @@ export function ComparisonTable({
                   ))}
                 </td>
                 {hasCand && (
-                  <td>
+                  <td data-label={candLabel ?? undefined}>
                     {r.candidateUnassigned ? (
                       <span className="badge unassigned">미처리</span>
                     ) : r.candidateMissing ? (
@@ -99,7 +125,7 @@ export function ComparisonTable({
                   </td>
                 )}
                 {hasCand && (
-                  <td>
+                  <td data-label="변경 · 이유">
                     {r.locked ? (
                       preserved ? (
                         <span className="dot dot-muted">원안 유지</span>
@@ -126,5 +152,6 @@ export function ComparisonTable({
         </tbody>
       </table>
     </div>
+    </>
   )
 }

@@ -1,0 +1,33 @@
+[Unit]
+Description=Banipmatch isolated public demo
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=banipmatch
+Group=banipmatch
+WorkingDirectory=/opt/banipmatch/current
+EnvironmentFile=/etc/banipmatch/app.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+Environment=OMP_NUM_THREADS=1
+Environment=OPENBLAS_NUM_THREADS=1
+ExecStart=/opt/banipmatch/venv/bin/python -m uvicorn backend.webapp:create --factory --host 127.0.0.1 --port 8877 --proxy-headers --forwarded-allow-ips 127.0.0.1 --workers 1 --no-access-log
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=75
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/banipmatch
+MemoryHigh=1100M
+MemoryMax=1400M
+TasksMax=128
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

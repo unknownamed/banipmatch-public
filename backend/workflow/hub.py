@@ -14,6 +14,7 @@ from backend.api.contracts import ApiError, ROOT, utc_now
 from backend.api.engine_replay import EngineReplay
 from backend.api.runs import ReplayJobs
 from backend.db.database import Database
+from backend.db.database import ensure_field_columns
 from backend.db.store import Store
 from .push import WebPushSender
 from .security import IDENTIFIER, Secrets, csrf, hashed
@@ -50,7 +51,14 @@ class DomainDatabase(Database):
                 conn.executescript((CONTRACT / "schema.sql").read_text(encoding="utf-8"))
         elif version != 2:
             raise RuntimeError("지원하지 않는 세션 DB 버전")
+        else:
+            with self.connect() as conn:
+                ensure_field_columns(conn)
+                conn.commit()
 
+
+# 발표장 30명 동시 계산 요청을 받는 대기열 상한(세션당 1건).
+QUEUE_LIMIT = 30
 
 class Hub:
     def __init__(self, settings, *, replay=None, sender=None, clock=None):
@@ -77,7 +85,8 @@ class Hub:
                 raise RuntimeError("기존 세션 보호키 유실. 원래 키를 복구해야 함")
             self.secrets = Secrets(self.root / "secrets.key")
             self.sender = self.sender or WebPushSender(self.settings)
-            self.calculations = ThreadPoolExecutor(max_workers=1, thread_name_prefix="session-calculation")
+            # 서버 vCPU 2개에 맞춘 동시 계산 2건. 세션별 DB가 분리되고 같은 세션은 한 건만 대기한다.
+            self.calculations = ThreadPoolExecutor(max_workers=2, thread_name_prefix="session-calculation")
             self.deliveries = ThreadPoolExecutor(max_workers=1, thread_name_prefix="push-delivery")
             with self.registry.connect() as conn:
                 rows = conn.execute("SELECT session_id FROM sessions WHERE ready=1").fetchall()
@@ -174,14 +183,16 @@ class Hub:
                 return cookie, self.session_response(cookie, self.authenticate(cookie))
             except ApiError:
                 pass
-        self.rate("new-session:" + client_bucket, limit=5)
+        # A classroom/demo group can share one public IP. Keep admission bounded
+        # while allowing a presentation room (30+ visitors, reloads) to open sessions.
+        self.rate("new-session:" + client_bucket, limit=60)
         with self.lock:
             self.cleanup()
             sid = secrets.token_hex(16)
             cookie = sid + "." + secrets.token_urlsafe(32)
             now, expires = self.now(), stamp(self.clock() + timedelta(hours=24))
             with self.registry.transaction() as conn:
-                if conn.execute("SELECT count(*) FROM sessions").fetchone()[0] >= 100:
+                if conn.execute("SELECT count(*) FROM sessions").fetchone()[0] >= 200:
                     raise ApiError(429, "SESSION_LIMIT", "서버 세션 보관 상한에 도달함")
                 conn.execute("INSERT INTO sessions(session_id,token_hash,created_at,expires_at) VALUES(?,?,?,?)",
                              (sid, hashed(cookie), now, expires))
@@ -216,18 +227,34 @@ class Hub:
 
     def check_queued(self, sid: str, run: dict):
         self.session(sid)
-        if (self.clock() - moment(run["created_at"])).total_seconds() > 120:
+        if (self.clock() - moment(run["created_at"])).total_seconds() > 300:
             raise ApiError(503, "QUEUE_TIMEOUT", "대기시간 상한을 넘음. 새 실행 필요")
 
     def authorize(self, sid: str):
         if not self.session(sid)["push_authorized"]:
             raise ApiError(403, "PUSH_TEST_NOT_AUTHORIZED", "운영자가 허용한 팀원 시험 세션만 전달 가능")
 
+    def authorize_with_team_code(self, sid: str, code: str):
+        """팀 시연 코드가 맞으면 이 세션만 앱 알림 시험 권한을 연다. 코드 값은 응답·로그에 남기지 않는다."""
+        import hmac
+        path = self.settings.push_team_code_file
+        if not path or not path.is_file():
+            raise ApiError(503, "TEAM_CODE_NOT_CONFIGURED", "이 서버는 팀 시연 코드를 쓰지 않음")
+        self.rate("team-code:" + sid, limit=5, seconds=600)
+        self.rate("team-code:all", limit=60, seconds=600)
+        expected = path.read_text(encoding="utf-8").strip().upper()
+        given = (code or "").strip().upper()
+        if not expected or not hmac.compare_digest(given.encode(), expected.encode()):
+            raise ApiError(403, "TEAM_CODE_INVALID", "팀 시연 코드가 맞지 않음")
+        with self.registry.transaction() as conn:
+            conn.execute("UPDATE sessions SET push_authorized=1, consent_note=? WHERE session_id=? AND revoked=0",
+                         ("팀 시연 코드로 허용(동의한 팀원 기기 시험)", sid))
+
     def enqueue_run(self, domain, request: dict, key: str):
         from backend.api.input_preflight import check_input
         with self.lock:
             def check(snapshot, methods):
-                if len(self.pending) >= 4 or any(s == domain.sid for s, _ in self.pending):
+                if len(self.pending) >= QUEUE_LIMIT or any(s == domain.sid for s, _ in self.pending):
                     raise ApiError(429, "QUEUE_FULL", "계산 중인 작업을 확인하고 잠시 후 요청해야 함")
                 with domain.db.connect() as conn:
                     if conn.execute("SELECT count(*) FROM runs").fetchone()[0] >= 20:

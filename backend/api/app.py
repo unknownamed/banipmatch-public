@@ -25,7 +25,7 @@ from backend.db.store import Store
 
 
 def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None = None,
-               workflow_replay=None, push_sender=None, workflow_clock=None) -> FastAPI:
+               workflow_replay=None, push_sender=None, workflow_clock=None, frontend_dir=None) -> FastAPI:
     settings = settings or Settings.from_env()
     database = Database(settings.db_path)
     store = Store(database)
@@ -56,6 +56,8 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
     app = FastAPI(title="반입맞춤 로컬 모의 API", version="0.1.0", lifespan=lifespan,
                   swagger_ui_parameters={"persistAuthorization": False})
     app.state.store = store
+    from backend.web_assets import install_assets
+    asset_paths = install_assets(app, frontend_dir) if frontend_dir is not None else set()
     app.openapi = lambda: runtime_openapi(settings.run_mode)
     if settings.workflow_enabled:
         from backend.workflow.middleware import BodyLimit
@@ -80,7 +82,7 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
         if public and (request.url.hostname not in settings.public_hosts or request.url.scheme != "https"):
             response = JSONResponse(ApiError(400, "INVALID_PUBLIC_ORIGIN", "설정한 HTTPS Host로 접근해야 함").body(
                 request.state.request_id), status_code=400)
-        elif public and not v2 and request.url.path not in {"/health", "/docs", "/openapi.json", "/docs/oauth2-redirect"}:
+        elif public and not v2 and request.url.path not in asset_paths | {"/health", "/docs", "/openapi.json", "/docs/oauth2-redirect"}:
             response = JSONResponse(ApiError(404, "HTTP_ERROR", "공개 모드에서 제공하지 않는 경로").body(
                 request.state.request_id), status_code=404)
         elif not public and request.url.hostname not in {"localhost", "127.0.0.1", "::1"}:
@@ -96,6 +98,9 @@ def create_app(settings: Settings | None = None, *, replay: FixtureReplay | None
             response = await call_next(request)
         response.headers["X-Request-ID"] = request.state.request_id
         response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-Frame-Options"] = "DENY"
         return response
 
     @app.exception_handler(ApiError)

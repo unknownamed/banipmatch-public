@@ -28,6 +28,11 @@ export interface Job {
   frozen: boolean
   freeze_reason: string | null
   evidence: Evidence
+  /** ISO 6346 컨테이너 번호(운송사 TMS·선적지시서). 없으면 화면은 job_id를 쓴다. */
+  container_no?: string | null
+  booking_no?: string | null
+  /** 화주 상호 */
+  cargo_owner?: string | null
 }
 
 export interface TimeWindow {
@@ -80,8 +85,9 @@ export interface Snapshot {
   /** 조건 보완(R4)에서 가용·근무 시각만 쓴다. 나머지 필드는 원본 그대로 보존한다. */
   vehicles?: Vehicle[]
   /** 차량 추가 시 시작 위치를 고르는 데만 쓴다. */
-  locations?: { location_id: string; name: string; kind: string }[]
-  // travel_times 는 이번 화면에서 쓰지 않아 생략.
+  locations?: { location_id: string; name: string; kind: string; latitude?: number | null; longitude?: number | null }[]
+  /** 차량 지도에서 위치 추정(이동 구간)에만 쓴다. */
+  travel_times?: { from_location_id: string; to_location_id: string; minutes: number | null }[]
 }
 
 export interface Vehicle {
@@ -92,6 +98,8 @@ export interface Vehicle {
   available_at: UtcString | null
   shift_end_at: UtcString | null
   evidence: Evidence
+  /** 차량 번호판. 없으면 화면은 vehicle_id를 쓴다. */
+  plate_no?: string | null
 }
 
 export type RunStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'

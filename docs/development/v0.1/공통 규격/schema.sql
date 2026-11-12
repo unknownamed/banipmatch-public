@@ -66,6 +66,7 @@ CREATE TABLE vehicles (
     equipment_types_json TEXT NOT NULL CHECK(json_valid(equipment_types_json)
         AND json_type(equipment_types_json)='array' AND json_array_length(equipment_types_json)>0),
     evidence_json TEXT NOT NULL CHECK(json_valid(evidence_json) AND json_type(evidence_json)='object'),
+    plate_no TEXT CHECK(plate_no IS NULL OR length(plate_no) BETWEEN 1 AND 20),
     PRIMARY KEY(scenario_id, vehicle_id),
     FOREIGN KEY(scenario_id) REFERENCES scenarios(scenario_id),
     FOREIGN KEY(scenario_id, start_location_id) REFERENCES locations(scenario_id, location_id)
@@ -106,6 +107,9 @@ CREATE TABLE jobs (
     frozen INTEGER NOT NULL CHECK(frozen IN (0,1)),
     freeze_reason TEXT,
     evidence_json TEXT NOT NULL CHECK(json_valid(evidence_json) AND json_type(evidence_json)='object'),
+    container_no TEXT CHECK(container_no IS NULL OR length(container_no)=11),
+    booking_no TEXT CHECK(booking_no IS NULL OR length(booking_no) BETWEEN 1 AND 35),
+    cargo_owner TEXT CHECK(cargo_owner IS NULL OR length(cargo_owner) BETWEEN 1 AND 60),
     PRIMARY KEY(scenario_id, job_id),
     CHECK(state<>'departed' OR frozen=1),
     CHECK(frozen=0 OR (freeze_reason IS NOT NULL AND length(trim(freeze_reason))>0)),

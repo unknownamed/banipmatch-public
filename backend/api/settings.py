@@ -20,6 +20,9 @@ class Settings:
     push_enabled: bool = False
     vapid_private_key: Path | None = None
     vapid_subject: str = ""
+    reference_file: Path | None = None
+    # 팀 시연 코드 파일(서버 비공개 경로). 담당자가 코드를 입력하면 그 세션만 앱 알림 시험 권한을 얻는다.
+    push_team_code_file: Path | None = None
     cors_origins: tuple[str, ...] = field(default_factory=lambda: (
         "http://localhost:5173", "http://127.0.0.1:5173",
     ))
@@ -39,6 +42,8 @@ class Settings:
             vapid_private_key=Path(os.environ["BANIPMATCH_VAPID_PRIVATE_KEY_FILE"]).resolve()
             if os.getenv("BANIPMATCH_VAPID_PRIVATE_KEY_FILE") else None,
             vapid_subject=os.getenv("BANIPMATCH_VAPID_SUBJECT", ""),
+            reference_file=Path(os.environ['BANIPMATCH_REFERENCE_FILE']).resolve() if os.getenv('BANIPMATCH_REFERENCE_FILE') else None,
+            push_team_code_file=Path(os.environ['BANIPMATCH_PUSH_TEAM_CODE_FILE']).resolve() if os.getenv('BANIPMATCH_PUSH_TEAM_CODE_FILE') else None,
             cors_origins=tuple(x.strip() for x in os.getenv(
                 "BANIPMATCH_CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
             ).split(",") if x.strip()),

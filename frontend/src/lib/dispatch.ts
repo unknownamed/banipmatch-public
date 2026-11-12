@@ -18,6 +18,8 @@ export interface PlanChange {
   before: { vehicle_id?: string; pickup_departure_at?: string; gate_arrival_at?: string } | null
   after: { vehicle_id?: string; pickup_departure_at?: string; gate_arrival_at?: string } | null
   instruction: string
+  /** 현장 표시 정보(입력에 있을 때만): 컨테이너 번호·화주·상차지 이름·항차·터미널·크기 */
+  display?: { container_no?: string | null; booking_no?: string | null; cargo_owner?: string | null; origin_name?: string; terminal_id?: string; voyage_id?: string; size?: string }
 }
 
 export interface DispatchPreview {
@@ -31,7 +33,7 @@ export interface DispatchPreview {
   unassigned_job_ids: string[]
   followups: Followup[]
   limits: string[]
-  vehicle_changes: { vehicle_id: string; changes: PlanChange[]; followups: Followup[]; recipient_id: string | null; recipient_status: string }[]
+  vehicle_changes: { vehicle_id: string; plate_no?: string | null; changes: PlanChange[]; followups: Followup[]; recipient_id: string | null; recipient_status: string }[]
 }
 
 export interface NotificationState {

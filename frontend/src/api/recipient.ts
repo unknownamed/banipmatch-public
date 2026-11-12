@@ -26,7 +26,7 @@ export interface RecipientNotification {
   is_current: boolean
   vehicle_ids: string[]
   /** 이전 계획이면 null(상세를 가림). */
-  payload: { plan_version: number; data_mode: string; vehicle_changes: { vehicle_id: string; changes: RecipientChange[] }[] } | null
+  payload: { plan_version: number; data_mode: string; vehicle_changes: { vehicle_id: string; plate_no?: string | null; changes: RecipientChange[] }[] } | null
   response_history: { response: HumanResponse; note: string; created_at: string }[]
 }
 

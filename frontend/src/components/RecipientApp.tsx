@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { RecipientClient, RecipientNotification, RecipientSession } from '../api/recipient'
 import { CHANGE_LABEL, RESPONSE_LABEL } from '../lib/dispatch'
 import { base64UrlToBytes, claimKey, inviteFromPaste, mustInstallFirst, platform, type Fragment, type PlatformInfo } from '../lib/recipient'
 import { kstDateTime, kstTime } from '../lib/time'
+import { formatContainer } from '../lib/labels'
 
 const errText = (e: unknown) =>
   e instanceof ApiRequestError && e.body ? `${e.body.code} — ${e.message}` : e instanceof Error ? e.message : String(e)
@@ -43,13 +44,13 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
   return (
     <Shell demo={demo}>
       <section className="card">
-        <h2>시험 수신 연결</h2>
-        <p className="small muted">배차 담당자가 확정한 <b>모의</b> 변경을 받아 보고 응답하는 시험 화면입니다. 실제 운송 지시가 아닙니다.</p>
+        <h2>배차 알림 연결</h2>
+        <p className="small muted">확정된 배차 변경을 이 휴대폰으로 받고 바로 응답합니다.</p>
         {install ? (
           <InstallGuide hasInvite={!!invite} />
         ) : invite ? (
           <>
-            <p>초대를 수락하면 이 기기가 지정된 차량의 시험 수신자로 연결됩니다. 이름·전화번호는 받지 않습니다.</p>
+            <p>연결하면 이 휴대폰이 지정된 차량의 배차 알림을 받습니다. 이름·전화번호는 저장하지 않습니다.</p>
             <button type="button" disabled={busy} onClick={() => accept(invite)}>{busy ? '수락 중…' : '초대 수락'}</button>
           </>
         ) : (
@@ -74,7 +75,7 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
 function Shell({ children, demo }: { children: React.ReactNode; demo: boolean }) {
   return (
     <main className="recipient">
-      <header className="recipient-head"><span className="brand-mark" aria-hidden="true">반</span> 반입맞춤 <span className="badge mode-simulated">시험 수신</span></header>
+      <header className="recipient-head"><span className="brand-mark" aria-hidden="true">반</span> 반입맞춤 <span className="demo-pill">기사용</span></header>
       {demo && (
         <div className="banner fixture" role="note">
           모의 화면입니다. 서버·웹 푸시 없이 이 탭의 가짜 자료로만 동작하며, 응답은 어디에도 전달·저장되지 않습니다.
@@ -118,6 +119,15 @@ function PasteInvite({ busy, onInvite }: { busy: boolean; onInvite: (token: stri
 function Connected({ client, session, env, demo, focus, onLeave }: { client: RecipientClient; session: RecipientSession; env: PlatformInfo; demo: boolean; focus: string | null; onLeave: () => void }) {
   const [inbox, setInbox] = useState<{ items?: RecipientNotification[]; error?: unknown }>({})
   const [selected, setSelected] = useState<string | null>(focus)
+  const [leaving, setLeaving] = useState(false)
+  const [leaveError, setLeaveError] = useState<unknown>(null)
+  async function leave() {
+    setLeaving(true)
+    setLeaveError(null)
+    try { await client.leave(); onLeave() }
+    catch (e) { setLeaveError(e) }
+    finally { setLeaving(false) }
+  }
   const load = useCallback(() => client.inbox().then((r) => setInbox({ items: r.notifications }), (error) => setInbox((s) => ({ ...s, error }))), [client])
   useEffect(() => {
     load()
@@ -140,7 +150,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
     <>
       <section className="card">
         <h2>내 차량 {session.vehicle_ids.join(', ')}</h2>
-        <p className="small muted">연결 만료 {kstDateTime(session.expires_at)} · 모의 배차 시험</p>
+        <p className="small muted">연결 만료 {kstDateTime(session.expires_at)}</p>
         {demo ? <p className="small muted">모의 화면에서는 알림 권한을 묻거나 구독하지 않습니다.</p> : <PushControl client={client} session={session} env={env} />}
       </section>
 
@@ -155,9 +165,10 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
           ))}
         </nav>
       )}
-      {current && <NotificationDetail key={current.notification_id} client={client} id={current.notification_id} listCurrent={current.is_current} onChanged={load} />}
+      {current && <NotificationDetail key={current.notification_id} client={client} summary={current} onChanged={load} />}
 
-      <LeaveButton client={client} onLeave={onLeave} />
+      <p className="small"><button type="button" className="secondary" disabled={leaving} onClick={leave}>이 기기 연결 해제</button></p>
+      {leaveError !== null && <p className="warn small" role="alert">연결 해제 실패: {errText(leaveError)}. 연결은 유지됩니다. 다시 시도해 주세요.</p>}
     </>
   )
 }
@@ -176,7 +187,7 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
       const result = await Notification.requestPermission()
       if (result !== 'granted') return setNote('알림이 허용되지 않았습니다. 화면을 직접 열어 변경을 확인할 수 있습니다.')
       const config = await client.pushConfig()
-      if (!config.configured || !config.application_server_key) return setNote('서버의 웹 푸시 설정이 아직 없습니다. 배포 서버에서 설정된 뒤 다시 시도하세요.')
+      if (!config.configured || !config.application_server_key) return setNote('알림 서버가 준비되지 않았습니다. 잠시 후 다시 시도하세요.')
       const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
       await navigator.serviceWorker.ready
       const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64UrlToBytes(config.application_server_key) }))
@@ -205,7 +216,7 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
   }
 
   if (!env.pushSupported)
-    return <p className="small warn">이 브라우저는 웹 푸시를 지원하지 않습니다{env.ios ? '(iPhone은 iOS 16.4 이상 홈 화면 앱 필요)' : ''}. 이 화면을 열어 직접 확인해야 합니다.</p>
+    return <p className="small warn">이 브라우저는 알림을 지원하지 않습니다{env.ios ? '(iPhone은 iOS 16.4 이상에서 홈 화면에 추가한 뒤 사용)' : ''}. 이 화면을 열어 직접 확인해 주세요.</p>
   return (
     <div className="push-control">
       {status === 'active' && permission === 'granted' ? (
@@ -221,34 +232,13 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
   )
 }
 
-/** 연결 해제는 서버가 성공을 돌려준 뒤에만 화면을 바꾼다. 실패하면 연결·구독이 남아 있으므로 여기서 다시 시도하게 한다. */
-function LeaveButton({ client, onLeave }: { client: RecipientClient; onLeave: () => void }) {
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<unknown>(null)
-  async function leave() {
-    setBusy(true)
-    setError(null)
-    try {
-      await client.leave()
-      onLeave()
-    } catch (e) {
-      setError(e)
-      setBusy(false)
-    }
-  }
-  return (
-    <div className="small">
-      <button type="button" className="secondary" disabled={busy} onClick={leave}>{busy ? '해제 중…' : '이 기기 연결 해제'}</button>
-      {error !== null && <p className="warn" role="alert">연결 해제 실패: {errText(error)}. 아직 연결돼 있어 알림이 올 수 있습니다. 다시 시도하세요.</p>}
-    </div>
-  )
-}
-
-function NotificationDetail({ client, id, listCurrent, onChanged }: { client: RecipientClient; id: string; listCurrent: boolean; onChanged: () => void }) {
+function NotificationDetail({ client, summary, onChanged }: { client: RecipientClient; summary: RecipientNotification; onChanged: () => void }) {
+  const id = summary.notification_id
   const [n, setN] = useState<{ data?: RecipientNotification; error?: unknown }>({})
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [sendError, setSendError] = useState<unknown>(null)
+  const attempt = useRef<{ body: string; key: string } | null>(null)
 
   useEffect(() => {
     let live = true
@@ -259,18 +249,19 @@ function NotificationDetail({ client, id, listCurrent, onChanged }: { client: Re
       if (data.is_current && data.payload && !data.opened_at) client.opened(id).then((d) => live && setN({ data: d }), () => {})
     }, (error) => live && setN({ error }))
     return () => { live = false }
-  }, [client, id])
+  }, [client, id, summary])
 
   async function respond(response: 'acknowledged' | 'can_perform' | 'cannot_perform') {
     setBusy(true)
     setSendError(null)
+    const body = JSON.stringify([id, response, note.trim()])
+    if (attempt.current?.body !== body) attempt.current = { body, key: `respond-${id}-${crypto.randomUUID()}` }
     try {
-      setN({ data: await client.respond(id, response, note.trim(), `respond-${id}-${crypto.randomUUID()}`) })
+      setN({ data: await client.respond(id, response, note.trim(), attempt.current.key) })
+      attempt.current = null
       setNote('')
       onChanged()
     } catch (e) {
-      // 서버가 이전 계획이라고 하면 화면에 남은 상세·응답 버튼도 바로 지운다.
-      if (isCode(e, 'NOTIFICATION_SUPERSEDED')) setN((x) => (x.data ? { data: { ...x.data, is_current: false, payload: null } } : x))
       setSendError(e)
     } finally {
       setBusy(false)
@@ -280,8 +271,7 @@ function NotificationDetail({ client, id, listCurrent, onChanged }: { client: Re
   if (n.error) return <p className="card warn small" role="alert">변경 내용 조회 실패: {errText(n.error)}</p>
   if (!n.data) return <p className="card muted" role="status">변경 내용 불러오는 중…</p>
   const d = n.data
-  // 목록 재조회에서 이전 계획이 됐으면(같은 알림 ID여도) 열어 둔 상세를 가린다.
-  if (!listCurrent || !d.is_current || !d.payload)
+  if (!summary.is_current || !d.is_current || !d.payload || isCode(sendError, 'NOTIFICATION_SUPERSEDED'))
     return (
       <section className="card">
         <h2>이전 계획의 알림</h2>
@@ -291,23 +281,29 @@ function NotificationDetail({ client, id, listCurrent, onChanged }: { client: Re
   return (
     <section className="card recipient-detail" aria-labelledby="detail-title">
       <h2 id="detail-title">변경 내용 <span className="small muted">계획 v{d.payload.plan_version} · {kstDateTime(d.created_at)}</span></h2>
-      <p className="small muted">담당자가 확정한 모의 변경입니다. 실제 운송·터미널 예약 변경을 뜻하지 않습니다.</p>
+      <p className="small muted">담당자가 확정한 배차 변경입니다. 터미널 예약은 바뀌지 않으니 게이트 도착 시각을 지켜 주세요.</p>
       {d.payload.vehicle_changes.map((v) => (
         <div key={v.vehicle_id}>
-          <h3>{v.vehicle_id}</h3>
+          <h3>{v.plate_no ?? v.vehicle_id}</h3>
           <ul>
-            {v.changes.map((c) => (
+            {v.changes.map((c) => {
+              const d = c.display
+              const name = d?.container_no ? formatContainer(d.container_no) : c.job_id
+              const route = d?.origin_name ? `${d.origin_name} → ${d.terminal_id} 게이트` : ''
+              const who = (vid?: string) => (vid === v.vehicle_id ? '내 차량' : vid ?? '')
+              return (
               <li key={c.job_id}>
-                <b>{c.job_id}</b> {CHANGE_LABEL[c.kind] ?? c.kind}
-                <br />
+                <b>{name}</b> {d?.size && <span className="small muted">{d.size}</span>} <span className="badge change">{CHANGE_LABEL[c.kind] ?? c.kind}</span>
+                {(d?.cargo_owner || route) && <div className="small muted">{[d?.cargo_owner, route, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(' · ')}</div>}
                 <span className="small">
-                  이전: {c.before ? `${c.before.vehicle_id} · 상차지 출발 ${kstTime(c.before.pickup_departure_at)} · 게이트 ${kstTime(c.before.gate_arrival_at)}` : c.before_outside_scope ? '다른 차량(상세 비공개)' : '배정 없음'}
+                  이전: {c.before ? `${who(c.before.vehicle_id)} · ${kstTime(c.before.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.before.gate_arrival_at)}` : c.before_outside_scope ? '다른 차량(상세 비공개)' : '배정 없음'}
                   <br />
-                  변경: {c.after ? `${c.after.vehicle_id} · 상차지 출발 ${kstTime(c.after.pickup_departure_at)} · 게이트 ${kstTime(c.after.gate_arrival_at)}` : c.after_outside_scope ? '다른 차량으로 이동(상세 비공개)' : '미처리 · 담당자 확인 중'}
+                  변경: {c.after ? `${who(c.after.vehicle_id)} · ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : c.after_outside_scope ? '다른 차량으로 이동(상세 비공개)' : '미배정 · 담당자 확인 중'}
                 </span>
-                {c.instruction && <p className="small muted">{c.instruction}</p>}
+                {c.instruction && c.kind === 'removed_from_plan' && <p className="small muted">{c.instruction}</p>}
               </li>
-            ))}
+              )
+            })}
           </ul>
         </div>
       ))}
@@ -315,7 +311,7 @@ function NotificationDetail({ client, id, listCurrent, onChanged }: { client: Re
       <h3>응답</h3>
       <p className="small">현재: <b>{RESPONSE_LABEL[d.response]}</b>{d.responded_at && ` · ${kstTime(d.responded_at)}`}</p>
       <label className="rev-reason">
-        메모 (선택 · 300자 · 개인정보 쓰지 않기)
+        메모 (선택 · 개인정보 쓰지 않기)
         <textarea rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} />
       </label>
       <div className="respond-buttons">

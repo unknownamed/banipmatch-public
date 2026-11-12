@@ -2,49 +2,37 @@ import { useState } from 'react'
 import fixture from '../fixtures/reference-preview.synthetic.json'
 import { BLOCKER_LABEL, KIND_LABEL, display, type ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
+import { LiveReference } from './LiveReference'
 
-type Source = 'live' | 'replay' | 'mock'
 const cases = fixture.cases as unknown as { id: string; label: string; view: ReferenceView }[]
 
 /**
  * #32 실제·재생·모의 자료 구분 화면. 사용자가 자료 종류를 직접 고르며, 실패해도 다른 종류로 자동 전환하지 않는다.
- * 지금은 서버 읽기 경로가 없어(PR #42는 내부 모듈) 실제 조회·재생은 '연결 전'으로만 보여준다.
+ * 실제 수신 결과는 인증된 /v2/references/current에서 읽는다. 과거 재생과 모의 예제는 구분한다.
  */
 export function ReferencePanel() {
-  const [source, setSource] = useState<Source>('mock')
   const [caseId, setCaseId] = useState(cases[0].id)
   const picked = cases.find((c) => c.id === caseId)!
 
   return (
-    <main>
-      <section className="card reference" aria-labelledby="ref-title">
-        <h2 id="ref-title">참고 자료 · HJNC 항차 반입 일정</h2>
-        <p className="small muted">
-          항차별 반입 시작·마감과 접안 예정(ETB)을 참고로 보여줍니다. 참고 자료는 배차 계산 입력이 아니며, 접안 예정 변화를 반입 마감 변경으로 바꾸지 않습니다.
-        </p>
-        <div className="tabs" role="radiogroup" aria-label="자료 종류">
-          {([['live', '실제 현재 조회'], ['replay', '저장 자료 재생'], ['mock', '모의 시연']] as const).map(([id, label]) => (
-            <button key={id} type="button" role="radio" aria-checked={source === id} aria-selected={source === id} onClick={() => setSource(id)}>{label}</button>
-          ))}
+    <main className="timeline-view">
+      <header className="top">
+        <div>
+          <h1>터미널 일정</h1>
+          <p className="muted">반입 마감을 확인하는 터미널 공지와, 배차 판단에 참고할 해상 기상·도로 이동 시간입니다.</p>
         </div>
-
-        {source !== 'mock' ? (
-          <p className="warn small" role="status">
-            {source === 'live' ? '실제 조회는' : '저장 자료 재생은'} 아직 연결되지 않았습니다. 서버의 읽기 경로가 생기기 전에는 결과를 보여주지 않으며, 모의 자료로 대신 채우지 않습니다.
-          </p>
-        ) : (
-          <>
-            <div className="banner fixture" role="note">모의(합성) 예제입니다. 실제 HJNC 응답이나 수신 기록이 아닙니다. 상태별 화면 표시를 확인하는 용도입니다.</div>
-            <label className="small">
-              모의 상태{' '}
-              <select value={caseId} onChange={(e) => setCaseId(e.target.value)}>
-                {cases.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-              </select>
-            </label>
-            <ReferenceStatus view={picked.view} />
-          </>
-        )}
-      </section>
+      </header>
+      <LiveReference />
+      <details className="tech-info">
+        <summary>수신 실패·부분 응답일 때 화면 예시</summary>
+        <label className="small">
+          상황{' '}
+          <select value={caseId} onChange={(e) => setCaseId(e.target.value)}>
+            {cases.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+          </select>
+        </label>
+        <ReferenceStatus view={picked.view} />
+      </details>
     </main>
   )
 }
@@ -95,16 +83,19 @@ export function ReferenceStatus({ view: v }: { view: ReferenceView }) {
                 : '받은 행이 필드 누락 등으로 모두 제외돼 표시할 행이 없습니다. 정상 0건이 아닙니다.'}
             </p>
           )}
-          {d.sample.blockers.length > 0 && (
-            <ul className="small muted ref-blockers">
-              {d.sample.blockers.map((b) => <li key={b}>{BLOCKER_LABEL[b] ?? b}</li>)}
-            </ul>
-          )}
         </>
       )}
-      <p className="small muted">
-        배차 계산 입력 변환: {v.engine_conversion === 'blocked' ? '막힘' : v.engine_conversion} · 승인 근거로 사용: {v.approval_eligible ? '가능' : '불가'} · 실패 시 모의 자동 전환: {v.automatic_mock_fallback ? '있음' : '없음'}
-      </p>
+      <details className="tech-info">
+        <summary>자료 사용 조건</summary>
+        {d.sample && d.sample.blockers.length > 0 && (
+          <ul className="small muted ref-blockers">
+            {d.sample.blockers.map((b) => <li key={b}>{BLOCKER_LABEL[b] ?? b}</li>)}
+          </ul>
+        )}
+        <p className="small muted">
+          배차 계산 입력으로 변환: {v.engine_conversion === 'blocked' ? '하지 않음' : v.engine_conversion} · 승인 근거로 사용: {v.approval_eligible ? '가능' : '불가'} · 조회 실패 시 예시 자료로 대체: {v.automatic_mock_fallback ? '있음' : '없음'}
+        </p>
+      </details>
     </div>
   )
 }

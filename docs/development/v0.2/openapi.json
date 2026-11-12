@@ -186,6 +186,85 @@
         ]
       }
     },
+    "/v2/session/push-authorization": {
+      "post": {
+        "summary": "Push Authorization",
+        "operationId": "push_authorization_v2_session_push_authorization_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
     "/v2/examples/default": {
       "get": {
         "summary": "Example",
@@ -197,6 +276,62 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ]
+      }
+    },
+    "/v2/references/current": {
+      "get": {
+        "summary": "Reference Display",
+        "operationId": "reference_display_v2_references_current_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveDisplay"
                 }
               }
             }
@@ -2463,6 +2598,19 @@
           },
           "evidence": {
             "$ref": "#/components/schemas/Evidence"
+          },
+          "plate_no": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 20,
+                "description": "차량 번호판(예: 부산 90바 1201). 기사 개인정보는 넣지 않는다"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2551,6 +2699,44 @@
           },
           "evidence": {
             "$ref": "#/components/schemas/Evidence"
+          },
+          "container_no": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{3}[UJZ][0-9]{7}$",
+                "description": "ISO 6346 컨테이너 번호(소유자 3자+구분 1자+일련 6자리+확인 숫자). 운송사 TMS·선적지시서 값"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "booking_no": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 35,
+                "description": "선사 부킹 번호"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cargo_owner": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60,
+                "description": "화주(상호). 개인 이름을 넣지 않는다"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -3666,6 +3852,115 @@
         ],
         "additionalProperties": false
       },
+      "AisStatus": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "aisstream.io",
+            "title": "Source"
+          },
+          "started_at": {
+            "type": "string",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "type": "string",
+            "title": "Finished At"
+          },
+          "trial_bbox": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Trial Bbox"
+          },
+          "max_seconds": {
+            "type": "integer",
+            "title": "Max Seconds"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "connection_closed": {
+            "type": "boolean",
+            "title": "Connection Closed"
+          },
+          "subscription_confirmed": {
+            "type": "boolean",
+            "title": "Subscription Confirmed"
+          },
+          "unique_position_mmsi_count": {
+            "type": "integer",
+            "title": "Unique Position Mmsi Count"
+          },
+          "valid_position_events": {
+            "type": "integer",
+            "title": "Valid Position Events"
+          },
+          "voyage_link_verified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Voyage Link Verified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "started_at",
+          "finished_at",
+          "trial_bbox",
+          "max_seconds",
+          "status",
+          "connection_closed",
+          "subscription_confirmed",
+          "unique_position_mmsi_count",
+          "valid_position_events",
+          "voyage_link_verified"
+        ],
+        "title": "AisStatus"
+      },
+      "Attempt": {
+        "properties": {
+          "at": {
+            "type": "string",
+            "title": "At"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "empty",
+              "partial",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "at",
+          "status",
+          "error_code",
+          "attempts"
+        ],
+        "title": "Attempt"
+      },
       "Claim": {
         "properties": {
           "invitation_token": {
@@ -3841,6 +4136,96 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "Hjnc": {
+        "properties": {
+          "model_version": {
+            "type": "string",
+            "title": "Model Version"
+          },
+          "source": {
+            "type": "string",
+            "const": "hjnc",
+            "title": "Source"
+          },
+          "source_ref": {
+            "type": "string",
+            "title": "Source Ref"
+          },
+          "kind": {
+            "type": "string",
+            "const": "reference",
+            "title": "Kind"
+          },
+          "checked_at": {
+            "type": "string",
+            "title": "Checked At"
+          },
+          "last_attempt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Attempt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_success": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Success"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sample"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cached": {
+            "type": "null",
+            "title": "Cached"
+          },
+          "engine_conversion": {
+            "type": "string",
+            "const": "blocked",
+            "title": "Engine Conversion"
+          },
+          "approval_eligible": {
+            "type": "boolean",
+            "const": false,
+            "title": "Approval Eligible"
+          },
+          "automatic_mock_fallback": {
+            "type": "boolean",
+            "const": false,
+            "title": "Automatic Mock Fallback"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model_version",
+          "source",
+          "source_ref",
+          "kind",
+          "checked_at",
+          "last_attempt",
+          "last_success",
+          "current",
+          "engine_conversion",
+          "approval_eligible",
+          "automatic_mock_fallback"
+        ],
+        "title": "Hjnc"
+      },
       "Invitation": {
         "properties": {
           "plan_id": {
@@ -3897,6 +4282,98 @@
           "expires_at"
         ],
         "title": "InvitationState"
+      },
+      "Item": {
+        "properties": {
+          "values": {
+            "$ref": "#/components/schemas/Values"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          }
+        },
+        "type": "object",
+        "required": [
+          "values",
+          "provenance"
+        ],
+        "title": "Item"
+      },
+      "LiveDisplay": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "reference-display-1",
+            "title": "Schema Version"
+          },
+          "kind": {
+            "type": "string",
+            "const": "reference",
+            "title": "Kind"
+          },
+          "checked_at": {
+            "type": "string",
+            "title": "Checked At"
+          },
+          "engine_conversion": {
+            "type": "string",
+            "const": "blocked",
+            "title": "Engine Conversion"
+          },
+          "approval_eligible": {
+            "type": "boolean",
+            "const": false,
+            "title": "Approval Eligible"
+          },
+          "automatic_mock_fallback": {
+            "type": "boolean",
+            "const": false,
+            "title": "Automatic Mock Fallback"
+          },
+          "hjnc": {
+            "$ref": "#/components/schemas/Hjnc"
+          },
+          "weather": {
+            "items": {
+              "$ref": "#/components/schemas/Weather"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Weather"
+          },
+          "ais": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AisStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "road": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Road"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "schema_version",
+          "kind",
+          "checked_at",
+          "engine_conversion",
+          "approval_eligible",
+          "automatic_mock_fallback",
+          "hjnc",
+          "weather"
+        ],
+        "title": "LiveDisplay"
       },
       "NotificationInbox": {
         "properties": {
@@ -4079,6 +4556,88 @@
           "needs_followup"
         ],
         "title": "NotificationState"
+      },
+      "Observation": {
+        "properties": {
+          "station_id": {
+            "type": "string",
+            "title": "Station Id"
+          },
+          "observed_at_utc": {
+            "type": "string",
+            "title": "Observed At Utc"
+          },
+          "original_time_kst": {
+            "type": "string",
+            "title": "Original Time Kst"
+          },
+          "wh_m_original": {
+            "type": "string",
+            "title": "Wh M Original"
+          },
+          "ws_m_s_original": {
+            "type": "string",
+            "title": "Ws M S Original"
+          },
+          "gust_m_s_original": {
+            "type": "string",
+            "title": "Gust M S Original"
+          },
+          "missing_or_invalid_nonnegative_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Or Invalid Nonnegative Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "station_id",
+          "observed_at_utc",
+          "original_time_kst",
+          "wh_m_original",
+          "ws_m_s_original",
+          "gust_m_s_original",
+          "missing_or_invalid_nonnegative_fields"
+        ],
+        "title": "Observation"
+      },
+      "Provenance": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "reference",
+            "title": "Kind"
+          },
+          "source_ref": {
+            "type": "string",
+            "title": "Source Ref"
+          },
+          "received_at": {
+            "type": "string",
+            "title": "Received At"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "source_ref",
+          "received_at",
+          "observed_at"
+        ],
+        "title": "Provenance"
       },
       "PushConfig": {
         "properties": {
@@ -4508,6 +5067,310 @@
         ],
         "title": "RevisionState"
       },
+      "Road": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "const": "openrouteservice",
+            "title": "Source"
+          },
+          "kind": {
+            "type": "string",
+            "const": "reference",
+            "title": "Kind"
+          },
+          "profile": {
+            "type": "string",
+            "const": "driving-hgv",
+            "title": "Profile"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "key_missing",
+              "received",
+              "partial",
+              "auth_error",
+              "rate_limited",
+              "http_error",
+              "invalid_response"
+            ],
+            "title": "Status"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "http_status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Http Status"
+          },
+          "retry_after_seconds": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 86400.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry After Seconds"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/RoadPoint"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Points"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/RoadCell"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "title": "Cells"
+          },
+          "engine_conversion": {
+            "type": "string",
+            "const": "blocked",
+            "title": "Engine Conversion"
+          },
+          "approval_eligible": {
+            "type": "boolean",
+            "const": false,
+            "title": "Approval Eligible"
+          },
+          "automatic_mock_fallback": {
+            "type": "boolean",
+            "const": false,
+            "title": "Automatic Mock Fallback"
+          },
+          "coordinates_are_approximate": {
+            "type": "boolean",
+            "const": true,
+            "title": "Coordinates Are Approximate"
+          },
+          "realtime_traffic": {
+            "type": "boolean",
+            "const": false,
+            "title": "Realtime Traffic"
+          },
+          "truck_access_verified": {
+            "type": "boolean",
+            "const": false,
+            "title": "Truck Access Verified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "kind",
+          "profile",
+          "status",
+          "received_at",
+          "http_status",
+          "retry_after_seconds",
+          "points",
+          "cells",
+          "engine_conversion",
+          "approval_eligible",
+          "automatic_mock_fallback",
+          "coordinates_are_approximate",
+          "realtime_traffic",
+          "truck_access_verified"
+        ],
+        "title": "Road"
+      },
+      "RoadCell": {
+        "properties": {
+          "origin": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Origin"
+          },
+          "destination": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Destination"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "distance_meters": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Meters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "origin",
+          "destination",
+          "duration_seconds",
+          "distance_meters"
+        ],
+        "title": "RoadCell"
+      },
+      "RoadPoint": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude"
+          },
+          "latitude": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude"
+          },
+          "source_snap_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Snap M"
+          },
+          "destination_snap_m": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destination Snap M"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "longitude",
+          "latitude",
+          "source_snap_m",
+          "destination_snap_m"
+        ],
+        "title": "RoadPoint"
+      },
+      "Sample": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "received",
+              "empty",
+              "partial"
+            ],
+            "title": "Status"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Items"
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count"
+          },
+          "reported_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported Count"
+          },
+          "excluded_rows": {
+            "type": "integer",
+            "title": "Excluded Rows"
+          },
+          "blockers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Blockers"
+          },
+          "received_at": {
+            "type": "string",
+            "title": "Received At"
+          },
+          "freshness": {
+            "type": "string",
+            "enum": [
+              "fresh",
+              "stale"
+            ],
+            "title": "Freshness"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "items",
+          "row_count",
+          "reported_count",
+          "excluded_rows",
+          "blockers",
+          "received_at",
+          "freshness"
+        ],
+        "title": "Sample"
+      },
       "SessionPlan": {
         "properties": {
           "plan_id": {
@@ -4652,6 +5515,34 @@
         ],
         "title": "SubscriptionState"
       },
+      "Success": {
+        "properties": {
+          "received_at": {
+            "type": "string",
+            "title": "Received At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count"
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "received_at",
+          "status",
+          "row_count",
+          "item_count"
+        ],
+        "title": "Success"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -4691,6 +5582,198 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "Values": {
+        "properties": {
+          "VOY_NO": {
+            "type": "string",
+            "title": "Voy No"
+          },
+          "YARD_OPEN": {
+            "type": "string",
+            "title": "Yard Open"
+          },
+          "YARD_CLOSE": {
+            "type": "string",
+            "title": "Yard Close"
+          },
+          "ETB": {
+            "type": "string",
+            "title": "Etb"
+          }
+        },
+        "type": "object",
+        "required": [
+          "VOY_NO",
+          "YARD_OPEN",
+          "YARD_CLOSE",
+          "ETB"
+        ],
+        "title": "Values"
+      },
+      "Warning": {
+        "properties": {
+          "region_id": {
+            "type": "string",
+            "title": "Region Id"
+          },
+          "region_name": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "published_at_utc": {
+            "type": "string",
+            "title": "Published At Utc"
+          },
+          "effective_at_utc": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective At Utc"
+          },
+          "effective_time_original_kst": {
+            "type": "string",
+            "title": "Effective Time Original Kst"
+          },
+          "effective_representation": {
+            "type": "string",
+            "title": "Effective Representation"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "command": {
+            "type": "string",
+            "title": "Command"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_id",
+          "region_name",
+          "published_at_utc",
+          "effective_at_utc",
+          "effective_time_original_kst",
+          "effective_representation",
+          "kind",
+          "level",
+          "command"
+        ],
+        "title": "Warning"
+      },
+      "Weather": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "sea",
+              "warning"
+            ],
+            "title": "Kind"
+          },
+          "source_ref": {
+            "type": "string",
+            "title": "Source Ref"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "http_status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Http Status"
+          },
+          "report": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeatherReport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "kind",
+          "source_ref",
+          "status",
+          "received_at",
+          "http_status",
+          "report"
+        ],
+        "title": "Weather"
+      },
+      "WeatherReport": {
+        "properties": {
+          "row_count": {
+            "type": "integer",
+            "title": "Row Count",
+            "default": 0
+          },
+          "observations": {
+            "items": {
+              "$ref": "#/components/schemas/Observation"
+            },
+            "type": "array",
+            "title": "Observations",
+            "default": []
+          },
+          "selected_records": {
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            },
+            "type": "array",
+            "title": "Selected Records",
+            "default": []
+          },
+          "future_observation_rows": {
+            "type": "integer",
+            "title": "Future Observation Rows",
+            "default": 0
+          },
+          "station_mismatch_rows": {
+            "type": "integer",
+            "title": "Station Mismatch Rows",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "WeatherReport"
       },
       "SessionSnapshot": {
         "allOf": [

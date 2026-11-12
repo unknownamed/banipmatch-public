@@ -1,5 +1,7 @@
 # 반입맞춤 · BanipMatch
 
+> 2026-11-11 통합 시험: [기능·검수·남은 조건](docs/team/handoffs/2026-11-11-unknownamed-live-demo.md) · [직접 계산 웹앱 실행법](docs/deployment/live-demo.md). 실제 참고 자료와 합성 배차/선박 재생을 구분합니다.
+
 **팀원 테스트는 여기서 시작:** [접속 주소·역할별 확인·AI 시작문구·휴대폰 알림 방법](docs/team/integration-test-start.md). 최신 main으로 이 안내를 읽고 테스트할 수 있습니다. 실제 배포 코드 버전은 문서/이슈 #69에서 별도로 확인합니다.
 
 **보고서·제출 패키지 준비:** [검토본 생성·새 폴더 재현 안내](docs/submission/README.md). 10쪽 PDF와 같은 커밋의 코드/데이터 ZIP을 만들고 파일 해시·과거 소스·동결 결과를 검증합니다. 검토본과 최종 제출/배포 완료는 구분합니다.

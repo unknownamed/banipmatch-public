@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
+import type { MethodResult } from './api/types'
 import { useDispatchView } from './api/useDispatchView'
 import { ComparisonSection } from './components/ComparisonSection'
 import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
@@ -8,8 +9,16 @@ import { acknowledgeIds, approvalGate, approvalIdempotencyKey, type ApprovalGate
 import { buildRows } from './lib/compare'
 import { hasAssumedCondition } from './lib/revision'
 import type { V2Client } from './api/v2'
-import { ConditionRevisionPanel, NextInputCard, RevisionComparison } from './components/RevisionPanels'
+import { ConditionRevisionPanel, NextPlanPanel, RevisionComparison } from './components/RevisionPanels'
 import { DispatchPanel } from './components/DispatchPanel'
+import { registerLabels } from './lib/labels'
+import { ActionSummary } from './components/ActionSummary'
+
+function recommend(list: MethodResult[]): MethodResult | undefined {
+  const ok = list.filter((r) => r.result_origin === 'computed' && r.validation_status !== 'failed')
+  const key = (r: MethodResult) => [r.metrics.unassigned_count, r.metrics.movable_violation_count, r.metrics.fixed_risk_count, r.metrics.changed_job_ids.length]
+  return [...ok].sort((a, b) => { const x = key(a), y = key(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0 })[0]
+}
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
@@ -20,11 +29,14 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const approvalScope = `${scenarioId}:${runId}:${client.mode}`
 
   const snapshot = view.scenario.state === 'ready' ? view.scenario.data : null
+  registerLabels(snapshot)
   const run = view.run.state === 'ready' ? view.run.data : null
   const results = view.results.state === 'ready' ? view.results.data.results : null
   const base = results?.find((r) => r.method === 'B0')
   const candidates = results?.filter((r) => r.method !== 'B0') ?? []
-  const cand = candidates.find((r) => r.method === picked) ?? candidates[0]
+  // 처음 열 때는 추천안을 보여 준다: 미처리 → 조정 가능 위반 → 고정 위험 → 변경 수가 적은 순. 사용자가 고르면 그 안을 따른다.
+  const recommended = recommend(candidates)
+  const cand = candidates.find((r) => r.method === picked) ?? recommended ?? candidates[0]
   const rows = useMemo(() => (snapshot ? buildRows(snapshot, base, cand) : []), [snapshot, base, cand])
   // 새로고침 뒤에도 이미 다른 승인으로 바뀐 계획을 409 전에 알린다. 최종 판단은 서버가 한다.
   const [planNow, setPlanNow] = useState<{ planId: string; version: number } | null>(null)
@@ -34,9 +46,8 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
     client.getPlan(run.plan_id).then((p) => live && p.plan_id === run.plan_id && setPlanNow({ planId: p.plan_id, version: p.version })).catch(() => {})
     return () => { live = false }
   }, [client, run?.plan_id, approval.value?.status.state])
-  // 이 결과 이후 계획 버전이 올라갔는지(이번 화면 승인 또는 이미 승인됨). 이전 버전 입력으로는 조건 보완을 보내지 않는다.
-  const planAdvanced = !!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))
   const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
+  const approvedPlan = approval.value?.status.state === 'done' || !!(run && planNow?.planId === run.plan_id && planNow.version > run.base_plan_version)
   const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
   const v2 = 'session' in client ? (client as V2Client) : null
   const params = new URLSearchParams(location.search)
@@ -66,13 +77,17 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && (
         <>
           <Header s={snapshot} />
+          {view.results.state === 'ready' && (
+            <ActionSummary base={base} cand={cand} recommended={recommended?.method} rows={rows}
+              approved={!!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))} />
+          )}
           <ChangeEvidence s={snapshot} />
         </>
       )}
 
       {view.run.state === 'loading' && <Skeleton label="실행 상태 조회 중…" lines={2} />}
       {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
-      {run && <RunStatusPanel run={run} results={results} />}
+      {run && run.status !== 'completed' && <RunStatusPanel run={run} results={results} />}
       {assumed && (
         <div className="banner fixture" role="alert">
           가정 시험 입력입니다. 준비·가용 조건에 가정이 섞여 있어 비교만 할 수 있고 승인·전달할 수 없습니다.
@@ -91,6 +106,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             base={base}
             cand={cand}
             candidates={candidates}
+            recommended={recommended?.method}
             rows={rows}
             onPick={setPicked}
           />
@@ -111,15 +127,16 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       </div>
 
       {/* 승인 뒤(이번 화면에서 승인했거나 계획 버전이 이미 올라간 경우) 전달 단계. 최종 확인은 서버의 dispatch-preview가 한다. */}
-      {v2 && run && planAdvanced && (
-        <DispatchPanel key={`${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
+      {v2 && run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version)) && (
+        <DispatchPanel key={`dispatch:${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
       )}
 
-      {v2 && snapshot && run && view.results.state === 'ready' && (planAdvanced ? (
-        <NextInputCard client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed }} />
-      ) : (
-        <ConditionRevisionPanel client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />
-      ))}
+      {v2 && snapshot && run && view.results.state === 'ready' && (approvedPlan
+        ? <NextPlanPanel key={`next:${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: null }} />
+        : <ConditionRevisionPanel key={snapshot.scenario_id} client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />)}
+
+      {/* 계산 방법별 상태·독립 검사는 검증용 정보라 아래에 둔다(실패하면 위에 바로 보인다). */}
+      {run && run.status === 'completed' && <RunStatusPanel run={run} results={results} />}
     </main>
   )
 }

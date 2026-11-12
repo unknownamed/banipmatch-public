@@ -138,6 +138,15 @@ def install(app, settings, *, replay=None, sender=None, clock=None):
         _, row = manager(request)
         return hub.session_response(request.cookies[MANAGER_COOKIE], row)
 
+    @app.post("/v2/session/push-authorization", response_model=SessionState)
+    def push_authorization(request: Request, body: dict = Body(...)):
+        _, row = manager(request, write=True)
+        code = body.get("team_code") if isinstance(body, dict) else None
+        if not isinstance(code, str) or not 1 <= len(code) <= 32:
+            raise ApiError(422, "REQUEST_VALIDATION_FAILED", "팀 시연 코드 형식 확인 필요")
+        hub.authorize_with_team_code(row["session_id"], code)
+        return hub.session_response(request.cookies[MANAGER_COOKIE], hub.authenticate(request.cookies[MANAGER_COOKIE]))
+
     @app.delete("/v2/session")
     def delete_session(request: Request):
         _, row = manager(request, write=True)
@@ -153,6 +162,13 @@ def install(app, settings, *, replay=None, sender=None, clock=None):
         from tools.demo_engine_api import prepare_snapshot
         source = json.loads((DRAFT / "예제 데이터" / "01_snapshot.json").read_text(encoding="utf-8"))
         return prepare_snapshot(source, hub.clock().replace(second=0, microsecond=0), uuid4().hex[:12])
+
+    from backend.references.display import LiveDisplay, read_display
+
+    @app.get('/v2/references/current', response_model=LiveDisplay)
+    def reference_display(request: Request):
+        manager(request)
+        return read_display(settings.reference_file)
 
     @app.post("/v2/scenarios")
     def register(request: Request, body: dict = Body(...)):

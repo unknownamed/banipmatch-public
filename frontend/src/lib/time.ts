@@ -39,3 +39,8 @@ export function kstTimeWithDay(utc: string | null | undefined, refUtc: string): 
 
 const dayFmt = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' })
 const dayKey = (utc: string) => dayFmt.format(new Date(utc))
+
+/** 서버 설명문 안의 UTC 시각(2026-11-12T09:34:00Z)을 화면 기준 KST 시각(18:34)으로 바꾼다. 다른 글자는 그대로 둔다. */
+export function humanizeTimes(text: string): string {
+  return text.replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?Z/g, (iso) => kstTime(iso))
+}

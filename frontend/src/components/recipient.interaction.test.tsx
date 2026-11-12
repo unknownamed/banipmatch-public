@@ -32,6 +32,7 @@ afterEach(async () => {
   await act(async () => root.unmount())
   container.remove()
   history.replaceState(null, '', '/')
+  vi.restoreAllMocks()
 })
 
 function fake(over: Partial<RecipientClient> = {}) {
@@ -50,6 +51,40 @@ const flush = () => act(async () => { await new Promise((r) => setTimeout(r, 0))
 const button = (text: string) => [...container.querySelectorAll('button')].find((b) => b.textContent === text)
 
 describe('수신자 화면', () => {
+  it('목록 갱신에서 이전 계획이 되면 같은 알림 상세와 응답을 즉시 가린다', async () => {
+    let poll: (() => void) | undefined
+    vi.spyOn(globalThis, 'setInterval').mockImplementation(((fn: () => void) => { poll = fn; return 0 }) as never)
+    const inbox = vi.fn().mockResolvedValueOnce({ notifications: [note({})] }).mockResolvedValue({ notifications: [note({ is_current: false, payload: null })] })
+    const client = fake({ restore: vi.fn().mockResolvedValue(session), inbox, notification: vi.fn().mockResolvedValue(note({})) })
+    await act(async () => root.render(<RecipientApp client={client} boot={takeFragment()} env={android} />))
+    await flush()
+    expect(button('수행 가능')).toBeDefined()
+    await act(async () => { poll!() })
+    await flush()
+    expect(button('수행 가능')).toBeUndefined()
+    expect(container.textContent).toContain('이전 계획의 알림')
+  })
+
+  it('연결 해제 실패는 연결 상태를 유지하고 실패를 알린다', async () => {
+    const client = fake({ restore: vi.fn().mockResolvedValue(session), leave: vi.fn().mockRejectedValue(new Error('offline')) })
+    await act(async () => root.render(<RecipientApp client={client} boot={takeFragment()} env={android} />))
+    await flush()
+    await act(async () => button('이 기기 연결 해제')!.click())
+    expect(container.textContent).toContain('내 차량 T1')
+    expect(container.textContent).toContain('연결 해제 실패')
+  })
+
+  it('응답이 유실돼 같은 내용을 다시 보내면 같은 키를 사용한다', async () => {
+    const respond = vi.fn().mockRejectedValueOnce(new Error('response lost')).mockResolvedValue(note({ response: 'can_perform' }))
+    const client = fake({ restore: vi.fn().mockResolvedValue(session), inbox: vi.fn().mockResolvedValue({ notifications: [note({})] }), notification: vi.fn().mockResolvedValue(note({})), respond })
+    await act(async () => root.render(<RecipientApp client={client} boot={takeFragment()} env={android} />))
+    await flush()
+    await act(async () => button('수행 가능')!.click())
+    await act(async () => button('수행 가능')!.click())
+    expect(respond).toHaveBeenCalledTimes(2)
+    expect(respond.mock.calls[0]).toEqual(respond.mock.calls[1])
+  })
+
   it('초대 비밀을 주소에서 지우고, 같은 초대에는 해시 기반 같은 키로 수락한다', async () => {
     history.replaceState(null, '', '/recipient#invite=sec.ret')
     const client = fake()
@@ -60,7 +95,7 @@ describe('수신자 화면', () => {
     await flush()
     expect(client.claim).toHaveBeenCalledWith('sec.ret', await claimKey('sec.ret'))
     expect(container.textContent).toContain('내 차량 T1')
-    expect(container.textContent).toContain('웹 푸시를 지원하지 않습니다')
+    expect(container.textContent).toContain('알림을 지원하지 않습니다')
   })
 
   it('iPhone Safari에서는 수락 버튼 대신 홈 화면 추가 안내만 보여준다', async () => {

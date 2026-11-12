@@ -6,6 +6,8 @@ import {
   type DispatchPreview, type DispatchState, type Followup, type RecipientSummary,
 } from '../lib/dispatch'
 import { kstDateTime, kstTime } from '../lib/time'
+import { jobName, vehicleName, vehicleShort } from '../lib/labels'
+import { driverMessage } from '../lib/driverMessage'
 
 const enc = encodeURIComponent
 const errText = (e: unknown) =>
@@ -30,7 +32,8 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
     client.get<DispatchPreview>(`/v2/plans/${enc(planId)}/dispatch-preview`).then((data) => live && setPreview({ data }), (error) => live && setPreview({ error }))
     client.session().then((s) => live && setSession(s), () => {})
     loadRecipients()
-    return () => { live = false }
+    const timer = setInterval(loadRecipients, 5000)
+    return () => { live = false; clearInterval(timer) }
   }, [client, planId, loadRecipients])
 
   if (preview.error) {
@@ -51,18 +54,18 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
   return (
     <section className="card dispatch" aria-labelledby="dispatch-title">
       <h2 id="dispatch-title">
-        변경 전달 · 응답 <span className="badge mode-simulated">{p.data_mode === 'simulated' ? '모의 배차' : p.data_mode}</span>
+        기사 전달 · 응답
       </h2>
       <p className="muted small">
-        내부 계획 v{p.approved_version}({p.method}) 기준 차량별 변경입니다. 내부 승인은 기사 통보가 아닙니다. 아래에서 명시적으로 전달할 때만 시험 수신자에게 웹 푸시가 갑니다.
+        확정한 계획 v{p.approved_version}({p.method}) 기준으로 바뀌는 차량입니다. 기사 앱으로 알림을 보내거나, 안내문을 복사해 문자·카톡으로 보낼 수 있습니다.
       </p>
 
-      <h3>차량별 변경 명세</h3>
+      <h3>차량별 변경 내용</h3>
       <div className="vehicle-changes">
         {p.vehicle_changes.map((v) => (
           <div key={v.vehicle_id} className="vehicle-change">
             <p>
-              <b>{v.vehicle_id}</b>{' '}
+              <b>{vehicleName(v.vehicle_id)}</b>{' '}
               <span className={`badge ${v.recipient_status === 'active' ? 'change' : 'unassigned'}`}>
                 {SUBSCRIPTION_LABEL[v.recipient_status as keyof typeof SUBSCRIPTION_LABEL] ?? v.recipient_status}
               </span>
@@ -70,18 +73,21 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
             <ul className="small">
               {v.changes.map((c) => (
                 <li key={c.job_id}>
-                  {c.job_id} · {CHANGE_LABEL[c.kind] ?? c.kind}:{' '}
-                  {c.before ? `${c.before.vehicle_id} ${kstTime(c.before.pickup_departure_at)} 출발` : '배정 없음'} →{' '}
-                  {c.after ? `${c.after.vehicle_id} ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : '미처리'}
+                  {jobName(c.job_id)} · {CHANGE_LABEL[c.kind] ?? c.kind}:{' '}
+                  {c.before ? `${vehicleShort(c.before.vehicle_id)} ${kstTime(c.before.pickup_departure_at)} 출발` : '배정 없음'} →{' '}
+                  {c.after ? `${vehicleShort(c.after.vehicle_id)} ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : '미처리'}
                 </li>
               ))}
             </ul>
+            <CopyNotice text={driverMessage(v.vehicle_id, v.changes, p.approved_version)} />
           </div>
         ))}
       </div>
 
       {p.followups.length > 0 && <Followups items={p.followups} title="담당자가 확인할 사항" />}
 
+      <PushGuide authorized={authorized} linked={recipients.some((r) => !r.revoked && r.subscription_status === 'active')} />
+      {!authorized && <TeamCodeUnlock client={client} onUnlocked={setSession} />}
       <Invitations client={client} planId={planId} vehicles={p.vehicle_changes.map((v) => v.vehicle_id)} authorized={authorized} recipients={recipients} onChange={loadRecipients} />
 
       <Send client={client} preview={p} authorized={authorized} dispatchId={dispatchId} onSent={(id) => {
@@ -93,7 +99,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
 
       {dispatchId && <DispatchStatus client={client} dispatchId={dispatchId} recipients={recipients} />}
 
-      <ul className="small muted">{p.limits.map((l) => <li key={l}>{l}</li>)}</ul>
+      <details className="tech-info"><summary>유의사항</summary><ul className="small muted">{p.limits.map((l) => <li key={l}>{l}</li>)}</ul></details>
     </section>
   )
 }
@@ -105,7 +111,7 @@ function Followups({ items, title }: { items: Followup[]; title: string }) {
       <ul className="followups">
         {items.map((f, i) => (
           <li key={`${f.job_id}:${f.code}:${i}`}>
-            <b>{f.job_id ?? '전체'}</b> <code className="small">{f.code}</code>
+            <b>{f.job_id ? jobName(f.job_id) : '전체'}</b> <code className="small">{f.code}</code>
             {f.check_next && <p className="small">{f.check_next}</p>}
             {f.contact_role && <p className="small muted">확인 담당: {f.contact_role} · 해결을 보장하지 않습니다.</p>}
           </li>
@@ -152,20 +158,16 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
 
   return (
     <>
-      <h3>시험 수신자 연결</h3>
-      {!authorized && (
-        <p className="small warn">
-          이 세션은 시험 발송 허가가 없어 초대·전달을 할 수 없습니다. 동의한 팀원 기기로 시험할 때만 운영자가 세션 ID를 확인해 허가합니다. 공개 방문자는 허가받을 수 없습니다.
-        </p>
-      )}
+      <h3>기사 앱 연결</h3>
+      {!authorized && <p className="small muted">팀 시연 코드를 입력하면 연결 링크를 만들 수 있습니다. 코드가 없으면 위의 안내문 복사로 전달하세요.</p>}
       {recipients.length > 0 && (
         <table className="grid small">
-          <thead><tr><th scope="col">수신자</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">만료</th><th /></tr></thead>
+          <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>
           <tbody>
             {recipients.map((r) => (
               <tr key={r.recipient_id}>
-                <td><code>{r.recipient_id.slice(0, 8)}</code></td>
-                <td>{r.vehicle_ids.join(', ')}</td>
+                <td className="muted">기기 {r.recipient_id.slice(-4)}</td>
+                <td>{r.vehicle_ids.map(vehicleName).join(', ')}</td>
                 <td>{r.revoked ? '해제됨' : SUBSCRIPTION_LABEL[r.subscription_status]}</td>
                 <td>{kstDateTime(r.expires_at)}</td>
                 <td>{!r.revoked && <button type="button" className="secondary" onClick={() => revoke(r.recipient_id)}>연결 해제</button>}</td>
@@ -176,23 +178,23 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
       )}
       {authorized && (
         <fieldset disabled={busy} className="invite">
-          <legend className="small">초대할 차량 (이미 연결된 차량은 해제 후 새로 초대)</legend>
+          <legend className="small">연결할 차량 (이미 연결된 차량은 해제 후 다시 연결)</legend>
           {vehicles.map((v) => (
             <label key={v} className="rev-choice">
               <input type="checkbox" disabled={taken.has(v)} checked={picked.includes(v)} onChange={(e) => setPicked((x) => (e.target.checked ? [...x, v] : x.filter((y) => y !== v)))} />
-              {' '}{v}{taken.has(v) && <span className="small muted"> · 연결됨</span>}
+              {' '}{vehicleName(v)}{taken.has(v) && <span className="small muted"> · 연결됨</span>}
             </label>
           ))}
           <label className="rev-choice">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />{' '}
-            이 차량의 시험 수신자(동의한 팀원)에게만 초대 링크를 전달합니다. 이름·전화번호는 받지 않습니다.
+            이 차량 기사에게만 연결 링크를 보냅니다. 기사가 휴대폰에서 열고 알림을 허용하면 연결됩니다. 이름·전화번호는 저장하지 않습니다.
           </label>
-          <button type="button" disabled={!picked.length || !consent} onClick={create}>초대 링크 만들기</button>
+          <button type="button" disabled={!picked.length || !consent} onClick={create}>연결 링크 만들기</button>
         </fieldset>
       )}
       {invite && (
         <div className="invite-link" role="status">
-          <p className="small">초대 링크(1회용 · {kstDateTime(invite.expires_at)}까지). 수신자가 알림을 허용해야 받을 수 있습니다.</p>
+          <p className="small">연결 링크(1회용 · {kstDateTime(invite.expires_at)}까지). 기사에게 이 링크를 보내 주세요.</p>
           <input readOnly value={invite.link} aria-label="초대 링크" onFocus={(e) => e.currentTarget.select()} />
           <button type="button" className="secondary" onClick={() => navigator.clipboard?.writeText(invite.link)}>복사</button>
           <p className="small muted">
@@ -231,16 +233,16 @@ function Send({ client, preview, authorized, dispatchId, onSent }: {
 
   return (
     <>
-      <h3>전달</h3>
+      <h3>앱 알림 보내기</h3>
       {dispatchId ? (
-        <p className="small muted">이 승인 계획은 전달 요청했습니다. 같은 승인으로 다시 보내지 않습니다.</p>
+        <p className="small muted">이 계획의 변경을 이미 보냈습니다. 아래에서 기사 응답을 확인하세요.</p>
       ) : (
         <fieldset disabled={busy}>
           <label className="rev-choice">
             <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />{' '}
-            내부 계획 v{preview.approved_version}의 변경을 연결된 시험 수신자에게 웹 푸시로 보냅니다. 잠금 화면에는 일반 문구만 표시됩니다.
+            확정한 계획 v{preview.approved_version}의 변경을 연결된 기사 휴대폰으로 보냅니다. 잠금 화면에는 ‘배차 변경 확인 요청’만 표시됩니다.
           </label>
-          <button type="button" disabled={!confirm} onClick={send}>{busy ? '전달 요청 중…' : '변경 전달'}</button>
+          <button type="button" disabled={!confirm} onClick={send}>{busy ? '보내는 중…' : '기사에게 보내기'}</button>
         </fieldset>
       )}
       {error !== null && <p className="warn small" role="alert">전달 실패: {errText(error)}</p>}
@@ -315,5 +317,59 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
       {retryError !== null && <p className="warn small" role="alert">재시도 실패: {errText(retryError)}</p>}
       {d.followups.length > 0 && <Followups items={d.followups} title="후속 확인 목록" />}
     </>
+  )
+}
+
+/** 웹 푸시를 받지 못하는 기사에게 문자·카톡으로 보낼 안내문. 자동 발송하지 않고 복사만 한다. */
+function CopyNotice({ text }: { text: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  return (
+    <div className="copy-notice">
+      <button type="button" className="secondary" onClick={() => navigator.clipboard?.writeText(text).then(() => setState('copied'), () => setState('failed')) ?? setState('failed')}>
+        {state === 'copied' ? '복사됨 · 문자/카톡에 붙여넣기' : '기사 안내문 복사'}
+      </button>
+      {state === 'failed' && <span className="warn small"> 복사하지 못했습니다. 아래 내용을 직접 선택해 복사하세요.</span>}
+      <details>
+        <summary className="small muted">안내문 미리보기</summary>
+        <pre className="notice-text">{text}</pre>
+      </details>
+    </div>
+  )
+}
+
+/** 앱 알림이 실제로 오기까지의 순서. 지금 어디까지 됐는지 표시한다. */
+function PushGuide({ authorized, linked }: { authorized: boolean; linked: boolean }) {
+  const steps: [string, boolean][] = [
+    ['팀 시연 코드로 알림 권한 열기', authorized],
+    ['차량을 골라 연결 링크를 만들고 기사 휴대폰으로 보내기', linked],
+    ['기사 휴대폰에서 링크 열기 → 알림 허용 (아이폰은 공유 → 홈 화면에 추가 후 그 아이콘으로 열기)', linked],
+    ['아래 ‘기사에게 보내기’ → 기사가 확인·곤란으로 응답하면 이 화면에 표시', false],
+  ]
+  return (
+    <ol className="push-guide small" aria-label="앱 알림 받는 방법">
+      {steps.map(([text, done], i) => <li key={i} className={done ? 'done' : ''}><b>{done ? '✓' : i + 1}</b>{text}</li>)}
+    </ol>
+  )
+}
+
+function TeamCodeUnlock({ client, onUnlocked }: { client: V2Client; onUnlocked: (s: SessionState) => void }) {
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  async function submit() {
+    setBusy(true); setError(null)
+    try {
+      onUnlocked(await client.post<SessionState>('/v2/session/push-authorization', { team_code: code }, `team-code-${crypto.randomUUID()}`))
+    } catch (e) {
+      const c = e instanceof ApiRequestError ? e.body?.code : null
+      setError(c === 'TEAM_CODE_INVALID' ? '코드가 맞지 않습니다.' : c === 'RATE_LIMITED' ? '시도가 많습니다. 10분 뒤 다시 해 주세요.' : c === 'TEAM_CODE_NOT_CONFIGURED' ? '이 서버는 팀 시연 코드를 쓰지 않습니다.' : errText(e))
+    } finally { setBusy(false) }
+  }
+  return (
+    <form className="team-code" onSubmit={(e) => { e.preventDefault(); void submit() }}>
+      <label className="small">팀 시연 코드 <input value={code} onChange={(e) => setCode(e.target.value)} maxLength={32} autoComplete="off" spellCheck={false} /></label>
+      <button type="submit" disabled={busy || !code.trim()}>{busy ? '확인 중…' : '알림 권한 열기'}</button>
+      {error && <span className="warn small" role="alert">{error}</span>}
+    </form>
   )
 }

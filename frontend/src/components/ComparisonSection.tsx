@@ -5,6 +5,7 @@ import { lockedViolations, type JobRow } from '../lib/compare'
 import { ComparisonTable } from './ComparisonTable'
 import { MetricsRow } from './Panels'
 import { VehicleTimeline } from './VehicleTimeline'
+import { DispatchMap } from './DispatchMap'
 
 interface Props {
   snapshot: Snapshot
@@ -14,6 +15,8 @@ interface Props {
   candidates: MethodResult[]
   rows: JobRow[]
   onPick: (method: string) => void
+  /** 추천 기준(미처리→위반→고정 위험→변경 수)으로 고른 방법 */
+  recommended?: string
   /** 처음 보일 보기. 기본은 차량별 일정 */
   initialLayout?: 'vehicle' | 'job'
 }
@@ -22,10 +25,19 @@ interface Props {
  * 원안 표는 입력(snapshot)만 있으면 항상 보인다. 결과가 대기·실패·B0 단독이어도 원안은 남기고,
  * 조정안 열과 지표만 결과가 준비됐을 때 연다. (PR #4 리뷰 반영)
  */
-export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, initialLayout = 'vehicle' }: Props) {
+/** 보류된 작업이 모두 원안에서 이미 마감 초과·준비 지연이었는지 */
+function heldWereLate(base: MethodResult, cand: MethodResult) {
+  const late = new Set(base.issues.filter((i) => i.code === 'CUTOFF_EXCEEDED' || i.code === 'READY_TOO_LATE').map((i) => i.job_id))
+  return cand.unassigned_job_ids.length > 0 && cand.unassigned_job_ids.every((id) => late.has(id))
+}
+
+export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle' }: Props) {
   const list = results.state === 'ready' ? results.data.results : null
   const broken = lockedViolations(rows)
-  const [layout, setLayout] = useState(initialLayout)
+  // 휴대폰 폭에서는 가로 스크롤이 필요한 타임라인 대신 작업별 카드부터 보여 준다.
+  const narrow = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches
+  const [layout, setLayout] = useState(narrow ? 'job' : initialLayout)
+  const [selectedJob, setSelectedJob] = useState<string | null>(null)
   const candLabel = cand ? `${cand.method} 조정안` : null
   const baseLabel = base ? 'B0 원안' : '원안(입력)'
   return (
@@ -42,15 +54,18 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
           {candidates.map((r) => (
             <button key={r.method} role="tab" aria-selected={r === cand} onClick={() => onPick(r.method)}>
               {r.method}
+              {r.method === recommended && <span className="rec-tag">추천</span>}
             </button>
           ))}
+          {recommended && <span className="muted small rec-note">추천 기준: 미처리 → 마감 위반 → 고정 작업 위험 → 바뀌는 작업 수가 적은 순</span>}
         </div>
       )}
       {base && cand && <MetricsRow base={base} cand={cand} />}
       {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
         <p className="warn">
-          미처리가 {base.metrics.unassigned_count}건 → {cand.metrics.unassigned_count}건으로 늘었습니다. 제약 위반 감소에는 미처리로 남긴 작업이
-          포함되어 있으므로 전체 해결이 아닙니다.
+          {cand.method} 조정안은 {cand.metrics.unassigned_count}건을 배정하지 못했습니다(미배정)
+          {heldWereLate(base, cand) ? '(원래 배차에서도 마감을 넘기던 작업)' : ''}. 위반이 줄어든 데에는 이 미배정이 포함되어 있으니,
+          오른쪽 ‘확인 필요’에서 처리하세요.
         </p>
       )}
       {broken.length > 0 && (
@@ -67,8 +82,9 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
       {layout === 'vehicle' ? (
         <VehicleTimeline rows={rows} baseLabel={baseLabel} candLabel={candLabel} />
       ) : (
-        <ComparisonTable rows={rows} asOf={snapshot.as_of} baseLabel={baseLabel} candLabel={candLabel} />
+        <ComparisonTable rows={rows} asOf={snapshot.as_of} baseLabel={baseLabel} candLabel={candLabel} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
       )}
+      <DispatchMap key={cand?.method ?? 'base'} snapshot={snapshot} base={base} cand={cand} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
     </section>
   )
 }
