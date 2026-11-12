@@ -152,7 +152,7 @@ export function VehicleTimeline({ rows, baseLabel, candLabel, buffer = 0 }: { ro
       ))}
       {model.ticks.length === 0 && <p className="muted">확인된 배정 시각이 없어 시간축을 그릴 수 없습니다.</p>}
       {model.baselineUnassigned.length > 0 && <p className="unassigned-row">{baseLabel} 배정 없음: {model.baselineUnassigned.map(jobName).join(', ')}</p>}
-      {model.missing.length > 0 && <p className="warn">조정안 결과 누락(배정·미처리 모두 아님): {model.missing.join(', ')}</p>}
+      {model.missing.length > 0 && <p className="warn">조정안 결과에서 빠진 작업(배정·미배정 모두 아님): {model.missing.join(', ')}</p>}
       {model.unassigned.length > 0 && (
         <p className="unassigned-row">
           <span className="badge unassigned">미배정</span> {model.unassigned.map(jobName).join(', ')}: 조정안에서 맡을 차량을 찾지 못했습니다.

@@ -106,7 +106,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       step = '계산 요청'
       setStatus({ state: 'sending', step })
       const { body, key } = runFor(attempt, picked)
-      const run = await withQueueRetry(() => client.createRun!(body, key), () => setStatus({ state: 'sending', step: '다른 사용자 계산을 기다리는' }))
+      const run = await withQueueRetry(() => client.createRun!(body, key), () => setStatus({ state: 'sending', step: '앞선 계산을 기다리는' }))
       location.search = `?scenario=${encodeURIComponent(run.scenario_id)}&run=${encodeURIComponent(run.run_id)}`
     } catch (error) {
       if (step === '계산 요청' && isInputRejection(error)) {

@@ -56,7 +56,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
         submitted.key,
       )
       if (!approvalResponseMatches(approval, run, result.method)) {
-        setStatus({ state: 'error', error: new Error('승인 응답의 계획·실행·방법·버전 또는 외부 반영 상태가 요청과 맞지 않습니다. 현재 계획을 다시 확인하세요.'), retryable: false, uncertain: true })
+        setStatus({ state: 'error', error: new Error('확정 결과가 요청한 내용과 달라 반영하지 않았습니다. 새로고침해 지금 배차를 확인하세요.'), retryable: false, uncertain: true })
         return
       }
       // 승인 응답과 별개로 서버의 현재 계획 버전을 다시 읽는다.
@@ -72,7 +72,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
   }
 
   const err = status.state === 'error' ? status.error : null
-  const otherLabel = shared?.status.state === 'sending' ? '승인 요청 중입니다' : shared?.status.state === 'done' ? '승인되었습니다' : '승인 결과를 확인해야 합니다'
+  const otherLabel = shared?.status.state === 'sending' ? '확정하는 중입니다' : shared?.status.state === 'done' ? '확정되었습니다' : '확정 결과를 확인해야 합니다'
   return (
     <section className="card">
       <h2>배차 계획 확정</h2>
@@ -84,7 +84,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       />
       {otherBusy && (
         <p className="warn" role="status">
-          {planName(shared!.method)}이 {otherLabel}. 다른 계산안은 승인할 수 없습니다.
+          {planName(shared!.method)}이 {otherLabel}. 다른 계산안은 확정할 수 없습니다.
         </p>
       )}
       {ack.length > 0 && (
@@ -96,7 +96,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
         </p>
       )}
       <button type="button" disabled={!canSend} onClick={send}>
-        {status.state === 'sending' ? '승인 요청 중…' : status.state === 'error' && status.retryable ? '다시 시도' : `${planName(result.method)} 승인`}
+        {status.state === 'sending' ? '확정하는 중…' : status.state === 'error' && status.retryable ? '다시 시도' : `${planName(result.method)} 확정`}
       </button>
       {!gate.allowed && (
         <ul className="warn">
@@ -116,7 +116,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       {err !== null && (
         <div className="warn" role="alert">
           <p>
-            {status.state === 'error' && status.uncertain ? '승인 결과를 확인해야 합니다: ' : '승인하지 못했습니다: '}
+            {status.state === 'error' && status.uncertain ? '확정 결과를 확인해야 합니다: ' : '확정하지 못했습니다: '}
             {err instanceof ApiRequestError
               ? err.message
               : err instanceof Error ? err.message : String(err)}
@@ -139,11 +139,11 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
 function ApprovalSteps({ acknowledged, sending, done, failed }: { acknowledged: boolean; sending: boolean; done: boolean; failed: boolean }) {
   const steps = [
     { label: '위험 확인', state: acknowledged || done ? 'done' : 'todo' },
-    { label: '승인 요청', state: done ? 'done' : sending ? 'active' : failed ? 'failed' : 'todo' },
+    { label: '확정 요청', state: done ? 'done' : sending ? 'active' : failed ? 'failed' : 'todo' },
     { label: '배차 확정', state: done ? 'done' : 'todo' },
   ]
   return (
-    <ol className="steps" aria-label="승인 진행">
+    <ol className="steps" aria-label="확정 진행">
       {steps.map((s, i) => (
         <li key={s.label} className={`step step-${s.state}`}>
           <span className="step-bar" />

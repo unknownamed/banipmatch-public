@@ -194,7 +194,7 @@
         "status": "INPUT_INCOMPLETE",
         "unassigned": 2,
         "late_or_unassigned": 2,
-        "changed": 11,
+        "changed": 15,
         "travel_min": 1151,
         "fixed_risk": 0,
         "ms": null
@@ -207,6 +207,24 @@
         "travel_min": 1151,
         "fixed_risk": 0,
         "ms": null
+      }
+    }
+  },
+  {
+    "case": "BHMN 조건 보완(B3, 같은 기준 시각)",
+    "fixture": "demo-02-evening",
+    "revision": {
+      "준비 40분 앞당김": {
+        "status": "OPTIMAL",
+        "unassigned": [
+          "J08"
+        ],
+        "changed": 5
+      },
+      "준비 40분 앞당김 + 차량 1대 추가": {
+        "status": "OPTIMAL",
+        "unassigned": [],
+        "changed": 7
       }
     }
   }

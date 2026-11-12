@@ -115,7 +115,7 @@ describe('수신자 화면', () => {
     await flush()
     await act(async () => button('연결하기')!.click())
     await flush()
-    expect(container.textContent).toContain('홈 화면 앱에서 수락해야 합니다')
+    expect(container.textContent).toContain('홈 화면에 추가한 반입맞춤에서 여세요')
   })
 
   it('최신 알림은 열람 기록 후 내 차량 변경만 보이고, 응답은 명시적으로 보낸다', async () => {

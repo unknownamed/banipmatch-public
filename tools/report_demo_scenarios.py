@@ -37,5 +37,21 @@ for label, name in CASES:
                                  'fixed_risk': r['metrics']['fixed_risk_count'], 'ms': r['metrics'].get('solve_time_ms')}
     rows.append(row)
     print(label, row['jobs'], row['vehicles'], 'blocked' if issues else '', {k: (v.get('late_or_unassigned'), v.get('changed'), v.get('travel_min'), v.get('status')) for k, v in row['methods'].items()})
+# 조건 보완 사례: BHMN에서 남은 1건(J08)의 상차 준비를 40분 앞당기고, 녹산 차고지 차량 1대를 추가해 같은 기준 시각으로 B3 재계산.
+import copy  # noqa: E402
+from datetime import datetime, timedelta  # noqa: E402
+base = json.loads((ROOT / 'frontend/src/fixtures/demo-02-evening.synthetic.json').read_text(encoding='utf-8'))
+def _shift(v, m): return (datetime.fromisoformat(v.replace('Z', '+00:00')) + timedelta(minutes=m)).strftime('%Y-%m-%dT%H:%M:%SZ')
+revision = {}
+for label, add_vehicle in (('준비 40분 앞당김', False), ('준비 40분 앞당김 + 차량 1대 추가', True)):
+    s = copy.deepcopy(base)
+    job = next(j for j in s['jobs'] if j['job_id'] == 'J08'); job['ready_at'] = _shift(job['ready_at'], -40)
+    if add_vehicle:
+        extra = copy.deepcopy(next(v for v in s['vehicles'] if v['vehicle_id'] == 'T3')); extra['vehicle_id'] = 'T9'; extra['available_at'] = job['ready_at']
+        s['vehicles'].append(extra)
+    r = solve(s, 'B3', dict(seed=0, time_limit_seconds=10))
+    revision[label] = {'status': r['solution_status'], 'unassigned': r['unassigned_job_ids'], 'changed': len(r['metrics']['changed_job_ids'])}
+    print('조건 보완', label, revision[label])
+rows.append({'case': 'BHMN 조건 보완(B3, 같은 기준 시각)', 'fixture': 'demo-02-evening', 'revision': revision})
 out = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'docs/experiments/demo-scenarios-2026-11-13/result.json'
 out.write_text(json.dumps(rows, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

@@ -105,12 +105,12 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
         {error !== null && (
           <p className="warn small" role="alert">
             {isCode(error, 'INVITATION_USED')
-              ? '이미 다른 곳에서 수락한 초대입니다. iPhone이면 Safari가 아닌 홈 화면 앱에서 수락해야 합니다. 담당자에게 새 초대를 요청하세요.'
+              ? '이미 사용한 링크입니다. iPhone은 홈 화면에 추가한 반입맞춤에서 여세요. 안 되면 담당자에게 새 링크를 요청하세요.'
               : isCode(error, 'INVITATION_EXPIRED')
                 ? '초대가 만료됐습니다(30분). 담당자에게 새 초대를 요청하세요.'
                 : isCode(error, 'RECIPIENT_REQUIRED', 'REQUEST_VALIDATION')
-                  ? '초대 링크가 올바르지 않거나 해제됐습니다. 받은 링크 전체를 다시 복사했는지 확인하고, 안 되면 담당자에게 새 초대를 요청하세요.'
-                : `수락 실패: ${errText(error)}`}
+                  ? '링크가 맞지 않거나 해제됐습니다. 받은 링크를 끝까지 다시 복사하고, 안 되면 담당자에게 새 링크를 요청하세요.'
+                : `연결하지 못했습니다: ${errText(error)}`}
           </p>
         )}
       </section>
@@ -168,7 +168,7 @@ function PasteInvite({ busy, onInvite }: { busy: boolean; onInvite: (token: stri
         <input value={text} autoComplete="off" spellCheck={false} placeholder="https://…/recipient#invite=…" onChange={(e) => setText(e.target.value)} />
       </label>
       {text && !token && <p className="small warn">초대 링크 형식이 아닙니다.</p>}
-      <button type="button" disabled={busy || !token} onClick={() => token && onInvite(token)}>{busy ? '수락 중…' : '초대 수락'}</button>
+      <button type="button" disabled={busy || !token} onClick={() => token && onInvite(token)}>{busy ? '연결 중…' : '연결'}</button>
     </div>
   )
 }
@@ -291,7 +291,7 @@ function LocationShare({ client, session }: { client: RecipientClient; session: 
 /** 알림 구독: 서비스 워커 등록 → 브라우저 구독 → 서버 저장. 권한은 이미 허용된 상태여야 한다. */
 async function subscribePush(client: RecipientClient) {
   const config = await client.pushConfig()
-  if (!config.configured || !config.application_server_key) throw new Error('알림 서버가 준비되지 않았습니다. 잠시 후 다시 시도하세요.')
+  if (!config.configured || !config.application_server_key) throw new Error('지금은 알림을 켤 수 없습니다. 잠시 후 다시 눌러 주세요.')
   const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
   await navigator.serviceWorker.ready
   const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64UrlToBytes(config.application_server_key) }))
@@ -327,7 +327,7 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
       await (await reg?.pushManager.getSubscription())?.unsubscribe()
       const r = await client.unsubscribe()
       setStatus(r.subscription_status as RecipientSession['subscription_status'])
-      setNote('알림을 껐습니다. 담당자 화면에는 구독 해제로 표시됩니다.')
+      setNote('알림을 껐습니다.')
     } catch (e) {
       setNote(`알림 끄기 실패: ${errText(e)}`)
     } finally {
@@ -421,7 +421,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
                 <div className="rc-top"><span className="rc-box">{d?.container_no ? <BoxNo no={d.container_no} /> : name}</span>{d?.size && <span className="rc-size">{d.size}</span>}<span className={`rc-tag ${tone}`}>{tag}</span></div>
                 {d?.origin_name && <div className="rc-route">{d.origin_name} → {d.terminal_id} 게이트</div>}
                 {outgoing || !c.after ? (
-                  <p className="rc-note">{c.kind === 'removed_from_plan' ? '담당자가 확인 중입니다. 별도 연락 전까지 이 작업은 하지 않습니다.' : '다른 차량이 맡습니다. 이 작업은 하지 않습니다.'}</p>
+                  <p className="rc-note">{c.kind === 'removed_from_plan' ? '담당자가 확인 중입니다. 따로 연락이 올 때까지 이 작업은 하지 마세요.' : '다른 차량이 맡습니다. 이 작업은 하지 않습니다.'}</p>
                 ) : (
                   <div className="rc-times">
                     <span>상차지 출발 {c.before && mine(c.before.vehicle_id) && c.before.pickup_departure_at !== c.after.pickup_departure_at && <s>{t(c.before.pickup_departure_at)}</s>} <b>{t(c.after.pickup_departure_at)}</b></span>

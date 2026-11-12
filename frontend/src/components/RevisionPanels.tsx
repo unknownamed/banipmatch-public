@@ -60,7 +60,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
 
   async function submit() {
     const sig = JSON.stringify([snapshot, changes, added, reason.trim(), confirmation, rerun])
-    let step = '새 입력 저장'
+    let step = '바꾼 값 저장'
     try {
       setStatus({ state: 'sending', step })
       // 시각까지 첫 요청 그대로 유지한다. 응답 유실 후 재시도에서도 같은 키/본문이어야 한다.
@@ -72,13 +72,13 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
       const { id } = current
       current.revision ??= await client.post<RevisionState>(`/v2/scenarios/${encodeURIComponent(snapshot.scenario_id)}/revisions`, current.body, `revision-${id}`)
       const rev = current.revision
-      step = '재계산 요청'
+      step = '다시 계산'
       setStatus({ state: 'sending', step })
       // 전후 비교가 공정하도록 이전 실행과 같은 방법·제한시간·seed를 쓴다.
       const next = await withQueueRetry(() => client.createRun!(
         { scenario_id: rev.scenario_id, base_plan_version: rev.base_plan_version, methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed },
         `revision-run-${id}`,
-      ), () => setStatus({ state: 'sending', step: '다른 사용자 계산을 기다리는' }))
+      ), () => setStatus({ state: 'sending', step: '앞선 계산을 기다리는' }))
       const q = new URLSearchParams({ scenario: rev.scenario_id, run: next.run_id, revision: rev.revision_id })
       if (rerun.beforeRunId) q.set('before', rerun.beforeRunId)
       location.search = `?${q}`
@@ -248,17 +248,17 @@ export function NextPlanPanel({ client, planId, rerun }: { client: V2Client; pla
     try {
       setStatus({ busy: true, step })
       current.snapshot ??= await client.get<Snapshot>(`/v2/plans/${encodeURIComponent(planId)}/next-input`)
-      step = '새 원안 등록'
+      step = '확정 배차 등록'
       setStatus({ busy: true, step })
       if (!current.registered) {
         await client.registerScenario!(current.snapshot, `next-input-${current.id}`)
         current.registered = true
       }
-      step = '새 기준 계산'
+      step = '새 점검 계산'
       setStatus({ busy: true, step })
       const snap = current.snapshot!
       const next = await withQueueRetry(() => client.createRun!({ scenario_id: snap.scenario_id, base_plan_version: snap.base_plan_version,
-        methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed }, `next-run-${current.id}`), () => setStatus({ busy: true, step: '다른 사용자 계산을 기다리는' }))
+        methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed }, `next-run-${current.id}`), () => setStatus({ busy: true, step: '앞선 계산을 기다리는' }))
       location.search = `?${new URLSearchParams({ scenario: next.scenario_id, run: next.run_id })}`
     } catch (error) { setStatus({ busy: false, step, error }) }
   }
@@ -293,8 +293,8 @@ interface Comparison {
 
 const TRANSITIONS = [
   ['became_assigned', '새로 배정됨'],
-  ['became_unassigned', '새로 미처리됨'],
-  ['remained_unassigned', '계속 미처리'],
+  ['became_unassigned', '새로 미배정됨'],
+  ['remained_unassigned', '계속 미배정'],
   ['changed_assignments', '이전 계산과 차량·출발 시각이 달라진 작업'],
   ['fixed_risks_added', '출발 차량 위험 생김'],
   ['fixed_risks_removed', '출발 차량 위험 없어짐'],
@@ -302,7 +302,7 @@ const TRANSITIONS = [
 ] as const
 
 const DELTAS = [
-  ['unassigned_count', '미처리'],
+  ['unassigned_count', '미배정'],
   ['movable_violation_count', '마감·조건 위반'],
   ['fixed_risk_count', '출발한 차량 위험'],
   ['changed_job_count', '변경 작업'],
@@ -364,7 +364,7 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
           <thead><tr>{DELTAS.map(([, l]) => <th key={l} scope="col">{l}</th>)}</tr></thead>
           <tbody><tr>{DELTAS.map(([k]) => <td key={k}>{signed(c.metric_deltas![k])}</td>)}</tr></tbody>
         </table>
-      ) : <p className="small">이전 계산과 비교해 미처리·위반·변경 작업 수와 이동 시간이 같습니다.</p>)}
+      ) : <p className="small">이전 계산과 미배정·위반·바뀌는 작업 수, 이동 시간이 같습니다.</p>)}
       {/* 두 계산 사이에 기준 시각이 바뀌었으면 결과 차이가 보완 때문만은 아닐 수 있다는 점만 짧게 알린다. */}
       {c.before.status !== 'input_blocked' && c.comparison_limits.some((l) => l.includes('기준시각')) && (
         <p className="small muted">그사이 시간이 지나 결과 차이에는 시간 경과도 섞여 있습니다.</p>

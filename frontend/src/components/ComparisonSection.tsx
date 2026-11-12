@@ -82,7 +82,7 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
         </details>
       )}
       {broken.length > 0 && (
-        <p className="warn">이미 출발한 작업({broken.map(jobName).join(', ')})이 조정안에서 바뀌었거나 빠졌습니다. 이 조정안은 승인하지 마세요.</p>
+        <p className="warn">이미 출발한 작업({broken.map(jobName).join(', ')})이 조정안에서 바뀌었거나 빠졌습니다. 이 조정안은 확정하지 마세요.</p>
       )}
       <div className="tabs" role="tablist" aria-label="보기 방식">
         <button role="tab" aria-selected={layout === 'vehicle'} onClick={() => setLayout('vehicle')}>

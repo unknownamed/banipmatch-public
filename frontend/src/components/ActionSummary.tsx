@@ -70,7 +70,7 @@ export function ActionSummary({ base, cand, rows, approved }: {
         ) : (
           <>
             <button type="button" className="secondary" onClick={() => go('.comparison')}>조정안 자세히 보기</button>
-            <button type="button" onClick={() => go('.side')}>확인하고 승인하기</button>
+            <button type="button" onClick={() => go('.side')}>확인하고 확정하기</button>
           </>
         )}
       </div>
