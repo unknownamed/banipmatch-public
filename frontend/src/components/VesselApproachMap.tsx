@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BUOYS, SOURCES, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
 import { MAP_TYPES, keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
+import { Icon } from './Icon'
 import type { Snapshot } from '../api/types'
 
 export type ScenarioLink = { snapshot: Snapshot; reviewHref: string }
 type Cutoff = { min: number | null; prevMin: number | null; linked: boolean; confirmed: boolean }
 
+const SHOW_BUOYS = false
 const MAX_MIN = 480
 const STATUS_LABEL = { underway: '입항 중', anchored: '묘박 대기', berthed: '접안', stale: '위치 끊김', offshore: '외해 항해' } as const
 
@@ -28,9 +30,13 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
   const [t, setT] = useState(0)
   const [speed, setSpeed] = useState<1 | 10 | 60>(1)
   const [picked, setPicked] = useState<string>('BM-01')
-  const [mapType, setMapType] = useState<MapType>('HYBRID')
+  const [scope, setScope] = useState<'HJNC' | 'all'>('HJNC')
+  const [vq, setVq] = useState('')
+  const [mapType, setMapType] = useState<MapType>('ROADMAP')
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
   const fleet = useMemo(() => fleetAt(t), [t])
+  const inboundHjnc = fleet.filter(v => v.vessel.terminal === 'HJNC' && !v.vessel.outbound && v.status !== 'berthed').length
+  const nextCut = fleet.filter(v => v.vessel.terminal === 'HJNC' && v.vessel.cutoffMin !== null && v.vessel.cutoffMin > t).sort((a, b) => a.vessel.cutoffMin! - b.vessel.cutoffMin!)[0]
   const sel = fleet.find(v => v.vessel.id === picked) ?? fleet[0]
   // 계산한 시나리오에 같은 항차·터미널 반입 시간창이 있으면 그 값을 쓴다(지도 전용 모의 값보다 우선).
   const cutoffOf = (voyage: string, terminal: string, fallback: number | null): Cutoff => {
@@ -74,7 +80,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         seen.add(key)
         new maps.Polyline({ map: m, path: v.route.map(ll), strokeWeight: 2, strokeColor: '#9aa6ad', strokeOpacity: 0.8, strokeStyle: 'shortdash' })
       }
-      for (const b of BUOYS) {
+      // 항로 부표는 그리지 않는다(담당자에게 데이터 점처럼 보여 헷갈린다). 항로선만 남긴다.
+      for (const b of SHOW_BUOYS ? BUOYS : []) {
         const el = document.createElement('div')
         el.className = `vm-buoy ${b.side}`
         el.title = `${b.name} (OSM 해상 표지)`
@@ -166,9 +173,16 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         <div className="vm-head">
           <div>
             <h2>입항 모선 · 반입 마감</h2>
-            <p className="muted small">HJNC로 들어오는 모선의 도착 예상과 항차별 반입 마감(컷오프)</p>
+            <p className="muted small">HJNC로 들어오는 모선과, 그 항차의 반입 마감까지 남은 시간</p>
           </div>
         </div>
+        {nextCut && (
+          <div className="vm-brief">
+            <span><b>HJNC로 오는 모선 {inboundHjnc}척</b></span>
+            <span>다음 반입 마감 <b>{nextCut.vessel.voyage}</b> {kst(at(base, nextCut.vessel.cutoffMin!))} · <b className="vm-left">{formatDuration(nextCut.vessel.cutoffMin! - t)} 남음</b></span>
+            <span className="vm-tip">배 모양을 누르면 항차·반입 마감이 보입니다</span>
+          </div>
+        )}
         {link ? (
           <p className="vm-linked small">지금 점검 중인 배차의 항차별 반입 마감을 함께 표시합니다. <a href={link.reviewHref}>배차 점검으로 돌아가기</a></p>
         ) : (
@@ -200,21 +214,28 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
             {!mapState.ok && <p className="vm-map-msg muted small" role="status">{mapState.msg}</p>}
             {mapState.ok && (
               <div className="map-legend" aria-label="범례">
-                <span><i className="lg hjnc" />HJNC 입항</span><span><i className="lg other" />다른 터미널</span><span><i className="lg berth" />접안 중</span><span><i className="lg route" />선택 선박 남은 항로</span>
+                <span><i className="lg hjnc" />HJNC로 오는 배</span><span><i className="lg other" />다른 터미널로 가는 배</span><span><i className="lg berth" />부두에 댄 배</span><span><i className="lg route" />고른 배의 남은 뱃길</span>
               </div>
             )}
           </div>
 
           <div className="vm-side">
             <InfoCard v={sel} t={t} base={base} cut={cutoffOf(sel.vessel.voyage, sel.vessel.terminal, sel.vessel.cutoffMin)} link={link} />
-            <h3 className="vm-group">HJNC(대상 터미널) 선박 {fleet.filter(v => v.vessel.terminal === 'HJNC').length}척</h3>
-            <ol className="vm-list" aria-label="HJNC 선박 도착 추정 순">
-              {fleet.filter(v => v.vessel.terminal === 'HJNC').map(v => row(v))}
-            </ol>
-            <details className="vm-others">
-              <summary>다른 신항 터미널 선박 {fleet.filter(v => v.vessel.terminal !== 'HJNC').length}척</summary>
-              <ol className="vm-list">{fleet.filter(v => v.vessel.terminal !== 'HJNC').map(v => row(v))}</ol>
-            </details>
+            <div className="toolbar vm-tools">
+              <div className="seg" role="group" aria-label="터미널 범위">
+                <button type="button" aria-pressed={scope === 'HJNC'} onClick={() => setScope('HJNC')}>HJNC<span className="n">{fleet.filter(v => v.vessel.terminal === 'HJNC').length}</span></button>
+                <button type="button" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>신항 전체<span className="n">{fleet.length}</span></button>
+              </div>
+              <label className="search">
+                <Icon name="search" size={15} />
+                <input type="search" value={vq} onChange={(e) => setVq(e.target.value)} placeholder="선박명·항차 검색" aria-label="선박 검색" />
+              </label>
+            </div>
+            {(() => {
+              const q = vq.trim().toLowerCase().replace(/\s/g, '')
+              const list = fleet.filter(v => (scope === 'all' || v.vessel.terminal === 'HJNC') && (!q || `${v.vessel.name ?? ''}${v.vessel.voyage}${v.vessel.terminal}`.toLowerCase().replace(/\s/g, '').includes(q)))
+              return list.length ? <ol className="vm-list" aria-label="선박 도착 추정 순">{list.map(v => row(v))}</ol> : <p className="ib-empty">조건에 맞는 선박이 없습니다.</p>
+            })()}
           </div>
         </div>
 

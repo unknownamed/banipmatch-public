@@ -19,8 +19,9 @@ it('지도 키가 없어도 선박 목록·남은 시간·모의 표시를 보�
   const { box, unmount } = await mount(<VesselApproachMap />)
   expect(box.textContent).toContain('시연용 모의 자료')
   expect(box.textContent).toContain('후 도착 추정')
+  const all = [...box.querySelectorAll('button')].find(b => b.textContent?.startsWith('신항 전체'))!
+  await act(async () => all.click())
   expect(box.textContent).toContain('속력 0이라 도착 시각을 산정하지 않음')
-  expect(box.textContent).toContain('다른 신항 터미널 선박')
   await unmount()
 })
 

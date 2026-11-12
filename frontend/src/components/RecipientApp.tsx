@@ -5,6 +5,7 @@ import { RESPONSE_LABEL } from '../lib/dispatch'
 import { base64UrlToBytes, claimKey, inviteFromPaste, mustInstallFirst, platform, type Fragment, type PlatformInfo } from '../lib/recipient'
 import { kstDateTime, kstTime } from '../lib/time'
 import { formatContainer } from '../lib/labels'
+import { BoxNo, Plate } from './Ids'
 
 const errText = (e: unknown) =>
   e instanceof ApiRequestError && e.body ? `${e.body.code} — ${e.message}` : e instanceof Error ? e.message : String(e)
@@ -279,7 +280,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
       <p className="rc-lead">담당자가 확정한 배차 변경입니다. 게이트 도착 시각을 지켜 주세요.</p>
       {d.payload.vehicle_changes.map((v) => (
         <div key={v.vehicle_id}>
-          <h3>{v.plate_no ?? v.vehicle_id}</h3>
+          <h3><Plate plate={v.plate_no} id={v.vehicle_id} /></h3>
           <ul className="rc-list">
             {v.changes.map((c) => {
               const d = c.display
@@ -292,7 +293,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
               const t = (x?: string | null) => kstTime(x ?? null)
               return (
               <li key={c.job_id} className={`rc-item ${tone}`}>
-                <div className="rc-top"><b className="rc-box">{name}</b>{d?.size && <span className="rc-size">{d.size}</span>}<span className={`rc-tag ${tone}`}>{tag}</span></div>
+                <div className="rc-top"><span className="rc-box">{d?.container_no ? <BoxNo no={d.container_no} /> : name}</span>{d?.size && <span className="rc-size">{d.size}</span>}<span className={`rc-tag ${tone}`}>{tag}</span></div>
                 {d?.origin_name && <div className="rc-route">{d.origin_name} → {d.terminal_id} 게이트</div>}
                 {outgoing || !c.after ? (
                   <p className="rc-note">{c.kind === 'removed_from_plan' ? '담당자가 확인 중입니다. 별도 연락 전까지 이 작업은 하지 않습니다.' : '다른 차량이 맡습니다. 이 작업은 하지 않습니다.'}</p>

@@ -8,6 +8,7 @@ import {
 import { kstDateTime, kstTime } from '../lib/time'
 import { jobName, vehicleName, vehicleShort } from '../lib/labels'
 import { driverMessage } from '../lib/driverMessage'
+import { BoxNo, Plate } from './Ids'
 import { ISSUE_LABEL } from '../lib/compare'
 
 const enc = encodeURIComponent
@@ -66,14 +67,14 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
         {p.vehicle_changes.map((v) => (
           <div key={v.vehicle_id} className="vehicle-change">
             <p>
-              <b>{vehicleName(v.vehicle_id)}</b>{' '}
-              <span className={`badge ${v.recipient_status === 'active' ? 'change' : 'unassigned'}`}>
+              <Plate id={v.vehicle_id} />{' '}
+              <span className={`st ${v.recipient_status === 'active' ? 'ok' : 'wait'}`}>
                 {SUBSCRIPTION_LABEL[v.recipient_status as keyof typeof SUBSCRIPTION_LABEL] ?? v.recipient_status}
               </span>
             </p>
             <ul className="small">
               {v.changes.map((c) => (
-                <li key={c.job_id}><b>{jobName(c.job_id)}</b> · {changeText(v.vehicle_id, c)}</li>
+                <li key={c.job_id}><BoxNo jobId={c.job_id} /> <span className="vc-text">{changeText(v.vehicle_id, c)}</span></li>
               ))}
             </ul>
             <CopyNotice text={driverMessage(v.vehicle_id, v.changes, p.approved_version)} />

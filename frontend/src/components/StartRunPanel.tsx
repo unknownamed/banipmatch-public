@@ -135,7 +135,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
                   <span className={`ib-ic ${e.tone}`}><Icon name={e.icon} size={16} /></span>
                   <span className="ib-main">
                     <span className="ib-title"><b>{e.title}</b></span>
-                    <span className="ib-meta"><span className={`st ${e.tone === 'danger' ? 'bad' : 'warn'}`}>{e.chip}</span> · {e.meta}</span>
+                    <span className="ib-meta"><span className={`st ${e.tone === 'danger' ? 'bad' : 'warn'}`}>{e.chip}</span><span>{e.meta}</span></span>
                   </span>
                   <span className="ib-when">{receivedAgo(e.snapshot as unknown as Snapshot)}</span>
                 </button>

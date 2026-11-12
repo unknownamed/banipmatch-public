@@ -63,7 +63,7 @@ describe('변경 전달 화면', () => {
     const { client } = fakeClient(false)
     await act(async () => root.render(<DispatchPanel client={client} planId="P1" />))
     await flush()
-    expect(container.textContent).toContain('J1 · 다른 차량(T2)으로 넘어감')
+    expect(container.textContent).toContain('다른 차량(T2)으로 넘어감')
     expect(container.textContent).toContain('상차 준비 완료 시각을 확인하세요.')
     expect(container.textContent).toContain('알림 사용 코드')
     expect([...container.querySelectorAll('button')].some((b) => b.textContent === '연결 링크 만들기')).toBe(false)

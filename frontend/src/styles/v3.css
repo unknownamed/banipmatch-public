@@ -24,7 +24,7 @@
 body { background: var(--canvas) !important; -webkit-font-smoothing: antialiased; }
 
 /* 사이드바: 짙은 남색 */
-#root { grid-template-columns: 224px minmax(0, 1fr); }
+@media (min-width: 891px) { #root { grid-template-columns: 224px minmax(0, 1fr); } }
 .appbar { background: #0f172a !important; border-right: 0 !important; padding: 18px 12px !important; gap: 18px !important; }
 .appbar .brand { color: #fff; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; padding: 0 8px; }
 .appbar .nav-group { color: #7c8799; font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em; margin: 14px 10px 4px; text-transform: none; }
@@ -113,7 +113,7 @@ h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
 .ib-ic { width: 30px !important; height: 30px !important; border-radius: 7px !important; }
 .ib-title { font-size: 14.5px !important; gap: 6px !important; }
 .ib-title b { font-weight: 700; }
-.ib-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; margin-top: 2px; font-size: 13px !important; color: var(--ink-2) !important; }
+.ib-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin-top: 2px; font-size: 13px !important; color: var(--ink-2) !important; }
 .ib-meta .st { font-size: 12.5px; }
 .ib-when { font-size: 12.5px !important; color: var(--ink-3) !important; font-weight: 500 !important; }
 .ib-detail { display: grid; gap: 10px; padding: 0 14px 14px 56px; }
@@ -211,3 +211,39 @@ h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
 .cell-times { margin-top: 3px; }
 .job-cell .boxno { font-size: 14px; }
 .timeline-vehicle h3, .vt-vehicle h3 { margin: 0 0 6px; }
+
+/* 입항 선박·기사 전달·터미널 일정 */
+.vm-tools { margin: 4px 0 6px; }
+.vm-tools .search { flex-basis: 100%; max-width: none; }
+.vehicle-change { border: 1px solid var(--line) !important; border-radius: 8px !important; padding: 12px 14px !important; background: #fff; }
+.vehicle-change ul { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 6px; font-size: 13.5px !important; }
+.vehicle-change li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.vc-text { color: var(--ink-2); }
+.tl-voy { font-family: var(--font-num); font-weight: 700; white-space: nowrap; }
+.tl-card .toolbar { margin: 10px 0; }
+
+/* 중간 폭(태블릿·좁은 창): 위쪽 짙은 가로 막대 */
+@media (min-width: 641px) and (max-width: 890px) {
+  .appbar { padding: 10px 16px !important; flex-direction: row !important; align-items: center; gap: 16px !important; height: auto !important; }
+  .appbar .nav-group { display: none; }
+  .appbar .side-nav { flex-direction: row; gap: 2px; }
+  .appbar .side-nav a { padding: 7px 10px; }
+  .appbar .side-nav a[aria-current='page']::before { left: 10px; right: 10px; top: auto; bottom: -10px; width: auto; height: 3px; border-radius: 3px 3px 0 0; }
+}
+
+/* 입항 선박 지도: 한 줄 요약 */
+.vm-brief { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 10px 14px; border-radius: 8px; background: #f8f9fb; border: 1px solid var(--line); font-size: 14px; }
+.vm-brief .vm-left { color: var(--red); }
+.vm-brief .vm-tip { margin-left: auto; font-size: 12.5px; color: var(--ink-3); }
+.vm-linked { display: none; }
+
+/* 차량별 일정(간트): 차량마다 카드로 감싸지 않고 한 표처럼 이어 붙인다 */
+.timeline { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.vehicle-card { border: 0 !important; border-top: 1px solid var(--line-2) !important; border-radius: 0 !important; box-shadow: none !important; padding: 8px 0 6px !important; margin: 0 !important; background: transparent !important; }
+.vehicle-card h3 { margin: 0 0 4px !important; font-size: 13px; }
+.vehicle-card .plate { font-size: 12px; padding: 0 6px; }
+.lane { min-height: 26px !important; }
+.lane-track { height: 22px !important; background: #f3f4f6 !important; }
+.lane-name { font-size: 12px !important; color: var(--ink-3) !important; font-weight: 600; }
+.rec-note { flex-basis: 100%; margin-top: 4px; font-size: 12.5px !important; color: var(--ink-3) !important; }
+.card.comparison > .tabs + .rec-note, .method-row { flex-wrap: wrap; }

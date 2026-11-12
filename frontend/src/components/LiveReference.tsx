@@ -6,6 +6,7 @@ import { display, type ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
 import { RoadReference, type RoadData } from './RoadReference'
 import { Hint } from './Hint'
+import { Icon } from './Icon'
 
 interface Weather {
   kind: 'sea' | 'warning'; status: string; received_at: string | null; http_status: number | null
@@ -30,6 +31,8 @@ export function LiveReference() {
   const [data, setData] = useState<LiveData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [tlFilter, setTlFilter] = useState<'all' | 'before' | 'open' | 'closed'>('open')
+  const [tlQuery, setTlQuery] = useState('')
   async function load() {
     setLoading(true); setError(null)
     try { await client.session(); setData(await client.get<LiveData>('/v2/references/current')) }
@@ -42,7 +45,14 @@ export function LiveReference() {
   if (!data) return <p className="muted" role="status">{loading ? '불러오는 중…' : ''}</p>
 
   const d = display(data.hjnc)
-  const rows = [...(d.sample?.items ?? [])].sort((a, b) => String(a.values.YARD_CLOSE).localeCompare(String(b.values.YARD_CLOSE)))
+  const all = [...(d.sample?.items ?? [])].sort((a, b) => String(a.values.YARD_CLOSE).localeCompare(String(b.values.YARD_CLOSE)))
+  // 공개 화면의 시각은 KST 문자열이다. 지금과 비교해 반입 전 / 반입 중 / 마감을 표시한다.
+  const kstMs = (raw: unknown) => (typeof raw === 'string' && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(raw) ? Date.parse(`${raw.slice(0, 10)}T${raw.slice(11, 16)}:00+09:00`) : NaN)
+  const stateOf = (v: Record<string, unknown>): 'before' | 'open' | 'closed' => {
+    const now = Date.now(), o = kstMs(v.YARD_OPEN), c = kstMs(v.YARD_CLOSE)
+    return now >= c ? 'closed' : now >= o ? 'open' : 'before'
+  }
+  const rows = all.filter((it) => (tlFilter === 'all' || stateOf(it.values) === tlFilter) && (!tlQuery.trim() || String(it.values.VOY_NO).toLowerCase().includes(tlQuery.trim().toLowerCase())))
   const received = d.sample?.received_at ?? data.hjnc.last_success?.received_at ?? null
   const sea = data.weather.find(w => w.kind === 'sea')
   const warn = data.weather.find(w => w.kind === 'warning')
@@ -61,14 +71,29 @@ export function LiveReference() {
         </div>
         <button type="button" className="secondary" disabled={loading} onClick={load}>{loading ? '불러오는 중…' : '다시 불러오기'}</button>
       </div>
-      {rows.length ? (
-        <div className="table-wrap">
-          <table className="grid tl-table">
-            <thead><tr><th scope="col">항차</th><th scope="col">반입 시작</th><th scope="col">반입 마감</th><th scope="col">접안 예정</th></tr></thead>
+      {all.length > 0 && (
+        <div className="toolbar">
+          <div className="seg" role="group" aria-label="반입 상태">
+            {([['open', '반입 중'], ['before', '반입 전'], ['closed', '마감'], ['all', '전체']] as const).map(([id, label]) => (
+              <button key={id} type="button" aria-pressed={tlFilter === id} onClick={() => setTlFilter(id)}>{label}<span className="n">{id === 'all' ? all.length : all.filter((it) => stateOf(it.values) === id).length}</span></button>
+            ))}
+          </div>
+          <label className="search">
+            <Icon name="search" size={15} />
+            <input type="search" value={tlQuery} onChange={(e) => setTlQuery(e.target.value)} placeholder="항차 검색 (예: OONP)" aria-label="항차 검색" />
+          </label>
+        </div>
+      )}
+      {all.length ? (
+        <div className="dt-wrap">
+          <table className="dt tl-table">
+            <thead><tr><th scope="col">항차</th><th scope="col">상태</th><th scope="col">반입 시작</th><th scope="col">반입 마감(Cut-off)</th><th scope="col">접안 예정</th></tr></thead>
             <tbody>
+              {rows.length === 0 && <tr className="empty-row"><td colSpan={5}>조건에 맞는 항차가 없습니다.</td></tr>}
               {rows.map((it, i) => (
                 <tr key={`${it.values.VOY_NO}:${i}`}>
                   <td className="tl-voy">{it.values.VOY_NO}</td>
+                  <td>{(() => { const st = stateOf(it.values); return <span className={`st ${st === 'open' ? 'ok' : st === 'closed' ? 'wait' : 'run'}`}>{st === 'open' ? '반입 중' : st === 'closed' ? '마감' : '반입 전'}</span> })()}</td>
                   <td>{short(it.values.YARD_OPEN)}</td>
                   <td><b>{short(it.values.YARD_CLOSE)}</b></td>
                   <td>{short(it.values.ETB)}</td>

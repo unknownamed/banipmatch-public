@@ -63,9 +63,9 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
               {r.method === recommended && <span className="rec-tag">추천</span>}
             </button>
           ))}
-          {recommended && <span className="muted small rec-note">추천 기준: 미처리 → 마감 위반 → 고정 작업 위험 → 바뀌는 작업 수가 적은 순</span>}
         </div>
       )}
+      {candidates.length > 1 && recommended && <p className="rec-note">추천 기준: 못 넣은 작업이 적고 → 마감 위반이 적고 → 출발한 차량 위험이 적고 → 바뀌는 작업이 적은 안</p>}
       {base && cand && <MetricsRow base={base} cand={cand} />}
       {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
         <p className="warn">

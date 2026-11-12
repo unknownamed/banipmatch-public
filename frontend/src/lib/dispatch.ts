@@ -79,7 +79,7 @@ export const DELIVERY_LABEL: Record<DeliveryStatus, string> = {
   unknown: '결과 불명 · 자동 재전송 안 함',
   expired: '구독 만료',
   unsubscribed: '구독 해제',
-  unlinked: '수신자 미연결',
+  unlinked: '기사 앱 미연결',
   superseded: '이전 계획',
 }
 
@@ -95,7 +95,7 @@ export const SUBSCRIPTION_LABEL: Record<RecipientSummary['subscription_status'] 
   missing: '연결됨 · 알림 미허용',
   revoked: '해제됨',
   expired: '만료',
-  unlinked: '수신자 미연결',
+  unlinked: '기사 앱 미연결',
 }
 
 export const CHANGE_LABEL: Record<string, string> = {
