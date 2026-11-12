@@ -6,87 +6,86 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --navy:#16294D; --blue:#2457E6; --ink:#1b2333; --ink2:#3d4656; --mute:#6a7383; --line:#d9dee7; --soft:#eef2f8; --red:#c0262d; --green:#15803d; --amber:#b45309; }
-  @page { size: A4; margin: 15mm 15mm 16mm 15mm;
-    @bottom-center { content: counter(page); font: 9pt 'Noto Sans KR', sans-serif; color: #8a93a3; } }
+  :root { --navy:#16294D; --ink:#1d1d1f; --ink2:#3a3a3c; --mute:#6b6b70; --line:#d4d4d8; --rule:#1d1d1f; --soft:#f4f4f5; --red:#b42318; }
+  @page { size: A4; margin: 16mm 16mm 16mm 16mm;
+    @bottom-center { content: counter(page); font: 9pt 'Noto Sans KR', sans-serif; color: #8e8e93; } }
   @page cover { margin: 0; @bottom-center { content: none; } }
   * { box-sizing: border-box; }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body { margin: 0; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.62; word-break: keep-all; }
+  body { margin: 0; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.65; word-break: keep-all; }
   h1, h2, h3, h4 { margin: 0; line-height: 1.3; }
-  .chapter { break-before: page; } .chapter.flow-on { break-before: auto; margin-top: 26px; }
+  .chapter { break-before: page; } .chapter.flow-on { break-before: auto; margin-top: 28px; }
   .pb { break-before: page; }
   .chapter-head, .criteria { break-after: avoid; }
   h3, h4 { break-after: avoid; }
   figure, .box { break-inside: avoid; }
-  .chapter-head { display: flex; align-items: baseline; gap: 10px; border-bottom: 2.5px solid var(--navy); padding-bottom: 6px; margin-bottom: 12px; }
-  .chapter-head .no { font-size: 22pt; font-weight: 800; color: var(--navy); }
-  .chapter-head h2 { font-size: 17pt; font-weight: 800; color: var(--navy); }
-  .chapter-head .pts { margin-left: auto; font-size: 9pt; color: var(--mute); font-weight: 500; }
-  .criteria { background: var(--soft); border-radius: 6px; padding: 7px 11px; font-size: 8.8pt; color: var(--ink2); margin-bottom: 12px; }
-  .criteria b { color: var(--navy); }
-  h3 { font-size: 12pt; font-weight: 700; color: var(--navy); margin: 14px 0 6px; }
-  h4 { font-size: 10.4pt; font-weight: 700; margin: 10px 0 4px; }
+  .chapter-head { display: flex; align-items: baseline; gap: 10px; border-bottom: 1.5px solid var(--navy); padding-bottom: 5px; margin-bottom: 6px; }
+  .chapter-head .no { font-size: 20pt; font-weight: 700; color: var(--navy); }
+  .chapter-head h2 { font-size: 16pt; font-weight: 700; color: var(--navy); }
+  .chapter-head .pts { margin-left: auto; font-size: 9pt; color: var(--mute); font-weight: 400; }
+  .criteria { font-size: 8.8pt; color: var(--mute); margin: 0 0 12px; }
+  .criteria b { color: var(--ink2); font-weight: 600; }
+  h3 { font-size: 11.8pt; font-weight: 700; color: var(--navy); margin: 16px 0 6px; }
+  h4 { font-size: 10.3pt; font-weight: 700; margin: 10px 0 4px; }
   p { margin: 0 0 7px; }
   ul, ol { margin: 2px 0 8px; padding-left: 18px; }
   li { margin: 1px 0; }
-  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 8.9pt; line-height: 1.45; break-inside: avoid; }
-  th { background: var(--navy); color: #fff; font-weight: 600; text-align: left; padding: 5px 7px; }
-  td { border-bottom: 1px solid var(--line); padding: 5px 7px; vertical-align: top; }
-  tr:nth-child(even) td { background: #f8f9fc; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 8.9pt; line-height: 1.5; break-inside: avoid; border-top: 1.2px solid var(--rule); border-bottom: 1.2px solid var(--rule); }
+  th { background: none; color: var(--ink); font-weight: 700; text-align: left; padding: 5px 7px; border-bottom: 0.8px solid var(--rule); }
+  td { border-bottom: 0.5px solid var(--line); padding: 5px 7px; vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .good { color: var(--green); font-weight: 700; } .bad { color: var(--red); font-weight: 700; } .warn { color: var(--amber); font-weight: 700; }
+  .good { font-weight: 700; } .bad { color: var(--red); font-weight: 700; } .warn { font-weight: 700; }
   figure { margin: 8px 0 12px; break-inside: avoid; }
-  figure img { width: 100%; border: 1px solid var(--line); border-radius: 6px; display: block; }
-  a { color: var(--blue); text-decoration: none; }
+  figure img { width: 100%; border: 0.8px solid var(--line); display: block; }
+  a { color: var(--navy); text-decoration: underline; text-decoration-thickness: 0.5px; text-underline-offset: 2px; }
   ol.src a, .cover a { word-break: break-all; }
   figcaption { font-size: 8.6pt; color: var(--mute); margin-top: 4px; }
   figcaption b { color: var(--ink2); }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .two-31 { display: grid; grid-template-columns: 2.1fr 1fr; gap: 12px; align-items: start; }
-  .box { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; break-inside: avoid; }
-  .box.navy { background: var(--navy); color: #fff; border: 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .two-31 { display: grid; grid-template-columns: 2.1fr 1fr; gap: 14px; align-items: start; }
+  .box { border: 0.8px solid var(--line); padding: 9px 12px; break-inside: avoid; }
+  .box.navy { border: 0; border-left: 2.5px solid var(--navy); padding: 2px 0 2px 14px; }
   .box.soft { background: var(--soft); border: 0; }
-  .callout { border-left: 4px solid var(--blue); background: #f3f6fd; padding: 8px 12px; border-radius: 0 6px 6px 0; margin: 8px 0 10px; break-inside: avoid; }
-  .callout.red { border-color: var(--red); background: #fdf3f3; }
+  .callout { border-left: 2px solid var(--ink2); padding: 2px 0 2px 12px; margin: 10px 0 12px; break-inside: avoid; }
+  .callout.red { border-color: var(--ink2); }
   .note { font-size: 8.6pt; color: var(--mute); }
-  .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 8px 0 12px; }
-  .kpi .box { text-align: left; }
-  .kpi .v { font-size: 17pt; font-weight: 800; color: var(--navy); line-height: 1.15; }
-  .kpi .l { font-size: 8.4pt; color: var(--mute); }
+  .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 10px 0 14px; border-top: 1.2px solid var(--rule); border-bottom: 1.2px solid var(--rule); }
+  .kpi .box { border: 0; border-right: 0.5px solid var(--line); padding: 8px 12px; }
+  .kpi .box:last-child { border-right: 0; }
+  .kpi .v { font-size: 16pt; font-weight: 700; color: var(--navy); line-height: 1.2; }
+  .kpi .l { font-size: 8.3pt; color: var(--mute); }
   .flow { display: flex; align-items: stretch; gap: 0; margin: 8px 0 12px; break-inside: avoid; }
-  .flow .step { flex: 1; background: var(--soft); border-radius: 6px; padding: 7px 8px; font-size: 8.6pt; line-height: 1.4; position: relative; }
+  .flow .step { flex: 1; border: 0.8px solid var(--line); padding: 7px 8px; font-size: 8.6pt; line-height: 1.4; }
   .flow .step b { display: block; color: var(--navy); font-size: 9.2pt; margin-bottom: 2px; }
-  .flow .arrow { width: 14px; display: flex; align-items: center; justify-content: center; color: var(--navy); font-weight: 800; }
-  .flow .step.hl { background: var(--navy); color: #e6ebf5; } .flow .step.hl b { color: #fff; }
+  .flow .arrow { width: 14px; display: flex; align-items: center; justify-content: center; color: var(--mute); }
+  .flow .step.hl { border: 1.2px solid var(--navy); }
   .pipe { display: grid; grid-template-columns: 1.15fr 14px 1.2fr 14px 1.25fr; gap: 0; margin: 8px 0 12px; break-inside: avoid; }
-  .pipe .col { background: var(--soft); border-radius: 7px; padding: 8px 10px; font-size: 8.6pt; line-height: 1.45; }
+  .pipe .col { border: 0.8px solid var(--line); padding: 8px 10px; font-size: 8.6pt; line-height: 1.45; }
   .pipe .col h5 { margin: 0 0 4px; font-size: 9.6pt; color: var(--navy); }
-  .pipe .ar { display: flex; align-items: center; justify-content: center; color: var(--navy); font-weight: 800; }
-  .tag { display: inline-block; font-size: 7.8pt; font-weight: 700; padding: 0 6px; border-radius: 9px; vertical-align: 1px; }
-  .tag.real { background: #e3f3e8; color: var(--green); } .tag.sim { background: #fdeccd; color: var(--amber); } .tag.calc { background: #e6ecfb; color: var(--blue); }
+  .pipe .ar { display: flex; align-items: center; justify-content: center; color: var(--mute); }
+  .tag { display: inline-block; font-size: 7.8pt; font-weight: 600; padding: 0 5px; border: 0.8px solid var(--ink2); color: var(--ink2); vertical-align: 1px; line-height: 1.5; }
   .toc td { padding: 4px 7px; }
   .small { font-size: 8.8pt; }
   .src { font-size: 8.2pt; color: var(--mute); word-break: break-all; }
   /* 표지 */
-  .cover { page: cover; height: 297mm; padding: 28mm 22mm 20mm; background: linear-gradient(160deg, #16294D 0%, #1d3566 62%, #22396A 100%); color: #fff; display: flex; flex-direction: column; }
-  .cover .tagline { font-size: 11pt; letter-spacing: .5px; color: #b9c6e4; }
-  .cover h1 { font-size: 40pt; font-weight: 800; margin: 14mm 0 4mm; letter-spacing: -1px; }
-  .cover .sub { font-size: 15.5pt; font-weight: 500; line-height: 1.5; color: #e6ebf5; }
-  .cover .logo { width: 30mm; height: 30mm; background: #fff; border-radius: 7mm; display: flex; align-items: center; justify-content: center; }
-  .cover .logo img { width: 22mm; }
-  .cover .card { margin-top: auto; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; padding: 14px 18px; font-size: 10.5pt; line-height: 1.8; }
-  .cover .card b { display: inline-block; width: 26mm; color: #b9c6e4; font-weight: 500; }
-  .cover .foot { margin-top: 10mm; font-size: 9.5pt; color: #b9c6e4; }
+  .cover { page: cover; height: 297mm; padding: 34mm 24mm 22mm; background: #fff; color: var(--ink); display: flex; flex-direction: column; }
+  .cover .logo img { width: 24mm; display: block; }
+  .cover h1 { font-size: 34pt; font-weight: 800; color: var(--navy); margin: 16mm 0 4mm; letter-spacing: -0.5px; }
+  .cover .sub { font-size: 14pt; font-weight: 500; line-height: 1.55; color: var(--ink2); padding-bottom: 8mm; border-bottom: 1.5px solid var(--navy); }
+  .cover .tagline { font-size: 10.5pt; color: var(--mute); }
+  .cover .card { margin-top: auto; font-size: 10pt; line-height: 1.9; border-top: 1.2px solid var(--rule); border-bottom: 1.2px solid var(--rule); padding: 8px 0; }
+  .cover .card b { display: inline-block; width: 26mm; color: var(--mute); font-weight: 500; }
+  .cover .foot { margin-top: 8mm; font-size: 9.5pt; color: var(--mute); }
 </style>
 </head>
 <body>
 
 <!-- ───────────── 표지 ───────────── -->
 <section class="cover">
-  <div class="logo"><img src="../../../frontend/public/brand.svg" alt=""></div>
+  <div class="logo"><img src="../../../frontend/public/icon-192.png" alt=""></div>
   <h1>반입맞춤</h1>
-  <p class="sub">부산항 신항 수출 컨테이너 반입 마감 변경에<br>운송사 배차를 몇 분 안에 다시 맞추는 서비스</p>
+  <p class="sub">반입 마감이 바뀔 때 남은 배차를 가장 적게 고쳐<br>다시 맞추는 컨테이너 운송 배차 서비스</p>
   <p class="tagline" style="margin-top:8mm">2nd LogisticSolver 2026 · 스마트물류 문제해결 경진대회 보고서</p>
   <div class="card">
     <div><b>팀</b>반입맞춤 (국립창원대학교 컴퓨터공학과)</div>
@@ -101,7 +100,7 @@
 <section class="chapter">
   <div class="chapter-head"><h2>요약</h2></div>
   <div class="box navy" style="margin-bottom:12px">
-    <p style="margin:0;font-size:11pt;line-height:1.6">터미널이 반입 마감(CCT)을 바꾸면 운송사 배차 담당자(이하 담당자)는 남은 배차표를 손으로 다시 짜고, 기사에게 전화와 카카오톡으로 한 명씩 알린다. <b>반입맞춤</b>은 터미널이 확정한 변경을 받으면 곧바로 <b>새 마감을 넘기는 컨테이너를 찾는다</b>. 그리고 <b>이미 출발한 작업은 그대로 둔 채 배차를 가장 적게 바꾸는 최소 변경안</b>을 근거와 함께 보여 준다. 담당자가 확정하면 <b>배차가 바뀐 차량의 기사에게만</b> 알림이 가고, 기사는 '수행 가능' 또는 '수행 곤란'으로 답한다.</p>
+    <p style="margin:0;font-size:10.8pt;line-height:1.7">터미널이 반입 마감(CCT)을 바꾸면 운송사 배차 담당자(이하 담당자)는 남은 배차표를 손으로 다시 짜고, 기사에게 전화와 카카오톡으로 한 명씩 알린다. <b>반입맞춤</b>은 터미널이 확정한 변경을 받으면 곧바로 <b>새 마감을 넘기는 컨테이너를 찾는다</b>. 그리고 <b>이미 출발한 작업은 그대로 둔 채 배차를 가장 적게 바꾸는 최소 변경안</b>을 근거와 함께 보여 준다. 담당자가 확정하면 <b>배차가 바뀐 차량의 기사에게만</b> 알림이 가고, 기사는 '수행 가능' 또는 '수행 곤란'으로 답한다.</p>
   </div>
   <div class="kpi">
     <div class="box"><div class="v">4 → 0<span style="font-size:10pt">건</span></div><div class="l">새 마감을 넘겨 도착하는 운행<br>(시연 BHMN. 3건은 마감 안으로 옮기고, 준비가 늦은 1건은 출발 전에 원인 안내)</div></div>
@@ -395,14 +394,16 @@
   </table>
 
   <div class="box soft" style="margin:4px 0 10px">
-    <h4 style="margin-top:0">직접 해 보는 순서 (가입 없음, 약 3분)</h4>
+    <h4 style="margin-top:0">직접 해 보는 순서 (가입 없음, 약 5분)</h4>
     <ol class="small" style="margin:0">
       <li><a href="https://banipmatch.duckdns.org">banipmatch.duckdns.org</a>에 접속한다. 방문자마다 별도 작업공간이 열리고 24시간 뒤 지워진다.</li>
       <li><b>받은 변경</b>에서 'HJNC BHMN … 반입 마감 2시간 30분 앞당김'을 고르고 <b>영향 확인하고 조정안 보기</b>를 누른다(계산 약 10초).</li>
       <li><b>점검 결과</b>에서 요약, 조정안 비교(시간 막대와 다른 계산안), 차량 지도 탭을 차례로 본다.</li>
       <li><b>조건 보완</b>에서 확인이 필요한 컨테이너(BNJU 100208 3)의 상차 준비 시각을 40분 앞당기고, 녹산 차고지 차량 1대를 추가해 <b>다시 계산</b>한다. 남아 있던 1건까지 마감 안에 들어가고 전후 비교가 나온다.</li>
       <li>남는 위험을 확인하고 <b>확인하고 확정하기</b>를 누르면 <b>기사 전달</b> 탭에 차량별 변경 내용과 기사 안내문이 나온다.</li>
-      <li>기사 휴대폰 연결과 실제 알림은 남용을 막기 위해 <b>알림 사용 코드</b>를 입력한 작업공간에서만 쓸 수 있다(그림 4·5, 4.2절의 실기기 기록).</li>
+      <li><b>기사 전달</b> 탭에서 알림 사용 코드에 심사용 코드(제출한 보고서 PDF 4.1절)를 넣고 <b>알림 기능 켜기</b>를 누른다(남용을 막기 위한 코드로, 대회 기간에만 쓴다).</li>
+      <li>차량 하나의 <b>안내문·연결 링크 복사</b>로 받은 링크를 휴대폰에서 열어 <b>연결하고 알림 받기</b>를 누른다. 카카오톡 안에서 열렸다면 다른 브라우저로 연다. 아이폰은 공유 버튼에서 '홈 화면에 추가'한 뒤 연다.</li>
+      <li>PC에서 <b>연결된 기사에게 보내기</b>를 누르면 휴대폰에 변경 알림이 오고, 휴대폰에서 '수행 가능' 또는 '수행 곤란'으로 답하면 PC 화면에 바로 표시된다.</li>
     </ol>
     <p class="small" style="margin:4px 0 0">왼쪽 메뉴의 <b>입항 선박</b>·<b>터미널 일정</b>에서는 서버가 수집한 HJNC 일정과 기상청 관측을 볼 수 있다.</p>
   </div>
@@ -583,12 +584,19 @@
   </ol>
 
   <h3>제출물 구성과 재현 방법</h3>
+  <p class="small">ZIP을 풀면 맨 위의 <span class="src">README.md</span>에 사용 흐름 그림, 상황별 처리, 데이터 위치, 실행·시험 방법이 정리돼 있다. 주요 내용의 위치는 다음과 같다.</p>
   <table>
-    <tr><th style="width:30%">파일</th><th>내용</th></tr>
-    <tr><td>반입맞춤_문제해결_보고서.pdf</td><td>이 보고서</td></tr>
-    <tr><td>반입맞춤_코드_데이터.zip</td><td>전체 소스(백엔드·엔진·화면), 배포 설정, 모의 데이터·스키마, 실제 API 검증 기록, 실험 입력·결과 원자료, 조사 자료, 시험 코드, 파일별 해시 목록. 비밀 키·개인정보는 제외</td></tr>
+    <tr><th style="width:34%">ZIP 안 위치</th><th>내용</th><th style="width:12%">보고서</th></tr>
+    <tr><td><span class="src">backend/engine/</span></td><td>배차 엔진(네 가지 방법, CP-SAT)과 모형 설명 <span class="src">OPTIMIZATION.md</span></td><td>3.2–3.3</td></tr>
+    <tr><td><span class="src">backend/workflow/</span>, <span class="src">frontend/</span></td><td>운영 API(작업공간·확정·기사 전달·응답)와 담당자·기사 화면</td><td>3.4–3.5, 4.1</td></tr>
+    <tr><td><span class="src">tools/collect_live_reference.py</span></td><td>HJNC·기상청 실제 자료 수집(호출 한도, 실패 시 직전 자료 유지)</td><td>2.1–2.2</td></tr>
+    <tr><td><span class="src">docs/data/</span></td><td>실제 응답 검증 기록(HJNC·기상청·도로공사·AIS·ORS), 채택하지 않은 이유</td><td>2.1, 2.6</td></tr>
+    <tr><td><span class="src">frontend/src/fixtures/</span></td><td>시연 공지 5종 모의 배차 입력, 도로 경로(OSM·OSRM)</td><td>2.4, 5.1</td></tr>
+    <tr><td><span class="src">docs/experiments/</span></td><td>80회 평가·무작위 견고성·시연 사례의 입력과 결과 원자료</td><td>5.1–5.2</td></tr>
+    <tr><td><span class="src">deployment/</span>, <span class="src">docs/deployment/</span></td><td>운영 서버 설정 예시와 구성 설명(키·주소 제외)</td><td>4.1</td></tr>
+    <tr><td><span class="src">submission-manifest.json</span></td><td>ZIP의 모든 파일 해시. <span class="src">python tools/check_submission.py --files-only</span>로 검사</td><td>—</td></tr>
   </table>
-  <p class="small">재현: ZIP의 <span class="src">docs/submission/README.md</span> 순서대로 Python 3.12·Node 24에서 <span class="src">pytest</span>(서버 시험), <span class="src">npm test</span>(화면 시험), <span class="src">python tools/report_demo_scenarios.py</span>(5.1 표), <span class="src">python tools/check_engine_robustness.py</span>(5.2 견고성)를 실행하면 보고서 수치를 다시 얻을 수 있다. 운영 서비스는 <a href="https://banipmatch.duckdns.org">https://banipmatch.duckdns.org</a>에서 바로 확인할 수 있다.</p>
+  <p class="small">재현: Python 3.12·Node 24에서 <span class="src">pytest</span>(서버 시험 668개), <span class="src">npm test</span>(화면 시험 183개), <span class="src">python tools/report_demo_scenarios.py</span>(5.1 표), <span class="src">python tools/check_engine_robustness.py</span>(5.2 견고성)를 실행하면 보고서 수치를 다시 얻을 수 있다. 자세한 순서는 <span class="src">docs/submission/README.md</span>. 운영 서비스는 <a href="https://banipmatch.duckdns.org">https://banipmatch.duckdns.org</a>에서 바로 확인할 수 있다.</p>
 </section>
 
 </body>

@@ -1,5 +1,21 @@
 # 문서 목록
 
+## 최종 산출물 (v1.0.0, 2026-11-13)
+
+| 문서 | 내용 |
+|---|---|
+| [문제해결 보고서](report/final/report.html) | 경진대회 제출 보고서 원고(A4 PDF는 `tools/build_final_report.py`로 생성) |
+| [운영 서버](deployment/production.md) | AWS 서울 리전 운영 구성, 배포 절차, 자료 자동 수집, 공개 운영 보호 |
+| [최적화 모형](../backend/engine/OPTIMIZATION.md) | 배차 엔진 네 가지 방법과 최소 변경안의 목적·제약 |
+| [데이터](data/README.md) | 실제 자료 검증 기록, 모의 배차 입력, 이용 조건 |
+| [실험](experiments/) | 80회 고정 평가, 무작위 견고성, 시연 사례 계산 원자료 |
+| [제출 묶음 확인·재현](submission/README.md) | 제출 ZIP의 무결성 검사와 재현 순서 |
+| [개발 규격 v0.1·v0.2](development/) | OpenAPI·JSON Schema·SQL·예제·검수 |
+
+## 개발 과정 기록
+
+아래는 개발 중 팀이 남긴 작업 기록이다. 당시 상태를 보존하므로 최종 결과와 다른 내용이 있을 수 있다.
+
 - [심사 대응 설계 보완서(PDF 4쪽)](design/evaluation-addendum-2026-11-08.pdf): 설계v6 유지, 증거·실험·담당별 완료 기준·전문가 질의 준비.
 
 - [11월 8일 최신 엔진 인계](team/handoffs/2026-11-08-unknownamed-engine-diagnostics.md): 0.2.3 시간 초과 시 입력 누락 진단 보존·연결 담당 참고.

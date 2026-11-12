@@ -616,3 +616,15 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .card.comparison { padding: 18px 20px !important; background: #fff !important; }
 .card.comparison > h2 { margin-bottom: 14px !important; }
 @media (max-width: 576px) { .card.comparison { padding: 14px 12px !important; } }
+
+/* 마감 점선은 막대 뒤에 두고 위아래로만 보이게 한다(작업 번호를 가리지 않도록) */
+.lane-track .cut-mark { z-index: 0 !important; top: -6px; bottom: -6px; }
+.lane-track .job-bar { z-index: 1; }
+
+/* 막대: 상차지→게이트 구간은 진하게, 게이트→복귀 구간은 연하게. 진한 구간의 끝이 게이트 도착 시각이다. */
+.lane-track .job-bar { --seg: #dfe4ec; --rest: #ffffff; background: linear-gradient(90deg, var(--seg) 0 var(--arr, 50%), var(--rest) var(--arr, 50%) 100%) !important; }
+.lane-track .job-bar.changed { --seg: #bfe5cf; --rest: #f1faf4; }
+.lane-track .job-bar.late { --seg: #f6c6c9; --rest: #fdf1f2; }
+.lane-track .job-bar.locked { --seg: #cfe3f3; --rest: #eef6fc; }
+.lane-track .job-bar .arrival { top: 0 !important; bottom: 0 !important; height: auto !important; width: 2px !important; margin-left: -1px !important; border-radius: 0 !important; opacity: .9 !important; }
+.sw-bar { background: linear-gradient(90deg, #dfe4ec 0 60%, #fff 60% 100%) !important; }
