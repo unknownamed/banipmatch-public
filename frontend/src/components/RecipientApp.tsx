@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { RecipientClient, RecipientNotification, RecipientSession } from '../api/recipient'
 import { RESPONSE_LABEL } from '../lib/dispatch'
-import { base64UrlToBytes, claimKey, inviteFromPaste, inviteUrl, kakaoExternal, mustInstallFirst, platform, type Fragment, type PlatformInfo } from '../lib/recipient'
+import { base64UrlToBytes, claimKey, inviteFromPaste, inviteUrl, kakaoExternal, mustInstallFirst, platform, takeFragment, type Fragment, type PlatformInfo } from '../lib/recipient'
 import { kstDateTime, kstTime } from '../lib/time'
 import { formatContainer } from '../lib/labels'
 import { BoxNo, Plate } from './Ids'
@@ -24,6 +24,12 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
   useEffect(() => {
     client.restore().then(setSession, () => setSession(null))
   }, [client])
+  // 이 화면이 열린 채로 새 초대 링크를 열면(같은 주소에 # 뒤만 바뀜) 새로고침 없이 초대를 받고 주소에서 지운다.
+  useEffect(() => {
+    const onHash = () => { const f = takeFragment(); if (f.invite) setInvite(f.invite) }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   // 카카오톡으로 받은 링크를 누르면 카톡 안 브라우저로 열린다. 거기서는 알림을 못 받으므로 기본 브라우저로 바로 넘긴다.
   const external = env.inApp === 'kakao' && !demo ? kakaoExternal(inviteUrl(location.origin, invite)) : null
@@ -55,6 +61,32 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
   }
 
   if (session === undefined) return <Shell demo={demo}><p className="muted" role="status">연결 확인 중…</p></Shell>
+  // 이미 연결된 휴대폰으로 새 초대를 열면(다음 배차 등) 예전 연결 대신 새 초대를 받을지 묻는다.
+  async function switchTo(token: string) {
+    setBusy(true)
+    setError(null)
+    try {
+      await client.leave().catch(() => {})
+      setSession(await client.claim(token, await claimKey(token)))
+      setInvite(null)
+    } catch (e) {
+      setError(e)
+      setSession(null)
+    } finally {
+      setBusy(false)
+    }
+  }
+  if (session && invite && !mustInstallFirst(env))
+    return (
+      <Shell demo={demo}>
+        <section className="card">
+          <h2>새 배차 초대</h2>
+          <p>이 휴대폰을 새 배차 알림에 연결합니다. 예전 연결은 끊깁니다.</p>
+          <button type="button" disabled={busy} onClick={() => switchTo(invite)}>{busy ? '연결 중…' : '새 초대 수락'}</button>
+          <button type="button" className="secondary" disabled={busy} onClick={() => setInvite(null)}>예전 연결 유지</button>
+        </section>
+      </Shell>
+    )
   if (session) return <Shell demo={demo}><Connected client={client} session={session} env={env} demo={demo} focus={boot.notification} onLeave={() => setSession(null)} /></Shell>
 
   const install = mustInstallFirst(env)

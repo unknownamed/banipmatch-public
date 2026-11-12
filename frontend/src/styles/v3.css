@@ -586,3 +586,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .vm-source .badge { margin: 0; }
 .rev-row.rev-off { background: #fdf2f2; border-radius: 8px; }
 .rev-row.rev-off > b { text-decoration: line-through; text-decoration-color: #c0262d; }
+
+/* 조정안에서 일정이 바뀐 차량: 주황 테두리 고리 + 목록 표시 */
+.dm-pin.changed { outline: 2px solid #f59e0b; outline-offset: 2px; }
+.dm-cluster.changed { outline: 2px solid #f59e0b; outline-offset: 2px; }
+.lg.chg { border-radius: 50%; background: transparent; border: 2px solid #f59e0b; box-sizing: border-box; }
+.st.chg { color: #b45309; } .st.chg::before { background: #d97706; }

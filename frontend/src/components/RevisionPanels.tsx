@@ -202,12 +202,12 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
       </fieldset>
 
       <div className="rev-confirm">
-        <span className="small muted">입력한 값</span>
-        <div className="seg" role="group" aria-label="입력한 값">
+        <span className="small muted">값 확인</span>
+        <div className="seg" role="group" aria-label="값 확인">
           <button type="button" disabled={sending} aria-pressed={confirmation === 'confirmed_simulation'} onClick={() => setConfirmation('confirmed_simulation')}>확인한 값</button>
-          <button type="button" disabled={sending} aria-pressed={confirmation === 'assumed'} onClick={() => setConfirmation('assumed')}>가정한 값</button>
+          <button type="button" disabled={sending} aria-pressed={confirmation === 'assumed'} onClick={() => setConfirmation('assumed')}>확인 전(미리 계산)</button>
         </div>
-        {confirmation === 'assumed' && <span className="small warn">가정한 값은 비교만 하고 확정할 수 없습니다.</span>}
+        {confirmation === 'assumed' && <span className="small warn">결과만 미리 보고 확정은 할 수 없습니다.</span>}
       </div>
 
       <label className="rev-reason">
@@ -335,7 +335,7 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
     <section className="card revision-compare" aria-labelledby="revcmp-title">
       <h2 id="revcmp-title">
         조건 보완 결과{' '}
-        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정한 값(확정 불가)' : '확인한 값'}</span>
+        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '확인 전 값(확정 불가)' : '확인한 값'}</span>
       </h2>
       <p className="small">수정 이유: {c.revision.reason}</p>
       <ul className="rev-diff">

@@ -70,8 +70,8 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
           <div key={v.vehicle_id} className="vehicle-change">
             <p>
               <Plate id={v.vehicle_id} />{' '}
-              <span className={`st ${v.recipient_status === 'active' ? 'ok' : 'wait'}`}>
-                {SUBSCRIPTION_LABEL[v.recipient_status as keyof typeof SUBSCRIPTION_LABEL] ?? v.recipient_status}
+              <span className={`st ${v.recipient_status === 'linked' || v.recipient_status === 'active' ? 'ok' : 'wait'}`}>
+                {RECIPIENT_STATUS_LABEL[v.recipient_status] ?? SUBSCRIPTION_LABEL[v.recipient_status as keyof typeof SUBSCRIPTION_LABEL] ?? '연결 상태 확인 중'}
               </span>
             </p>
             <ul className="small">
@@ -130,6 +130,9 @@ function qrDataUrl(text: string): string {
   return qr.createDataURL(5, 2)
 }
 
+// 변경 명세의 차량별 연결 상태(서버 값: linked / unsubscribed / unlinked)
+const RECIPIENT_STATUS_LABEL: Record<string, string> = { linked: '알림 받는 중', unsubscribed: '연결됨, 알림 꺼짐', unlinked: '휴대폰 미연결' }
+
 function Invitations({ client, planId, vehicles, authorized, recipients, onChange }: {
   client: V2Client; planId: string; vehicles: string[]; authorized: boolean; recipients: RecipientSummary[]; onChange: () => void
 }) {
@@ -138,6 +141,9 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<unknown>(null)
   const linkedBy = new Map(recipients.filter((r) => !r.revoked).flatMap((r) => r.vehicle_ids.map((v) => [v, r] as const)))
+  // 기사가 연결을 마치면 그 차량의 QR·링크 상자를 닫는다.
+  const linkedNow = invite ? linkedBy.has(invite.vehicle) : false
+  useEffect(() => { if (linkedNow) setInvite(null) }, [linkedNow])
 
   // 차량 줄의 '휴대폰 연결'을 누르면 바로 그 차량용 1회용 링크를 만든다(선택 기사에게만 보내고 이름·번호는 저장하지 않음).
   async function create(vehicle: string) {
@@ -202,7 +208,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
               </button>
               {copied && <span className="small muted">카톡이나 문자로 기사에게 붙여 넣으세요.</span>}
             </div>
-            <p className="small muted">아이폰은 Safari에서 공유 › 홈 화면에 추가한 뒤, 그 아이콘으로 열어 링크를 붙여넣어야 알림이 옵니다.</p>
+            <p className="small muted">아이폰은 링크를 연 뒤 화면 안내대로 홈 화면에 추가해야 알림이 옵니다.</p>
           </div>
         </div>
       )}
