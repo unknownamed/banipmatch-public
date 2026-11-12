@@ -68,13 +68,16 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
 
       <h3>차량별 변경 내용</h3>
       <div className="vehicle-changes">
-        {p.vehicle_changes.map((v) => (
+        {p.vehicle_changes.map((v) => {
+          // 연결 상태는 5초마다 새로 받는 연결 목록을 기준으로 보여 준다(처음 불러온 명세의 상태는 곧 낡는다).
+          const r = recipients.find((x) => !x.revoked && x.vehicle_ids.includes(v.vehicle_id))
+          const label = r ? SUBSCRIPTION_LABEL[r.subscription_status] : RECIPIENT_STATUS_LABEL[v.recipient_status] ?? '휴대폰 미연결'
+          const ok = r ? r.subscription_status === 'active' : v.recipient_status === 'linked'
+          return (
           <div key={v.vehicle_id} className="vehicle-change">
             <p>
               <Plate id={v.vehicle_id} />{' '}
-              <span className={`st ${v.recipient_status === 'linked' || v.recipient_status === 'active' ? 'ok' : 'wait'}`}>
-                {RECIPIENT_STATUS_LABEL[v.recipient_status] ?? SUBSCRIPTION_LABEL[v.recipient_status as keyof typeof SUBSCRIPTION_LABEL] ?? '연결 상태 확인 중'}
-              </span>
+              <span className={`st ${ok ? 'ok' : r ? 'warn' : 'wait'}`}>{label}</span>
             </p>
             <ul className="small">
               {v.changes.map((c) => (
@@ -83,7 +86,8 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
             </ul>
             <CopyNotice text={driverMessage(v.vehicle_id, v.changes, p.approved_version)} />
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {p.followups.length > 0 && <Followups items={p.followups} title="담당자가 확인할 사항" />}

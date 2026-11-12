@@ -16,7 +16,7 @@ const MESSAGE: Record<string, string> = {
   TEAM_CODE_INVALID: '코드가 맞지 않습니다.',
   RATE_LIMITED: '요청이 많습니다. 잠시 후 다시 시도해 주세요.',
   QUEUE_FULL: '처리 중인 작업이 많습니다. 잠시 후 다시 시도해 주세요.',
-  PUSH_RATE_LIMITED: '알림 서버가 잠시 기다려 달라고 했습니다. 잠시 후 다시 보내 주세요.',
+  PUSH_RATE_LIMITED: '알림을 잠시 보낼 수 없습니다. 1분 뒤 다시 보내 주세요.',
   DISPATCH_LIMIT: '이 작업에서 보낼 수 있는 알림 횟수를 넘었습니다. 새로 점검해 주세요.',
   DELIVERY_UNCERTAIN: '이미 전달됐을 수 있어 다시 보내지 않았습니다. 기사 응답을 먼저 확인하세요.',
   DELIVERY_NOT_RETRYABLE: '지금은 다시 보낼 수 없는 상태입니다.',

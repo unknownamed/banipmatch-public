@@ -35,3 +35,12 @@ def test_team_code_is_rate_limited_and_absent_when_not_configured(settings, tmp_
         actor = new_manager(client)
         r = actor.post("/v2/session/push-authorization", {"team_code": "BM2611"})
         assert r.status_code == 503 and r.json()["code"] == "TEAM_CODE_NOT_CONFIGURED"
+
+
+def test_several_codes_one_per_line_and_blank_never_matches(settings, tmp_path):
+    with make(settings, tmp_path, code="TEAMA1\n\nJUDGE7") as client:
+        a, b, c = new_manager(client), new_manager(client), new_manager(client)
+        assert a.post("/v2/session/push-authorization", {"team_code": "judge7"}).status_code == 200
+        assert b.post("/v2/session/push-authorization", {"team_code": "TEAMA1"}).status_code == 200
+        assert c.post("/v2/session/push-authorization", {"team_code": ""}).status_code in (403, 422)
+        assert c.post("/v2/session/push-authorization", {"team_code": "TEAMA1\nJUDGE7"}).status_code in (403, 422)

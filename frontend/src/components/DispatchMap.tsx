@@ -208,12 +208,34 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       place.el.style.visibility = hit ? 'hidden' : ''
       if (hit && !placeAt.has(hit)) placeAt.set(hit, place.name)
     }
+    // 게이트 이름표: 기본 자리(서쪽 터미널은 점 왼쪽, 동쪽은 오른쪽)가 차량·묶음·장소 이름표와 겹치면
+    // 반대쪽·위·아래 중 비어 있는 자리로 옮긴다(모두 막히면 가장 덜 겹치는 자리).
+    type Box = [number, number, number, number]
+    const overlap = (a: Box, b: Box) => Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]))
+    const obstacles: Box[] = clusters.map(c => (c.list.length > 1 ? [c.x - 26, c.y - 26, c.x + 26, c.y + 26] : [c.x - 45, c.y - 42, c.x + 45, c.y - 4]) as Box)
+    for (const place of placeEls.current.values()) {
+      if (place.el.style.visibility === 'hidden') continue
+      const pp = proj.containerPointFromCoords(ll(place.pos))
+      const pw = place.el.offsetWidth || 80, ph = place.el.offsetHeight || 22
+      obstacles.push([pp.x - pw / 2, pp.y - ph * 1.3, pp.x + pw / 2, pp.y - ph * 0.3])
+    }
+    const placed: Box[] = []
     for (const gate of gateEls.current.values()) {
       const gp = proj.containerPointFromCoords(ll(gate.pos))
-      // 게이트 이름표가 놓이는 쪽(서쪽 터미널은 왼쪽, 동쪽은 오른쪽)에 차량 묶음이 있으면 이름표를 점 위로 올린다.
-      const w = gate.el.offsetWidth || 90
-      const blocked = clusters.some(c => Math.abs(c.y - gp.y) < 30 && (gate.west ? c.x > gp.x - w - 24 && c.x < gp.x + 12 : c.x > gp.x - 12 && c.x < gp.x + w + 24))
-      gate.el.style.transform = blocked ? 'translateY(-38px)' : ''
+      const w = gate.el.offsetWidth || 90, h = gate.el.offsetHeight || 24
+      const x0 = gate.west ? gp.x - w * 1.08 : gp.x + w * 0.08, y0 = gp.y - h / 2
+      const side = gate.west ? 1 : -1 // 반대쪽으로 갈 때의 방향
+      // 기본 자리 → 같은 쪽으로 조금 더 바깥(점 위의 묶음 원을 비켜 감) → 반대쪽 → 위 → 아래
+      const moves: [number, number][] = [[0, 0], [-side * 34, 0], [side * w * 1.16, 0], [side * (w * 1.16 + 34), 0], [side * w * 0.58, -(h / 2 + 32)], [side * w * 0.58, h / 2 + 32]]
+      let best = moves[0], bestHit = Infinity
+      for (const [dx, dy] of moves) {
+        const box: Box = [x0 + dx, y0 + dy, x0 + dx + w, y0 + dy + h]
+        const hit = [...obstacles, ...placed].reduce((sum, o) => sum + overlap(box, o), 0)
+        if (hit < bestHit) { best = [dx, dy]; bestHit = hit }
+        if (hit === 0) break
+      }
+      gate.el.style.transform = best[0] || best[1] ? `translate(${Math.round(best[0])}px, ${Math.round(best[1])}px)` : ''
+      placed.push([x0 + best[0], y0 + best[1], x0 + best[0] + w, y0 + best[1] + h])
     }
     for (const c of clusters) {
       const at = placeAt.get(c)
@@ -392,7 +414,6 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                   {v.live && v.live.offKm >= 2 && <span className="st warn">일정상 위치와 약 {Math.round(v.live.offKm)}km 떨어짐</span>}
                   {v.gate && v.marginMin !== null && <span className={`st ${v.gate === 'late' ? 'bad' : v.gate === 'tight' ? 'warn' : 'ok'}`}>{v.gate === 'late' ? `${-v.marginMin}분 늦음` : `${v.marginMin}분 여유`}</span>}
                 </span>
-                {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} compact />}
                 {v.jobId && v.gateEta ? (
                   <span className="dmi-line"><BoxNo jobId={v.jobId} /> <span className="nowrap">게이트 <b>{kstTime(v.gateEta)}</b>, 마감 {kstTime(v.cutoff)}</span></span>
                 ) : <span className="dmi-line">남은 작업 없음</span>}

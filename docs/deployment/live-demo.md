@@ -1,4 +1,6 @@
-# 통합 웹앱 시험 배포
+# 통합 웹앱 시험 배포 (2026-11-11, 이전 기록)
+
+> 현재 운영 서버는 [production.md](production.md)를 본다. 아래는 운영 서버 이전의 임시 터널 시험 기록이다.
 
 2026-11-11 사용자가 전체 통합·배포·화면 시험을 요청했다. 대겸 책임 아래 이번 AI 보조 임시 HTTPS 배포를 허용한 범위이며 유료계약·상시 운영·실제 기사 연락까지 승인한 것은 아니다. 별도 계정이 없어 [Cloudflare Quick Tunnel](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)로 PC의 시연 서버를 연결했다. PC/프로세스 종료 시 접속이 끊기며 새 터널은 주소가 바뀔 수 있다. 운영 서비스의 가용성을 보장하지 않는다.
 

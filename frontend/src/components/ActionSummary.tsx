@@ -35,12 +35,12 @@ export function ActionSummary({ base, cand, rows, approved }: {
   }
   const name = cand ? planName(cand.method) : ''
   const headline = !cand
-    ? `원래 배차대로 가면 컨테이너 ${lateSet.length}개가 새 마감을 넘깁니다.`
+    ? `원래 배차대로 가면 컨테이너 ${lateSet.length}건이 새 마감을 넘깁니다.`
     : fixed === lateSet.length
       ? fixed === 1
-        ? `${name}을 쓰면 늦는 컨테이너 1개를 마감 안에 넣을 수 있습니다.`
-        : `${name}을 쓰면 늦는 컨테이너 ${fixed}개를 모두 마감 안에 넣을 수 있습니다.`
-      : `${name}을 쓰면 늦는 컨테이너 ${lateSet.length}개 중 ${fixed}개를 마감 안에 넣을 수 있습니다.`
+        ? `${name}을 쓰면 늦는 컨테이너 1건을 마감 안에 넣을 수 있습니다.`
+        : `${name}을 쓰면 늦는 컨테이너 ${fixed}건을 모두 마감 안에 넣을 수 있습니다.`
+      : `${name}을 쓰면 늦는 컨테이너 ${lateSet.length}건 중 ${fixed}건을 마감 안에 넣을 수 있습니다.`
   return (
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
       <div className="as-top">
@@ -51,8 +51,8 @@ export function ActionSummary({ base, cand, rows, approved }: {
         </div>
       </div>
       <dl className="stat-strip">
-        <div className="ss-bad"><dt>원래 배차로 마감 넘김</dt><dd><b>{lateSet.length}</b><span>개</span></dd></div>
-        {cand && <div className="ss-good"><dt>{name}으로 해결</dt><dd><b>{fixed}</b><span>개</span></dd></div>}
+        <div className="ss-bad"><dt>원래 배차로 마감 넘김</dt><dd><b>{lateSet.length}</b><span>건</span></dd></div>
+        {cand && <div className="ss-good"><dt>{name}으로 해결</dt><dd><b>{fixed}</b><span>건</span></dd></div>}
         {cand && <div><dt>바뀌는 작업</dt><dd><b>{changed}</b><span>건</span></dd></div>}
         {cand && <div className={unresolved.length ? 'ss-warn' : undefined}><dt>담당자 확인 필요</dt><dd><b>{unresolved.length}</b><span>건</span></dd></div>}
       </dl>
@@ -70,7 +70,7 @@ export function ActionSummary({ base, cand, rows, approved }: {
         ) : (
           <>
             <button type="button" className="secondary" onClick={() => go('.comparison')}>조정안 자세히 보기</button>
-            <button type="button" onClick={() => go('.side')}>확인하고 승인하기</button>
+            <button type="button" onClick={() => go('.side')}>확인하고 확정하기</button>
           </>
         )}
       </div>

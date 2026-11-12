@@ -76,7 +76,7 @@ describe('차량별 일정의 미확인·미배정 보존', () => {
     const rows = buildRows(snapshot, undefined, cand)
     const html = renderToStaticMarkup(<VehicleTimeline rows={rows} baseLabel="원안" candLabel="B3 조정안" />)
     expect(timelineModel(rows, true)!.missing).toEqual(['J2'])
-    expect(html).toContain('조정안 결과 누락(배정·미처리 모두 아님): J2')
+    expect(html).toContain('조정안 결과에서 빠진 작업(배정·미배정 모두 아님): J2')
     expect(timelineModel(rows, true)!.unassigned).toEqual(['J3'])
   })
 })

@@ -108,3 +108,26 @@ def test_export_uses_committed_bytes_and_excludes_tracked_env(tmp_path):
     assert len(commit)==len(tree)==40
     assert files["backend/api/contracts.py"]==b"committed\r\n"
     assert ".env" not in files and ".env" in excluded
+
+
+def test_final_stage_bundle_uses_final_report_name(tmp_path):
+    pdf=b"%PDF-1.4\nsynthetic final\n"
+    meta={"source_commit":"a"*40,"pdf_sha256":build.sha(pdf),"page_count":19,"stage":"final"}
+    files={"source.py":b"x\n","report/report-build.json":json.dumps(meta).encode(),
+           "report/"+build.REPORT_NAMES["final"]:pdf}
+    manifest={"schema_version":"1","stage":"final","source_commit":"a"*40,
+              "files":[{"path":n,"bytes":len(b),"sha256":build.sha(b)} for n,b in files.items()]}
+    for name,data in files.items():
+        p=tmp_path/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
+    (tmp_path/build.MANIFEST).write_text(json.dumps(manifest),encoding="utf-8")
+    assert verify_files(tmp_path)["stage"]=="final"
+
+
+def test_final_stage_requires_final_report_inputs(tmp_path,monkeypatch):
+    monkeypatch.setattr(build,"collect_sources",lambda *a:("a"*40,"b"*40,{},[]))
+    report=tmp_path/"report.pdf";report.write_bytes(b"%PDF-test")
+    meta=tmp_path/"report.json"
+    meta.write_text(json.dumps({"source_commit":"a"*40,"pdf_sha256":build.sha(report.read_bytes()),
+        "stage":"final","page_count":19,"inputs":{"tools/build_submission_report.py":"x"}}))
+    with pytest.raises(ValueError,match="generator"):
+        build.build(tmp_path,"HEAD",report,meta,tmp_path/"output.zip")

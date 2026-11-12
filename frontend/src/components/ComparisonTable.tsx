@@ -138,7 +138,7 @@ export function ComparisonTable({
                 {hasCand && (
                   <td data-label={candLabel ?? undefined}>
                     {r.candidateUnassigned ? (
-                      <span className="badge unassigned">미처리</span>
+                      <span className="badge unassigned">미배정</span>
                     ) : r.candidateMissing ? (
                       <span className="warn">계산 결과에 없음</span>
                     ) : (
@@ -157,7 +157,7 @@ export function ComparisonTable({
                     ) : r.changes.length ? (
                       <span className="dot dot-ok">{r.changes.map((c) => CHANGE_LABEL[c]).join('·')} 변경</span>
                     ) : r.candidateUnassigned ? (
-                      <span className="dot dot-warn">미처리</span>
+                      <span className="dot dot-warn">미배정</span>
                     ) : (
                       <span className="dot dot-muted">변경 없음</span>
                     )}

@@ -9,13 +9,13 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.build_submission import MANIFEST, EVALUATION, SOURCE_COMMIT, safe_path
+from tools.build_submission import MANIFEST, EVALUATION, REPORT_NAMES, SOURCE_COMMIT, safe_path
 
 
 def verify_files(root: Path) -> dict:
     root = root.resolve()
     manifest = json.loads((root / MANIFEST).read_text(encoding="utf-8"))
-    if manifest.get("schema_version") != "1" or manifest.get("stage") != "review_draft":
+    if manifest.get("schema_version") != "1" or manifest.get("stage") not in REPORT_NAMES:
         raise ValueError("Unsupported submission manifest")
     names = set()
     for row in manifest["files"]:
@@ -33,7 +33,7 @@ def verify_files(root: Path) -> dict:
     if actual != names | {MANIFEST}:
         raise ValueError(f"Unexpected/missing files: {sorted(actual ^ (names | {MANIFEST}))[:5]}")
     report = json.loads((root / "report/report-build.json").read_text(encoding="utf-8"))
-    pdf = root / "report/반입맞춤_문제해결_보고서_검토본.pdf"
+    pdf = root / "report" / REPORT_NAMES[manifest["stage"]]
     if (report["source_commit"] != manifest["source_commit"]
             or report["pdf_sha256"] != hashlib.sha256(pdf.read_bytes()).hexdigest()
             or not 1 <= report["page_count"] <= 20):
