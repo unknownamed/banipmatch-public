@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest'
 import { base64UrlToBytes, claimKey, inviteFromPaste, mustInstallFirst, platform, readFragment } from './recipient'
 
@@ -21,6 +22,11 @@ describe('수락 멱등키', () => {
     expect(await claimKey('secret.one')).toBe(a)
     expect(await claimKey('secret.two')).not.toBe(a)
     expect(a).not.toContain('secret')
+  })
+  it('같은 초대라도 다른 휴대폰이면 다른 키라서 링크는 처음 연결한 휴대폰만 쓸 수 있다', async () => {
+    const a = await claimKey('secret.one')
+    localStorage.setItem('banipmatch.device', 'other-phone')
+    expect(await claimKey('secret.one')).not.toBe(a)
   })
 })
 

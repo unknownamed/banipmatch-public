@@ -25,12 +25,24 @@ export function inviteFromPaste(text: string): string | null {
 }
 
 /**
- * 같은 초대로 다시 수락할 때 같은 멱등키가 가도록 초대 비밀의 해시로 키를 만든다.
- * (iPhone 홈 화면 앱은 Safari와 쿠키가 달라 재수락이 필요할 수 있다. 키가 다르면 서버가 409 INVITATION_USED.)
- * 키에는 비밀 원문이 아니라 해시만 들어간다.
+ * 연결 요청 키: 같은 휴대폰이 다시 눌러도(응답 유실 등) 같은 키, 다른 휴대폰이면 다른 키가 되도록
+ * 초대 비밀 + 이 기기에만 저장한 임의 값의 해시로 만든다. 그래서 링크는 처음 연결한 휴대폰 한 대만 쓸 수 있다
+ * (다른 휴대폰은 서버가 409 INVITATION_USED). 키에는 비밀 원문이 들어가지 않는다.
  */
+let memoryDevice: string | null = null
+function deviceId(): string {
+  try {
+    const saved = localStorage.getItem('banipmatch.device')
+    if (saved) return saved
+    const id = crypto.randomUUID()
+    localStorage.setItem('banipmatch.device', id)
+    return id
+  } catch {
+    return (memoryDevice ??= crypto.randomUUID())
+  }
+}
 export async function claimKey(invite: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`claim:${invite}`))
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`claim:${invite}:${deviceId()}`))
   return `claim-${[...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 40)}`
 }
 

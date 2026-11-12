@@ -7,9 +7,10 @@ import { kstDateTime, kstTime } from '../lib/time'
 import { formatContainer } from '../lib/labels'
 import { copyText } from '../lib/copyText'
 import { BoxNo, Plate } from './Ids'
+import { friendlyError } from '../lib/friendlyError'
 
-const errText = (e: unknown) =>
-  e instanceof ApiRequestError && e.body ? e.message : e instanceof Error ? e.message : String(e)
+// 서버의 개발용 설명 대신 쉬운 안내를 보여 준다.
+const errText = friendlyError
 const isCode = (e: unknown, ...codes: string[]) => e instanceof ApiRequestError && !!e.body && codes.includes(e.body.code)
 
 /**
@@ -78,9 +79,8 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
       <Shell demo={demo}>
         <section className="card">
           <h2>새 배차 초대</h2>
-          <p>이 휴대폰을 새 배차 알림에 연결합니다. 예전 연결은 끊깁니다.</p>
+          <p>새 배차 알림 링크입니다. 연결하면 이 휴대폰은 새 배차 알림을 받습니다.</p>
           <button type="button" disabled={busy} onClick={() => switchTo(invite)}>{busy ? '연결 중…' : env.pushSupported ? '연결하고 알림 받기' : '연결하기'}</button>
-          <button type="button" className="secondary" disabled={busy} onClick={() => setInvite(null)}>예전 연결 유지</button>
         </section>
       </Shell>
     )
