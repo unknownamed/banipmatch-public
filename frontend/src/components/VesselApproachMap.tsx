@@ -167,7 +167,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       if (!mk) continue
       mk.overlay.setPosition(ll(v.pos))
       mk.overlay.setZIndex(v.vessel.id === sel.vessel.id ? 9 : v.vessel.terminal === 'HJNC' ? 6 : 5)
-      mk.el.className = `vm-ship ${v.status}${v.vessel.terminal === 'HJNC' ? ' target' : ''}${v.vessel.id === sel.vessel.id ? ' picked' : ''}`
+      mk.el.className = `vm-ship ${v.status}${v.vessel.terminal === 'HJNC' ? ' target' : ''}${v.vessel.id === sel.vessel.id ? ' picked' : ''}${scope === 'HJNC' && v.vessel.terminal !== 'HJNC' && v.vessel.id !== sel.vessel.id ? ' dim' : ''}`
       const name = v.vessel.name ?? '이름 미수신'
       const tail = v.vessel.outbound ? `${v.vessel.port}행 출항` : v.etaMin !== null ? `${formatDuration(v.etaMin - t)} 후 도착` : STATUS_LABEL[v.status]
       const label = v.vessel.id === sel.vessel.id ? `${name} <small>${tail}</small>` : name
@@ -178,7 +178,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       paths.current.passed.setPath(sel.passed.length > 1 ? sel.passed.map(ll) : [])
       paths.current.ahead.setPath(sel.status === 'underway' && sel.ahead.length > 1 ? sel.ahead.map(ll) : [])
     }
-  }, [fleet, sel, mapState.ok, t, zoomTick])
+  }, [fleet, sel, mapState.ok, t, zoomTick, scope])
 
   const focus = (v: VesselView) => {
     setPicked(v.vessel.id)
@@ -260,8 +260,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
             <InfoCard v={sel} t={t} base={base} cut={cutoffOf(sel.vessel.voyage, sel.vessel.terminal, sel.vessel.cutoffMin)} link={link} />
             <div className="toolbar vm-tools">
               <div className="seg" role="group" aria-label="터미널 범위">
-                <button type="button" aria-pressed={scope === 'HJNC'} onClick={() => setScope('HJNC')}>HJNC<span className="n">{fleet.filter(v => v.vessel.terminal === 'HJNC').length}</span></button>
-                <button type="button" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>신항 전체<span className="n">{fleet.length}</span></button>
+                <button type="button" aria-pressed={scope === 'HJNC'} onClick={() => setScope('HJNC')}>HJNC행<span className="n">{fleet.filter(v => v.vessel.terminal === 'HJNC').length}척</span></button>
+                <button type="button" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>신항 전체<span className="n">{fleet.length}척</span></button>
               </div>
               <label className="search">
                 <Icon name="search" size={15} />

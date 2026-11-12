@@ -46,17 +46,13 @@ function fakeClient(authorized: boolean) {
   })
   const get = vi.fn(async (path: string) => {
     if (path.endsWith('/dispatch-preview')) return preview
-    if (path === '/v2/recipients') return { recipients: [] }
+    if (path === '/v2/recipients') return { recipients: [{ recipient_id: 'R-0001', plan_id: 'P1', vehicle_ids: ['T2'], revoked: false, subscription_status: 'active', expires_at: '2026-11-08T10:00:00Z' }] }
     if (path === '/v2/dispatches/D1') return dispatch
     throw new Error(path)
   })
   return { client: { session: vi.fn().mockResolvedValue(session(authorized)), get, post } as unknown as V2Client, post }
 }
 const flush = () => act(async () => { await new Promise((r) => setTimeout(r, 0)) })
-const clickText = async (text: string) => {
-  const el = [...container.querySelectorAll('button, label')].find((b) => b.textContent?.includes(text)) as HTMLElement
-  await act(async () => (el.tagName === 'LABEL' ? el.querySelector('input')! : el).click())
-}
 
 describe('변경 전달 화면', () => {
   it('허가 없는 세션은 명세·확인할 사항만 보이고 초대·전달 버튼이 없다', async () => {
@@ -70,28 +66,28 @@ describe('변경 전달 화면', () => {
     expect([...container.querySelectorAll('button')].some((b) => b.textContent === '기사에게 보내기')).toBe(false)
   })
 
-  it('동의 체크 후 초대를 만들고 비밀은 fragment 링크로만 보여준다', async () => {
+  it('차량 줄의 휴대폰 연결로 초대를 만들고 비밀은 fragment 링크·QR로만 보여준다', async () => {
     const { client, post } = fakeClient(true)
     await act(async () => root.render(<DispatchPanel client={client} planId="P1" />))
     await flush()
-    await clickText('T1')
-    expect(container.querySelector<HTMLButtonElement>('fieldset.invite button')!.disabled).toBe(true)
-    await clickText('이 차량 기사에게만 연결 링크')
-    await clickText('연결 링크 만들기')
+    const row = [...container.querySelectorAll('.link-list li')].find((li) => li.textContent?.includes('T1'))!
+    const connect = [...row.querySelectorAll('button')].find((b) => b.textContent === '휴대폰 연결')!
+    await act(async () => connect.click())
     await flush()
     expect(post).toHaveBeenCalledWith('/v2/invitations', { plan_id: 'P1', vehicle_ids: ['T1'], consent_acknowledged: true }, expect.stringMatching(/^invite-/))
-    const link = container.querySelector<HTMLInputElement>('.invite-link input')!.value
-    expect(link).toMatch(/\/recipient#invite=tok\.en$/)
+    const qr = container.querySelector<HTMLImageElement>('.invite-qr')!
+    expect(qr).toBeTruthy()
+    expect(container.textContent).not.toContain('tok.en')
     expect(location.search).not.toContain('tok')
+    expect(container.querySelector<HTMLImageElement>('.invite-qr')!.src).toMatch(/^data:image\//)
   })
 
-  it('확인 후에만 전달하고, 같은 승인은 같은 멱등키, 접수는 읽음이 아니며 실패만 다시 보낼 수 있다', async () => {
+  it('한 번 눌러 전달하고, 같은 승인은 같은 멱등키, 접수는 읽음이 아니며 실패만 다시 보낼 수 있다', async () => {
     const { client, post } = fakeClient(true)
     await act(async () => root.render(<DispatchPanel client={client} planId="P1" />))
     await flush()
-    const sendButton = () => [...container.querySelectorAll('button')].find((b) => b.textContent === '기사에게 보내기')!
-    expect(sendButton().disabled).toBe(true)
-    await clickText('기사 휴대폰으로 보냅니다')
+    const sendButton = () => [...container.querySelectorAll('button')].find((b) => b.textContent?.startsWith('연결된 기사에게 보내기'))!
+    expect(sendButton().disabled).toBe(false)
     await act(async () => sendButton().click())
     await flush()
     expect(post).toHaveBeenCalledWith('/v2/plans/P1/dispatches', { approval_id: 'A1', expected_version: 2, confirm_test_send: true }, 'dispatch-A1')

@@ -288,11 +288,20 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
           <div ref={box} className="dm-map" aria-label="차량 현황 지도" />
           {!mapState.ok && <p className="vm-map-msg muted small" role="status">{mapState.msg}</p>}
           {mapState.ok && (
-            <div className="map-legend" aria-label="범례">
-              <span><i className="lg ok-g" />여유 있음</span><span><i className="lg tight" />빠듯함(20분 미만)</span><span><i className="lg late" />마감 넘김</span><span><i className="lg idle" />대기</span>
+            <div className="map-legend two-rows" aria-label="범례">
+              <div className="lg-row">
+                <span className="lg-group">트럭 색<small>반입 마감까지 남은 시간</small></span>
+                <span><i className="lg ok-g" />넉넉함</span><span><i className="lg tight" />20분 미만</span><span><i className="lg late" />늦음</span><span><i className="lg idle" />작업 없음</span>
+              </div>
+              {traffic && (
+                <div className="lg-row">
+                  <span className="lg-group">도로 색<small>지금 막히는 정도</small></span>
+                  <span><i className="lg-road ok" />원활</span><span><i className="lg-road slow" />서행</span><span><i className="lg-road jam" />정체</span>
+                </div>
+              )}
             </div>
           )}
-          {mapState.ok && <span className="map-credit">{ROAD_ATTRIBUTION}</span>}
+          {mapState.ok && <p className="map-credit-line">{ROAD_ATTRIBUTION}</p>}
         </div>
         {!compact && <div className="dm-side">
         {sel ? (

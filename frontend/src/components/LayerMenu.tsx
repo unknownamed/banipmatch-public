@@ -44,7 +44,7 @@ export function LayerMenu({ sky, onSky, traffic, onTraffic, disabled }: {
           {onTraffic && (
             <label className="lp-switch">
               <span className="lp-mini" style={{ backgroundImage: `url(${TRAFFIC}), url(${sky ? SKY : ROAD})` }} aria-hidden="true" />
-              <span className="lp-name">실시간 교통</span>
+              <span className="lp-name">실시간 도로 막힘</span>
               <input type="checkbox" role="switch" checked={!!traffic} onChange={(e) => onTraffic(e.target.checked)} />
               <i aria-hidden="true" />
             </label>

@@ -61,7 +61,8 @@ class WorkflowStore:
                 plan = self.store.get_plan(snapshot["plan_id"])
                 rebase = (plan["scenario_id"], head["active_scenario_id"], head["current_version"])
         def cap(conn):
-            if conn.execute("SELECT count(*) FROM scenarios").fetchone()[0] > 20:
+            # 세션당 입력 보관 상한. 리허설·시연을 반복해도 막히지 않게 넉넉히 두고(디스크 여유 충분), 계산 동시성·요청 속도는 별도 제한한다.
+            if conn.execute("SELECT count(*) FROM scenarios").fetchone()[0] > 100:
                 raise ApiError(429, "SCENARIO_LIMIT", "세션 입력 보관 상한에 도달함")
             if rebase:
                 conn.execute("INSERT INTO input_rebases VALUES(?,?,?,?,?)",
@@ -99,7 +100,8 @@ class WorkflowStore:
             raise ApiError(422, "CONDITION_REVISION_INVALID", str(error)) from None
         revision_id = new_id("V-")
         def record(conn):
-            if conn.execute("SELECT count(*) FROM scenarios").fetchone()[0] > 20:
+            # 세션당 입력 보관 상한. 리허설·시연을 반복해도 막히지 않게 넉넉히 두고(디스크 여유 충분), 계산 동시성·요청 속도는 별도 제한한다.
+            if conn.execute("SELECT count(*) FROM scenarios").fetchone()[0] > 100:
                 raise ApiError(429, "SCENARIO_LIMIT", "세션 입력 보관 상한에 도달함")
             head = self.store.head(conn, before["plan_id"])
             # register() has already atomically advanced the active input to after.

@@ -4,7 +4,7 @@ import type { Method, Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
 import { EMPTY_DRAFT, draftProblems, freezeLabel, isBlankDraft, isCompleteInput, listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits, type VehicleDraft } from '../lib/revision'
 import { kstDateTime } from '../lib/time'
-import { jobName, planName, vehicleName } from '../lib/labels'
+import { jobName, vehicleName } from '../lib/labels'
 import { withQueueRetry } from '../lib/queueRetry'
 
 const FIELD_LABEL = { ready_at: '상차 준비 시각', available_at: '운행 시작', shift_end_at: '근무 종료' } as const
@@ -289,13 +289,13 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
     return () => { live = false }
   }, [client, revisionId, beforeRunId, afterRunId, method])
 
-  if (state.error) return <section className="card"><h2>조건 보완 전후 비교</h2><ErrorNote step="비교 조회" error={state.error} /></section>
-  if (!state.data) return <section className="card" role="status"><h2>조건 보완 전후 비교</h2><p className="muted">비교 불러오는 중…</p></section>
+  if (state.error) return <section className="card"><h2>조건 보완 결과</h2><ErrorNote step="비교 조회" error={state.error} /></section>
+  if (!state.data) return <section className="card" role="status"><h2>조건 보완 결과</h2><p className="muted">비교 불러오는 중…</p></section>
   const { confirmation, comparison: c } = state.data
   return (
     <section className="card revision-compare" aria-labelledby="revcmp-title">
       <h2 id="revcmp-title">
-        조건 보완 전후 비교 · {planName(method)}{' '}
+        조건 보완 결과{' '}
         <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정한 값(확정 불가)' : '확인한 값'}</span>
       </h2>
       <p className="small">수정 이유: {c.revision.reason}</p>

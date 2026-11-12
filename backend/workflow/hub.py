@@ -257,7 +257,7 @@ class Hub:
                 if len(self.pending) >= QUEUE_LIMIT or any(s == domain.sid for s, _ in self.pending):
                     raise ApiError(429, "QUEUE_FULL", "계산 중인 작업을 확인하고 잠시 후 요청해야 함")
                 with domain.db.connect() as conn:
-                    if conn.execute("SELECT count(*) FROM runs").fetchone()[0] >= 20:
+                    if conn.execute("SELECT count(*) FROM runs").fetchone()[0] >= 100:
                         raise ApiError(429, "RUN_LIMIT", "세션 계산 보관 상한에 도달함")
                 check_input(snapshot)
                 self.adapter.check(snapshot, methods)

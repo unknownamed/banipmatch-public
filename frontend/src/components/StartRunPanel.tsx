@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import s07 from '../fixtures/demo-02-missing-ready.synthetic.json'
 import s08 from '../fixtures/demo-02-unconfirmed.synthetic.json'
 import s02 from '../fixtures/demo-02-evening.synthetic.json'
@@ -35,6 +35,8 @@ const EXAMPLES = [
   { id: '10', group: 'todo', icon: 'clock', tone: 'neutral', chip: '영향 없음', title: 'HJNC BPNR-2026-0007 반입 마감 1시간 늦춰짐', meta: '모선 BM 파이오니어호 입항 지연, 터미널 확정 공지', go: '영향 확인하기', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 0개'], what: '마감이 늦춰져 여유만 늘었습니다. 원래 배차 그대로 가도 되는지 확인만 하면 됩니다.', snapshot: s10 },
 ] as const satisfies readonly { id: string; group: 'todo'; icon: IconName; tone: Tone; chip: string; title: string; meta: string; go: string; stats: readonly string[]; what: string; snapshot: unknown }[]
 
+const AUTOSTART = 'banipmatch.autostart'
+
 type Status =
   | { state: 'idle' }
   | { state: 'sending'; step: string }
@@ -68,6 +70,17 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   if (source && !attempts.has(exampleId)) attempts.set(exampleId, newAttempt(source, runRequestJson as unknown as RunRequest))
   const attempt = attempts.get(exampleId)
 
+  // 기록을 비운 뒤 다시 열렸으면 고르던 변경을 바로 이어서 계산한다(한 번만).
+  const startRef = useRef<() => void>(() => {})
+  const [resume, setResume] = useState<string | null>(() => {
+    try { const id = sessionStorage.getItem(AUTOSTART); sessionStorage.removeItem(AUTOSTART); return id } catch { return null }
+  })
+  useEffect(() => {
+    if (!resume) return
+    if (exampleId !== resume) { if (EXAMPLES.some((e) => e.id === resume)) setExampleId(resume as typeof exampleId); else setResume(null); return }
+    if (attempt && status.state === 'idle') { setResume(null); startRef.current() }
+  }, [resume, exampleId, attempt, status.state])
+
   if (!attempt)
     return (
       <main>
@@ -75,6 +88,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       </main>
     )
 
+  startRef.current = () => { void start() }
   async function start() {
     if (!attempt) return
     let step = '입력 등록'
@@ -93,6 +107,11 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         setStatus({ state: 'rejected', error, snapshot: saved })
         // 막힌 이유 바로 아래에 공지 내용·지금 배차가 이어지도록 그 자리로 옮겨 준다.
         window.setTimeout(() => document.querySelector('.rejected-input')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
+      } else if (v2 && error instanceof ApiRequestError && ['SCENARIO_LIMIT', 'RUN_LIMIT'].includes(error.body?.code ?? '')) {
+        // 이 브라우저의 보관 기록이 가득 찼다. 지난 기록을 다시 여는 화면은 없으므로 비우고 같은 변경을 바로 다시 계산한다.
+        try { sessionStorage.setItem(AUTOSTART, exampleId) } catch { /* 저장 못 하면 버튼으로 다시 시작 */ }
+        await v2.reset().catch(() => {})
+        location.href = '?'
       } else setStatus({ state: 'error', step, error })
     }
   }
@@ -104,7 +123,6 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         <div>
           <h1>받은 변경</h1>
         </div>
-        <span className="updated"><span className="live" aria-hidden="true" />실시간 수신</span>
       </header>
       <div className="start-grid">
       <div className="start-left">

@@ -77,9 +77,9 @@ export const DELIVERY_LABEL: Record<DeliveryStatus, string> = {
   accepted: '전달됨',
   failed: '전송 실패',
   unknown: '전달 결과 확인 안 됨',
-  expired: '구독 만료',
-  unsubscribed: '구독 해제',
-  unlinked: '기사 앱 미연결',
+  expired: '알림 연결 만료',
+  unsubscribed: '알림 꺼짐(앱에서 확인 가능)',
+  unlinked: '휴대폰 미연결',
   superseded: '이전 계획',
 }
 
@@ -95,7 +95,7 @@ export const SUBSCRIPTION_LABEL: Record<RecipientSummary['subscription_status'] 
   missing: '연결됨 · 알림 꺼짐',
   revoked: '해제됨',
   expired: '만료',
-  unlinked: '기사 앱 미연결',
+  unlinked: '휴대폰 미연결',
 }
 
 export const CHANGE_LABEL: Record<string, string> = {

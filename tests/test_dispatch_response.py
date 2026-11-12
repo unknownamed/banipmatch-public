@@ -75,15 +75,19 @@ def test_reassignment_includes_original_and_new_vehicle(snapshot, computed):
     assert recipients == {"T1", "T2"}
 
 
-def test_small_time_difference_is_not_hidden_by_kpi_tolerance(snapshot, computed):
-    snapshot["baseline_assignments"] = deepcopy(computed["assignments"])
-    snapshot["baseline_unassigned_job_ids"] = deepcopy(computed["unassigned_job_ids"])
-    row = next(a for a in snapshot["baseline_assignments"] if a["job_id"] == "J1")
+def test_time_shift_within_tolerance_is_not_sent_but_larger_shift_is(snapshot, computed):
+    # 엔진과 같은 기준: 같은 차량·같은 순서에서 정책 허용폭(분) 안의 시각 이동은 기사에게 보내지 않는다.
     from datetime import datetime, timedelta
-    row["pickup_departure_at"] = (datetime.fromisoformat(row["pickup_departure_at"].replace("Z", "+00:00")) + timedelta(minutes=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    recalc_metrics(snapshot, computed)
-    assert "J1" not in computed["metrics"]["time_changed_job_ids"]
-    assert "J1" in {c["job_id"] for c in build_response_preview(snapshot, computed)["changes"]}
+    def shifted(minutes):
+        snapshot["baseline_assignments"] = deepcopy(computed["assignments"])
+        snapshot["baseline_unassigned_job_ids"] = deepcopy(computed["unassigned_job_ids"])
+        row = next(a for a in snapshot["baseline_assignments"] if a["job_id"] == "J1")
+        row["pickup_departure_at"] = (datetime.fromisoformat(row["pickup_departure_at"].replace("Z", "+00:00")) + timedelta(minutes=minutes)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        recalc_metrics(snapshot, computed)
+        return {c["job_id"] for c in build_response_preview(snapshot, computed)["changes"]}
+    tolerance = snapshot["policy"]["time_change_tolerance_minutes"]
+    assert "J1" not in shifted(1)
+    assert "J1" in shifted(tolerance + 1)
 
 
 def test_new_assignment_and_no_change_are_distinguished(snapshot, computed):
