@@ -30,6 +30,9 @@ REPORT_INPUTS = {"review_draft": {"tools/build_submission_report.py", "requireme
 DENIED_PARTS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache",
                 "local", "tmp", "private", "raw", "secrets", "credentials", "dist", "dist-showcase"}
 DENIED_SUFFIXES = {".db", ".sqlite", ".sqlite3", ".pem", ".key", ".log", ".pyc", ".pyo"}
+# GitHub 첫 화면용 GIF·캡처는 제출 묶음에 넣지 않는다. 묶음의 README는 글로 쓴 ZIP 전용 안내로 바꾼다.
+GITHUB_ONLY_PREFIXES = ("docs/readme/",)
+ZIP_README = "docs/submission/zip-readme.md"
 
 
 def sha(data: bytes) -> str:
@@ -52,7 +55,17 @@ def allowed_source(name: str) -> bool:
         return False
     if path.name.lower().startswith(".env") and path.name != ".env.example":
         return False
+    if name.startswith(GITHUB_ONLY_PREFIXES):
+        return False
     return name in ALLOWED_FILES or (len(path.parts) > 1 and path.parts[0] in ALLOWED_ROOTS)
+
+
+def use_zip_readme(blobs: dict[str, bytes]) -> bool:
+    """묶음 맨 위 README.md를 ZIP 전용 안내로 바꾼다. 안내 파일이 없으면 저장소 README를 그대로 둔다."""
+    if ZIP_README not in blobs:
+        return False
+    blobs["README.md"] = blobs[ZIP_README]
+    return True
 
 
 def git_bytes(repo: Path, *args: str) -> bytes:
@@ -118,12 +131,14 @@ def build(repo: Path, revision: str, report: Path, report_meta: Path, output: Pa
         safe_path(name)
         if name not in blobs or sha(blobs[name].replace(b"\r\n", b"\n")) != expected:
             raise ValueError(f"Report input differs from committed source: {name}")
+    zip_readme = use_zip_readme(blobs)
     blobs.update(historical_sources(repo, blobs))
     blobs["report/" + REPORT_NAMES[stage]] = report_bytes
     blobs["report/report-build.json"] = report_meta.read_bytes()
     manifest = {"schema_version": "1", "stage": stage, "source_commit": commit,
                 "source_tree": tree, "historical_source_commit": SOURCE_COMMIT,
                 "external_actions_performed": False, "excluded_tracked_paths": excluded,
+                "readme_source": ZIP_README if zip_readme else "README.md",
                 "limits": [("Final submission bundle; operating service https://banipmatch.duckdns.org"
                             if stage == "final" else "Not a completed deployment or final submission approval"),
                            "No credentials, local runtime DB, Git history, or installed dependencies",

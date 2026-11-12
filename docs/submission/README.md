@@ -7,6 +7,8 @@
 | `반입맞춤_문제해결_보고서.pdf` | 문제해결 보고서(20쪽 이내). 원고는 `docs/report/final/report.html` |
 | `반입맞춤_코드_데이터.zip` | 같은 커밋의 소스·계약·모의 입력·실험 원자료·검사 코드·운영 설정 예시와 보고서 PDF |
 
+ZIP 맨 위 `README.md`는 글로 쓴 묶음 안내(`docs/submission/zip-readme.md`)다. GitHub 첫 화면용 GIF와 캡처(`docs/readme/`)는 묶음에 넣지 않고, 시연 영상은 별도 파일로 낸다.
+
 운영 서비스: <https://banipmatch.duckdns.org> (배포 커밋은 ZIP의 `submission-manifest.json`의 `source_commit`과 같다).
 
 ## 받는 사람: ZIP을 새 폴더에 풀어서 확인

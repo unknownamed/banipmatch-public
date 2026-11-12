@@ -131,3 +131,15 @@ def test_final_stage_requires_final_report_inputs(tmp_path,monkeypatch):
         "stage":"final","page_count":19,"inputs":{"tools/build_submission_report.py":"x"}}))
     with pytest.raises(ValueError,match="generator"):
         build.build(tmp_path,"HEAD",report,meta,tmp_path/"output.zip")
+
+
+def test_github_only_media_not_exported():
+    assert not build.allowed_source("docs/readme/usage-flow.gif")
+    assert build.allowed_source("docs/report/final/figures/03-comparison-gantt.png")
+
+
+def test_zip_readme_replaces_repository_readme():
+    blobs={"README.md":b"github",build.ZIP_README:b"zip guide"}
+    assert build.use_zip_readme(blobs) and blobs["README.md"]==b"zip guide"
+    only={"README.md":b"github"}
+    assert not build.use_zip_readme(only) and only["README.md"]==b"github"
