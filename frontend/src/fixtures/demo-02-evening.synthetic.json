@@ -96,6 +96,19 @@
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
       }
+    },
+    {
+      "location_id": "PNIT",
+      "name": "PNIT 게이트(모의)",
+      "kind": "terminal",
+      "latitude": 35.0818,
+      "longitude": 128.8337,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
     }
   ],
   "vehicles": [
@@ -205,6 +218,42 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "plate_no": "경남 88자 7136"
+    },
+    {
+      "vehicle_id": "T7",
+      "start_location_id": "D",
+      "available_at": "2026-11-07T10:00:00Z",
+      "shift_end_at": "2026-11-07T19:00:00Z",
+      "capacity_kg": 30000,
+      "equipment_types": [
+        "DRY20",
+        "DRY40"
+      ],
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      },
+      "plate_no": "부산 93바 4408"
+    },
+    {
+      "vehicle_id": "T8",
+      "start_location_id": "D",
+      "available_at": "2026-11-07T10:20:00Z",
+      "shift_end_at": "2026-11-07T19:00:00Z",
+      "capacity_kg": 30000,
+      "equipment_types": [
+        "DRY20",
+        "DRY40"
+      ],
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      },
+      "plate_no": "경남 86사 6620"
     }
   ],
   "jobs": [
@@ -575,6 +624,98 @@
       "container_no": "BNJU1002165",
       "booking_no": "BKGBP007E016",
       "cargo_owner": "새벽식품(주)"
+    },
+    {
+      "job_id": "J17",
+      "voyage_id": "BE221E",
+      "origin_id": "O1",
+      "terminal_id": "PNIT",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T10:10:00Z",
+      "gross_weight_kg": 21000,
+      "equipment_type": "DRY40",
+      "service_minutes": 20,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      },
+      "container_no": "BNJU1002170",
+      "booking_no": "BKGBE221E017",
+      "cargo_owner": "가람정밀(주)"
+    },
+    {
+      "job_id": "J18",
+      "voyage_id": "BE221E",
+      "origin_id": "O4",
+      "terminal_id": "PNIT",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T10:30:00Z",
+      "gross_weight_kg": 19000,
+      "equipment_type": "DRY40",
+      "service_minutes": 20,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      },
+      "container_no": "BNJU1002186",
+      "booking_no": "BKGBE221E018",
+      "cargo_owner": "누리화학(주)"
+    },
+    {
+      "job_id": "J19",
+      "voyage_id": "BE221E",
+      "origin_id": "O2",
+      "terminal_id": "PNIT",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T11:00:00Z",
+      "gross_weight_kg": 23000,
+      "equipment_type": "DRY40",
+      "service_minutes": 20,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      },
+      "container_no": "BNJU1002191",
+      "booking_no": "BKGBE221E019",
+      "cargo_owner": "다온물산(주)"
+    },
+    {
+      "job_id": "J20",
+      "voyage_id": "BE221E",
+      "origin_id": "O5",
+      "terminal_id": "PNIT",
+      "return_location_id": "D",
+      "ready_at": "2026-11-07T11:20:00Z",
+      "gross_weight_kg": 14000,
+      "equipment_type": "DRY20",
+      "service_minutes": 20,
+      "state": "planned",
+      "frozen": false,
+      "freeze_reason": null,
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      },
+      "container_no": "BNJU1002205",
+      "booking_no": "BKGBE221E020",
+      "cargo_owner": "새벽식품(주)"
     }
   ],
   "windows": [
@@ -616,6 +757,22 @@
       "terminal_id": "HJNC",
       "opens_at": "2026-11-07T11:00:00Z",
       "closes_at": "2026-11-07T18:00:00Z",
+      "verification": "confirmed",
+      "confirmed_by": "demo-dispatcher",
+      "confirmed_at": "2026-11-07T09:55:00Z",
+      "evidence": {
+        "kind": "simulated",
+        "source_ref": "fixture:demo_02_evening",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "window_id": "W-BE221E",
+      "voyage_id": "BE221E",
+      "terminal_id": "PNIT",
+      "opens_at": "2026-11-07T06:00:00Z",
+      "closes_at": "2026-11-07T15:00:00Z",
       "verification": "confirmed",
       "confirmed_by": "demo-dispatcher",
       "confirmed_at": "2026-11-07T09:55:00Z",
@@ -706,6 +863,17 @@
       }
     },
     {
+      "from_location_id": "D",
+      "to_location_id": "PNIT",
+      "minutes": 10,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
       "from_location_id": "O1",
       "to_location_id": "D",
       "minutes": 8,
@@ -783,6 +951,17 @@
       }
     },
     {
+      "from_location_id": "O1",
+      "to_location_id": "PNIT",
+      "minutes": 8,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
       "from_location_id": "O2",
       "to_location_id": "D",
       "minutes": 35,
@@ -852,6 +1031,17 @@
       "from_location_id": "O2",
       "to_location_id": "HJNC",
       "minutes": 40,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "O2",
+      "to_location_id": "PNIT",
+      "minutes": 33,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -937,6 +1127,17 @@
       }
     },
     {
+      "from_location_id": "O3",
+      "to_location_id": "PNIT",
+      "minutes": 25,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
       "from_location_id": "O4",
       "to_location_id": "D",
       "minutes": 35,
@@ -1006,6 +1207,17 @@
       "from_location_id": "O4",
       "to_location_id": "HJNC",
       "minutes": 45,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "O4",
+      "to_location_id": "PNIT",
+      "minutes": 40,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1091,6 +1303,17 @@
       }
     },
     {
+      "from_location_id": "O5",
+      "to_location_id": "PNIT",
+      "minutes": 32,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
       "from_location_id": "HJNC",
       "to_location_id": "D",
       "minutes": 18,
@@ -1159,6 +1382,105 @@
     {
       "from_location_id": "HJNC",
       "to_location_id": "HJNC",
+      "minutes": 0,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "HJNC",
+      "to_location_id": "PNIT",
+      "minutes": 15,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "D",
+      "minutes": 10,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "O1",
+      "minutes": 8,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "O2",
+      "minutes": 33,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "O3",
+      "minutes": 25,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "O4",
+      "minutes": 40,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "O5",
+      "minutes": 32,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "HJNC",
+      "minutes": 15,
+      "evidence": {
+        "kind": "assumed",
+        "source_ref": "fixture:demo_02_travel",
+        "observed_at": null,
+        "received_at": "2026-11-07T10:00:00Z"
+      }
+    },
+    {
+      "from_location_id": "PNIT",
+      "to_location_id": "PNIT",
       "minutes": 0,
       "evidence": {
         "kind": "assumed",
@@ -1296,6 +1618,38 @@
       "pickup_departure_at": "2026-11-07T12:46:00Z",
       "gate_arrival_at": "2026-11-07T13:26:00Z",
       "return_at": "2026-11-07T14:14:00Z"
+    },
+    {
+      "job_id": "J17",
+      "vehicle_id": "T7",
+      "sequence": 1,
+      "pickup_departure_at": "2026-11-07T10:10:00Z",
+      "gate_arrival_at": "2026-11-07T10:18:00Z",
+      "return_at": "2026-11-07T10:58:00Z"
+    },
+    {
+      "job_id": "J19",
+      "vehicle_id": "T7",
+      "sequence": 2,
+      "pickup_departure_at": "2026-11-07T11:33:00Z",
+      "gate_arrival_at": "2026-11-07T12:06:00Z",
+      "return_at": "2026-11-07T12:46:00Z"
+    },
+    {
+      "job_id": "J18",
+      "vehicle_id": "T8",
+      "sequence": 1,
+      "pickup_departure_at": "2026-11-07T10:55:00Z",
+      "gate_arrival_at": "2026-11-07T11:35:00Z",
+      "return_at": "2026-11-07T12:15:00Z"
+    },
+    {
+      "job_id": "J20",
+      "vehicle_id": "T8",
+      "sequence": 2,
+      "pickup_departure_at": "2026-11-07T12:40:00Z",
+      "gate_arrival_at": "2026-11-07T13:12:00Z",
+      "return_at": "2026-11-07T13:52:00Z"
     }
   ],
   "change": {

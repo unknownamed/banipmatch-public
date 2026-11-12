@@ -37,6 +37,7 @@ LOCATIONS = [
     ("O4", "김해 안동공단(모의)", "origin", 35.2300, 128.8790),
     ("O5", "장유 상차지(모의)", "origin", 35.1950, 128.8020),
     ("HJNC", "HJNC 게이트(모의)", "terminal", 35.0814, 128.7843),
+    ("PNIT", "PNIT 게이트(모의)", "terminal", 35.0818, 128.8337),
 ]
 # 화물차 기준 가정 이동시간(분). 대칭으로 쓴다.
 PAIRS = {
@@ -45,6 +46,7 @@ PAIRS = {
     ("O2", "O3"): 45, ("O2", "O4"): 30, ("O2", "O5"): 35, ("O2", "HJNC"): 40,
     ("O3", "O4"): 40, ("O3", "O5"): 20, ("O3", "HJNC"): 15,
     ("O4", "O5"): 22, ("O4", "HJNC"): 45, ("O5", "HJNC"): 30,
+    ("D", "PNIT"): 10, ("O1", "PNIT"): 8, ("O2", "PNIT"): 33, ("O3", "PNIT"): 25, ("O4", "PNIT"): 40, ("O5", "PNIT"): 32, ("HJNC", "PNIT"): 15,
 }
 
 
@@ -53,7 +55,8 @@ def travel(a: str, b: str) -> int:
 
 
 # 항차별 반입 시간창(분, T0 기준). V1은 변경 전 마감 +240 → 변경 후 +120.
-WINDOWS = {"V1": (-360, 90), "V2": (-120, 330), "V4": (60, 480)}
+WINDOWS = {"V1": (-360, 90), "V2": (-120, 330), "V4": (60, 480), "V7": (-240, 300)}
+TERMINAL = {"V1": "HJNC", "V2": "HJNC", "V4": "HJNC", "V7": "PNIT"}
 V1_PREVIOUS_CLOSE = 240
 
 VEHICLES = [  # id, 가용 시작, 장비
@@ -63,6 +66,8 @@ VEHICLES = [  # id, 가용 시작, 장비
     ("T4", 0, ["DRY20"]),
     ("T5", 30, ["DRY20", "DRY40"]),
     ("T6", 60, ["DRY20", "DRY40"]),
+    ("T7", 0, ["DRY20", "DRY40"]),
+    ("T8", 20, ["DRY20", "DRY40"]),
 ]
 SHIFT_END = 540
 
@@ -84,13 +89,18 @@ JOBS = [
     ("J14", "V4", "O4", 120, 22000, "DRY40", "planned"),
     ("J15", "V4", "O2", 150, 26000, "DRY40", "planned"),
     ("J16", "V4", "O5", 100, 16000, "DRY20", "planned"),
+    # 같은 날 PNIT로 가는 다른 항차(반입 시간 변경 없음) — 영향받지 않는 작업이 섞여 있는 실제 배차표를 흉내 낸다
+    ("J17", "V7", "O1", 10, 21000, "DRY40", "planned"),
+    ("J18", "V7", "O4", 30, 19000, "DRY40", "planned"),
+    ("J19", "V7", "O2", 60, 23000, "DRY40", "planned"),
+    ("J20", "V7", "O5", 80, 14000, "DRY20", "planned"),
 ]
 SERVICE = 20
 
 # 현장에서 쓰는 식별 정보(모두 가상). 항차는 '선박 약어+항차 번호+방향' 형식, 선박은 서비스 이름을 딴 가상 선단.
-VOYAGE_CODE = {"V1": "BH045E", "V2": "BO112W", "V4": "BP007E"}
+VOYAGE_CODE = {"V1": "BH045E", "V2": "BO112W", "V4": "BP007E", "V7": "BE221E"}
 SHIPPER = {"O1": "가람정밀(주)", "O2": "다온물산(주)", "O3": "한결산업(주)", "O4": "누리화학(주)", "O5": "새벽식품(주)"}
-PLATE = {"T1": "부산 90바 1201", "T2": "부산 90바 1207", "T3": "부산 91사 3315", "T4": "경남 87아 2044", "T5": "부산 92바 5520", "T6": "경남 88자 7136"}
+PLATE = {"T1": "부산 90바 1201", "T2": "부산 90바 1207", "T3": "부산 91사 3315", "T4": "경남 87아 2044", "T5": "부산 92바 5520", "T6": "경남 88자 7136", "T7": "부산 93바 4408", "T8": "경남 86사 6620"}
 
 
 def iso6346(owner: str, serial: int) -> str:
@@ -107,13 +117,16 @@ BASELINE = {
     "T4": ["J05", "J11", "J13"],
     "T5": ["J06", "J07"],
     "T6": ["J03", "J08"],
+    "T7": ["J17", "J19"],
+    "T8": ["J18", "J20"],
 }
 DEPARTED = {"J01": -15, "J02": -10}  # 이미 출발한 작업의 실제 출발(분)
 
 
 def departed_return(jid: str) -> int:
-    _, _, origin, *_ = next(j for j in JOBS if j[0] == jid)
-    return DEPARTED[jid] + travel(origin, "HJNC") + BUFFER + SERVICE + travel("HJNC", "D")
+    _, voy, origin, *_ = next(j for j in JOBS if j[0] == jid)
+    gate = TERMINAL[voy]
+    return DEPARTED[jid] + travel(origin, gate) + BUFFER + SERVICE + travel(gate, "D")
 
 
 # 출발한 작업을 수행 중인 차량은 그 작업 복귀 뒤에 다음 작업이 가능하다(예제 01과 같은 규칙).
@@ -133,13 +146,14 @@ def build():
             opens, closes = WINDOWS[voy]
             if voy == "V1":
                 closes = V1_PREVIOUS_CLOSE
-            loaded = travel(origin, "HJNC")
+            gate = TERMINAL[voy]
+            loaded = travel(origin, gate)
             if jid in DEPARTED:
                 dep = DEPARTED[jid]
             else:
                 dep = max(cursor + travel(location, origin), ready, opens - loaded)
             arr = dep + loaded
-            back = arr + BUFFER + SERVICE + travel("HJNC", "D")
+            back = arr + BUFFER + SERVICE + travel(gate, "D")
             assert arr + BUFFER <= closes and back <= SHIFT_END, (jid, arr, closes, back)
             assignments.append(dict(job_id=jid, vehicle_id=vid, sequence=seq, pickup_departure_at=at(dep),
                                     gate_arrival_at=at(arr), return_at=at(back)))
@@ -149,12 +163,12 @@ def build():
         locations=[dict(location_id=i, name=n, kind=k, latitude=la, longitude=lo, evidence=ev()) for i, n, k, la, lo in LOCATIONS],
         vehicles=[dict(vehicle_id=v, start_location_id="D", available_at=at(AVAILABLE[v]), shift_end_at=at(SHIFT_END), capacity_kg=30000,
                        equipment_types=eq, evidence=ev(), plate_no=PLATE[v]) for v, a, eq in VEHICLES],
-        jobs=[dict(job_id=j, voyage_id=VOYAGE_CODE[voy], origin_id=o, terminal_id="HJNC", return_location_id="D", ready_at=at(r),
+        jobs=[dict(job_id=j, voyage_id=VOYAGE_CODE[voy], origin_id=o, terminal_id=TERMINAL[voy], return_location_id="D", ready_at=at(r),
                    gross_weight_kg=w, equipment_type=e, service_minutes=SERVICE, state=st, frozen=st == "departed",
                    freeze_reason="ALREADY_DEPARTED" if st == "departed" else None, evidence=ev(),
                    container_no=iso6346("BNJU", 100200 + int(j[1:])), booking_no=f"BKG{VOYAGE_CODE[voy]}{int(j[1:]):03d}",
                    cargo_owner=SHIPPER[o]) for j, voy, o, r, w, e, st in JOBS],
-        windows=[dict(window_id=f"W-{VOYAGE_CODE[voy]}", voyage_id=VOYAGE_CODE[voy], terminal_id="HJNC", opens_at=at(o), closes_at=at(c), verification="confirmed",
+        windows=[dict(window_id=f"W-{VOYAGE_CODE[voy]}", voyage_id=VOYAGE_CODE[voy], terminal_id=TERMINAL[voy], opens_at=at(o), closes_at=at(c), verification="confirmed",
                       confirmed_by="demo-dispatcher", confirmed_at=at(-5), evidence=ev()) for voy, (o, c) in WINDOWS.items()],
         travel_times=[dict(from_location_id=a, to_location_id=b, minutes=travel(a, b), evidence=ev("assumed", "fixture:demo_02_travel"))
                       for a, *_ in LOCATIONS for b, *_ in LOCATIONS],

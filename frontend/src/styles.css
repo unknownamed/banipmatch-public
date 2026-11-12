@@ -543,3 +543,6 @@ button.secondary:hover { background: var(--color-hover); }
 .lane { grid-template-columns: 104px minmax(0, 1fr); }
 .lane-name b { display: block; color: var(--color-text); font-size: var(--fs-body-sm); }
 .lane-name small { display: block; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.copy-notice { margin-top: 6px; display: grid; gap: 4px; }
+.copy-notice > button { justify-self: start; }
+.notice-text { margin: 4px 0 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-canvas); border: var(--border); font: inherit; font-size: var(--fs-caption); line-height: 1.6; white-space: pre-wrap; }

@@ -7,6 +7,7 @@ import {
 } from '../lib/dispatch'
 import { kstDateTime, kstTime } from '../lib/time'
 import { jobName, vehicleName, vehicleShort } from '../lib/labels'
+import { driverMessage } from '../lib/driverMessage'
 
 const enc = encodeURIComponent
 const errText = (e: unknown) =>
@@ -78,6 +79,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
                 </li>
               ))}
             </ul>
+            <CopyNotice text={driverMessage(v.vehicle_id, v.changes, p.approved_version)} />
           </div>
         ))}
       </div>
@@ -317,5 +319,22 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
       {retryError !== null && <p className="warn small" role="alert">재시도 실패: {errText(retryError)}</p>}
       {d.followups.length > 0 && <Followups items={d.followups} title="후속 확인 목록" />}
     </>
+  )
+}
+
+/** 웹 푸시를 받지 못하는 기사에게 문자·카톡으로 보낼 안내문. 자동 발송하지 않고 복사만 한다. */
+function CopyNotice({ text }: { text: string }) {
+  const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
+  return (
+    <div className="copy-notice">
+      <button type="button" className="secondary" onClick={() => navigator.clipboard?.writeText(text).then(() => setState('copied'), () => setState('failed')) ?? setState('failed')}>
+        {state === 'copied' ? '복사됨 · 문자/카톡에 붙여넣기' : '기사 안내문 복사'}
+      </button>
+      {state === 'failed' && <span className="warn small"> 복사하지 못했습니다. 아래 내용을 직접 선택해 복사하세요.</span>}
+      <details>
+        <summary className="small muted">안내문 미리보기</summary>
+        <pre className="notice-text">{text}</pre>
+      </details>
+    </div>
   )
 }

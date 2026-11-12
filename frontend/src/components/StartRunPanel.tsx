@@ -16,7 +16,7 @@ import { ComparisonSection } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
 
 const EXAMPLES = [
-  { id: '02', label: '신항 저녁 배차', size: '트럭 6대 · 작업 16건', what: 'BM 하모니호(BH045E) HJNC 반입 마감이 2시간 30분 앞당겨졌습니다. 원래 배차로는 컨테이너 4개가 마감을 넘깁니다.', tag: '추천', snapshot: s02 },
+  { id: '02', label: '신항 저녁 배차', size: '트럭 8대 · 컨테이너 20개 · HJNC·PNIT', what: 'BM 하모니호(BH045E) HJNC 반입 마감이 2시간 30분 앞당겨졌습니다. 원래 배차로는 컨테이너 4개가 마감을 넘깁니다. PNIT 작업은 영향이 없습니다.', tag: '추천', snapshot: s02 },
   { id: '01', label: '작은 배차', size: '트럭 2대 · 작업 4건', what: 'V1 반입 마감이 앞당겨진 간단한 상황입니다. 흐름을 빠르게 확인할 때 씁니다.', tag: '', snapshot: s01 },
   { id: '07', label: '입력이 빠진 경우', size: '준비 시각 미확인', what: '상차 준비 시각이 비어 있어 계산이 멈춥니다. 확인한 값을 넣어 다시 계산하는 과정을 봅니다.', tag: '', snapshot: s07 },
   { id: '08', label: '확정되지 않은 변경', size: '터미널 공지 미확정', what: '변경이 확정되지 않아 계산하지 않습니다. 잘못된 정보로 배차를 바꾸지 않도록 막는 예입니다.', tag: '', snapshot: s08 },

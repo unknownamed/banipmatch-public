@@ -10,7 +10,7 @@ const min = (m: number) => t0 + m * 60000
 describe('배차 일정 기반 차량 위치 추정', () => {
   it('모든 차량에 위치와 단계가 있고 출처는 계획 기반 추정이다', () => {
     const list = vehiclesAt(s, s.baseline_assignments, min(5))
-    expect(list).toHaveLength(6)
+    expect(list).toHaveLength(8)
     expect(list.every(v => v.pos && v.source === 'plan_inferred')).toBe(true)
   })
 

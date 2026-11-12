@@ -2,14 +2,20 @@
 // 내부 식별자(job_id·vehicle_id)는 계산·연결용 키로 남고, 표시 이름이 없으면 그대로 쓴다.
 import type { Snapshot } from '../api/types'
 
-type JobInfo = { container: string | null; booking: string | null; owner: string | null }
+type JobInfo = { container: string | null; booking: string | null; owner: string | null; origin: string; terminal: string; voyage: string; size: string }
 const jobs = new Map<string, JobInfo>()
 const plates = new Map<string, string>()
 
 /** 입력을 불러올 때 한 번 호출한다. 같은 입력이면 다시 불러도 결과가 같다. */
-export function registerLabels(s: Pick<Snapshot, 'jobs' | 'vehicles'> | null | undefined) {
+export function registerLabels(s: Pick<Snapshot, 'jobs' | 'vehicles' | 'locations'> | null | undefined) {
   if (!s) return
-  for (const j of s.jobs) jobs.set(j.job_id, { container: j.container_no ?? null, booking: j.booking_no ?? null, owner: j.cargo_owner ?? null })
+  const place = (id: string) => s.locations?.find(l => l.location_id === id)?.name.replace('(모의)', '').trim() ?? id
+  for (const j of s.jobs)
+    jobs.set(j.job_id, {
+      container: j.container_no ?? null, booking: j.booking_no ?? null, owner: j.cargo_owner ?? null,
+      origin: place(j.origin_id), terminal: j.terminal_id, voyage: j.voyage_id,
+      size: j.equipment_type === 'DRY40' ? '40ft' : j.equipment_type === 'DRY20' ? '20ft' : j.equipment_type,
+    })
   for (const v of s.vehicles ?? []) if (v.plate_no) plates.set(v.vehicle_id, v.plate_no)
 }
 
