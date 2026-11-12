@@ -798,3 +798,19 @@ def test_driver_location_is_consented_latest_only_bounded_and_removed_on_stop_or
     assert manager.post("/v2/recipients/" + actor.info["recipient_id"] + "/revoke", {}).status_code == 200
     with hub.domain(manager.info["session_id"]).db.connect() as conn:
         assert conn.execute("SELECT COUNT(*) FROM recipient_locations").fetchone()[0] == 0
+
+
+def test_many_drivers_can_be_linked_and_used_invites_do_not_block_new_ones(workflow):
+    client, _, _ = workflow
+    manager = new_manager(client)
+    snapshot = seed(manager)
+    allow(manager)
+    vehicles = [v["vehicle_id"] for v in snapshot["vehicles"]]
+    # 차량마다 초대·연결을 반복해도(이전 상한 3명) 막히지 않는다.
+    for round_ in range(3):
+        for vehicle in vehicles:
+            actor, _ = connect_recipient(manager, snapshot, [vehicle])
+            assert manager.post("/v2/recipients/" + actor.info["recipient_id"] + "/revoke", {}).status_code == 200
+    linked = [connect_recipient(manager, snapshot, [v])[0] for v in vehicles]
+    assert len(linked) == len(vehicles) >= 2
+    assert sum(not r["revoked"] for r in manager.get("/v2/recipients").json()["recipients"]) == len(vehicles)

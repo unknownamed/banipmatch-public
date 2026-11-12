@@ -7,9 +7,10 @@ import { kstDateTime, kstTime } from '../lib/time'
 import { formatContainer } from '../lib/labels'
 import { copyText } from '../lib/copyText'
 import { BoxNo, Plate } from './Ids'
+import { friendlyError } from '../lib/friendlyError'
 
-const errText = (e: unknown) =>
-  e instanceof ApiRequestError && e.body ? e.message : e instanceof Error ? e.message : String(e)
+// 서버의 개발용 설명 대신 쉬운 안내를 보여 준다.
+const errText = friendlyError
 const isCode = (e: unknown, ...codes: string[]) => e instanceof ApiRequestError && !!e.body && codes.includes(e.body.code)
 
 /**

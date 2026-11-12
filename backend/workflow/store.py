@@ -13,6 +13,12 @@ from .hub import moment, stamp
 from .security import hashed, new_id, validate_snapshot_bounds, validate_subscription
 
 
+# 세션(담당자 작업공간)당 기사 연결 한도. 운송사 한 곳의 한 근무조 차량 수를 넉넉히 덮는다.
+RECIPIENT_LIMIT = 30
+PENDING_INVITE_LIMIT = 30
+TOTAL_INVITE_LIMIT = 200
+
+
 class WorkflowStore:
     def __init__(self, hub, sid, store, jobs):
         self.hub, self.sid, self.store, self.jobs = hub, sid, store, jobs
@@ -220,10 +226,12 @@ class WorkflowStore:
             vehicles = {v["vehicle_id"] for v in snapshot["vehicles"]}
             if not set(body["vehicle_ids"]) <= vehicles or len(set(body["vehicle_ids"])) != len(body["vehicle_ids"]):
                 raise ApiError(422, "RECIPIENT_SCOPE_INVALID", "해당 계획의 차량 범위를 확인해야 함")
-            count = conn.execute("SELECT count(*) FROM invitations WHERE revoked=0 AND expires_at>?",
-                                 (self.hub.now(),)).fetchone()[0]
-            if count >= 3 or conn.execute("SELECT count(*) FROM invitations").fetchone()[0] >= 10:
-                raise ApiError(429, "RECIPIENT_LIMIT", "세션 시험 수신자/초대 상한에 도달함")
+            # 운송사 한 곳의 차량 수만큼 기사를 연결할 수 있게 한다. 아직 쓰지 않은 초대만 '대기 중'으로 세고,
+            # 공개 서버 보호를 위해 세션당 전체 초대 수에도 상한을 둔다.
+            pending = conn.execute("SELECT count(*) FROM invitations WHERE revoked=0 AND consumed_by IS NULL AND expires_at>?",
+                                   (self.hub.now(),)).fetchone()[0]
+            if pending >= PENDING_INVITE_LIMIT or conn.execute("SELECT count(*) FROM invitations").fetchone()[0] >= TOTAL_INVITE_LIMIT:
+                raise ApiError(429, "RECIPIENT_LIMIT", "연결 대기 중인 초대 또는 전체 초대 수가 상한에 도달함")
             identifier = new_id()
             expires = min(self.hub.clock() + timedelta(minutes=30), moment(self.hub.session(self.sid)["expires_at"]))
             conn.execute("INSERT INTO invitations(invitation_id,plan_id,vehicle_ids_json,expires_at) VALUES(?,?,?,?)",
@@ -244,8 +252,8 @@ class WorkflowStore:
                 if invitation["claim_key_hash"] != hashed(key):
                     raise ApiError(409, "INVITATION_USED", "이미 연결한 초대임")
                 return 200, self.recipient(conn, invitation["consumed_by"])
-            if conn.execute("SELECT count(*) FROM recipients WHERE revoked=0 AND expires_at>?", (self.hub.now(),)).fetchone()[0] >= 3:
-                raise ApiError(429, "RECIPIENT_LIMIT", "시험 수신자 상한에 도달함")
+            if conn.execute("SELECT count(*) FROM recipients WHERE revoked=0 AND expires_at>?", (self.hub.now(),)).fetchone()[0] >= RECIPIENT_LIMIT:
+                raise ApiError(429, "RECIPIENT_LIMIT", "연결된 기사 수가 상한에 도달함")
             identifier = new_id()
             expires = self.hub.session(self.sid)["expires_at"]
             vehicles = json.loads(invitation["vehicle_ids_json"])

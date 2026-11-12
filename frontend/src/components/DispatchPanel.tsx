@@ -14,10 +14,11 @@ import { BoxNo, Plate } from './Ids'
 import { Icon } from './Icon'
 import { ISSUE_LABEL } from '../lib/compare'
 import { publishDriverLocations } from '../lib/driverLocations'
+import { friendlyError } from '../lib/friendlyError'
 
 const enc = encodeURIComponent
-const errText = (e: unknown) =>
-  e instanceof ApiRequestError && e.body ? e.message : e instanceof Error ? e.message : String(e)
+// 서버의 개발용 설명 대신 쉬운 안내를 보여 준다.
+const errText = friendlyError
 
 /**
  * 내부 승인 이후: 차량별 변경 명세 → 시험 수신자 초대·연결 → 명시적 전달 → 대상별 전달·사람 응답 상태.
