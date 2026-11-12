@@ -69,7 +69,11 @@ export interface RecipientSummary {
   revoked: boolean
   vehicle_ids: string[]
   subscription_status: 'active' | 'revoked' | 'expired' | 'missing'
+  /** 기사가 동의해 보낸 최근 60분 안의 휴대폰 위치 */
+  location?: DriverLocation | null
 }
+
+export interface DriverLocation { latitude: number; longitude: number; accuracy_m: number; captured_at: string; received_at: string }
 
 export const DELIVERY_LABEL: Record<DeliveryStatus, string> = {
   pending: '전송 대기',

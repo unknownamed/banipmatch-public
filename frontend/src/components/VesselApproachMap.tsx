@@ -114,7 +114,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         const el = document.createElement('div')
         el.className = 'vm-ship'
         el.setAttribute('role', 'button')
-        el.addEventListener('click', () => setPicked(v.id))
+        // 다른 터미널 배를 누르면 목록에도 보이도록 '신항 전체'로 넓힌다.
+        el.addEventListener('click', () => { setPicked(v.id); if (v.terminal !== 'HJNC') setScope('all') })
         const overlay = new maps.CustomOverlay({ map: m, position: ll(v.route[0]), content: el, zIndex: 5, clickable: true })
         marks.current.set(v.id, { overlay, el })
       }
@@ -179,6 +180,15 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       paths.current.ahead.setPath(sel.status === 'underway' && sel.ahead.length > 1 ? sel.ahead.map(ll) : [])
     }
   }, [fleet, sel, mapState.ok, t, zoomTick, scope])
+
+  // 지도에서 배를 누르면 목록의 같은 배를 강조하고, 화면 밖이면 보이는 곳까지만 굴린다(처음 열 때는 굴리지 않는다).
+  const firstPick = useRef(true)
+  useEffect(() => {
+    if (firstPick.current) { firstPick.current = false; return }
+    // 범위가 '신항 전체'로 바뀌어 목록이 다시 그려진 뒤에 굴린다.
+    const id = requestAnimationFrame(() => document.querySelector<HTMLElement>('.vm-item.picked')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+    return () => cancelAnimationFrame(id)
+  }, [picked])
 
   const focus = (v: VesselView) => {
     setPicked(v.vessel.id)

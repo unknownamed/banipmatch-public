@@ -553,3 +553,25 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 
 /* 차량 지도 시간 막대 */
 .dispatch-map .vm-play { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* 기사 휴대폰 위치: 일정 추정 위치와 구별되게 파란 점을 붙이고 은은하게 깜빡인다 */
+.dm-pin.live { box-shadow: 0 0 0 3px rgba(36, 87, 230, .28), 0 2px 6px rgba(0,0,0,.22); }
+.dm-pin.live::before { content: ""; position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; border-radius: 50%; background: #2457E6; border: 2px solid #fff; animation: live-pulse 2s ease-out infinite; }
+@keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(36, 87, 230, .55); } 100% { box-shadow: 0 0 0 8px rgba(36, 87, 230, 0); } }
+@media (prefers-reduced-motion: reduce) { .dm-pin.live::before { animation: none; } }
+.lg.live { border-radius: 50%; background: #2457E6; box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(36, 87, 230, .4); }
+.st.live { color: #2457E6; } .st.live::before { background: #2457E6; }
+.loc-share { margin-top: 12px; }
+.loc-share .lp-switch { border-top: 1px solid var(--line); padding-top: 12px; }
+.dm-cluster.live { position: relative; }
+.dm-cluster.live::before { content: ""; position: absolute; top: -3px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: #2457E6; border: 2px solid #fff; z-index: 1; animation: live-pulse 2s ease-out infinite; }
+.cl-item.live b::after { content: "휴대폰 위치"; margin-left: 6px; font-size: 11px; font-weight: 600; color: #2457E6; }
+@media (prefers-reduced-motion: reduce) { .dm-cluster.live::before { animation: none; } }
+
+/* 지도에서 고른 차량·선박: 표·목록의 같은 줄을 남색 띠로 강조 */
+.ft-table tbody tr[tabindex] { cursor: pointer; }
+.ft-table tbody tr.picked { background: #EEF2F8; box-shadow: inset 3px 0 0 #16294D; }
+.ft-table tbody tr.picked:hover { background: #E4EAF4; }
+.ft-table tbody tr:focus-visible { outline: 2px solid #16294D; outline-offset: -2px; }
+.vm-item.picked { background: #EEF2F8; }
+.ft-table .late-next { color: var(--red, #c0262d); font-weight: 600; }

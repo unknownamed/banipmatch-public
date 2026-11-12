@@ -1,6 +1,6 @@
 // 홈 '오늘 저녁 배차 현황': 지금 배차표(원안)대로 가면 차량마다 무엇을 하고 있고, 새 반입 마감에 맞는지.
 // 관제 화면의 '요약 수치 + 검색·필터가 있는 상태 표' 구성. 위치·단계는 배차 일정으로 추정한 값이다(실제 GPS 아님).
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Snapshot } from '../api/types'
 import { PHASE_LABEL, gateStatus, vehiclesAt, type Phase } from '../lib/fleetPosition'
 import { jobInfo, jobName, registerLabels, vehicleName } from '../lib/labels'
@@ -13,15 +13,22 @@ const PHASE_TONE: Record<Phase, 'run' | 'gate' | 'wait'> = {
 }
 type Filter = 'all' | 'run' | 'wait' | 'risk'
 
-export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
+export function FleetToday({ snapshot, picked = null, onPick }: { snapshot: Snapshot; picked?: string | null; onPick?: (vehicleId: string) => void }) {
   useMemo(() => registerLabels(snapshot), [snapshot])
   const [now, setNow] = useState(() => Date.now())
   const [filter, setFilter] = useState<Filter>('all')
   const [query, setQuery] = useState('')
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 30_000)
+    const t = setInterval(() => setNow(Date.now()), 10_000)
     return () => clearInterval(t)
   }, [])
+  // 지도에서 차량을 고르면 그 행을 강조하고, 화면 밖이면 보이는 곳까지만 굴린다.
+  const body = useRef<HTMLTableSectionElement>(null)
+  useEffect(() => {
+    if (!picked) return
+    const row = body.current?.querySelector<HTMLElement>(`tr[data-vehicle="${CSS.escape(picked)}"]`)
+    row?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [picked])
   const plan = snapshot.baseline_assignments
   const buffer = snapshot.policy.buffer_minutes
   const cutoff = (jid: string) => {
@@ -31,7 +38,15 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
   const vehicles = vehiclesAt(snapshot, plan, now)
   const moving = vehicles.filter((v) => PHASE_TONE[v.phase] !== 'wait').length
   const remaining = plan.filter((a) => Date.parse(a.gate_arrival_at) > now)
-  const atRisk = plan.filter((a) => gateStatus(a.gate_arrival_at, cutoff(a.job_id), buffer).gate === 'late')
+  const isLate = (a: (typeof plan)[number]) => gateStatus(a.gate_arrival_at, cutoff(a.job_id), buffer).gate === 'late'
+  const atRisk = remaining.filter(isLate)
+  // 표는 차량마다 지금(또는 다음) 컨테이너 한 줄이라, 그 뒤에 이어지는 작업 중 늦는 것을 따로 센다.
+  const laterLate = (v: (typeof vehicles)[number]) => {
+    const mine = plan.filter((a) => a.vehicle_id === v.vehicleId).sort((x, y) => x.sequence - y.sequence)
+    const at = mine.findIndex((a) => a.job_id === v.jobId)
+    return at < 0 ? 0 : mine.slice(at + 1).filter(isLate).length
+  }
+  const risky = (v: (typeof vehicles)[number]) => v.gate === 'late' || v.gate === 'tight' || laterLate(v) > 0
   const nextCut = [...new Set(remaining.map((a) => cutoff(a.job_id)).filter((c): c is string => !!c && Date.parse(c) > now))].sort()[0]
   const stats = [
     { label: '운행 중 트럭', value: `${moving}`, unit: `/ ${vehicles.length}대` },
@@ -41,22 +56,22 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
   ]
   const q = query.trim().toLowerCase().replace(/\s/g, '')
   // 급한 순: 마감 넘김 → 빠듯함 → 여유(적은 순) → 남은 작업 없음
-  const urgency = (v: (typeof vehicles)[number]) => (v.gate === 'late' ? 0 : v.gate === 'tight' ? 1 : v.gate === 'ok' ? 2 : 3) * 10000 + (v.marginMin ?? 9999)
+  const urgency = (v: (typeof vehicles)[number]) => (v.gate === 'late' ? 0 : v.gate === 'tight' ? 1 : laterLate(v) > 0 ? 2 : v.gate === 'ok' ? 3 : 4) * 10000 + (v.marginMin ?? 9999)
   const rows = [...vehicles].sort((a, b) => urgency(a) - urgency(b)).filter((v) => {
     const tone = PHASE_TONE[v.phase]
     if (filter === 'run' && tone === 'wait') return false
     if (filter === 'wait' && tone !== 'wait') return false
-    if (filter === 'risk' && v.gate !== 'late' && v.gate !== 'tight') return false
+    if (filter === 'risk' && !risky(v)) return false
     if (!q) return true
     const info = v.jobId ? jobInfo(v.jobId) : null
     return `${vehicleName(v.vehicleId)}${v.jobId ? jobName(v.jobId) : ''}${info?.owner ?? ''}${info?.origin ?? ''}${info?.voyage ?? ''}`.toLowerCase().replace(/\s/g, '').includes(q)
   })
-  const count = (f: Filter) => vehicles.filter((v) => f === 'all' || (f === 'run' ? PHASE_TONE[v.phase] !== 'wait' : f === 'wait' ? PHASE_TONE[v.phase] === 'wait' : v.gate === 'late' || v.gate === 'tight')).length
+  const count = (f: Filter) => vehicles.filter((v) => f === 'all' || (f === 'run' ? PHASE_TONE[v.phase] !== 'wait' : f === 'wait' ? PHASE_TONE[v.phase] === 'wait' : risky(v))).length
   return (
     <section className="card fleet-today" aria-labelledby="ft-title">
       <div className="ft-head">
         <h2 id="ft-title">오늘 배차 현황</h2>
-        <span className="updated">위치는 배차 일정으로 추정</span>
+        <span className="updated">배차 일정 기준 위치</span>
       </div>
       <dl className="stat-strip">
         {stats.map((s) => (
@@ -82,13 +97,15 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
           <thead>
             <tr><th>차량</th><th>지금</th><th>컨테이너</th><th>상차지 → 터미널</th><th>게이트 도착</th><th>마감 여유</th></tr>
           </thead>
-          <tbody>
+          <tbody ref={body}>
             {rows.length === 0 && <tr className="empty-row"><td colSpan={6}>조건에 맞는 차량이 없습니다.</td></tr>}
             {rows.map((v) => {
               const info = v.jobId ? jobInfo(v.jobId) : null
               const tone = v.gate === 'late' ? 'bad' : v.gate === 'tight' ? 'warn' : 'ok'
               return (
-                <tr key={v.vehicleId}>
+                <tr key={v.vehicleId} data-vehicle={v.vehicleId} className={v.vehicleId === picked ? 'picked' : undefined} aria-selected={v.vehicleId === picked}
+                  tabIndex={onPick ? 0 : undefined} onClick={onPick ? () => onPick(v.vehicleId) : undefined}
+                  onKeyDown={onPick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(v.vehicleId) } } : undefined}>
                   <td data-label="차량"><Plate id={v.vehicleId} /></td>
                   <td data-label="지금"><span className={`st ${PHASE_TONE[v.phase]}`}>{PHASE_LABEL[v.phase]}</span></td>
                   <td data-label="컨테이너">{v.jobId ? <><BoxNo jobId={v.jobId} />{info && <span className="sub">{info.size}, {info.owner}</span>}</> : '—'}</td>
@@ -96,6 +113,7 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
                   <td data-label="게이트 도착" className="num">{v.gateEta ? kstTimeWithDay(v.gateEta, snapshot.as_of) : '—'}</td>
                   <td data-label="마감 여유" className="num">
                     {v.marginMin === null ? '—' : <span className={`st ${tone}`}>{v.gate === 'late' ? `${-v.marginMin}분 늦음` : `${v.marginMin}분 여유`}</span>}
+                    {laterLate(v) > 0 && <span className="sub late-next">다음 작업 {laterLate(v)}개 늦음</span>}
                   </td>
                 </tr>
               )

@@ -17,7 +17,7 @@ from .security import csrf, hashed
 from .contracts import (SessionState, RecipientState, InvitationState, RevisionState,
                         RevisionRecord, ComparisonState, DispatchReceipt, RetryReceipt,
                         DispatchState, NotificationState, NotificationInbox, RecipientsState,
-                        PushConfig, SubscriptionState)
+                        PushConfig, SubscriptionState, LocationState)
 
 MANAGER_COOKIE = "banipmatch_session"
 RECIPIENT_COOKIE = "banipmatch_recipient"
@@ -73,6 +73,15 @@ class Retry(Input):
 class RecipientResponse(Input):
     response: Literal["acknowledged", "can_perform", "cannot_perform"]
     note: str = Field(default="", max_length=300)
+
+
+class LocationShare(Input):
+    # 국내 위치만 받는다(위도·경도는 대한민국 범위).
+    latitude: float = Field(ge=33.0, le=38.7)
+    longitude: float = Field(ge=124.5, le=131.9)
+    accuracy_m: float = Field(ge=0, le=5000)
+    captured_at: str = Field(min_length=20, max_length=40)
+    consent: Literal[True]
 
 
 class Empty(Input):
@@ -320,6 +329,16 @@ def install(app, settings, *, replay=None, sender=None, clock=None):
     def unsubscribe(request: Request):
         domain, info, _ = recipient(request, write=True)
         return domain.unsubscribe(info["recipient_id"])
+
+    @app.post("/v2/recipient/location", response_model=LocationState)
+    def share_location(request: Request, body: LocationShare):
+        domain, info, _ = recipient(request, write=True)
+        return domain.share_location(info["recipient_id"], body.model_dump())
+
+    @app.delete("/v2/recipient/location", response_model=LocationState)
+    def stop_location(request: Request):
+        domain, info, _ = recipient(request, write=True)
+        return domain.stop_location(info["recipient_id"])
 
     @app.get("/v2/recipient/notifications", response_model=NotificationInbox)
     def inbox(request: Request):

@@ -12,6 +12,7 @@ import { driverMessage } from '../lib/driverMessage'
 import { BoxNo, Plate } from './Ids'
 import { Icon } from './Icon'
 import { ISSUE_LABEL } from '../lib/compare'
+import { publishDriverLocations } from '../lib/driverLocations'
 
 const enc = encodeURIComponent
 const errText = (e: unknown) =>
@@ -28,7 +29,11 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
   const [dispatchId, setDispatchId] = useState(() => new URLSearchParams(location.search).get('dispatch'))
 
   const loadRecipients = useCallback(
-    () => client.get<{ recipients: RecipientSummary[] }>('/v2/recipients').then((r) => setRecipients(r.recipients.filter((x) => x.plan_id === planId)), () => {}),
+    () => client.get<{ recipients: RecipientSummary[] }>('/v2/recipients').then((r) => {
+      const mine = r.recipients.filter((x) => x.plan_id === planId)
+      setRecipients(mine)
+      publishDriverLocations(mine)
+    }, () => {}),
     [client, planId],
   )
   useEffect(() => {
@@ -37,7 +42,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
     client.session().then((s) => live && setSession(s), () => {})
     loadRecipients()
     const timer = setInterval(loadRecipients, 5000)
-    return () => { live = false; clearInterval(timer) }
+    return () => { live = false; clearInterval(timer); publishDriverLocations([]) }
   }, [client, planId, loadRecipients])
 
   if (preview.error) {

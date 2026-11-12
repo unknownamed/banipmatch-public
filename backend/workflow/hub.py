@@ -41,6 +41,13 @@ class Registry(Database):
             conn.execute("PRAGMA journal_mode=WAL")
 
 
+# 기사가 동의해 보낸 휴대폰 위치(차량별 최신 1건만, 이력 없음). 예전 세션 DB에도 없으면 만든다.
+LOCATION_DDL = ("CREATE TABLE IF NOT EXISTS recipient_locations ("
+                " recipient_id TEXT PRIMARY KEY REFERENCES recipients(recipient_id),"
+                " latitude REAL NOT NULL, longitude REAL NOT NULL, accuracy_m REAL NOT NULL,"
+                " captured_at TEXT NOT NULL, received_at TEXT NOT NULL) STRICT;")
+
+
 class DomainDatabase(Database):
     def initialize(self):
         with self.connect() as conn:
@@ -55,6 +62,8 @@ class DomainDatabase(Database):
             with self.connect() as conn:
                 ensure_field_columns(conn)
                 conn.commit()
+        with self.connect() as conn:
+            conn.executescript(LOCATION_DDL)
 
 
 # 발표장 30명 동시 계산 요청을 받는 대기열 상한(세션당 1건).

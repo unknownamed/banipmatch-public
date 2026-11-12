@@ -50,6 +50,8 @@ export type VehicleNow = {
   gate: GateStatus | null
   source: 'plan_inferred'
   path?: Pt[] | null // 지금 달리는 구간의 도로 경로(있으면)
+  /** 기사가 동의해 보낸 휴대폰 위치(있으면 pos가 이 값) */
+  live?: { captured_at: string; accuracy_m: number }
 }
 
 const ms = (iso: string) => Date.parse(iso)

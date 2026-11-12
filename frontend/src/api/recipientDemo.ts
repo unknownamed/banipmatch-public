@@ -51,6 +51,8 @@ export function createDemoRecipientClient(): RecipientClient {
     pushConfig: async () => ({ configured: false, application_server_key: null }),
     subscribe: async () => ({ subscription_status: 'missing' }),
     unsubscribe: async () => ({ subscription_status: 'missing' }),
+    shareLocation: async (p) => ({ location_shared: true, captured_at: p.captured_at }),
+    stopLocation: async () => ({ location_shared: false, captured_at: null }),
     inbox: async () => ({ notifications: copy(notifications) }),
     notification: async (id) => copy(find(id)),
     opened: async (id) => {
