@@ -668,3 +668,8 @@ h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
 .now-cut.muted { color: var(--color-muted); font-weight: 500; }
 .now-foot { margin: 0; display: flex; align-items: center; gap: 6px; color: #3b3f46; font-weight: 600; }
 .vm-chip.offshore { background: #eef2f6; color: #44505c; }
+/* PR #73(길웅)에서 가져온 보완: 표 머리글 줄바꿈 방지, 지도 아래 버튼 정렬, 좁은 화면 라벨 정렬 */
+.grid thead th { white-space: nowrap; }
+.map-choice { grid-column: 2; margin: var(--space-6) var(--space-8) 0; }
+@media (max-width: 890px) { .map-choice { grid-column: 1; margin: var(--space-4) var(--space-4) 0; } }
+@media (max-width: 576px) { .rev-row > b { flex-basis: 100%; } }
