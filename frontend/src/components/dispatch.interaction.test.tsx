@@ -66,14 +66,21 @@ describe('변경 전달 화면', () => {
     expect([...container.querySelectorAll('button')].some((b) => b.textContent === '기사에게 보내기')).toBe(false)
   })
 
-  it('차량 줄의 휴대폰 연결로 초대를 만들고 비밀은 fragment 링크·QR로만 보여준다', async () => {
+  it('차량 줄 버튼 한 번으로 초대를 만들고 안내문·연결 링크를 함께 복사하며, 비밀은 화면·주소에 보이지 않는다', async () => {
     const { client, post } = fakeClient(true)
+    const copied: string[] = []
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (t: string) => { copied.push(t) } } })
     await act(async () => root.render(<DispatchPanel client={client} planId="P1" />))
     await flush()
     const row = [...container.querySelectorAll('.link-list li')].find((li) => li.textContent?.includes('T1'))!
-    const connect = [...row.querySelectorAll('button')].find((b) => b.textContent === '휴대폰 연결')!
+    const connect = [...row.querySelectorAll('button')].find((b) => b.textContent === '안내문·연결 링크 복사')!
     await act(async () => connect.click())
     await flush()
+    expect(copied).toHaveLength(1)
+    expect(copied[0]).toContain('[반입맞춤 배차 변경]')
+    expect(copied[0]).toContain('연결하고 알림 받기')
+    expect(copied[0].trim().split(String.fromCharCode(10)).pop()).toMatch(/\/recipient#invite=/)
+    expect(container.textContent).toContain('복사했습니다')
     expect(post).toHaveBeenCalledWith('/v2/invitations', { plan_id: 'P1', vehicle_ids: ['T1'], consent_acknowledged: true }, expect.stringMatching(/^invite-/))
     const qr = container.querySelector<HTMLImageElement>('.invite-qr')!
     expect(qr).toBeTruthy()

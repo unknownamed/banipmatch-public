@@ -592,3 +592,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .dm-cluster.changed { outline: 2px solid #f59e0b; outline-offset: 2px; }
 .lg.chg { border-radius: 50%; background: transparent; border: 2px solid #f59e0b; box-sizing: border-box; }
 .st.chg { color: #b45309; } .st.chg::before { background: #d97706; }
+.invite-raw { display: inline-block; margin-top: 4px; font-family: ui-monospace, monospace; font-size: 11.5px; word-break: break-all; user-select: all; color: var(--ink); }
+.invite-raw { white-space: pre-wrap; }
+.invite-qr-more { margin-top: 8px; }
+.invite-qr-more summary { cursor: pointer; color: var(--ink-2); }
+.invite-qr-more .invite-qr { display: block; margin-top: 8px; }

@@ -27,3 +27,16 @@ export function driverMessage(vehicleId: string, changes: ChangeLine[], _version
   lines.push('', '확인하셨으면 "확인", 수행이 어려우면 "곤란"으로 회신 부탁드립니다.')
   return lines.join('\n')
 }
+
+/** 한 번 복사로 보내는 메시지: 바뀐 배차 안내문 + 알림 연결 방법 + 연결 링크(맨 끝). */
+export function inviteMessage(notice: string, link: string, expiresAt: string) {
+  const body = notice.split('\n').filter((l) => !l.startsWith('확인하셨으면')).join('\n').trimEnd()
+  return [
+    body,
+    '',
+    '■ 휴대폰 알림 연결(처음 한 번)',
+    `아래 링크를 누르고 "연결하고 알림 받기"를 누르면 앞으로 바뀌는 배차를 알림으로 받고 바로 응답할 수 있습니다. (${kstTime(expiresAt)}까지, 한 번만 사용)`,
+    '아이폰은 Safari에서 열어 화면 안내를 따라 주세요. 연결이 어려우면 이 메시지에 "확인" 또는 "곤란"으로 회신해 주세요.',
+    link,
+  ].join('\n')
+}
