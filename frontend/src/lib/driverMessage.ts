@@ -6,10 +6,10 @@ import { kstTime } from './time'
 type Slot = { vehicle_id?: string; pickup_departure_at?: string; gate_arrival_at?: string } | null
 export type ChangeLine = { job_id: string; kind: string; before: Slot; after: Slot }
 
-export function driverMessage(vehicleId: string, changes: ChangeLine[], version: number) {
+export function driverMessage(vehicleId: string, changes: ChangeLine[], _version?: number) {
   const mine = changes.filter(c => c.after?.vehicle_id === vehicleId)
   const removed = changes.filter(c => c.before?.vehicle_id === vehicleId && c.after?.vehicle_id !== vehicleId)
-  const lines = [`[반입맞춤 배차 변경 v${version}] ${vehicleName(vehicleId)}`]
+  const lines = [`[반입맞춤 배차 변경] ${vehicleName(vehicleId)}`]
   if (mine.length) {
     lines.push('', '■ 수행할 작업')
     mine.forEach((c, i) => {

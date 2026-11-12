@@ -107,6 +107,8 @@ class Weather(PublicModel):
     status: str
     received_at: str | None
     http_status: int | None
+    # network: 응답을 받지 못함(연결 실패·시간 초과), provider: 기상청이 오류 응답을 보냄
+    failure: Literal['network', 'provider'] | None = None
     report: WeatherReport | None
 
 

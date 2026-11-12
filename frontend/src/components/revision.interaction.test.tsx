@@ -39,7 +39,7 @@ async function edit(client: V2Client) {
 it('분 경계를 넘겨 저장을 재시도해도 같은 본문·키를 보낸다', async () => {
   const post = vi.fn().mockRejectedValue(new Error('응답 유실'))
   await edit({ post } as unknown as V2Client)
-  await click('새 입력으로 재계산')
+  await click('다시 계산')
   const first = JSON.stringify(post.mock.calls[0])
   vi.setSystemTime(new Date('2026-11-11T05:02:05Z'))
   await click('다시 시도')
@@ -53,7 +53,7 @@ it('저장이 끝난 뒤 계산만 실패하면 등록을 반복하지 않고 �
   const post = vi.fn().mockResolvedValue({ scenario_id: 'S2', plan_id: 'P1', base_plan_version: 1, revision_id: 'RV1' })
   const createRun = vi.fn().mockRejectedValue(new Error('일시 장애'))
   await edit({ post, createRun } as unknown as V2Client)
-  await click('새 입력으로 재계산')
+  await click('다시 계산')
   vi.setSystemTime(new Date('2026-11-11T05:03:05Z'))
   await click('다시 시도')
   expect(post).toHaveBeenCalledTimes(1)
@@ -67,8 +67,8 @@ it('확정 원안을 그대로 등록하며 재시도에도 새 next-input을 �
   const createRun = vi.fn().mockRejectedValue(new Error('일시 장애'))
   const client = { get, registerScenario, createRun } as unknown as V2Client
   await act(async () => root.render(<NextPlanPanel client={client} planId="P001" rerun={rerun} />))
-  expect(el.textContent).toContain('이전 변경 알림은 지난 지시')
-  await click('확정 계획으로 새 점검 시작')
+  expect(el.textContent).toContain('기사에게 보낸 알림은 지난 알림')
+  await click('확정한 배차로 새 점검')
   vi.setSystemTime(new Date('2026-11-11T05:04:05Z'))
   await click('다시 시도')
   await click('다시 시도')

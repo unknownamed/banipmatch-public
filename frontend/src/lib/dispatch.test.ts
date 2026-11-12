@@ -14,8 +14,8 @@ describe('전달 재시도', () => {
   })
   it('확실한 실패만 재시도할 수 있고 3회·대기 시각·이전 계획은 막는다', () => {
     expect(retryBlocker(n({}), now)).toBe('')
-    expect(retryBlocker(n({ attempts: 3 }), now)).toMatch('3회')
-    expect(retryBlocker(n({ retry_not_before: '2026-11-11T05:01:00Z' }), now)).toMatch('재시도 가능 시각')
+    expect(retryBlocker(n({ attempts: 3 }), now)).toMatch('세 번')
+    expect(retryBlocker(n({ retry_not_before: '2026-11-11T05:01:00Z' }), now)).toMatch('잠시 뒤 다시 보낼 수 있습니다')
     expect(retryBlocker(n({ is_current: false }), now)).toMatch('이전 계획')
   })
 })

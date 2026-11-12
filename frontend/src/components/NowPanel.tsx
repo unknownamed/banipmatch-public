@@ -21,7 +21,7 @@ export function NowPanel() {
         <h2>지금 신항</h2>
         <span className="now-clock"><span className="vm-live" aria-hidden="true" />{hm(now)}</span>
       </div>
-      <p className="now-sub">HJNC 반입 마감(컷오프) 임박 항차</p>
+      <p className="now-sub">HJNC 반입 마감이 가까운 항차</p>
       <ol className="now-list">
         {upcoming.map(v => (
           <li key={v.id}>

@@ -7,7 +7,7 @@ import { kstDateTime } from '../lib/time'
 import { jobName, planName, vehicleName } from '../lib/labels'
 import { withQueueRetry } from '../lib/queueRetry'
 
-const FIELD_LABEL = { ready_at: '상차 준비시각', available_at: '차량 가용 시작', shift_end_at: '근무 종료' } as const
+const FIELD_LABEL = { ready_at: '상차 준비 시각', available_at: '운행 시작', shift_end_at: '근무 종료' } as const
 
 interface RevisionState { scenario_id: string; plan_id: string; base_plan_version: number; revision_id: string; confirmation: Confirmation }
 
@@ -18,6 +18,8 @@ interface RevisionState { scenario_id: string; plan_id: string; base_plan_versio
 /** 재계산 조건. 이전 실행이 있으면 그 방법·예산·seed, 입력 부족으로 계산이 막혔으면 막힌 요청의 값(이전 실행 없음). */
 export interface Rerun { methods: Method[]; time_limit_seconds: number; seed: number; beforeRunId: string | null }
 
+
+const EQUIP_LABEL: Record<string, string> = { DRY20: '20ft', DRY40: '40ft', REEFER20: '20ft 냉동', REEFER40: '40ft 냉동' }
 export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: { client: V2Client; snapshot: Snapshot; rerun: Rerun; focus?: readonly string[] }) {
   const [edits, setEdits] = useState<Edits>({})
   const [reason, setReason] = useState('')
@@ -83,7 +85,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
     const invalid = !!value && !isCompleteInput(value)
     return (
       <div className="rev-field" role="group" aria-label={`${label} (KST)`}>
-        <span className="small muted">{label} · {hint}</span>
+        <span className="small muted">{label}<span className="rev-now">{hint}</span></span>
         <span className="rev-inputs">
           <input type="date" aria-label="날짜" value={date} disabled={sending} onChange={(e) => onChange(`${e.target.value}T${time}`)} />
           <input
@@ -97,31 +99,30 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
     )
   }
   const field = (key: string, current: string | null, label: string) =>
-    timeInput(edits[key] ?? toKstInput(current), (v) => set(key, v), label, `현재 ${current ? kstDateTime(current) : '미확인'}`)
+    timeInput(edits[key] ?? toKstInput(current), (v) => set(key, v), label, current ? kstDateTime(current) : '미확인')
 
   return (
     <section className="card revision" aria-labelledby="rev-title">
-      <h2 id="rev-title">조건 보완 · 재계산</h2>
-      <p className="small">보류된 작업을 살릴 수 있는지, 확인한 값으로 다시 계산해 봅니다.</p>
+      <h2 id="rev-title">조건 보완</h2>
 
       <fieldset disabled={sending}>
-        <legend>작업 준비시각</legend>
+        <legend>상차 준비 시각</legend>
         {/* 확인이 필요한 작업(미배정·위반·준비 시각 없음)을 먼저 펼치고, 나머지는 접어 둔다 */}
         {movable.filter(isFocus).map(jobRow)}
         {movable.some((j) => !isFocus(j)) && (
           <details className="rev-more" open={!movable.some(isFocus)}>
             <summary>다른 작업 {movable.filter((j) => !isFocus(j)).length + frozen.length}건</summary>
             {movable.filter((j) => !isFocus(j)).map(jobRow)}
-            {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b title={j.job_id}>{jobName(j.job_id)}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
+            {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b title={j.job_id}>{jobName(j.job_id)}</b><span className="small">{freezeLabel(j.freeze_reason)}, 수정할 수 없음</span></div>)}
           </details>
         )}
       </fieldset>
 
       {!!snapshot.vehicles?.length && (
         <fieldset disabled={sending}>
-          <legend>차량 가용 · 근무</legend>
+          <legend>차량 근무 시간</legend>
           <details className="rev-more">
-          <summary>차량 {snapshot.vehicles.length}대의 가용 시작·근무 종료</summary>
+          <summary>차량 {snapshot.vehicles.length}대</summary>
           {snapshot.vehicles.map((v) => (
             <div key={v.vehicle_id} className="rev-row">
               <b title={v.vehicle_id}>{vehicleName(v.vehicle_id)}</b>
@@ -137,70 +138,66 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
         <legend>차량 추가</legend>
         <details className="rev-more" open={draftOpen}>
         <summary>외부에서 확보한 차량 넣기</summary>
-        <p className="small muted">
-          외부에서 확보가 확인된 차량만 넣으세요. 이 화면은 차량을 구해 주지 않습니다. 모든 값을 직접 입력하며 다른 차량 값으로 채우지 않습니다.
-          시작 위치는 이동시간이 이미 있는 기존 위치에서만 고를 수 있습니다.
-        </p>
         <div className="rev-row">
-          <label className="rev-field"><span className="small muted">차량 ID</span><input value={draft.vehicle_id} maxLength={32} placeholder="예: T9 (내부 관리 번호)" onChange={(e) => setD({ vehicle_id: e.target.value })} /></label>
+          <label className="rev-field"><span className="small muted">차량 번호</span><input value={draft.plate ?? ''} maxLength={20} placeholder="부산 95바 3021" onChange={(e) => setD({ plate: e.target.value })} /></label>
           <label className="rev-field">
             <span className="small muted">시작 위치</span>
             <select value={draft.start_location_id} onChange={(e) => setD({ start_location_id: e.target.value })}>
               <option value="">선택</option>
-              {snapshot.locations?.map((l) => <option key={l.location_id} value={l.location_id}>{l.location_id} · {l.name}</option>)}
+              {snapshot.locations?.map((l) => <option key={l.location_id} value={l.location_id}>{l.name.replace('(모의)', '').trim()}</option>)}
             </select>
           </label>
-          <label className="rev-field"><span className="small muted">적재 가능 중량(kg)</span><input inputMode="numeric" value={draft.capacity_kg} size={8} onChange={(e) => setD({ capacity_kg: e.target.value })} /></label>
+          <label className="rev-field"><span className="small muted">최대 적재 중량(kg)</span><input inputMode="numeric" value={draft.capacity_kg} size={8} onChange={(e) => setD({ capacity_kg: e.target.value })} /></label>
+        </div>
+        <div className="rev-row" role="group" aria-label="실을 수 있는 컨테이너">
+          <span className="small muted">실을 수 있는 컨테이너</span>
+          {equipmentOptions.map((t) => {
+            const on = draft.equipment_types.includes(t)
+            return (
+              <button key={t} type="button" className="chip-toggle" aria-pressed={on} onClick={() => setD({ equipment_types: on ? draft.equipment_types.filter((x) => x !== t) : [...draft.equipment_types, t] })}>
+                {EQUIP_LABEL[t] ?? t}
+              </button>
+            )
+          })}
         </div>
         <div className="rev-row">
-          <span className="small muted">장비</span>
-          {equipmentOptions.map((t) => (
-            <label key={t} className="small">
-              <input type="checkbox" checked={draft.equipment_types.includes(t)} onChange={(e) => setD({ equipment_types: e.target.checked ? [...draft.equipment_types, t] : draft.equipment_types.filter((x) => x !== t) })} /> {t}
-            </label>
-          ))}
+          {timeInput(draft.available_at, (v) => setD({ available_at: v }), '운행 시작', '')}
+          {timeInput(draft.shift_end_at, (v) => setD({ shift_end_at: v }), '근무 종료', '')}
         </div>
-        <div className="rev-row">
-          {timeInput(draft.available_at, (v) => setD({ available_at: v }), '가용 시작', '필수')}
-          {timeInput(draft.shift_end_at, (v) => setD({ shift_end_at: v }), '근무 종료', '필수')}
-        </div>
-        {draftOpen && missing.length > 0 && <p className="small warn">추가 차량에 빠진 값: {missing.join(', ')}. 모두 채워야 함께 보냅니다.</p>}
+        {draftOpen && missing.length > 0 && <p className="small warn">빠진 값: {missing.join(', ')}</p>}
         {draftOpen && <button type="button" className="secondary" onClick={() => setDraft(EMPTY_DRAFT)}>차량 추가 취소</button>}
         </details>
       </fieldset>
 
-      <fieldset disabled={sending}>
-        <legend>조건 구분</legend>
-        <label className="rev-choice">
-          <input type="radio" name="confirmation" checked={confirmation === 'confirmed_simulation'} onChange={() => setConfirmation('confirmed_simulation')} />
-          확인된 조건 <span className="small">— 화주·기사에게 확인한 값</span>
-        </label>
-        <label className="rev-choice">
-          <input type="radio" name="confirmation" checked={confirmation === 'assumed'} onChange={() => setConfirmation('assumed')} />
-          가정해서 비교 <span className="small">— 아직 확인 전인 값, 비교만 하고 확정은 불가</span>
-        </label>
-      </fieldset>
+      <div className="rev-confirm">
+        <span className="small muted">입력한 값</span>
+        <div className="seg" role="group" aria-label="입력한 값">
+          <button type="button" disabled={sending} aria-pressed={confirmation === 'confirmed_simulation'} onClick={() => setConfirmation('confirmed_simulation')}>확인한 값</button>
+          <button type="button" disabled={sending} aria-pressed={confirmation === 'assumed'} onClick={() => setConfirmation('assumed')}>가정한 값</button>
+        </div>
+        {confirmation === 'assumed' && <span className="small warn">가정한 값은 비교만 하고 확정할 수 없습니다.</span>}
+      </div>
 
       <label className="rev-reason">
-        수정 이유 (필수)
-        <textarea value={reason} maxLength={1000} rows={2} disabled={sending} placeholder="예: 화주에게 J3 상차 준비 13:40 완료 확인" onChange={(e) => setReason(e.target.value)} />
+        변경 이유
+        <textarea value={reason} maxLength={1000} rows={2} disabled={sending} placeholder="누구에게 무엇을 확인했는지 적어 주세요" onChange={(e) => setReason(e.target.value)} />
       </label>
 
       {(changes.length > 0 || added.length > 0) && (
         <ul className="rev-diff" aria-label="바뀌는 조건">
           {changes.map((c) => (
-            <li key={c.key}>{c.id} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
+            <li key={c.key}>{c.field === 'ready_at' ? jobName(c.id) : vehicleName(c.id)} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
           ))}
           {added.map((d) => (
-            <li key={d.vehicle_id}>차량 추가: <b>{d.vehicle_id.trim()}</b> · {d.start_location_id} 출발 · {d.capacity_kg}kg · {d.equipment_types.join('/')} · 가용 {d.available_at.replace('T', ' ')} ~ 근무 종료 {d.shift_end_at.replace("T", " ")}</li>
+            <li key={d.vehicle_id || d.plate}>차량 추가: <b>{d.plate?.trim() || d.vehicle_id.trim()}</b>, {snapshot.locations?.find((l) => l.location_id === d.start_location_id)?.name.replace('(모의)', '').trim() ?? d.start_location_id}에서 {d.available_at.slice(11)}부터 {d.shift_end_at.slice(11)}까지, {d.equipment_types.map((t) => EQUIP_LABEL[t] ?? t).join('/')}</li>
           ))}
         </ul>
       )}
 
       <button type="button" disabled={sending || anyInvalid || missing.length > 0 || (!changes.length && !added.length) || !reason.trim()} onClick={submit}>
-        {sending ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '새 입력으로 재계산'}
+        {sending ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '다시 계산'}
       </button>
-      {!changes.length && !added.length && <p className="small muted">바꿀 값을 하나 이상 입력하거나 차량을 추가하세요.</p>}
+      {!changes.length && !added.length && <p className="small muted">바꿀 값을 입력하세요.</p>}
       {status.state === 'error' && <ErrorNote step={status.step} error={status.error} />}
     </section>
   )
@@ -232,10 +229,10 @@ export function NextPlanPanel({ client, planId, rerun }: { client: V2Client; pla
     } catch (error) { setStatus({ busy: false, step, error }) }
   }
   return <section className="card">
-    <h2>확정된 계획에서 이어서 점검</h2>
-    <p className="small">새 점검을 시작하면 이전 변경 알림은 지난 지시로 바뀝니다. 기사 응답을 확인한 뒤 진행하세요.</p>
-    <p className="small">추가 변경이 생기면 지금 확정한 계획을 기준으로 다시 점검합니다.</p>
-    <button type="button" disabled={status.busy} onClick={start}>{status.busy ? `${status.step} 중…` : status.error ? '다시 시도' : '확정 계획으로 새 점검 시작'}</button>
+    <h2>이어서 점검</h2>
+    <p className="small">새로 점검하면 기사에게 보낸 알림은 지난 알림이 됩니다. 기사 응답을 확인한 뒤 시작하세요.</p>
+
+    <button type="button" disabled={status.busy} onClick={start}>{status.busy ? `${status.step} 중…` : status.error ? '다시 시도' : '확정한 배차로 새 점검'}</button>
     {status.error != null && <ErrorNote step={status.step} error={status.error} />}
   </section>
 }
@@ -244,7 +241,7 @@ function ErrorNote({ step, error }: { step: string; error: unknown }) {
   return (
     <div className="warn" role="alert">
       <p>
-        {step} 실패: {error instanceof ApiRequestError && error.body ? `HTTP ${error.status} ${error.body.code} — ${error.message}` : error instanceof Error ? error.message : String(error)}
+        {step} 실패: {error instanceof Error ? error.message : String(error)}
       </p>
       {error instanceof ApiRequestError && error.body?.details?.map((d) => <p key={d.path} className="small"><code>{d.path}</code> {d.reason}</p>)}
     </div>
@@ -265,15 +262,15 @@ const TRANSITIONS = [
   ['became_unassigned', '새로 미처리됨'],
   ['remained_unassigned', '계속 미처리'],
   ['changed_assignments', '배정 바뀜'],
-  ['fixed_risks_added', '고정 위험 생김'],
-  ['fixed_risks_removed', '고정 위험 없어짐'],
-  ['fixed_risks_remaining', '고정 위험 남음'],
+  ['fixed_risks_added', '출발 차량 위험 생김'],
+  ['fixed_risks_removed', '출발 차량 위험 없어짐'],
+  ['fixed_risks_remaining', '출발 차량 위험 남음'],
 ] as const
 
 const DELTAS = [
   ['unassigned_count', '미처리'],
-  ['movable_violation_count', '제약 위반'],
-  ['fixed_risk_count', '고정 위험'],
+  ['movable_violation_count', '마감·조건 위반'],
+  ['fixed_risk_count', '출발한 차량 위험'],
   ['changed_job_count', '변경 작업'],
   ['movable_travel_minutes', '이동(분)'],
 ] as const
@@ -292,14 +289,14 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
     return () => { live = false }
   }, [client, revisionId, beforeRunId, afterRunId, method])
 
-  if (state.error) return <section className="card"><h2>조건 보완 전후 비교 ({method})</h2><ErrorNote step="비교 조회" error={state.error} /></section>
-  if (!state.data) return <section className="card" role="status"><h2>조건 보완 전후 비교 ({method})</h2><p className="muted">비교 불러오는 중…</p></section>
+  if (state.error) return <section className="card"><h2>조건 보완 전후 비교</h2><ErrorNote step="비교 조회" error={state.error} /></section>
+  if (!state.data) return <section className="card" role="status"><h2>조건 보완 전후 비교</h2><p className="muted">비교 불러오는 중…</p></section>
   const { confirmation, comparison: c } = state.data
   return (
     <section className="card revision-compare" aria-labelledby="revcmp-title">
       <h2 id="revcmp-title">
         조건 보완 전후 비교 · {planName(method)}{' '}
-        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정 비교 · 확정 불가' : '확인된 조건'}</span>
+        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정한 값(확정 불가)' : '확인한 값'}</span>
       </h2>
       <p className="small">수정 이유: {c.revision.reason}</p>
       <ul className="rev-diff">
@@ -311,7 +308,7 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
         ))}
       </ul>
       {c.before.status === 'input_blocked' && (
-        <p className="small">이전 입력은 계산되지 않아 새 결과만 보여 줍니다.</p>
+        <p className="small">이전 결과가 없어 새 결과만 보여 줍니다.</p>
       )}
       {c.job_transitions && (
         <dl className="rev-transitions">

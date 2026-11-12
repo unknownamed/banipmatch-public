@@ -8,7 +8,7 @@ import { type RoadData } from './RoadReference'
 import { Icon } from './Icon'
 
 interface Weather {
-  kind: 'sea' | 'warning'; status: string; received_at: string | null; http_status: number | null
+  kind: 'sea' | 'warning'; status: string; received_at: string | null; http_status: number | null; failure?: 'network' | 'provider' | null
   report: null | { row_count: number; future_observation_rows: number; station_mismatch_rows: number
     observations: { station_id: string; observed_at_utc: string; wh_m_original: string; ws_m_s_original: string; gust_m_s_original: string; missing_or_invalid_nonnegative_fields: string[] }[]
     selected_records: { region_name: string; kind: string; level: string; command: string; published_at_utc: string; effective_time_original_kst: string }[] }
@@ -32,13 +32,18 @@ export function LiveReference() {
   const [loading, setLoading] = useState(false)
   const [tlFilter, setTlFilter] = useState<'all' | 'before' | 'open' | 'closed'>('open')
   const [tlQuery, setTlQuery] = useState('')
-  async function load() {
-    setLoading(true); setError(null)
-    try { await client.session(); setData(await client.get<LiveData>('/v2/references/current')) }
-    catch (e) { setError(e instanceof Error ? e.message : '자료를 읽지 못했습니다.'); setData(null) }
-    finally { setLoading(false) }
+  // 서버에 받아 둔 최신 일정을 5분마다 다시 읽는다(사람이 누를 필요 없음). 이미 보이는 표는 다시 읽는 동안에도 유지한다.
+  async function load(quiet = false) {
+    if (!quiet) setLoading(true)
+    try { await client.session(); setData(await client.get<LiveData>('/v2/references/current')); setError(null) }
+    catch (e) { if (!quiet) { setError(e instanceof Error ? e.message : '자료를 읽지 못했습니다.'); setData(null) } }
+    finally { if (!quiet) setLoading(false) }
   }
-  useEffect(() => { void load() }, [client])
+  useEffect(() => {
+    void load()
+    const timer = window.setInterval(() => void load(true), 5 * 60_000)
+    return () => window.clearInterval(timer)
+  }, [client])
 
   if (error) return <p className="warn" role="alert">터미널 일정을 불러오지 못했습니다: {error}</p>
   if (!data) return <p className="muted" role="status">{loading ? '불러오는 중…' : ''}</p>
@@ -61,10 +66,9 @@ export function LiveReference() {
           <h3 id="tl-hjnc">HJNC 항차별 반입 일정</h3>
           <p className="small muted">
             <a href="https://www.hjnc.co.kr/esvc/vessel/berthScheduleT" target="_blank" rel="noreferrer">HJNC 공개 선석배정현황</a> 기준
-            {received && <> · 마지막 수신 {kstDateTime(received)} <span className={`tl-age${(Date.now() - Date.parse(received)) > 6 * 3600000 ? ' stale' : ''}`}>{age(received)}</span></>}
+            {received && <>, {kstDateTime(received)} 수신 <span className={`tl-age${(Date.now() - Date.parse(received)) > 6 * 3600000 ? ' stale' : ''}`}>{age(received)}</span></>}
           </p>
         </div>
-        <button type="button" className="secondary" disabled={loading} onClick={load}>{loading ? '불러오는 중…' : '다시 불러오기'}</button>
       </div>
       {all.length > 0 && (
         <div className="toolbar">
@@ -82,7 +86,7 @@ export function LiveReference() {
       {all.length ? (
         <div className="dt-wrap">
           <table className="dt tl-table">
-            <thead><tr><th scope="col">항차</th><th scope="col">상태</th><th scope="col">반입 시작</th><th scope="col">반입 마감(Cut-off)</th><th scope="col">접안 예정</th></tr></thead>
+            <thead><tr><th scope="col">항차</th><th scope="col">상태</th><th scope="col">반입 시작</th><th scope="col">반입 마감</th><th scope="col">접안 예정</th></tr></thead>
             <tbody>
               {rows.length === 0 && <tr className="empty-row"><td colSpan={5}>조건에 맞는 항차가 없습니다.</td></tr>}
               {rows.map((it, i) => (
@@ -113,9 +117,19 @@ export function SeaWeatherLine() {
   }, [])
   const obs = data?.weather.find(w => w.kind === 'sea')?.report?.observations[0]
   const warn = data?.weather.find(w => w.kind === 'warning')
-  if (!obs) return null
-  const warnText = warn?.status === 'empty_framed_response' ? '특보 없음' : warn?.report?.selected_records.length ? warn.report.selected_records.map(r => `${r.kind} ${r.level}`).join(', ') : ''
+  // 3시간이 지난 관측은 지금 바다 상태로 보기 어려워 보여 주지 않는다.
+  if (!obs || Date.now() - Date.parse(obs.observed_at_utc) > 3 * 3600_000) return null
+  const warnText = warn?.status === 'empty_framed_response' ? '특보 없음'
+    : warn?.report?.selected_records.length ? warn.report.selected_records.map(r => `${r.kind} ${r.level}`).join(', ')
+    : warn?.failure === 'provider' ? '특보 확인 안 됨(기상청 응답 오류)'
+    : warn?.failure === 'network' ? '특보 확인 안 됨(연결 실패)' : ''
+  const hm = new Date(obs.observed_at_utc).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
   return (
-    <span className="sea-line">해상 기상 · 거제도 부이 파고 <b>{obs.wh_m_original}m</b> · 풍속 <b>{obs.ws_m_s_original}m/s</b>{warnText && ` · ${warnText}`} <span className="sea-age">({age(obs.observed_at_utc)} 관측)</span></span>
+    <span className="sea-line" title={`거제도 해양기상부이, ${hm} 관측`}>
+      <span className="sea-item"><Icon name="waves" size={15} />파고 <b>{obs.wh_m_original}m</b></span>
+      <span className="sea-item"><Icon name="wind" size={15} />풍속 <b>{obs.ws_m_s_original}m/s</b></span>
+      {warnText && <span className={`sea-item${warnText === '특보 없음' ? '' : warnText.startsWith('특보 확인 안 됨') ? ' sea-muted' : ' sea-warn'}`}><Icon name="weather" size={15} />{warnText}</span>}
+      <span className="sea-age">{hm} 관측</span>
+    </span>
   )
 }

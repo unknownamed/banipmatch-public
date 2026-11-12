@@ -84,14 +84,14 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       />
       {otherBusy && (
         <p className="warn" role="status">
-          이 실행은 {shared!.method} 조정안이 {otherLabel}. {shared!.method} 탭에서 결과를 확인하세요. 다른 방법은 보낼 수 없습니다.
+          {planName(shared!.method)}이 {otherLabel}. 다른 계산안은 승인할 수 없습니다.
         </p>
       )}
       {ack.length > 0 && (
         <p>
           <label>
             <input type="checkbox" checked={checked} disabled={otherBusy || !gate.allowed || (status.state !== 'idle' && !(status.state === 'error' && status.retryable))} onChange={(e) => setChecked(e.target.checked)} />{' '}
-            마감 안에 못 넣는 작업 확인함: <b>{ack.map(jobName).join(', ')}</b>
+            마감 안에 넣지 못하는 작업(<b>{ack.map(jobName).join(', ')}</b>)을 확인했습니다
           </label>
         </p>
       )}
@@ -108,8 +108,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       {status.state === 'done' && (
         <div role="status">
           <p className="ok">
-            내부 계획 v{status.approval.version} 승인됨 · {kstDateTime(status.approval.approved_at)}
-            {' '}· 외부 반영 없음
+            배차를 확정했습니다 · {kstDateTime(status.approval.approved_at)}
           </p>
           {status.planWarning && <p className="warn">{status.planWarning}</p>}
         </div>
@@ -117,9 +116,9 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       {err !== null && (
         <div className="warn" role="alert">
           <p>
-            {status.state === 'error' && status.uncertain ? '승인 결과 확인 필요: ' : '승인 거절: '}
+            {status.state === 'error' && status.uncertain ? '승인 결과를 확인해야 합니다: ' : '승인하지 못했습니다: '}
             {err instanceof ApiRequestError
-              ? `HTTP ${err.status}${err.body ? ` ${err.body.code}` : ''} — ${err.message}`
+              ? err.message
               : err instanceof Error ? err.message : String(err)}
           </p>
           {status.state === 'error' && status.uncertain && status.retryable && <p>이미 처리됐을 수 있습니다. 다시 시도해도 두 번 처리되지 않습니다.</p>}
@@ -141,7 +140,7 @@ function ApprovalSteps({ acknowledged, sending, done, failed }: { acknowledged: 
   const steps = [
     { label: '위험 확인', state: acknowledged || done ? 'done' : 'todo' },
     { label: '승인 요청', state: done ? 'done' : sending ? 'active' : failed ? 'failed' : 'todo' },
-    { label: '내부 계획 확정', state: done ? 'done' : 'todo' },
+    { label: '배차 확정', state: done ? 'done' : 'todo' },
   ]
   return (
     <ol className="steps" aria-label="승인 진행">

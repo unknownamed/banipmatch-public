@@ -84,8 +84,9 @@ export function revisedSnapshot(s: Snapshot, changes: FieldChange[], confirmatio
 }
 
 /** 추가 차량 입력. 숫자·시각은 입력칸 그대로 받고, 비어 있으면 채우지 않고 추가를 막는다. */
-export interface VehicleDraft { vehicle_id: string; start_location_id: string; capacity_kg: string; equipment_types: string[]; available_at: string; shift_end_at: string }
-export const EMPTY_DRAFT: VehicleDraft = { vehicle_id: '', start_location_id: '', capacity_kg: '', equipment_types: [], available_at: '', shift_end_at: '' }
+/** 담당자는 번호판(plate)으로 차량을 입력한다. 내부 ID는 번호판에서 만든다(직접 지정한 ID가 있으면 그것을 쓴다). */
+export interface VehicleDraft { vehicle_id: string; plate?: string; start_location_id: string; capacity_kg: string; equipment_types: string[]; available_at: string; shift_end_at: string }
+export const EMPTY_DRAFT: VehicleDraft = { vehicle_id: '', plate: '', start_location_id: '', capacity_kg: '', equipment_types: [], available_at: '', shift_end_at: '' }
 
 /**
  * 추가 차량에 빠진 값. 다른 차량 값을 복사해 채우지 않는다.
@@ -93,22 +94,31 @@ export const EMPTY_DRAFT: VehicleDraft = { vehicle_id: '', start_location_id: ''
  */
 export function draftProblems(s: Snapshot, d: VehicleDraft): string[] {
   const out: string[] = []
-  const id = d.vehicle_id.trim()
-  if (!/^[A-Za-z0-9_-]{1,32}$/.test(id)) out.push('차량 ID(영문·숫자·-·_ 32자 이내)')
-  else if (s.vehicles?.some((v) => v.vehicle_id === id)) out.push('이미 있는 차량 ID')
+  const id = draftId(d)
+  const plate = (d.plate ?? '').trim()
+  if (!id || !/^[A-Za-z0-9_-]{1,32}$/.test(id)) out.push('차량 번호')
+  else if (s.vehicles?.some((v) => v.vehicle_id === id || (!!plate && v.plate_no === plate))) out.push('이미 있는 차량')
   if (!s.locations?.some((l) => l.location_id === d.start_location_id)) out.push('시작 위치')
   if (!/^[1-9]\d{0,6}$/.test(d.capacity_kg.trim())) out.push('적재 가능 중량(kg, 양의 정수)')
-  if (!d.equipment_types.length) out.push('장비 종류')
-  if (!isCompleteInput(d.available_at)) out.push('가용 시작 시각')
+  if (!d.equipment_types.length) out.push('실을 수 있는 컨테이너')
+  if (!isCompleteInput(d.available_at)) out.push('운행 시작 시각')
   if (!isCompleteInput(d.shift_end_at)) out.push('근무 종료 시각')
-  else if (isCompleteInput(d.available_at) && Date.parse(`${d.shift_end_at}:00Z`) <= Date.parse(`${d.available_at}:00Z`)) out.push('근무 종료가 가용 시작보다 늦어야 함')
+  else if (isCompleteInput(d.available_at) && Date.parse(`${d.shift_end_at}:00Z`) <= Date.parse(`${d.available_at}:00Z`)) out.push('근무 종료가 운행 시작보다 늦어야 함')
   return out
 }
 
 export const isBlankDraft = (d: VehicleDraft) => JSON.stringify(d) === JSON.stringify(EMPTY_DRAFT)
 
+/** 번호판 '부산 95바 3021' → 'EXT953021'. 숫자가 없으면 ID를 만들지 않는다. */
+export function draftId(d: VehicleDraft): string {
+  if (d.vehicle_id.trim()) return d.vehicle_id.trim()
+  const digits = (d.plate ?? '').replace(/\D/g, '')
+  return digits.length >= 4 ? `EXT${digits}` : ''
+}
+
 const draftVehicle = (d: VehicleDraft): Omit<Vehicle, 'evidence'> => ({
-  vehicle_id: d.vehicle_id.trim(),
+  vehicle_id: draftId(d),
+  ...(d.plate?.trim() ? { plate_no: d.plate.trim() } : {}),
   start_location_id: d.start_location_id,
   available_at: fromKstInput(d.available_at),
   shift_end_at: fromKstInput(d.shift_end_at),

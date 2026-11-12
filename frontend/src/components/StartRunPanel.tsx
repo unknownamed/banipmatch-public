@@ -28,12 +28,12 @@ import { Icon, type IconName } from './Icon'
 type Tone = 'danger' | 'caution' | 'neutral'
 const FILTERS: ['all' | Tone, string][] = [['all', '전체'], ['danger', '조치 필요'], ['caution', '확인 대기'], ['neutral', '영향 없음']]
 const EXAMPLES = [
-  { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'HJNC · BHMN-2026-0045 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 그중 1개는 상차 준비가 늦어 어떤 차량으로도 맞추기 어렵습니다.', snapshot: s02 },
-  { id: '09', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'PNIT · BE221E 반입 마감 1시간 30분 앞당김', meta: '모선 BM 오션호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 1개'], what: '원래 배차대로 가면 새벽식품(주) 컨테이너 1개가 새 마감을 넘깁니다. 차량 몇 대만 바꾸면 맞출 수 있는지 확인하세요.', snapshot: s09 },
-  { id: '08', group: 'todo', icon: 'bell', tone: 'caution', chip: '확정 대기', title: 'HJNC · BORT-2026-0112 반입 마감 1시간 앞당김(확정 전)', meta: '모선 BM 오리엔트호 · 터미널 공지 접수 · 아직 확정되지 않음', stats: ['트럭 8대', '컨테이너 20개'], what: '공지가 확정되기 전에는 배차를 바꾸지 않습니다. 열면 공지 내용과 지금 배차를 확인할 수 있습니다.', snapshot: s08 },
-  { id: '07', group: 'todo', icon: 'edit', tone: 'caution', chip: '입력 확인', title: 'BNJU 100210 2 상차 준비 시각 미입력', meta: '다온물산(주) · 사상 공단 상차지 · BORT-2026-0112', stats: ['트럭 8대', '컨테이너 20개'], what: '준비 시각이 비어 있으면 계산할 수 없습니다. 화주에게 확인한 시각을 넣으면 바로 다시 계산합니다.', snapshot: s07 },
-  { id: '10', group: 'todo', icon: 'clock', tone: 'neutral', chip: '확정 · 영향 없음', title: 'HJNC · BPNR-2026-0007 반입 마감 1시간 늦춰짐', meta: '모선 BM 파이오니어호 입항 지연 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 0개'], what: '마감이 늦춰져 여유만 늘었습니다. 원래 배차 그대로 가도 되는지 확인만 하면 됩니다.', snapshot: s10 },
-] as const satisfies readonly { id: string; group: 'todo'; icon: IconName; tone: Tone; chip: string; title: string; meta: string; stats: readonly string[]; what: string; snapshot: unknown }[]
+  { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '조치 필요', title: 'HJNC BHMN-2026-0045 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호, 터미널 확정 공지', go: '영향 확인하고 조정안 보기', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 그중 1개는 상차 준비가 늦어 어떤 차량으로도 맞추기 어렵습니다.', snapshot: s02 },
+  { id: '09', group: 'todo', icon: 'warning', tone: 'danger', chip: '조치 필요', title: 'PNIT BE221E 반입 마감 1시간 30분 앞당김', meta: '모선 BM 오션호, 터미널 확정 공지', go: '영향 확인하고 조정안 보기', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 1개'], what: '원래 배차대로 가면 새벽식품(주) 컨테이너 1개가 새 마감을 넘깁니다. 차량 몇 대만 바꾸면 맞출 수 있는지 확인하세요.', snapshot: s09 },
+  { id: '08', group: 'todo', icon: 'bell', tone: 'caution', chip: '확정 대기', title: 'HJNC BORT-2026-0112 반입 마감 1시간 앞당김 예정', meta: '모선 BM 오리엔트호, 터미널 공지 접수(확정 전)', go: '공지 내용과 지금 배차 보기', stats: ['트럭 8대', '컨테이너 20개'], what: '공지가 확정되기 전에는 배차를 바꾸지 않습니다. 열면 공지 내용과 지금 배차를 확인할 수 있습니다.', snapshot: s08 },
+  { id: '07', group: 'todo', icon: 'edit', tone: 'caution', chip: '입력 확인', title: 'BNJU 100210 2 상차 준비 시각 미입력', meta: '다온물산(주), 사상 공단 상차지, BORT-2026-0112', go: '비어 있는 값 확인하기', stats: ['트럭 8대', '컨테이너 20개'], what: '준비 시각이 비어 있으면 계산할 수 없습니다. 화주에게 확인한 시각을 넣으면 바로 다시 계산합니다.', snapshot: s07 },
+  { id: '10', group: 'todo', icon: 'clock', tone: 'neutral', chip: '영향 없음', title: 'HJNC BPNR-2026-0007 반입 마감 1시간 늦춰짐', meta: '모선 BM 파이오니어호 입항 지연, 터미널 확정 공지', go: '영향 확인하기', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 0개'], what: '마감이 늦춰져 여유만 늘었습니다. 원래 배차 그대로 가도 되는지 확인만 하면 됩니다.', snapshot: s10 },
+] as const satisfies readonly { id: string; group: 'todo'; icon: IconName; tone: Tone; chip: string; title: string; meta: string; go: string; stats: readonly string[]; what: string; snapshot: unknown }[]
 
 type Status =
   | { state: 'idle' }
@@ -91,6 +91,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         // 등록된 입력을 서버에서 다시 읽어 보여준다(화면이 가진 사본이 아니라 저장된 원본).
         const saved = await client.getScenario(attempt.snapshot.scenario_id).catch(() => attempt.snapshot)
         setStatus({ state: 'rejected', error, snapshot: saved })
+        // 막힌 이유 바로 아래에 공지 내용·지금 배차가 이어지도록 그 자리로 옮겨 준다.
+        window.setTimeout(() => document.querySelector('.rejected-input')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else setStatus({ state: 'error', step, error })
     }
   }
@@ -101,7 +103,6 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       <header className="page-head">
         <div>
           <h1>받은 변경</h1>
-          <p>터미널 반입 마감 변경을 확인하고, 남은 배차를 다시 맞춥니다.</p>
         </div>
         <span className="updated"><span className="live" aria-hidden="true" />실시간 수신</span>
       </header>
@@ -150,11 +151,11 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
                     <p className="ib-what">{e.what}</p>
                     <div className="ib-facts">
                       {source && <Countdown snapshot={source} />}
-                      <span>{e.stats.join(' · ')}</span>
+                      <span>{e.stats.join(', ')}</span>
                     </div>
                     {status.state !== 'rejected' && (
                       <button type="button" className="ib-go" disabled={status.state === 'sending'} onClick={start}>
-                        {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '영향 확인하고 조정안 보기'}
+                        {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : e.go}
                         <Icon name="arrow" size={15} />
                       </button>
                     )}
@@ -182,18 +183,23 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
             )}
           </div>
         )}
-        {status.state === 'rejected' && (
+        {status.state === 'rejected' && status.error.body!.code === 'WINDOW_UNCONFIRMED' && (
+          <div className="note-box" role="status">
+            <p><b>확정 전 공지라 배차를 바꾸지 않았습니다.</b></p>
+            <p>{unconfirmedPreview(status.snapshot)}</p>
+            <p className="small">터미널이 확정하면 새 변경으로 다시 받습니다.</p>
+          </div>
+        )}
+        {status.state === 'rejected' && status.error.body!.code !== 'WINDOW_UNCONFIRMED' && (
           <div className="warn" role="alert">
-            <p>
-              <b>{status.error.body!.code === 'WINDOW_UNCONFIRMED' ? '반입 마감 변경이 아직 확정되지 않아 배차를 바꾸지 않았습니다.' : '비어 있거나 맞지 않는 값이 있어 계산하지 못했습니다.'}</b>
-            </p>
+            <p><b>비어 있거나 맞지 않는 값이 있어 계산하지 못했습니다.</b></p>
             <ul className="reject-list">
               {status.error.body!.details?.map((d, k) => {
                 const r = readableDetail(d.path, d.reason, status.snapshot)
-                return <li key={`${d.path}:${k}`}><b>{r.what}</b> — {r.why}</li>
+                return <li key={`${d.path}:${k}`}><b>{r.what}</b>: {r.why}</li>
               })}
             </ul>
-            <p className="small">{status.error.body!.code === 'WINDOW_UNCONFIRMED' ? '터미널 공지가 확정되면 다시 점검하세요. 아래에서 원래 배차와 공지 내용은 볼 수 있습니다.' : '화주·기사에게 확인한 값을 아래 ‘조건 보완’에 넣고 다시 계산하세요.'}</p>
+            <p className="small">화주·기사에게 확인한 값을 아래 ‘조건 보완’에 넣고 다시 계산하세요.</p>
           </div>
         )}
       </section>
@@ -206,7 +212,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       </div>
       {status.state !== 'rejected' && <FleetToday snapshot={tonight} />}
       {status.state === 'rejected' && <RejectedInput snapshot={status.snapshot} reason={status.error.message} />}
-      {status.state === 'rejected' && v2 && (
+      {status.state === 'rejected' && v2 && status.error.body!.code !== 'WINDOW_UNCONFIRMED' && (
         <ConditionRevisionPanel
           client={v2}
           snapshot={status.snapshot}
@@ -221,19 +227,33 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
 function RejectedInput({ snapshot }: { snapshot: Snapshot; reason?: string }) {
   return (
     <>
+      <span className="rejected-input" aria-hidden="true" />
       <Header s={snapshot} />
       <ChangeEvidence s={snapshot} />
       <ComparisonSection
         snapshot={snapshot}
-        results={{ state: 'error', message: `${NOT_COMPUTED} 지금 배차만 보여 줍니다.` }}
+        results={{ state: 'error', message: `${NOT_COMPUTED} 지금 배차 일정입니다.` }}
         base={undefined}
         cand={undefined}
         candidates={[]}
         rows={buildRows(snapshot, undefined, undefined)}
         onPick={() => {}}
+        unchanged
       />
     </>
   )
+}
+
+/** 확정 전 공지대로 바뀌면 지금 배차(원안)로 몇 개가 늦는지 미리 센다. 배차는 바꾸지 않는다. */
+function unconfirmedPreview(s: Snapshot): string {
+  const w = s.windows.find((x) => x.window_id === s.change.new_window_id)
+  if (!w?.closes_at) return '공지된 새 마감을 확인하지 못했습니다.'
+  const jobs = new Set(s.jobs.filter((j) => j.voyage_id === s.change.voyage_id && j.terminal_id === s.change.terminal_id).map((j) => j.job_id))
+  const mine = s.baseline_assignments.filter((a) => jobs.has(a.job_id))
+  const late = mine.filter((a) => Date.parse(a.gate_arrival_at) + s.policy.buffer_minutes * 60_000 > Date.parse(w.closes_at!)).length
+  return late === 0
+    ? `공지대로 확정돼도 지금 배차로 이 항차 컨테이너 ${mine.length}개 모두 마감 안에 들어갑니다.`
+    : `공지대로 확정되면 지금 배차로 이 항차 컨테이너 ${mine.length}개 중 ${late}개가 마감을 넘깁니다. 확정되면 바로 조정안을 계산하세요.`
 }
 
 const pick = (r: RunRequest) => ({ methods: r.methods, time_limit_seconds: r.time_limit_seconds, seed: r.seed })
@@ -261,7 +281,7 @@ function Countdown({ snapshot }: { snapshot: Snapshot }) {
   const confirmed = snapshot.change.verification === 'confirmed'
   return (
     <span className="countdown">
-      {confirmed ? '새 반입 마감' : '공지대로면 새 마감'} <b>{kstTime(w.closes_at)}</b>까지 <b className="cd-num">{hh}:{pad(mm)}:{pad(ss)}</b>
+      {confirmed ? '새 반입 마감' : '공지대로라면 새 마감'} <b>{kstTime(w.closes_at)}</b>까지 <b className="cd-num">{hh}:{pad(mm)}:{pad(ss)}</b>
     </span>
   )
 }

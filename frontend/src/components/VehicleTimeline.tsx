@@ -145,7 +145,7 @@ export function VehicleTimeline({ rows, baseLabel, candLabel, buffer = 0 }: { ro
           {candLabel && <Lane name={candLabel} bars={v.cand} model={model} incomplete={model.incomplete.some((a) => a.vehicleId === v.id && a.side === 'cand')} />}
           {model.incomplete.filter((a) => a.vehicleId === v.id).map((a) => (
             <p key={`${a.side}-${a.jobId}`} className="warn small">
-              {a.side === 'base' ? baseLabel : candLabel}: {a.label} — 시각 확인 필요 · 막대 표시 보류
+              {a.side === 'base' ? baseLabel : candLabel}: {a.label}, 시각 확인 필요
             </p>
           ))}
         </section>
@@ -155,7 +155,7 @@ export function VehicleTimeline({ rows, baseLabel, candLabel, buffer = 0 }: { ro
       {model.missing.length > 0 && <p className="warn">조정안 결과 누락(배정·미처리 모두 아님): {model.missing.join(', ')}</p>}
       {model.unassigned.length > 0 && (
         <p className="unassigned-row">
-          <span className="badge unassigned">미배정</span> {model.unassigned.map(jobName).join(', ')} — 조정안에서 어느 차량에도 배정되지 않았습니다.
+          <span className="badge unassigned">미배정</span> {model.unassigned.map(jobName).join(', ')}: 조정안에서 맡을 차량을 찾지 못했습니다.
         </p>
       )}
     </div>

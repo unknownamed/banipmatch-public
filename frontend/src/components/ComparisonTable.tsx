@@ -121,7 +121,7 @@ export function ComparisonTable({
                   {r.locked && (
                     <div>
                       <span className="badge lock" title={r.job.freeze_reason ?? undefined}>
-                        <Icon name="lock" /> 고정{r.job.state === 'departed' ? ' · 출발함' : ''}
+                        <Icon name="lock" /> {r.job.state === 'departed' ? '이미 출발' : '고정'}
                       </span>
                     </div>
                   )}
@@ -140,7 +140,7 @@ export function ComparisonTable({
                     {r.candidateUnassigned ? (
                       <span className="badge unassigned">미처리</span>
                     ) : r.candidateMissing ? (
-                      <span className="warn">결과에 없음(배정·미처리 모두 아님)</span>
+                      <span className="warn">계산 결과에 없음</span>
                     ) : (
                       <Cell a={r.candidate} refUtc={asOf} closesAt={r.window?.closes_at} buffer={buffer} />
                     )}

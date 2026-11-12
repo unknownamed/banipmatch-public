@@ -28,9 +28,9 @@ describe('확인 대상 작업', () => {
 describe('실패 안내', () => {
   it('Error.code에 따라 할 일을 구분한다', () => {
     expect(approvalErrorHint(409, 'PLAN_VERSION_CONFLICT')).toContain('다시 계산')
-    expect(approvalErrorHint(409, 'IDEMPOTENCY_CONFLICT')).toContain('요청 내용')
-    expect(approvalErrorHint(422, 'RESULT_NOT_COMPUTED')).toContain('설명용')
-    expect(approvalErrorHint(503, 'ANY')).toContain('확인 상태')
+    expect(approvalErrorHint(409, 'IDEMPOTENCY_CONFLICT')).toContain('다른 내용')
+    expect(approvalErrorHint(422, 'RESULT_NOT_COMPUTED')).toContain('실제 계산 결과가 아니라')
+    expect(approvalErrorHint(503, 'ANY')).toContain('잠시 후')
     expect(approvalErrorHint(422, 'OTHER')).toBeNull()
   })
 })
@@ -42,7 +42,7 @@ describe('승인 버튼', () => {
 
   it('설명용 결과는 버튼이 닫히고 이유가 보인다', () => {
     expect(html(b3)).toMatch(/<button[^>]*disabled/)
-    expect(html(b3)).toContain('illustrative_fixture')
+    expect(html(b3)).toContain('실제 계산 결과가 아니라')
   })
 
   it('승인 가능 결과라도 미처리 작업을 확인하기 전에는 닫혀 있다', () => {

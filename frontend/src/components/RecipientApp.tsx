@@ -8,7 +8,7 @@ import { formatContainer } from '../lib/labels'
 import { BoxNo, Plate } from './Ids'
 
 const errText = (e: unknown) =>
-  e instanceof ApiRequestError && e.body ? `${e.body.code} — ${e.message}` : e instanceof Error ? e.message : String(e)
+  e instanceof ApiRequestError && e.body ? e.message : e instanceof Error ? e.message : String(e)
 const isCode = (e: unknown, ...codes: string[]) => e instanceof ApiRequestError && !!e.body && codes.includes(e.body.code)
 
 /**

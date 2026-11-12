@@ -16,7 +16,7 @@ it('현재 계획 버전이 실행 기준과 다르면 승인 차단 이유를 �
   await act(async () => root.render(<App client={client} scenarioId="S001" runId="R001" />))
   await act(async () => { await new Promise((r) => setTimeout(r, 20)) })
   expect(getPlan).toHaveBeenCalledWith('P001')
-  expect(el.textContent).toContain('현재 계획이 v2입니다')
+  expect(el.textContent).toContain('그사이 배차가 이미 확정·변경되어')
   await act(async () => root.unmount())
 })
 
@@ -29,7 +29,7 @@ it('v2 확정 후에는 이전 입력 편집 대신 확정 원안으로 새 점�
   const el = document.createElement('div'); const root = createRoot(el)
   await act(async () => root.render(<App client={client} scenarioId="S001" runId="R001" />))
   await act(async () => { await new Promise((r) => setTimeout(r, 20)) })
-  expect(el.textContent).toContain('확정 계획으로 새 점검 시작')
+  expect(el.textContent).toContain('확정한 배차로 새 점검')
   expect(el.textContent).not.toContain('조건 보완 · 재계산')
   await act(async () => root.unmount())
 })

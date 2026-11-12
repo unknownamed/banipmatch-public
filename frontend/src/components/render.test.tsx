@@ -75,7 +75,7 @@ describe('원안 표는 결과 상태와 무관하게 남는다', () => {
     const html = render({ state: 'ready', data: { ...results, results: [b0] } }, true, false)
     expect(hasBaselineTable(html)).toBe(true)
     expect(html).toContain('원래 배차')
-    expect(html).toContain('원래 배차 점검만 표시')
+    expect(html).toContain('원래 배차만 보여 줍니다')
     expect(html).not.toContain('조정안</th>')
   })
 

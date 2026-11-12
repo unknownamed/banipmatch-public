@@ -7,7 +7,7 @@ import { BoxNo } from './Ids'
 
 const go = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-export function ActionSummary({ base, cand, recommended, rows, approved }: {
+export function ActionSummary({ base, cand, rows, approved }: {
   base: MethodResult | undefined
   cand: MethodResult | undefined
   recommended: string | undefined
@@ -22,7 +22,7 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
     return (
       <section className="card action-summary ok" aria-label="요약">
         <p className="as-head"><b>원래 배차로 모든 컨테이너가 마감 안에 들어갑니다.</b></p>
-        <p className="small muted">바꿀 필요가 없습니다. 아래에서 차량별 일정을 확인할 수 있습니다.</p>
+        <p className="small muted">바꿀 배차가 없습니다.</p>
       </section>
     )
   const unresolved = cand ? cand.unassigned_job_ids : []
@@ -35,17 +35,17 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
   }
   const name = cand ? planName(cand.method) : ''
   const headline = !cand
-    ? `원래 배차대로면 컨테이너 ${lateSet.length}개가 새 마감을 넘깁니다.`
+    ? `원래 배차대로 가면 컨테이너 ${lateSet.length}개가 새 마감을 넘깁니다.`
     : fixed === lateSet.length
-      ? `${name}${cand.method === recommended ? '(추천)' : ''}으로 늦던 컨테이너 ${fixed}개를 모두 마감 안에 맞춥니다.`
-      : `${name}${cand.method === recommended ? '(추천)' : ''}으로 ${lateSet.length}개 중 ${fixed}개를 마감 안에 맞춥니다.`
+      ? `${name}을 쓰면 늦는 컨테이너 ${fixed}개를 모두 마감 안에 넣을 수 있습니다.`
+      : `${name}을 쓰면 늦는 컨테이너 ${lateSet.length}개 중 ${fixed}개를 마감 안에 넣을 수 있습니다.`
   return (
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
       <div className="as-top">
         <div>
           <p className="as-kicker">{approved ? '확정 완료' : '판단 요약'}</p>
           <h2 className="as-headline">{headline}</h2>
-          {cand && <p className="as-sub">작업 {changed}건의 차량·시각이 바뀌고{unresolved.length ? `, ${unresolved.length}건은 담당자 확인이 필요합니다.` : ', 남는 문제는 없습니다.'}</p>}
+          {cand && <p className="as-sub">작업 {changed}건의 차량이나 시각이 바뀌고{unresolved.length ? `, ${unresolved.length}건은 담당자가 확인해야 합니다.` : ', 남는 문제는 없습니다.'}</p>}
         </div>
       </div>
       <dl className="stat-strip">
@@ -62,7 +62,7 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
       <div className="as-actions">
         {approved ? (
           <>
-            <span className="small"><b>내부 확정 완료.</b> 이제 바뀐 차량의 기사에게 전달합니다.</span>
+            <span className="small"><b>배차를 확정했습니다.</b> 이제 바뀐 차량의 기사에게 알려 주세요.</span>
             <button type="button" onClick={() => go('.card.dispatch')}>기사 전달로 이동</button>
           </>
         ) : (

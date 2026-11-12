@@ -97,7 +97,7 @@ describe('변경 전달 화면', () => {
     expect(post).toHaveBeenCalledWith('/v2/plans/P1/dispatches', { approval_id: 'A1', expected_version: 2, confirm_test_send: true }, 'dispatch-A1')
     expect(location.search).toContain('dispatch=D1')
     const rows = [...container.querySelectorAll('.dispatch-status tbody tr')].map((r) => r.textContent)
-    expect(rows[0]).toContain('중계망 접수 · 읽음 아님')
+    expect(rows[0]).toContain('전달됨')
     expect(rows[0]).not.toContain('다시 보내기')
     expect(rows[1]).toContain('전송 실패')
     expect(rows[1]).toContain('다시 보내기')

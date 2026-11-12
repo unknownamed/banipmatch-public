@@ -56,7 +56,7 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
     <section className="card fleet-today" aria-labelledby="ft-title">
       <div className="ft-head">
         <h2 id="ft-title">오늘 저녁 배차 현황</h2>
-        <span className="updated">현재 배차표 기준 · 위치는 일정으로 추정</span>
+        <span className="updated">위치는 배차 일정으로 추정</span>
       </div>
       <dl className="stat-strip">
         {stats.map((s) => (

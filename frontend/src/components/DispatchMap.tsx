@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MethodResult, Snapshot } from '../api/types'
 import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
 import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
-import { Icon } from './Icon'
+import { LayerMenu } from './LayerMenu'
 import { BoxNo, Plate } from './Ids'
 import { ROAD_ATTRIBUTION, roadPath } from '../lib/fleetPosition'
 import { kstTime } from '../lib/time'
@@ -48,7 +48,6 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
   const [style, setStyle] = useMapStyle('dispatch', 'sky')
   const sky = style === 'sky'
   const setSky = (on: boolean) => setStyle(on ? 'sky' : 'map')
-  const [layersOpen, setLayersOpen] = useState(false)
   // 지도를 확대·이동할 때마다 화면 거리 기준으로 차량 묶음을 다시 계산한다.
   const [viewTick, setViewTick] = useState(0)
   const [openCluster, setOpenCluster] = useState<string | null>(null)
@@ -255,13 +254,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
     <section className="dispatch-map">
       <div className="dm-head">
         <div>
-          <h3>차량 현황 · 게이트 도착</h3>
+          <h3>차량 현황</h3>
           <p className="muted small"><b>{kstTime(new Date(now).toISOString())}</b> {ahead === 'now' ? '현재' : '예상'} · {planLabel} 기준 위치</p>
         </div>
         <div className="dm-tools">
           {cand && (
             <div className="vm-seg" role="radiogroup" aria-label="표시할 배차">
-              <button type="button" role="radio" aria-checked={usePlan === 'base'} onClick={() => setUsePlan('base')}>원안</button>
+              <button type="button" role="radio" aria-checked={usePlan === 'base'} onClick={() => setUsePlan('base')}>원래 배차</button>
               <button type="button" role="radio" aria-checked={usePlan === 'cand'} onClick={() => setUsePlan('cand')}>{planName(cand.method)}</button>
             </div>
           )}
@@ -282,20 +281,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
               <button key={id} type="button" aria-pressed={ahead === id} disabled={id === 'cut' && !Number.isFinite(cutoffAt)} onClick={() => setAhead(id)}>{label}</button>
             ))}
           </div>
-          <div className="layers">
-            <button type="button" className="chip-toggle" aria-expanded={layersOpen} disabled={!mapState.ok} onClick={() => setLayersOpen(!layersOpen)}>
-              <Icon name="map" size={14} /> 레이어
-            </button>
-            {layersOpen && (
-              <div className="layers-pop" role="dialog" aria-label="지도 레이어">
-                <p className="layers-h">지도</p>
-                <label><input type="radio" name="dm-base" checked={!sky} onChange={() => setSky(false)} /> 일반 지도</label>
-                <label><input type="radio" name="dm-base" checked={sky} onChange={() => setSky(true)} /> 위성 사진</label>
-                <p className="layers-h">겹쳐 보기</p>
-                <label><input type="checkbox" checked={traffic} onChange={(e) => setTraffic(e.target.checked)} /> 실시간 도로 교통</label>
-              </div>
-            )}
-          </div>
+          <LayerMenu sky={sky} onSky={setSky} traffic={traffic} onTraffic={setTraffic} disabled={!mapState.ok} />
         </div>
       </div>
       <div className="dm-body">
@@ -340,7 +326,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                 </span>
                 {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} compact />}
                 {v.jobId && v.gateEta ? (
-                  <span className="dmi-line"><BoxNo jobId={v.jobId} /> · 게이트 <b>{kstTime(v.gateEta)}</b> · 마감 {kstTime(v.cutoff)}</span>
+                  <span className="dmi-line"><BoxNo jobId={v.jobId} /> <span className="nowrap">· 게이트 <b>{kstTime(v.gateEta)}</b> · 마감 {kstTime(v.cutoff)}</span></span>
                 ) : <span className="dmi-line">남은 작업 없음</span>}
               </button>
             </li>

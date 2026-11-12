@@ -20,7 +20,7 @@ it('지도 키가 없어도 선박 목록·남은 시간·모의 표시를 보�
   expect(box.textContent).toContain('후 도착 추정')
   const all = [...box.querySelectorAll('button')].find(b => b.textContent?.startsWith('신항 전체'))!
   await act(async () => all.click())
-  expect(box.textContent).toContain('속력 0이라 도착 시각을 산정하지 않음')
+  expect(box.textContent).toContain('도착 시각 미정')
   await unmount()
 })
 
@@ -31,7 +31,7 @@ it('계산 시나리오가 있으면 같은 항차의 반입 마감·변경 전 
     change: { change_id: 'C1', voyage_id: 'BHMN-2026-0045', terminal_id: 'HJNC', previous_opens_at: iso(-60), previous_closes_at: iso(180), new_window_id: 'W1', verification: 'confirmed' },
   } as unknown as Snapshot
   const { box, unmount } = await mount(<VesselApproachMap link={{ snapshot, reviewHref: '?scenario=S-test&run=R1' }} />)
-  expect(box.textContent).toContain('지금 점검 중인 배차')
+  expect(box.textContent).toContain('점검 결과로 돌아가기')
   expect(box.textContent).toMatch(/변경 전 \d\d:\d\d/)
   const go = [...box.querySelectorAll('a')].find(a => a.textContent?.includes('BHMN-2026-0045 항차 배차 점검'))
   expect(go?.getAttribute('href')).toBe('?scenario=S-test&run=R1')

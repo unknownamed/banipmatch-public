@@ -65,8 +65,8 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
 
   return (
     <main>
-      {view.scenario.state === 'loading' && <Skeleton label="입력 불러오는 중…" lines={3} />}
-      {view.scenario.state === 'error' && <p className="card warn">입력 조회 실패: {view.scenario.message}</p>}
+      {view.scenario.state === 'loading' && <Skeleton label="변경 내용 불러오는 중…" lines={3} />}
+      {view.scenario.state === 'error' && <p className="card warn">변경 내용을 불러오지 못했습니다: {view.scenario.message}</p>}
 
       {snapshot && (
         <>
@@ -80,8 +80,8 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         </>
       )}
 
-      {view.run.state === 'loading' && <Skeleton label="실행 상태 조회 중…" lines={2} />}
-      {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
+      {view.run.state === 'loading' && <Skeleton label="계산 상태 확인 중…" lines={2} />}
+      {view.run.state === 'error' && <p className="card warn">계산 상태를 확인하지 못했습니다: {view.run.message}</p>}
       {run && run.status !== 'completed' && <RunStatusPanel run={run} results={results} />}
       {assumed && (
         <div className="banner fixture" role="alert">
@@ -112,7 +112,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
           <aside className="side">
             <section className="card all-clear">
               <h2><Icon name="check" size={18} /> 확인 완료</h2>
-              <p>원래 배차 그대로 진행합니다. 기사에게 보낼 변경이 없습니다.</p>
+              <p>원래 배차 그대로 진행합니다.</p>
               <a className="button secondary" href="?">받은 변경으로 돌아가기</a>
             </section>
           </aside>
@@ -122,7 +122,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             <UnresolvedPanel rows={rows} cand={cand} />
             <ApprovalPanel
               key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
-              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null), assumed ? '가정한 값으로 계산한 결과라 확정할 수 없습니다. 확인된 값으로 다시 계산하세요.' : null)}
+              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? '그사이 배차가 이미 확정·변경되어 이 결과로는 승인할 수 없습니다. 이미 승인한 것이면 그대로 두고, 아니면 최신 배차로 다시 계산하세요.' : null), assumed ? '가정한 값으로 계산한 결과라 확정할 수 없습니다. 확인된 값으로 다시 계산하세요.' : null)}
               client={client} run={run} result={cand} idempotencyKey={approvalKey}
               shared={approval.key === approvalScope ? approval.value : null}
               onShared={(value) => setApproval({ key: approvalScope, value })}
