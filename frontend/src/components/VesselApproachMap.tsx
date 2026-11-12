@@ -15,9 +15,10 @@ function arrowSvg(heading: number) {
 }
 
 export function VesselApproachMap() {
-  const base = useMemo(() => { const d = new Date(); d.setSeconds(0, 0); d.setMinutes(d.getMinutes() - (d.getMinutes() % 5)); return d }, [])
+  // 화면을 연 시각이 모의 상황의 시작점이다. 기본은 실제 시간과 같은 속도로 흐른다(상황판).
+  const base = useMemo(() => new Date(), [])
   const [t, setT] = useState(0)
-  const [playing, setPlaying] = useState(false)
+  const [speed, setSpeed] = useState<1 | 10 | 60>(1)
   const [picked, setPicked] = useState<string>('SIM-01')
   const [mapType, setMapType] = useState<MapType>('HYBRID')
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
@@ -30,11 +31,9 @@ export function VesselApproachMap() {
   const paths = useRef<{ passed: any; ahead: any } | null>(null)
 
   useEffect(() => {
-    if (!playing) return
-    const id = setInterval(() => setT(x => (x >= MAX_MIN ? x : x + 1)), 100)
+    const id = setInterval(() => setT(x => Math.min(MAX_MIN, x + speed / 60)), 1000)
     return () => clearInterval(id)
-  }, [playing])
-  useEffect(() => { if (t >= MAX_MIN) setPlaying(false) }, [t])
+  }, [speed])
 
   // 지도와 고정 요소(항로·부표·터미널)는 한 번만 그린다.
   useEffect(() => {
@@ -132,11 +131,16 @@ export function VesselApproachMap() {
             ))}
           </div>
           <div className="vm-play">
-            <button type="button" className="vm-play-btn" onClick={() => setPlaying(!playing)} disabled={t >= MAX_MIN}>{playing ? '일시 정지' : '재생'}</button>
-            <button type="button" className="secondary" onClick={() => { setPlaying(false); setT(0) }}>처음</button>
-            <span className="vm-clock"><b>{kst(at(base, t))}</b> <span className="muted">모의 시각 · +{formatDuration(t)}</span></span>
+            <span className="vm-clock"><span className="vm-live" aria-hidden="true" /><b>{kst(at(base, t))}</b> <span className="muted">{speed === 1 ? '현재 시각' : `시연 ${speed}배속`}</span></span>
+            <label className="vm-speed small">시연 속도
+              <select value={speed} onChange={e => setSpeed(Number(e.target.value) as 1 | 10 | 60)}>
+                <option value={1}>실시간</option>
+                <option value={10}>10배</option>
+                <option value={60}>60배</option>
+              </select>
+            </label>
+            {t >= MAX_MIN && <button type="button" className="secondary" onClick={() => setT(0)}>모의 상황 다시 시작</button>}
           </div>
-          <input className="vm-range" aria-label="모의 시각" type="range" min={0} max={MAX_MIN} value={t} onChange={e => { setPlaying(false); setT(Number(e.target.value)) }} />
         </div>
 
         <div className="vm-body">
