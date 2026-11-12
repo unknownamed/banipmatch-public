@@ -27,13 +27,13 @@ it('지도 키가 없어도 선박 목록·남은 시간·모의 표시를 보�
 it('계산 시나리오가 있으면 같은 항차의 반입 마감·변경 전 값과 배차 화면 링크를 붙인다', async () => {
   const snapshot = {
     scenario_id: 'S-test',
-    windows: [{ window_id: 'W1', voyage_id: 'BH045E', terminal_id: 'HJNC', opens_at: iso(-60), closes_at: iso(90), verification: 'confirmed' }],
-    change: { change_id: 'C1', voyage_id: 'BH045E', terminal_id: 'HJNC', previous_opens_at: iso(-60), previous_closes_at: iso(180), new_window_id: 'W1', verification: 'confirmed' },
+    windows: [{ window_id: 'W1', voyage_id: 'BHMN-2026-0045', terminal_id: 'HJNC', opens_at: iso(-60), closes_at: iso(90), verification: 'confirmed' }],
+    change: { change_id: 'C1', voyage_id: 'BHMN-2026-0045', terminal_id: 'HJNC', previous_opens_at: iso(-60), previous_closes_at: iso(180), new_window_id: 'W1', verification: 'confirmed' },
   } as unknown as Snapshot
   const { box, unmount } = await mount(<VesselApproachMap link={{ snapshot, reviewHref: '?scenario=S-test&run=R1' }} />)
   expect(box.textContent).toContain('지금 점검 중인 배차')
   expect(box.textContent).toMatch(/변경 전 \d\d:\d\d/)
-  const go = [...box.querySelectorAll('a')].find(a => a.textContent?.includes('BH045E 항차 배차 점검'))
+  const go = [...box.querySelectorAll('a')].find(a => a.textContent?.includes('BHMN-2026-0045 항차 배차 점검'))
   expect(go?.getAttribute('href')).toBe('?scenario=S-test&run=R1')
   await unmount()
 })

@@ -726,3 +726,49 @@ h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
 .rev-more { margin-top: 6px; }
 .rev-more > summary { cursor: pointer; padding: 8px 0; font-size: 14px; font-weight: 600; color: var(--color-accent-strong); }
 .rev-more[open] > summary { margin-bottom: 4px; }
+.demo-pill { background: #fff6dc; color: #7a4f00; border: 1px solid #ecd28a; }
+
+/* 홈: 오늘 저녁 배차 현황(KPI + 상태 표) */
+.fleet-today { display: grid; gap: var(--space-4); }
+.ft-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.ft-head h2 { margin: 0; }
+.ft-note { color: #4b4f57; }
+.ft-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+.ft-kpi { position: relative; display: grid; gap: 6px; padding: 14px 16px; border: 1px solid #e6e8ec; border-radius: 12px; background: #fff; }
+.ft-kpi-label { font-size: 13px; font-weight: 600; color: #3b3f46; padding-right: 40px; }
+.ft-kpi-n { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.ft-kpi-ic { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #f1f4f8; color: #33465c; }
+.ft-kpi.bad .ft-kpi-n { color: var(--color-danger); }
+.ft-kpi.bad .ft-kpi-ic { background: var(--color-danger-soft); color: var(--color-danger); }
+.ft-kpi.good .ft-kpi-ic { background: var(--color-success-soft); color: var(--color-success); }
+.ft-table-wrap { overflow-x: auto; }
+.ft-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ft-table th { text-align: left; font-size: 12px; font-weight: 600; color: #4b4f57; padding: 8px 10px; border-bottom: 1px solid #e6e8ec; white-space: nowrap; }
+.ft-table td { padding: 11px 10px; border-bottom: 1px solid #f0f1f3; vertical-align: middle; }
+.ft-table tr:last-child td { border-bottom: 0; }
+.ft-table td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ft-sub { display: block; font-size: 12px; color: #4b4f57; }
+.ft-pill { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.ft-pill.run { background: #e6f0fb; color: #1d4f86; }
+.ft-pill.gate { background: #ede9fe; color: #5b21b6; }
+.ft-pill.wait { background: #f1f2f4; color: #3b3f46; }
+.ft-pill.off { background: #f1f2f4; color: #6b6f76; }
+.ft-pill.ok { background: var(--color-success-soft); color: var(--color-success); }
+.ft-pill.tight { background: #fff4d6; color: #7a4f00; }
+.ft-pill.late { background: var(--color-danger-soft); color: var(--color-danger); }
+@media (max-width: 900px) { .ft-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .ft-table thead { display: none; }
+  .ft-table, .ft-table tbody, .ft-table tr, .ft-table td { display: block; width: 100%; box-sizing: border-box; }
+  .ft-table tr { padding: 10px 0; border-bottom: 1px solid #eef0f3; }
+  .ft-table td { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border: 0; text-align: right; }
+  .ft-table td::before { content: attr(data-label); color: #4b4f57; font-size: 12px; font-weight: 600; text-align: left; }
+  .ft-sub { display: inline; margin-left: 6px; }
+}
+.now-main { display: grid; gap: 2px; align-items: start; }
+.now-main b { font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.now-list li { grid-template-areas: "ic main eta" "ic cut cut"; }
+.result-nav { position: sticky; top: 0; z-index: 20; display: flex; gap: 4px; overflow-x: auto; padding: 8px 0; margin: -8px 0 0; background: #f4f5f7; border-bottom: 1px solid #e6e8ec; scrollbar-width: none; }
+.result-nav::-webkit-scrollbar { display: none; }
+.rn-link { flex: none; padding: 7px 12px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: #2b2f36; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.rn-link:hover { background: #fff; border-color: #e6e8ec; }

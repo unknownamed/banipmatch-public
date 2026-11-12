@@ -54,14 +54,25 @@ def travel(a: str, b: str) -> int:
     return 0 if a == b else PAIRS.get((a, b)) or PAIRS[(b, a)]
 
 
-# 항차별 반입 마감(분, T0 기준). V1(BH045E)은 변경 전 +240 → 변경 후 +90(2시간 30분 앞당김).
-# 반입 마감은 모선 접안 12시간 전(PNC 공지의 '접안 12시간 전 이후 반입 금지' 규칙을 모의 규칙으로 사용),
-# 반입 시작은 접안 72시간 전으로 둔다(터미널은 보통 며칠 전부터 반입을 받는다. 예: HPNT 선적 5일 전, 2021).
-# 둘 다 터미널·선사마다 다르므로 모의 가정값이다.
+# 항차별 반입 마감(분, T0 기준). V1(BHMN-2026-0045)은 변경 전 +240 → 변경 후 +90(2시간 30분 앞당김).
+# 반입 시간은 HJNC 공개 선석배정현황(2026-11-11 수신 31개 항차)의 실제 간격을 따른다.
+#  - 반입 마감 = 접안 예정 10시간 전 (31개 항차 모두 같은 간격)
+#  - 반입 시작 = 접안 예정일 3일 전 00:00 KST
+# 시연 화면은 모든 시각을 현재 시각 기준으로 옮기므로 00:00이 다른 분 단위로 보일 수 있다.
 CLOSES = {"V1": 90, "V2": 330, "V4": 480, "V7": 300}
 V1_PREVIOUS_CLOSE = 240
-_OPEN_BEFORE_CLOSE = 72 * 60 - 12 * 60  # 접안 72시간 전 시작 = 마감 60시간 전
-WINDOWS = {v: ((V1_PREVIOUS_CLOSE if v == "V1" else c) - _OPEN_BEFORE_CLOSE, c) for v, c in CLOSES.items()}
+BERTH_AFTER_CLOSE = 600
+KST = timezone(timedelta(hours=9))
+
+
+def _opens(close_min: int) -> int:
+    berth = T0 + timedelta(minutes=close_min + BERTH_AFTER_CLOSE)
+    day = berth.astimezone(KST).date() - timedelta(days=3)
+    start = datetime(day.year, day.month, day.day, tzinfo=KST)
+    return int((start - T0).total_seconds() // 60)
+
+
+WINDOWS = {v: (_opens(V1_PREVIOUS_CLOSE if v == "V1" else c), c) for v, c in CLOSES.items()}
 TERMINAL = {"V1": "HJNC", "V2": "HJNC", "V4": "HJNC", "V7": "PNIT"}
 
 VEHICLES = [  # id, 가용 시작, 장비
@@ -104,7 +115,7 @@ JOBS = [
 SERVICE = 30
 
 # 현장에서 쓰는 식별 정보(모두 가상). 항차는 '선박 약어+항차 번호+방향' 형식, 선박은 서비스 이름을 딴 가상 선단.
-VOYAGE_CODE = {"V1": "BH045E", "V2": "BO112W", "V4": "BP007E", "V7": "BE221E"}
+VOYAGE_CODE = {"V1": "BHMN-2026-0045", "V2": "BORT-2026-0112", "V4": "BPNR-2026-0007", "V7": "BE221E"}
 SHIPPER = {"O1": "가람정밀(주)", "O2": "다온물산(주)", "O3": "한결산업(주)", "O4": "누리화학(주)", "O5": "새벽식품(주)"}
 PLATE = {"T1": "부산 90바 1201", "T2": "부산 90바 1207", "T3": "부산 91사 3315", "T4": "경남 87아 2044", "T5": "부산 92바 5520", "T6": "경남 88자 7136", "T7": "부산 93바 4408", "T8": "경남 86사 6620"}
 
@@ -172,7 +183,7 @@ def build():
         jobs=[dict(job_id=j, voyage_id=VOYAGE_CODE[voy], origin_id=o, terminal_id=TERMINAL[voy], return_location_id="D", ready_at=at(r),
                    gross_weight_kg=w, equipment_type=e, service_minutes=SERVICE, state=st, frozen=st == "departed",
                    freeze_reason="ALREADY_DEPARTED" if st == "departed" else None, evidence=ev(),
-                   container_no=iso6346("BNJU", 100200 + int(j[1:])), booking_no=f"BKG{VOYAGE_CODE[voy]}{int(j[1:]):03d}",
+                   container_no=iso6346("BNJU", 100200 + int(j[1:])), booking_no=f"BKG{VOYAGE_CODE[voy][:4]}{int(j[1:]):05d}",
                    cargo_owner=SHIPPER[o]) for j, voy, o, r, w, e, st in JOBS],
         windows=[dict(window_id=f"W-{VOYAGE_CODE[voy]}", voyage_id=VOYAGE_CODE[voy], terminal_id=TERMINAL[voy], opens_at=at(o), closes_at=at(c), verification="confirmed",
                       confirmed_by="demo-dispatcher", confirmed_at=at(-5), evidence=ev()) for voy, (o, c) in WINDOWS.items()],

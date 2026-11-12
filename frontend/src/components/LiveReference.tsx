@@ -101,18 +101,5 @@ export function LiveReference() {
       <RoadReference road={data.road} />
     </div>
 
-    <details className="tech-info tl-status">
-      <summary>데이터 연결 상태</summary>
-      <table className="grid small">
-        <thead><tr><th>자료</th><th>상태</th><th>마지막 수신</th></tr></thead>
-        <tbody>
-          <tr><td>HJNC 반입 일정</td><td>{d.headline}</td><td>{received ? kstDateTime(received) : '—'}</td></tr>
-          {data.weather.map(w => <tr key={w.kind}><td>{w.kind === 'sea' ? '기상청 해양 관측' : '기상청 특보'}</td><td>{w.status === 'sample_received' ? '수신' : w.status === 'empty_framed_response' ? '정상 응답(0건)' : w.status} · HTTP {w.http_status ?? '—'}</td><td>{w.received_at ? kstDateTime(w.received_at) : '—'}</td></tr>)}
-          <tr><td>도로 이동시간(ORS)</td><td>{data.road?.status ?? '없음'}</td><td>{data.road?.received_at ? kstDateTime(data.road.received_at) : '—'}</td></tr>
-          <tr><td>AIS 선박 위치</td><td>{data.ais ? `${data.ais.max_seconds}초 시험 · 위치 ${data.ais.valid_position_events}건(부산 제한 구역)` : '기록 없음'}</td><td>{data.ais ? kstDateTime(data.ais.finished_at) : '—'}</td></tr>
-        </tbody>
-      </table>
-      <p className="small muted">자동 반복 수집은 하지 않습니다. 제공기관 이용 조건을 확인한 범위에서 받은 결과만 보관합니다. AIS 무수신은 선박이 없다는 뜻이 아닙니다.</p>
-    </details>
   </>
 }

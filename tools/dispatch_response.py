@@ -39,6 +39,20 @@ def assignment_index(rows: list[dict]) -> dict[str, dict]:
     return indexed
 
 
+def ranked(rows: list[dict]) -> dict[str, dict]:
+    """차량별 작업 순서를 1부터 다시 매긴다. 엔진의 sequence는 빈 번호가 있을 수 있어,
+    순서와 시각이 그대로인 작업이 번호만 달라 '변경'으로 기사에게 전달되지 않게 한다."""
+    indexed = assignment_index(rows)
+    out: dict[str, dict] = {}
+    by_vehicle: dict[str, list[dict]] = {}
+    for row in indexed.values():
+        by_vehicle.setdefault(row["vehicle_id"], []).append(row)
+    for route in by_vehicle.values():
+        for rank, row in enumerate(sorted(route, key=lambda r: r["sequence"]), 1):
+            out[row["job_id"]] = {**row, "sequence": rank}
+    return out
+
+
 def job_display(snapshot: dict, job_id: str) -> dict:
     """기사·담당자 화면용 현장 식별 정보(입력에 있을 때만). 내부 job_id는 연결 키로 남는다."""
     job = next(j for j in snapshot["jobs"] if j["job_id"] == job_id)
@@ -63,8 +77,8 @@ def build_response_preview(snapshot: dict, result: dict) -> dict:
         raise ValueError("독립 검사 통과 상태의 실계산 조정 결과가 필요함")
     if not verify_schedule(snapshot, result):
         raise ValueError("일정 재검사 실패")
-    before = assignment_index(snapshot["baseline_assignments"])
-    after = assignment_index(result["assignments"])
+    before = ranked(snapshot["baseline_assignments"])
+    after = ranked(result["assignments"])
     changed = []
     by_vehicle: dict[str, list[dict]] = {}
     for job_id in sorted(before.keys() | after.keys()):

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MethodResult, Snapshot } from '../api/types'
 import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
-import { loadKakaoMaps } from '../lib/kakaoMaps'
+import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
 import { kstTime } from '../lib/time'
 import { jobName, jobInfo, vehicleName, vehicleShort } from '../lib/labels'
 import { TripStepper } from './TripStepper'
@@ -61,11 +61,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
   useEffect(() => {
     if (pts.size === 0) return
     let alive = true
+    let unobserve = () => {}
     loadKakaoMaps().then(maps => {
       if (!alive || !box.current) return
       const ll = (p: Pt) => new maps.LatLng(p.lat, p.lon)
       const m = new maps.Map(box.current, { center: ll([...pts.values()][0]), level: 8 })
       kmap.current = m
+      unobserve = keepLaidOut(m, box.current)
       const bounds = new maps.LatLngBounds()
       for (const loc of snapshot.locations ?? []) {
         const p = pts.get(loc.location_id)
@@ -88,7 +90,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
       jobLine.current = new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#ff3c00', strokeOpacity: 0.85, strokeStyle: 'dash' })
       setMapState({ ok: true, msg: '' })
     }).catch((e: Error) => alive && setMapState({ ok: false, msg: `${e.message} 아래 차량별 목록으로 확인할 수 있습니다.` }))
-    return () => { alive = false; pins.current = []; kmap.current = null }
+    return () => { alive = false; unobserve(); pins.current = []; kmap.current = null }
   }, [pts, snapshot])
 
   useEffect(() => {

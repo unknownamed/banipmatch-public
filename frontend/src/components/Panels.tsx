@@ -50,10 +50,10 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const c = s.change
   const w = s.windows.find((x) => x.window_id === c.new_window_id)
   const moved = shiftText(c.previous_closes_at, w?.closes_at)
-  // 모의 선박 일정에 같은 항차가 있으면, 반입 마감 변경과 함께 바뀐 모선 접안 예정을 보여 준다(접안 12시간 전 마감 규칙).
+  // 모의 선박 일정에 같은 항차가 있으면, 반입 마감 변경과 함께 바뀐 모선 접안 예정을 보여 준다(HJNC 공개 일정의 '접안 10시간 전 마감' 간격).
   const vessel = VESSELS.find((v) => v.voyage === c.voyage_id && v.terminal === c.terminal_id)
-  const plus12 = (t: string) => new Date(Date.parse(t) + 12 * 3600_000).toISOString()
-  const berth = vessel?.name && w?.closes_at && c.previous_closes_at ? { name: vessel.name, prev: plus12(c.previous_closes_at), next: plus12(w.closes_at) } : null
+  const plus10 = (t: string) => new Date(Date.parse(t) + 10 * 3600_000).toISOString()
+  const berth = vessel?.name && w?.closes_at && c.previous_closes_at ? { name: vessel.name, prev: plus10(c.previous_closes_at), next: plus10(w.closes_at) } : null
   return (
     <section className="card evidence">
       <h2>반입 마감(컷오프) 변경 <Hint text="선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다. 선박이 늦어도 터미널이 바꾸기 전에는 마감이 그대로입니다." /></h2>
@@ -66,7 +66,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
       {w && berth && (
         <p className="change-why">
           <Icon name="ship" size={15} /> 같은 항차 모선 <b>{berth.name}</b>의 접안 예정도 <s>{kstTimeWithDay(berth.prev, s.as_of)}</s> → <b>{kstTimeWithDay(berth.next, s.as_of)}</b>로 앞당겨졌습니다.
-          <span className="small"> 반입 마감은 접안 12시간 전으로 운영됩니다(모의 규칙).</span>
+          <span className="small"> HJNC는 접안 10시간 전에 반입을 마감합니다.</span>
         </p>
       )}
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}

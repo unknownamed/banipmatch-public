@@ -22,15 +22,15 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
       <a className="brand" href="?">
         <span className="brand-mark" aria-hidden="true">반</span>
         반입맞춤
-        {mode === 'http' && <span className="demo-pill">시연 데이터</span>}
+        {mode === 'http' && <span className="demo-pill" title="모의 자료로 운영하는 데모 환경입니다. 실제 기사·터미널에 전달되지 않습니다.">데모 환경</span>}
       </a>
       <nav className="side-nav" aria-label="화면">
-        {mode === 'http' && link('start', '새 점검', '?', 'plus', 'nav-cta')}
-        <p className="nav-group">배차 점검</p>
-        {link('review', '배차 점검', `?${reviewParams.toString()}`, 'grid')}
-        <p className="nav-group">상황 확인</p>
-        {link('map', '입항 선박', `?${mapParams.toString()}`, 'map')}
-        {link('reference', '터미널 일정', `?${refParams.toString()}`, 'clock')}
+        <p className="nav-group">배차</p>
+        {mode === 'http' && link('start', '받은 변경', '?', 'inbox')}
+        {link('review', '점검 결과', `?${reviewParams.toString()}`, 'grid')}
+        <p className="nav-group">항만 상황</p>
+        {link('map', '입항 선박', `?${mapParams.toString()}`, 'ship')}
+        {link('reference', '터미널 일정', `?${refParams.toString()}`, 'schedule')}
       </nav>
     </header>
   )

@@ -95,23 +95,23 @@ const route = (approach: LatLon[], t: TerminalId) => [...approach, ...BERTH_APPR
 const leave = (approach: LatLon[], t: TerminalId) => route(approach, t).reverse()
 
 // 선박명은 서비스 이름을 딴 가상 선단(BM)이다. 항차 코드는 '선박 약어+항차 번호+방향(E/W)' 형식.
-// 반입 마감은 보통 모선 접안보다 훨씬 앞선다(예: 접안 12시간 전 이후 반입 금지). 그래서 항구 앞에 와 있는 모선은
-// 반입 마감이 이미 지난 항차이고, 반입 마감이 바뀐 시나리오 항차(BH045E·BO112W·BP007E)의 모선은 아직 외해에 있다.
-const H = (etaMin: number) => etaMin - 720 // 접안 12시간 전 마감(모의 규칙)
+// 반입 마감은 보통 모선 접안보다 훨씬 앞선다(HJNC 공개 일정에서는 접안 10시간 전에 반입 마감). 그래서 항구 앞에 와 있는 모선은
+// 반입 마감이 이미 지난 항차이고, 반입 마감이 바뀐 시나리오 항차(BHMN-2026-0045·BORT-2026-0112·BPNR-2026-0007)의 모선은 아직 외해에 있다.
+const H = (etaMin: number) => etaMin - 600 // 접안 10시간 전 마감(HJNC 공개 선석배정현황의 반입 마감·접안 예정 간격)
 export const VESSELS: Vessel[] = [
   // 대상 터미널 HJNC — 예제 02의 항차. 외해 항해 중(지도 범위 밖)
-  { id: 'BM-01', name: 'BM 하모니호', voyage: 'BH045E', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 16, state: 'underway', cutoffMin: 90, teu: 8600, port: '상하이', offshoreEtaMin: 810 },
-  { id: 'BM-02', name: 'BM 오리엔트호', voyage: 'BO112W', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 15, state: 'underway', cutoffMin: 330, teu: 4300, port: '닝보', offshoreEtaMin: 1050 },
-  { id: 'BM-03', name: 'BM 파이오니어호', voyage: 'BP007E', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 17, state: 'underway', cutoffMin: 480, teu: 13000, port: '싱가포르', offshoreEtaMin: 1200 },
+  { id: 'BM-01', name: 'BM 하모니호', voyage: 'BHMN-2026-0045', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 16, state: 'underway', cutoffMin: 90, teu: 8600, port: '상하이', offshoreEtaMin: 690 },
+  { id: 'BM-02', name: 'BM 오리엔트호', voyage: 'BORT-2026-0112', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 15, state: 'underway', cutoffMin: 330, teu: 4300, port: '닝보', offshoreEtaMin: 930 },
+  { id: 'BM-03', name: 'BM 파이오니어호', voyage: 'BPNR-2026-0007', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 17, state: 'underway', cutoffMin: 480, teu: 13000, port: '싱가포르', offshoreEtaMin: 1080 },
   // HJNC로 들어오는 중(반입 마감 지난 항차)
-  { id: 'BM-20', name: 'BM 아리아호', voyage: 'BA311E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 22.5, speedKn: 11, state: 'underway', cutoffMin: H(37), teu: 9800, port: '칭다오' },
-  { id: 'BM-21', name: 'BM 코랄호', voyage: 'BC207W', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 9, speedKn: 13, state: 'underway', cutoffMin: H(94), teu: 4800, port: '하카타' },
-  { id: 'BM-04', name: 'BM 그린호', voyage: 'BG031E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: -840, teu: 6500, port: '칭다오' },
-  { id: 'BM-05', name: 'BM 블루호', voyage: 'BB208W', terminal: 'HJNC', route: leave(SOUTH_APPROACH, 'HJNC'), startNm: 0.4, speedKn: 9, state: 'underway', cutoffMin: null, teu: 5000, port: '도쿄', outbound: true },
-  { id: 'BM-06', name: 'BM 스타호', voyage: 'BS019E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 13, state: 'underway', cutoffMin: H(225), teu: 9200, port: '홍콩', appearMin: 90 },
-  { id: 'BM-07', name: 'BM 코스모호', voyage: 'BC077W', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 12, state: 'underway', cutoffMin: H(356), teu: 7400, port: '가오슝', appearMin: 210 },
-  { id: 'BM-08', name: 'BM 노바호', voyage: 'BN054E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 14, state: 'underway', cutoffMin: H(456), teu: 11000, port: '싱가포르', appearMin: 330 },
-  { id: 'BM-09', name: 'BM 루나호', voyage: 'BL162W', terminal: 'HJNC', route: leave(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 10, state: 'underway', cutoffMin: null, teu: 6000, port: '부산 북항', outbound: true, appearMin: 150 },
+  { id: 'BM-20', name: 'BM 아리아호', voyage: 'BARA-2026-0031', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 22.5, speedKn: 11, state: 'underway', cutoffMin: H(37), teu: 9800, port: '칭다오' },
+  { id: 'BM-21', name: 'BM 코랄호', voyage: 'BCRL-2026-0020', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 9, speedKn: 13, state: 'underway', cutoffMin: H(94), teu: 4800, port: '하카타' },
+  { id: 'BM-04', name: 'BM 그린호', voyage: 'BGRN-2026-0031', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: -840, teu: 6500, port: '칭다오' },
+  { id: 'BM-05', name: 'BM 블루호', voyage: 'BBLU-2026-0028', terminal: 'HJNC', route: leave(SOUTH_APPROACH, 'HJNC'), startNm: 0.4, speedKn: 9, state: 'underway', cutoffMin: null, teu: 5000, port: '도쿄', outbound: true },
+  { id: 'BM-06', name: 'BM 스타호', voyage: 'BSTR-2026-0019', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 13, state: 'underway', cutoffMin: H(225), teu: 9200, port: '홍콩', appearMin: 90 },
+  { id: 'BM-07', name: 'BM 코스모호', voyage: 'BCSM-2026-0077', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 12, state: 'underway', cutoffMin: H(356), teu: 7400, port: '가오슝', appearMin: 210 },
+  { id: 'BM-08', name: 'BM 노바호', voyage: 'BNVA-2026-0054', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 14, state: 'underway', cutoffMin: H(456), teu: 11000, port: '싱가포르', appearMin: 330 },
+  { id: 'BM-09', name: 'BM 루나호', voyage: 'BLNA-2026-0016', terminal: 'HJNC', route: leave(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 10, state: 'underway', cutoffMin: null, teu: 6000, port: '부산 북항', outbound: true, appearMin: 150 },
   // 다른 신항 터미널
   { id: 'BM-11', name: 'BM 오션호', voyage: 'BE221E', terminal: 'PNIT', route: route(SOUTH_APPROACH, 'PNIT'), startNm: 15, speedKn: 12, state: 'underway', cutoffMin: null, teu: 9000, port: '가오슝' },
   { id: 'BM-12', name: 'BM 브릿지호', voyage: 'BR090W', terminal: 'HPNT', route: route(SOUTH_APPROACH, 'HPNT'), startNm: 4, speedKn: 13, state: 'underway', cutoffMin: null, teu: 7000, port: '상하이' },

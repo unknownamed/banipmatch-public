@@ -2,7 +2,7 @@
 // 모든 선박·항차·속력·마감은 모의다. 도착은 추정이며 반입 마감을 바꾸지 않는다.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BUOYS, SOURCES, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
-import { MAP_TYPES, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
+import { MAP_TYPES, keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
 import type { Snapshot } from '../api/types'
 
 export type ScenarioLink = { snapshot: Snapshot; reviewHref: string }
@@ -55,10 +55,12 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
   // 지도와 고정 요소(항로·부표·터미널)는 한 번만 그린다.
   useEffect(() => {
     let alive = true
+    let unobserve = () => {}
     loadKakaoMaps().then(maps => {
       if (!alive || !box.current) return
       const m = new maps.Map(box.current, { center: new maps.LatLng(34.99, 128.8), level: 9 })
       kmap.current = m
+      unobserve = keepLaidOut(m, box.current)
       // 넓게 볼 때는 대상 터미널·선택 선박 이름만 남겨 겹침을 줄인다.
       const zoomClass = () => box.current?.classList.toggle('vm-far', m.getLevel() >= 8)
       maps.event.addListener(m, 'zoom_changed', zoomClass)
@@ -99,7 +101,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       }
       setMapState({ ok: true, msg: '' })
     }).catch((e: Error) => alive && setMapState({ ok: false, msg: `${e.message} 선박 목록과 남은 시간은 지도 없이 확인할 수 있습니다.` }))
-    return () => { alive = false; marks.current.clear(); paths.current = null; kmap.current = null }
+    return () => { alive = false; unobserve(); marks.current.clear(); paths.current = null; kmap.current = null }
   }, [])
 
   useEffect(() => {

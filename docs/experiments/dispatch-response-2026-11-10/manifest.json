@@ -5,7 +5,7 @@
   "source": "docs/development/v0.1/예제 데이터/01_snapshot.json",
   "source_sha256": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e",
   "tool": "tools/dispatch_response.py",
-  "tool_sha256": "0d6db2f9b22540832304d4d4651fcbbb6c63e8ce133fea3b052f907aab968d36",
+  "tool_sha256": "7fcd3573587f4ce1414abc12a0f74f775da75d61446fcd83b582f4cce1476a1a",
   "python": "3.12.14",
   "method": "B1",
   "seed": 42,
@@ -22,6 +22,10 @@
     {
       "date": "2026-11-12",
       "reason": "변경 명세에 현장 표시 정보(display, plate_no) 추가 후 같은 입력·결과로 재생성. 일정·대상 차량·변경 판정은 동일"
+    },
+    {
+      "date": "2026-11-12",
+      "reason": "변경 비교에서 차량별 작업 순서를 1부터 다시 매겨 비교(엔진 sequence의 빈 번호만 다른 작업을 변경으로 전달하지 않음). 같은 입력·결과로 재생성"
     }
   ]
 }

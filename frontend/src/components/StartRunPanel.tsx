@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import s01 from '@examples/01_snapshot.json'
+import { useMemo, useState } from 'react'
 import s07 from '@examples/07_snapshot_입력누락.json'
 import s08 from '@examples/08_snapshot_미확인변경.json'
 import s02 from '../fixtures/demo-02-evening.synthetic.json'
@@ -16,23 +15,17 @@ import { ComparisonSection } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
 import { withQueueRetry } from '../lib/queueRetry'
 import { NowPanel } from './NowPanel'
+import { FleetToday } from './FleetToday'
 import { Icon, type IconName } from './Icon'
 
 // 홈은 담당자가 받은 변경을 처리하는 알림함이다(물류 관제 화면의 '조치가 필요한 예외 목록' 구성).
-// 시연용 예제를 실제로 받을 수 있는 알림 종류로 보여 준다: 확정 공지 / 확정 전 공지 / 입력 누락 / 연습.
+// 시연용 예제를 실제로 받을 수 있는 알림 종류로 보여 준다: 확정 공지 / 확정 전 공지 / 입력 누락.
 type Tone = 'danger' | 'caution' | 'neutral'
 const EXAMPLES = [
-  { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'HJNC · BH045E 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 같은 저녁 PNIT 반입 작업은 영향이 없습니다.', snapshot: s02 },
+  { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'HJNC · BHMN-2026-0045 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 같은 저녁 PNIT 반입 작업은 영향이 없습니다.', snapshot: s02 },
   { id: '08', group: 'todo', icon: 'bell', tone: 'caution', chip: '확정 대기', title: 'HJNC · 반입 마감 변경 공지(확정 전)', meta: '터미널 공지 접수 · 아직 확정되지 않음', stats: ['트럭 2대', '작업 4건'], what: '확정되기 전에는 배차를 바꾸지 않습니다. 열어 보면 계산이 막히는 이유와 원래 배차를 확인할 수 있습니다.', snapshot: s08 },
   { id: '07', group: 'todo', icon: 'edit', tone: 'caution', chip: '입력 확인', title: '상차 준비 시각이 빠진 작업', meta: '운송 계획 입력 누락 · 반입 마감 변경 확정', stats: ['트럭 2대', '작업 4건'], what: '준비 시각이 비어 있으면 계산할 수 없습니다. 화주에게 확인한 시각을 넣어 다시 계산합니다.', snapshot: s07 },
-  { id: '01', group: 'practice', icon: 'box', tone: 'neutral', chip: '연습', title: '작은 배차로 흐름 익히기', meta: '트럭 2대 · 작업 4건 · 반입 마감 1시간 30분 앞당김', stats: ['트럭 2대', '작업 4건'], what: '처음 쓰는 담당자가 점검 → 비교 → 확정 → 기사 전달 흐름을 빠르게 익히는 예제입니다.', snapshot: s01 },
-] as const satisfies readonly { id: string; group: 'todo' | 'practice'; icon: IconName; tone: Tone; chip: string; title: string; meta: string; stats: readonly string[]; what: string; snapshot: unknown }[]
-const METHOD_TEXT: Record<string, string> = {
-  B0: '원래 배차 그대로 점검(항상 포함)',
-  B1: '마감 빠른 순 재배치',
-  B2: '전체 재최적화',
-  B3: '최소 변경 최적화',
-}
+] as const satisfies readonly { id: string; group: 'todo'; icon: IconName; tone: Tone; chip: string; title: string; meta: string; stats: readonly string[]; what: string; snapshot: unknown }[]
 
 type Status =
   | { state: 'idle' }
@@ -52,26 +45,21 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   // 예제마다 한 시도를 유지한다. 실패 후 "다시 시도"는 같은 본문·같은 멱등키. 새 시도는 새로고침.
   const [attempts] = useState(() => new Map<string, StartAttempt>())
   const [status, setStatus] = useState<Status>({ state: 'idle' })
-  // B0는 비교 기준이라 항상 포함한다. 기본은 명세대로 B0~B3 전체.
-  const [picked, setPicked] = useState<ReadonlySet<MethodId>>(() => new Set(ALL_METHODS))
-  // v2 서버는 예제 01을 현재 시연 시각으로 옮겨 준다(기준시각 경과로 승인이 막히지 않게). 모의 자료라는 점은 같다.
+  // 같은 입력·조건으로 B0~B3를 모두 계산해 비교한다(B0는 비교 기준). 담당자가 방법을 고르지 않는다.
+  const picked: ReadonlySet<MethodId> = new Set(ALL_METHODS)
   const v2 = 'defaultExample' in client ? (client as V2Client) : null
-  const [fresh, setFresh] = useState<{ snapshot?: Snapshot; error?: unknown }>({})
-  useEffect(() => {
-    v2?.defaultExample().then((snapshot) => setFresh({ snapshot }), (error) => setFresh({ error }))
-  }, [v2])
   const example = EXAMPLES.find((e) => e.id === exampleId)!
+  // 홈의 '오늘 저녁 배차 현황'은 예제 02의 현재 배차표를 지금 시각으로 옮겨 보여 준다(모의).
+  const tonight = useMemo(() => shiftSnapshot(s02 as unknown as Snapshot, new Date()), [])
   // 07·08도 같은 규칙으로 지금 시각에 옮긴다(만료가 아니라 원래 의도한 입력 누락·미확인 변경으로 막히게).
-  const source = !v2 ? (example.snapshot as unknown as Snapshot) : exampleId === '01' ? fresh.snapshot : shiftSnapshot(example.snapshot as unknown as Snapshot, new Date())
+  const source = !v2 ? (example.snapshot as unknown as Snapshot) : shiftSnapshot(example.snapshot as unknown as Snapshot, new Date())
   if (source && !attempts.has(exampleId)) attempts.set(exampleId, newAttempt(source, runRequestJson as unknown as RunRequest))
   const attempt = attempts.get(exampleId)
 
   if (!attempt)
     return (
       <main>
-        <p className={fresh.error ? 'card warn' : 'card'} role={fresh.error ? 'alert' : 'status'}>
-          {fresh.error ? `시연 예제를 받지 못했습니다: ${fresh.error instanceof Error ? fresh.error.message : String(fresh.error)}. 백엔드 실행(BANIPMATCH_WORKFLOW=1)을 확인하세요.` : '시연 세션과 예제 준비 중…'}
-        </p>
+        <p className="card" role="status">변경 내용을 불러오는 중…</p>
       </main>
     )
 
@@ -110,10 +98,10 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       <div className="start-grid">
       <section className="card start-main">
         <div role="radiogroup" aria-label="처리할 변경 선택" className="inbox">
-          {(['todo', 'practice'] as const).map((g) => (
+          {(['todo'] as const).map((g) => (
             <div key={g} className="inbox-group">
               <h2 className="inbox-head">
-                {g === 'todo' ? '처리할 변경' : '연습용'}
+                처리할 변경
                 <span className="inbox-count">{EXAMPLES.filter((e) => e.group === g).length}</span>
               </h2>
               {EXAMPLES.filter((e) => e.group === g).map((e) => {
@@ -145,29 +133,6 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
             </div>
           ))}
         </div>
-        <details className="tech-info start-advanced">
-          <summary>고급 설정 · 계산 방법</summary>
-          <fieldset disabled={status.state === 'sending'}>
-            {ALL_METHODS.map((m) => (
-              <label key={m} className="method-pick">
-                <input
-                  type="checkbox"
-                  checked={m === 'B0' || picked.has(m)}
-                  disabled={m === 'B0'}
-                  onChange={(e) => {
-                    const next = new Set(picked)
-                    if (e.target.checked) next.add(m)
-                    else next.delete(m)
-                    setPicked(next)
-                    if (status.state === 'error') setStatus({ state: 'idle' })
-                  }}
-                />{' '}
-                <b>{m}</b> {METHOD_TEXT[m]}
-              </label>
-            ))}
-            {!v2 && <p className="muted small">공통 예제는 기준시각이 지난 모의 자료라 승인이 입력 유효기간 만료로 거절될 수 있습니다.</p>}
-          </fieldset>
-        </details>
         {status.state !== 'rejected' && (
           <button type="button" disabled={status.state === 'sending'} onClick={start}>
             {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '선택한 변경 영향 확인'}
@@ -217,6 +182,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       </section>
       <NowPanel />
       </div>
+      {status.state !== 'rejected' && <FleetToday snapshot={tonight} />}
       {status.state === 'rejected' && <RejectedInput snapshot={status.snapshot} reason={status.error.message} />}
       {status.state === 'rejected' && v2 && (
         <ConditionRevisionPanel

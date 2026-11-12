@@ -1,3 +1,4 @@
+import { ResultNav } from './components/ResultNav'
 import { useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
 import type { MethodResult } from './api/types'
@@ -77,6 +78,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && (
         <>
           <Header s={snapshot} />
+          {view.results.state === 'ready' && <ResultNav />}
           {view.results.state === 'ready' && (
             <ActionSummary base={base} cand={cand} recommended={recommended?.method} rows={rows}
               approved={!!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))} />
