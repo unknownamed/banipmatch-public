@@ -1,0 +1,213 @@
+[
+  {
+    "case": "BHMN 마감 2시간 30분 앞당김(확정)",
+    "fixture": "demo-02-evening",
+    "jobs": 20,
+    "vehicles": 8,
+    "frozen": 2,
+    "blocked": false,
+    "block_codes": [],
+    "methods": {
+      "B0": {
+        "status": "BASELINE",
+        "unassigned": 0,
+        "late_or_unassigned": 4,
+        "changed": 0,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B1": {
+        "status": "HEURISTIC",
+        "unassigned": 1,
+        "late_or_unassigned": 1,
+        "changed": 16,
+        "travel_min": 1244,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B2": {
+        "status": "OPTIMAL",
+        "unassigned": 1,
+        "late_or_unassigned": 1,
+        "changed": 11,
+        "travel_min": 1244,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B3": {
+        "status": "OPTIMAL",
+        "unassigned": 1,
+        "late_or_unassigned": 1,
+        "changed": 5,
+        "travel_min": 1244,
+        "fixed_risk": 0,
+        "ms": null
+      }
+    }
+  },
+  {
+    "case": "BE221E 마감 1시간 30분 앞당김(확정)",
+    "fixture": "demo-02-minor-earlier",
+    "jobs": 20,
+    "vehicles": 8,
+    "frozen": 2,
+    "blocked": false,
+    "block_codes": [],
+    "methods": {
+      "B0": {
+        "status": "BASELINE",
+        "unassigned": 0,
+        "late_or_unassigned": 1,
+        "changed": 0,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B1": {
+        "status": "HEURISTIC",
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 16,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B2": {
+        "status": "OPTIMAL",
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 16,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B3": {
+        "status": "OPTIMAL",
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 2,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      }
+    }
+  },
+  {
+    "case": "BPNR 마감 1시간 늦춰짐(확정)",
+    "fixture": "demo-02-later",
+    "jobs": 20,
+    "vehicles": 8,
+    "frozen": 2,
+    "blocked": false,
+    "block_codes": [],
+    "methods": {
+      "B0": {
+        "status": "BASELINE",
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 0,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B1": {
+        "status": "HEURISTIC",
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 17,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B2": {
+        "status": "OPTIMAL",
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 5,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B3": {
+        "status": "OPTIMAL",
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 0,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      }
+    }
+  },
+  {
+    "case": "BORT 마감 앞당김 예정(확정 전)",
+    "fixture": "demo-02-unconfirmed",
+    "jobs": 20,
+    "vehicles": 8,
+    "frozen": 2,
+    "blocked": false,
+    "block_codes": [],
+    "methods": {
+      "B0": {
+        "error": "EngineInputError"
+      },
+      "B1": {
+        "error": "EngineInputError"
+      },
+      "B2": {
+        "error": "EngineInputError"
+      },
+      "B3": {
+        "error": "EngineInputError"
+      }
+    }
+  },
+  {
+    "case": "상차 준비 시각 미입력",
+    "fixture": "demo-02-missing-ready",
+    "jobs": 20,
+    "vehicles": 8,
+    "frozen": 2,
+    "blocked": false,
+    "block_codes": [],
+    "methods": {
+      "B0": {
+        "status": "INPUT_INCOMPLETE",
+        "unassigned": 0,
+        "late_or_unassigned": 4,
+        "changed": 0,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B1": {
+        "status": "INPUT_INCOMPLETE",
+        "unassigned": 2,
+        "late_or_unassigned": 2,
+        "changed": 15,
+        "travel_min": 1151,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B2": {
+        "status": "INPUT_INCOMPLETE",
+        "unassigned": 2,
+        "late_or_unassigned": 2,
+        "changed": 11,
+        "travel_min": 1151,
+        "fixed_risk": 0,
+        "ms": null
+      },
+      "B3": {
+        "status": "INPUT_INCOMPLETE",
+        "unassigned": 2,
+        "late_or_unassigned": 2,
+        "changed": 5,
+        "travel_min": 1151,
+        "fixed_risk": 0,
+        "ms": null
+      }
+    }
+  }
+]
