@@ -35,7 +35,7 @@
 |---|---|
 | ![점검 결과](docs/report/final/figures/02-result-top.png) | ![기사 전달](docs/report/final/figures/09b-dispatch-toast.png) |
 | **차량 지도(위성·실시간 교통)** | **기사 휴대폰** |
-| ![차량 지도](docs/report/final/figures/04-dispatch-map.png) | <img src="docs/report/final/figures/10-recipient-response.png" width="280" alt="기사 휴대폰 화면"> |
+| ![차량 지도](docs/report/final/figures/04-dispatch-map.jpg) | <img src="docs/report/final/figures/10-recipient-response.png" width="280" alt="기사 휴대폰 화면"> |
 
 ## 데이터
 
