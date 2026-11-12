@@ -33,7 +33,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
   const fleet = useMemo(() => fleetAt(t), [t])
   const sel = fleet.find(v => v.vessel.id === picked) ?? fleet[0]
   // 계산한 시나리오에 같은 항차·터미널 반입 시간창이 있으면 그 값을 쓴다(지도 전용 모의 값보다 우선).
-  const cutoffOf = (voyage: string, terminal: string, fallback: number): Cutoff => {
+  const cutoffOf = (voyage: string, terminal: string, fallback: number | null): Cutoff => {
     const toMin = (iso: string | null) => (iso ? (Date.parse(iso) - base.getTime()) / 60000 : null)
     const w = link?.snapshot.windows.find(x => x.voyage_id === voyage && x.terminal_id === terminal)
     if (!w) return { min: fallback, prevMin: null, linked: false, confirmed: false }
@@ -118,7 +118,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       mk.overlay.setZIndex(v.vessel.id === sel.vessel.id ? 9 : v.vessel.terminal === 'HJNC' ? 6 : 5)
       mk.el.className = `vm-ship ${v.status}${v.vessel.terminal === 'HJNC' ? ' target' : ''}${v.vessel.id === sel.vessel.id ? ' picked' : ''}`
       const name = v.vessel.name ?? '이름 미수신'
-      const tail = v.etaMin !== null ? formatDuration(v.etaMin - t) : STATUS_LABEL[v.status]
+      const tail = v.vessel.outbound ? `출항 · ${v.vessel.port}행` : v.etaMin !== null ? `${formatDuration(v.etaMin - t)} 후 도착` : STATUS_LABEL[v.status]
       mk.el.innerHTML = `${shipSvg(v.status === 'anchored' ? 20 : v.heading)}<span>${name} · ${tail}</span>`
     }
     if (paths.current) {
@@ -131,6 +131,29 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
     setPicked(v.vessel.id)
     const maps = window.kakao?.maps
     if (kmap.current && maps) kmap.current.panTo(new maps.LatLng(v.pos.lat, v.pos.lon))
+  }
+
+  const row = (v: VesselView) => {
+    const total = routeLengthNm(v.vessel.route)
+    const progress = total > 0 && v.remainingNm !== null ? 1 - v.remainingNm / total : v.status === 'berthed' ? 1 : 0
+    const label = v.vessel.outbound ? '출항 중' : STATUS_LABEL[v.status]
+    return (
+      <li key={v.vessel.id}>
+        <button type="button" className={`vm-item${v.vessel.id === sel.vessel.id ? ' picked' : ''}`} aria-pressed={v.vessel.id === sel.vessel.id} onClick={() => focus(v)}>
+          <span className="vm-item-top">
+            <b>{v.vessel.name ?? '이름 미수신'}</b>
+            <span className="muted">{v.vessel.voyage} · {v.vessel.terminal}</span>
+            <span className={`vm-chip ${v.vessel.outbound ? 'out' : v.status}`}>{label}</span>
+          </span>
+          <span className="vm-eta">
+            {v.vessel.outbound ? <span className="muted">{v.vessel.port} 향발{v.etaMin !== null ? ` · 외해까지 ${formatDuration(v.etaMin - t)}` : ''}</span>
+              : v.etaMin !== null ? <><b>{formatDuration(v.etaMin - t)}</b> 후 도착 추정 <span className="muted">· {kst(at(base, v.etaMin))}</span></>
+              : <span className="muted">{v.etaNote}</span>}
+          </span>
+          {!v.vessel.outbound && <span className="vm-bar" aria-hidden="true"><span style={{ width: `${Math.round(progress * 100)}%` }} /></span>}
+        </button>
+      </li>
+    )
   }
 
   return (
@@ -173,44 +196,24 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
           <div className="vm-map-wrap">
             <div ref={box} className="vm-map" aria-label="부산신항 입항 선박 지도" />
             {!mapState.ok && <p className="vm-map-msg muted small" role="status">{mapState.msg}</p>}
+            {mapState.ok && (
+              <div className="map-legend" aria-label="범례">
+                <span><i className="lg hjnc" />HJNC 입항</span><span><i className="lg other" />다른 터미널</span><span><i className="lg berth" />접안 중</span><span><i className="lg route" />선택 선박 남은 항로</span>
+              </div>
+            )}
           </div>
 
-          <ol className="vm-list" aria-label="도착 추정 순 선박">
-            {fleet.map(v => {
-              const total = routeLengthNm(v.vessel.route)
-              const progress = total > 0 && v.remainingNm !== null ? 1 - v.remainingNm / total : v.status === 'berthed' ? 1 : 0
-              const cut = cutoffOf(v.vessel.voyage, v.vessel.terminal, v.vessel.cutoffMin)
-              const cutLeft = cut.min === null ? null : cut.min - t
-              return (
-                <li key={v.vessel.id}>
-                  <button type="button" className={`vm-item${v.vessel.id === sel.vessel.id ? ' picked' : ''}`} aria-pressed={v.vessel.id === sel.vessel.id} onClick={() => focus(v)}>
-                    <span className="vm-item-top">
-                      <b>{v.vessel.name ?? '이름 미수신'}</b>
-                      <span className="muted">{v.vessel.voyage} · {v.vessel.terminal}{v.vessel.terminal === 'HJNC' ? ' (대상)' : ''}</span>
-                      <span className={`vm-chip ${v.status}`}>{STATUS_LABEL[v.status]}</span>
-                    </span>
-                    <span className="vm-eta">
-                      {v.etaMin !== null
-                        ? <><b>{formatDuration(v.etaMin - t)}</b> 후 도착 추정 <span className="muted">· {kst(at(base, v.etaMin))}</span></>
-                        : <span className="muted">{v.etaNote}</span>}
-                    </span>
-                    <span className="vm-bar" aria-hidden="true"><span style={{ width: `${Math.round(progress * 100)}%` }} /></span>
-                    <span className="vm-meta small">
-                      {v.remainingNm !== null && v.status !== 'berthed' && <span>남은 {v.remainingNm.toFixed(1)}해리</span>}
-                      {v.status === 'underway' && <span>{v.vessel.speedKn}노트</span>}
-                      {v.status === 'stale' && <span className="warn">마지막 위치 {Math.round(v.positionAgeMin)}분 전</span>}
-                    </span>
-                    <span className={`vm-cutoff small${cutLeft === null ? '' : cutLeft < 0 ? ' past' : cutLeft <= 60 ? ' soon' : ''}`}>
-                      {cut.min === null || cutLeft === null ? '반입 마감 미확인' : <>반입 마감 <b>{kst(at(base, cut.min))}</b> · {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}</>}
-                      {cut.prevMin !== null && <span className="vm-changed"> · 변경 전 {kst(at(base, cut.prevMin))}{cut.confirmed ? ' (확정 변경)' : ' (미확정)'}</span>}
-                      <span className="muted"> ({cut.linked ? '계산 시나리오의 터미널 공지·모의' : '지도 전용 모의 값'})</span>
-                    </span>
-                  </button>
-                  {cut.linked && link && <a className="vm-go" href={link.reviewHref}>{v.vessel.voyage} 항차 배차 점검 보기 →</a>}
-                </li>
-              )
-            })}
-          </ol>
+          <div className="vm-side">
+            <InfoCard v={sel} t={t} base={base} cut={cutoffOf(sel.vessel.voyage, sel.vessel.terminal, sel.vessel.cutoffMin)} link={link} />
+            <h3 className="vm-group">HJNC(대상 터미널) 선박 {fleet.filter(v => v.vessel.terminal === 'HJNC').length}척</h3>
+            <ol className="vm-list" aria-label="HJNC 선박 도착 추정 순">
+              {fleet.filter(v => v.vessel.terminal === 'HJNC').map(v => row(v))}
+            </ol>
+            <details className="vm-others">
+              <summary>다른 신항 터미널 선박 {fleet.filter(v => v.vessel.terminal !== 'HJNC').length}척</summary>
+              <ol className="vm-list">{fleet.filter(v => v.vessel.terminal !== 'HJNC').map(v => row(v))}</ol>
+            </details>
+          </div>
         </div>
 
         <details className="vm-notes small">
@@ -227,5 +230,30 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         </details>
       </section>
     </main>
+  )
+}
+
+function InfoCard({ v, t, base, cut, link }: { v: VesselView; t: number; base: Date; cut: Cutoff; link: ScenarioLink | null }) {
+  const name = v.vessel.name ?? '이름 미수신 선박'
+  const cutLeft = cut.min === null ? null : cut.min - t
+  const rows: [string, React.ReactNode][] = [
+    ['선박', `컨테이너선 · ${v.vessel.teu.toLocaleString()}TEU`],
+    [v.vessel.outbound ? '다음 기항' : '출발항', v.vessel.port],
+    ['터미널 · 항차', `${v.vessel.terminal} · ${v.vessel.voyage}`],
+  ]
+  if (v.status === 'underway' && !v.vessel.outbound && v.etaMin !== null) {
+    rows.push(['도착 추정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후)</>])
+    rows.push(['남은 항로', `${v.remainingNm!.toFixed(1)}해리 · ${v.vessel.speedKn}노트`])
+  } else if (v.vessel.outbound) rows.push(['상태', `출항 중 · ${v.vessel.speedKn}노트`])
+  else rows.push(['상태', v.etaNote])
+  if (v.vessel.terminal === 'HJNC' && !v.vessel.outbound && cut.min !== null && cutLeft !== null)
+    rows.push(['반입 마감', <>{kst(at(base, cut.min))} · {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}{cut.prevMin !== null && <span className="vm-changed"> (변경 전 {kst(at(base, cut.prevMin))})</span>}</>])
+  return (
+    <div className="vm-info" aria-live="polite">
+      <div className="vm-info-head"><b>{name}</b>{v.vessel.terminal === 'HJNC' && <span className="vm-chip underway">대상 터미널</span>}</div>
+      <dl>{rows.map(([k, val]) => <div key={k}><dt>{k}</dt><dd>{val}</dd></div>)}</dl>
+      {cut.linked && link && v.vessel.terminal === 'HJNC' && !v.vessel.outbound && <a className="vm-go" href={link.reviewHref}>{v.vessel.voyage} 항차 배차 점검 →</a>}
+      <p className="muted small">모의 선박입니다. 도착 시각은 남은 항로 ÷ 속력으로 계산한 추정이며 반입 마감을 바꾸지 않습니다.</p>
+    </div>
   )
 }

@@ -20,7 +20,7 @@ it('지도 키가 없어도 선박 목록·남은 시간·모의 표시를 보�
   expect(box.textContent).toContain('모두 모의입니다')
   expect(box.textContent).toContain('후 도착 추정')
   expect(box.textContent).toContain('속력 0이라 도착 시각을 산정하지 않음')
-  expect(box.textContent).toContain('지도 전용 모의 값')
+  expect(box.textContent).toContain('다른 신항 터미널 선박')
   await unmount()
 })
 
@@ -32,9 +32,8 @@ it('계산 시나리오가 있으면 같은 항차의 반입 마감·변경 전 
   } as unknown as Snapshot
   const { box, unmount } = await mount(<VesselApproachMap link={{ snapshot, reviewHref: '?scenario=S-test&run=R1' }} />)
   expect(box.textContent).toContain('S-test')
-  expect(box.textContent).toMatch(/변경 전 \d\d:\d\d \(확정 변경\)/)
-  expect(box.textContent).toContain('계산 시나리오의 터미널 공지')
-  const go = [...box.querySelectorAll('a')].find(a => a.textContent?.includes('V1 항차 배차 점검 보기'))
+  expect(box.textContent).toMatch(/변경 전 \d\d:\d\d/)
+  const go = [...box.querySelectorAll('a')].find(a => a.textContent?.includes('V1 항차 배차 점검'))
   expect(go?.getAttribute('href')).toBe('?scenario=S-test&run=R1')
   await unmount()
 })

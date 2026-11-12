@@ -24,14 +24,14 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
         반입맞춤
       </a>
       <nav className="side-nav" aria-label="화면">
-        {mode === 'http' && link('start', '계산 요청', '?', 'plus', 'nav-cta')}
+        {mode === 'http' && link('start', '새 점검', '?', 'plus', 'nav-cta')}
         <p className="nav-group">배차 점검</p>
-        {link('review', '비교 · 승인', `?${reviewParams.toString()}`, 'grid')}
-        <p className="nav-group">확인</p>
-        {link('map', '지도 확인', `?${mapParams.toString()}`, 'map')}
-        {link('reference', '참고 자료', `?${refParams.toString()}`, 'clock')}
+        {link('review', '배차 점검', `?${reviewParams.toString()}`, 'grid')}
+        <p className="nav-group">상황 확인</p>
+        {link('map', '입항 선박', `?${mapParams.toString()}`, 'map')}
+        {link('reference', '실제 자료', `?${refParams.toString()}`, 'clock')}
       </nav>
-      <span className="appbar-note">{mode === 'http' ? '모의 배차 · 서버 계산' : '공통 예제'}</span>
+      <span className="appbar-note">{mode === 'http' ? '시연용 모의 배차' : '공통 예제'}</span>
     </header>
   )
 }

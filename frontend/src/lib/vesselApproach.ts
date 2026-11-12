@@ -82,20 +82,31 @@ export type Vessel = {
   startNm: number // 재생 시작 시점에 항로 위에서 이미 지나온 거리
   speedKn: number
   state: VesselState
-  cutoffMin: number // 재생 시작 기준 반입 마감(분, 모의 터미널 공지)
+  cutoffMin: number | null // 재생 시작 기준 반입 마감(분, 모의 터미널 공지). 출항선은 없음
   staleAfterMin?: number // 이 시각 이후 위치 갱신 없음
+  teu: number // 선형 크기(모의)
+  port: string // 입항선은 직전 출발항, 출항선은 다음 기항지(모의)
+  outbound?: boolean
 }
 
 const route = (approach: LatLon[], t: TerminalId) => [...approach, ...BERTH_APPROACH[t]]
+const leave = (approach: LatLon[], t: TerminalId) => route(approach, t).reverse()
 
 export const VESSELS: Vessel[] = [
-  { id: 'SIM-01', name: 'SIM 한바다', voyage: 'V1', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 22.5, speedKn: 11, state: 'underway', cutoffMin: 90 },
-  { id: 'SIM-02', name: 'SIM 동백', voyage: 'V2', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 9, speedKn: 13, state: 'underway', cutoffMin: 150 },
-  { id: 'SIM-07', name: 'SIM 누리', voyage: 'V4', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 14, state: 'underway', cutoffMin: 210 },
-  { id: 'SIM-03', name: 'SIM 가덕', voyage: 'V7', terminal: 'DGT', route: route(WEST_APPROACH, 'DGT'), startNm: 0.6, speedKn: 10, state: 'underway', cutoffMin: 60 },
-  { id: 'SIM-04', name: 'SIM 오륙', voyage: 'V9', terminal: 'PNIT', route: [ANCHORAGE], startNm: 0, speedKn: 0, state: 'anchored', cutoffMin: 300 },
-  { id: 'SIM-05', name: null, voyage: 'V5', terminal: 'BNCT', route: route(SOUTH_APPROACH, 'BNCT'), startNm: 21, speedKn: 12, state: 'underway', cutoffMin: 30, staleAfterMin: 35 },
-  { id: 'SIM-06', name: 'SIM 영도', voyage: 'V3', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: -120 },
+  // 대상 터미널 HJNC
+  { id: 'SIM-01', name: 'SIM 한바다', voyage: 'V1', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 22.5, speedKn: 11, state: 'underway', cutoffMin: 90, teu: 8600, port: '상하이' },
+  { id: 'SIM-02', name: 'SIM 동백', voyage: 'V2', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 9, speedKn: 13, state: 'underway', cutoffMin: 150, teu: 4300, port: '닝보' },
+  { id: 'SIM-07', name: 'SIM 누리', voyage: 'V4', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 14, state: 'underway', cutoffMin: 210, teu: 13000, port: '싱가포르' },
+  { id: 'SIM-06', name: 'SIM 영도', voyage: 'V3', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: -120, teu: 6500, port: '칭다오' },
+  { id: 'SIM-08', name: 'SIM 태종', voyage: 'V0', terminal: 'HJNC', route: leave(SOUTH_APPROACH, 'HJNC'), startNm: 0.4, speedKn: 9, state: 'underway', cutoffMin: null, teu: 5000, port: '도쿄', outbound: true },
+  // 다른 신항 터미널
+  { id: 'SIM-09', name: 'SIM 해운대', voyage: 'P11', terminal: 'PNIT', route: route(SOUTH_APPROACH, 'PNIT'), startNm: 15, speedKn: 12, state: 'underway', cutoffMin: null, teu: 9000, port: '가오슝' },
+  { id: 'SIM-10', name: 'SIM 다대', voyage: 'H12', terminal: 'HPNT', route: route(SOUTH_APPROACH, 'HPNT'), startNm: 4, speedKn: 13, state: 'underway', cutoffMin: null, teu: 7000, port: '상하이' },
+  { id: 'SIM-03', name: 'SIM 가덕', voyage: 'D7', terminal: 'DGT', route: route(WEST_APPROACH, 'DGT'), startNm: 0.6, speedKn: 10, state: 'underway', cutoffMin: null, teu: 1800, port: '광양' },
+  { id: 'SIM-12', name: 'SIM 송정', voyage: 'D6', terminal: 'DGT', route: leave(WEST_APPROACH, 'DGT'), startNm: 1.2, speedKn: 8, state: 'underway', cutoffMin: null, teu: 2200, port: '여수', outbound: true },
+  { id: 'SIM-04', name: 'SIM 오륙', voyage: 'P9', terminal: 'PNIT', route: [ANCHORAGE], startNm: 0, speedKn: 0, state: 'anchored', cutoffMin: null, teu: 11000, port: '롱비치' },
+  { id: 'SIM-05', name: null, voyage: 'B5', terminal: 'BNCT', route: route(SOUTH_APPROACH, 'BNCT'), startNm: 21, speedKn: 12, state: 'underway', cutoffMin: null, staleAfterMin: 35, teu: 2500, port: '홍콩' },
+  { id: 'SIM-11', name: 'SIM 명지', voyage: 'B4', terminal: 'BNCT', route: route(SOUTH_APPROACH, 'BNCT'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: null, teu: 6000, port: '하이퐁' },
 ]
 
 const NM = 1852
@@ -160,14 +171,18 @@ export function vesselAt(v: Vessel, t: number): VesselView {
     return { ...base, status: 'anchored', remainingNm: null, etaMin: null, etaNote: '묘박 대기 · 속력 0이라 도착 시각을 산정하지 않음' }
   const remaining = total - travelled
   if (stale) return { ...base, status: 'stale', remainingNm: remaining, etaMin: null, etaNote: `위치 갱신 ${Math.round(t - v.staleAfterMin!)}분 없음 · 이후 이동을 추정하지 않음` }
-  if (remaining <= 0.01) return { ...base, status: 'berthed', remainingNm: 0, etaMin: null, etaNote: '터미널 앞 도착(모의)' }
-  return { ...base, status: 'underway', remainingNm: remaining, etaMin: t + (remaining / v.speedKn) * 60, etaNote: '남은 항로 ÷ 현재 속력' }
+  if (remaining <= 0.01)
+    return v.outbound
+      ? { ...base, status: 'underway', remainingNm: 0, etaMin: null, etaNote: `외해로 나감 · ${v.port} 향발` }
+      : { ...base, status: 'berthed', remainingNm: 0, etaMin: null, etaNote: '터미널 앞 도착(모의)' }
+  return { ...base, status: 'underway', remainingNm: remaining, etaMin: t + (remaining / v.speedKn) * 60, etaNote: v.outbound ? '외해까지' : '남은 항로 ÷ 현재 속력' }
 }
 
 export function fleetAt(t: number) {
   const order = { underway: 0, stale: 1, anchored: 2, berthed: 3 } as const
   return VESSELS.map(v => vesselAt(v, t)).sort((a, b) =>
     Number(b.vessel.terminal === 'HJNC') - Number(a.vessel.terminal === 'HJNC') ||
+    Number(!!a.vessel.outbound) - Number(!!b.vessel.outbound) ||
     order[a.status] - order[b.status] || (a.etaMin ?? 1e9) - (b.etaMin ?? 1e9))
 }
 

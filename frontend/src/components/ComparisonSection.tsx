@@ -15,6 +15,8 @@ interface Props {
   candidates: MethodResult[]
   rows: JobRow[]
   onPick: (method: string) => void
+  /** 추천 기준(미처리→위반→고정 위험→변경 수)으로 고른 방법 */
+  recommended?: string
   /** 처음 보일 보기. 기본은 차량별 일정 */
   initialLayout?: 'vehicle' | 'job'
 }
@@ -23,7 +25,7 @@ interface Props {
  * 원안 표는 입력(snapshot)만 있으면 항상 보인다. 결과가 대기·실패·B0 단독이어도 원안은 남기고,
  * 조정안 열과 지표만 결과가 준비됐을 때 연다. (PR #4 리뷰 반영)
  */
-export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, initialLayout = 'vehicle' }: Props) {
+export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle' }: Props) {
   const list = results.state === 'ready' ? results.data.results : null
   const broken = lockedViolations(rows)
   // 휴대폰 폭에서는 가로 스크롤이 필요한 타임라인 대신 작업별 카드부터 보여 준다.
@@ -46,8 +48,10 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
           {candidates.map((r) => (
             <button key={r.method} role="tab" aria-selected={r === cand} onClick={() => onPick(r.method)}>
               {r.method}
+              {r.method === recommended && <span className="rec-tag">추천</span>}
             </button>
           ))}
+          {recommended && <span className="muted small rec-note">추천 기준: 미처리 → 마감 위반 → 고정 작업 위험 → 바뀌는 작업 수가 적은 순</span>}
         </div>
       )}
       {base && cand && <MetricsRow base={base} cand={cand} />}

@@ -18,7 +18,7 @@ describe('입항 선박 계산', () => {
   })
 
   it('도착 추정은 남은 항로를 현재 속력으로 나눈 값이다', () => {
-    const v: Vessel = { id: 'T', name: 't', voyage: 'V', terminal: 'HJNC', route: line, startNm: 0, speedKn: 12, state: 'underway', cutoffMin: 0 }
+    const v: Vessel = { id: 'T', name: 't', voyage: 'V', terminal: 'HJNC', route: line, startNm: 0, speedKn: 12, state: 'underway', cutoffMin: 0, teu: 1000, port: 'x' }
     const now = vesselAt(v, 10) // 10분 동안 2해리 이동
     expect(now.remainingNm!).toBeCloseTo(4.0, 1)
     expect(now.etaMin!).toBeCloseTo(10 + 20, 0)

@@ -465,3 +465,47 @@ button.secondary:hover { background: var(--color-hover); }
 .dm-truck.picked .truck { filter: drop-shadow(0 0 3px rgba(255,60,0,.95)); }
 @media (max-width: 960px) { .dm-body { grid-template-columns: minmax(0, 1fr); } .dm-list { max-height: none; } }
 @media (max-width: 640px) { .dm-map { height: 340px; } .dm-truck:not(.picked) span { display: none; } }
+/* 선박 정보 카드·범례 */
+.vm-side { display: grid; gap: var(--space-2); align-content: start; }
+.vm-group { margin: var(--space-2) 0 0; font-size: var(--fs-body-sm); color: var(--color-muted); font-weight: var(--fw-bold); }
+.vm-others summary { cursor: pointer; font-size: var(--fs-body-sm); color: var(--color-muted); font-weight: var(--fw-bold); padding: 6px 0; }
+.vm-others .vm-list { margin-top: 6px; }
+.vm-chip.out { background: #eef2f6; color: #44505c; }
+.vm-info { border: 1px solid var(--color-text); border-radius: var(--radius-lg); padding: 12px 14px; background: var(--color-bg); display: grid; gap: 6px; }
+.vm-info-head { display: flex; align-items: center; gap: 8px; font-size: var(--fs-h3); }
+.vm-info dl { margin: 0; display: grid; gap: 4px; }
+.vm-info dl > div { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 8px; font-size: var(--fs-body-sm); }
+.vm-info dt { color: var(--color-muted); }
+.vm-info dd { margin: 0; font-variant-numeric: tabular-nums; }
+.vm-info p { margin: 2px 0 0; }
+.vm-info .vm-go { margin: 0; }
+.vm-list { max-height: none; }
+.map-legend { position: absolute; left: 10px; bottom: 10px; z-index: 3; display: flex; flex-wrap: wrap; gap: 6px 12px; max-width: calc(100% - 20px); padding: 6px 10px; border-radius: var(--radius-md); background: rgba(255,255,255,.95); box-shadow: 0 1px 4px rgba(0,0,0,.15); font-size: 11px; color: #333; }
+.map-legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.lg { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.lg.hjnc, .lg.ok { background: var(--color-accent-strong); }
+.lg.other { background: #8c96a0; }
+.lg.berth { background: var(--color-success); }
+.lg.route { height: 0; width: 16px; border-top: 3px dashed var(--color-accent-strong); border-radius: 0; }
+/* 시작 화면 */
+.start-hero { margin-bottom: var(--space-4); }
+.start-hero h1 { margin: 0 0 var(--space-3); font-size: 24px; line-height: 1.35; letter-spacing: -0.01em; }
+.start-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--color-muted); font-size: var(--fs-body-sm); }
+.start-steps li { display: inline-flex; align-items: center; gap: 6px; }
+.start-steps b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--color-hover); font-size: 11px; }
+.start-steps li.on { color: var(--color-text); font-weight: var(--fw-bold); }
+.start-steps li.on b { background: var(--color-accent-strong); color: #fff; }
+.scenario-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-2); margin: var(--space-3) 0; }
+.scenario-card { text-align: left; display: grid; gap: 4px; padding: 14px; border: var(--border); border-radius: var(--radius-lg); background: var(--color-bg); cursor: pointer; font: inherit; color: var(--color-text); transition: border-color var(--dur-base) ease, box-shadow var(--dur-base) ease; }
+.scenario-card:hover { border-color: var(--color-line-strong); }
+.scenario-card.on { border-color: var(--color-accent-strong); box-shadow: 0 0 0 1px var(--color-accent-strong); background: #fffaf7; }
+.sc-top { display: flex; align-items: center; gap: 6px; font-size: var(--fs-body); }
+.sc-tag { font-size: 11px; font-weight: var(--fw-bold); color: #fff; background: var(--color-accent-strong); padding: 1px 7px; border-radius: var(--radius-pill); }
+.sc-size { font-size: var(--fs-caption); color: var(--color-muted); font-weight: var(--fw-medium); }
+.sc-what { font-size: var(--fs-body-sm); line-height: 1.5; }
+.start-advanced { margin: 0 0 var(--space-3); }
+.start-advanced fieldset { border: 0; padding: var(--space-2) 0 0; margin: 0; display: grid; gap: 6px; }
+.method-pick { font-size: var(--fs-body-sm); color: var(--color-text); }
+@media (max-width: 640px) { .start-hero h1 { font-size: 20px; } }
+.rec-tag { margin-left: 6px; font-size: 10px; font-weight: var(--fw-bold); color: #fff; background: var(--color-accent-strong); padding: 1px 6px; border-radius: var(--radius-pill); vertical-align: 1px; }
+.rec-note { align-self: center; }

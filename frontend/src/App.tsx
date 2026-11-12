@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
+import type { MethodResult } from './api/types'
 import { useDispatchView } from './api/useDispatchView'
 import { ComparisonSection } from './components/ComparisonSection'
 import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
@@ -10,6 +11,12 @@ import { hasAssumedCondition } from './lib/revision'
 import type { V2Client } from './api/v2'
 import { ConditionRevisionPanel, NextPlanPanel, RevisionComparison } from './components/RevisionPanels'
 import { DispatchPanel } from './components/DispatchPanel'
+
+function recommend(list: MethodResult[]): MethodResult | undefined {
+  const ok = list.filter((r) => r.result_origin === 'computed' && r.validation_status !== 'failed')
+  const key = (r: MethodResult) => [r.metrics.unassigned_count, r.metrics.movable_violation_count, r.metrics.fixed_risk_count, r.metrics.changed_job_ids.length]
+  return [...ok].sort((a, b) => { const x = key(a), y = key(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0 })[0]
+}
 
 export function App({ client, scenarioId, runId }: { client: ApiClient; scenarioId: string; runId: string }) {
   const view = useDispatchView(client, scenarioId, runId)
@@ -24,7 +31,9 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const results = view.results.state === 'ready' ? view.results.data.results : null
   const base = results?.find((r) => r.method === 'B0')
   const candidates = results?.filter((r) => r.method !== 'B0') ?? []
-  const cand = candidates.find((r) => r.method === picked) ?? candidates[0]
+  // 처음 열 때는 추천안을 보여 준다: 미처리 → 조정 가능 위반 → 고정 위험 → 변경 수가 적은 순. 사용자가 고르면 그 안을 따른다.
+  const recommended = recommend(candidates)
+  const cand = candidates.find((r) => r.method === picked) ?? recommended ?? candidates[0]
   const rows = useMemo(() => (snapshot ? buildRows(snapshot, base, cand) : []), [snapshot, base, cand])
   // 새로고침 뒤에도 이미 다른 승인으로 바뀐 계획을 409 전에 알린다. 최종 판단은 서버가 한다.
   const [planNow, setPlanNow] = useState<{ planId: string; version: number } | null>(null)
@@ -90,6 +99,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             base={base}
             cand={cand}
             candidates={candidates}
+            recommended={recommended?.method}
             rows={rows}
             onPick={setPicked}
           />
