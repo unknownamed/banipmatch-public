@@ -14,7 +14,9 @@
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.62; word-break: keep-all; }
   h1, h2, h3, h4 { margin: 0; line-height: 1.3; }
-  .chapter, .pb { break-before: page; }
+  .chapter { break-before: page; } .chapter.flow-on { break-before: auto; margin-top: 26px; }
+  .pb { break-before: page; }
+  .chapter-head, .criteria { break-after: avoid; }
   h3, h4 { break-after: avoid; }
   figure, .box { break-inside: avoid; }
   .chapter-head { display: flex; align-items: baseline; gap: 10px; border-bottom: 2.5px solid var(--navy); padding-bottom: 6px; margin-bottom: 12px; }
@@ -111,10 +113,10 @@
   <table class="toc">
     <tr><th style="width:24%">평가 항목(배점)</th><th>이 보고서에서 답하는 내용</th><th style="width:9%">쪽</th></tr>
     <tr><td><b>기획의 명확성</b> (20)</td><td>반입 마감 변경이 운송사 배차에 미치는 문제, 대상 사용자, KPI 4개와 목표값</td><td>3–4</td></tr>
-    <tr><td><b>데이터 활용 계획</b> (20)</td><td>실제 자료 5종의 합법적 이용 조건, 수집 → 처리 → 활용 흐름, 품질 규칙과 호출 한도</td><td>5–6</td></tr>
-    <tr><td><b>창의성 및 차별성</b> (25)</td><td>최소 변경 재배차 알고리즘(우선순위별 순차 최적화, CP-SAT), 조건 보완·확정·기사 응답으로 이어지는 운영 모델, 기존 서비스 비교</td><td>7–11</td></tr>
-    <tr><td><b>실현 가능성</b> (15)</td><td>기술 스택과 실제 운영 서버, 실기기 검증, 테스트 847개, 일정·자원, 리스크와 대응</td><td>12–13</td></tr>
-    <tr><td><b>기대효과</b> (20)</td><td>측정값과 추정값을 나눈 KPI 개선, 산출식과 가정, 확산 시나리오</td><td>14–15</td></tr>
+    <tr><td><b>데이터 활용 계획</b> (20)</td><td>실제 자료 5종의 합법적 이용 조건, 수집 → 처리 → 활용 흐름, 품질 규칙과 호출 한도</td><td>5–7</td></tr>
+    <tr><td><b>창의성 및 차별성</b> (25)</td><td>최소 변경 재배차 알고리즘(우선순위별 순차 최적화, CP-SAT), 조건 보완·확정·기사 응답으로 이어지는 운영 모델, 기존 서비스 비교</td><td>7–12</td></tr>
+    <tr><td><b>실현 가능성</b> (15)</td><td>기술 스택과 실제 운영 서버, 실기기 검증, 테스트 851개, 일정·자원, 리스크와 대응</td><td>13–15</td></tr>
+    <tr><td><b>기대효과</b> (20)</td><td>측정값과 추정값을 나눈 KPI 개선, 산출식과 가정, 확산 시나리오</td><td>15–17</td></tr>
   </table>
   <h3>한눈에 보는 처리 흐름 — 시연 BHMN(반입 마감 2시간 30분 앞당김)</h3>
   <div class="flow">
@@ -192,11 +194,11 @@
     <tr><td>확정·통보</td><td>영향받을 수 있는 기사 8명 모두에게 전화·카카오톡(약 24분)</td><td>담당자가 남는 위험을 확인하고 확정하면 <b>바뀐 차량 4대에만</b> 안내문과 알림 전달</td></tr>
     <tr><td>응답 관리</td><td>통화·메시지에 흩어져 기록 없음</td><td>기사의 응답과 이유가 한 표에 모이고, '수행 곤란'은 즉시 알림 카드로 표시</td></tr>
   </table>
-  <figure><img src="figures/01-home.png" style="max-height:92mm;object-fit:cover;object-position:top left"><figcaption><b>그림 1.</b> 받은 변경 화면. 공지를 조치 필요·확정 대기·입력 확인·영향 없음으로 나눠 보여 주고, 지금 배차표 기준 차량 위치를 위성 사진과 실시간 도로 혼잡 위에 표시한다.</figcaption></figure>
+  <figure><img src="figures/01-home.png" style="max-height:66mm;object-fit:cover;object-position:top left"><figcaption><b>그림 1.</b> 받은 변경 화면. 공지를 조치 필요·확정 대기·입력 확인·영향 없음으로 나눠 보여 주고, 지금 배차표 기준 차량 위치를 위성 사진과 실시간 도로 혼잡 위에 표시한다.</figcaption></figure>
 </section>
 
 <!-- ───────────── 2. 데이터 활용 계획 ───────────── -->
-<section class="chapter">
+<section class="chapter flow-on">
   <div class="chapter-head"><span class="no">2</span><h2>데이터 활용 계획</h2><span class="pts">배점 20</span></div>
   <div class="criteria"><b>평가 기준</b> 합법적 소스(API/공공·민간 데이터), 수집 → 처리 → 활용 흐름이 구체적인지</div>
 
@@ -270,7 +272,7 @@
 </section>
 
 <!-- ───────────── 3. 창의성 및 차별성 ───────────── -->
-<section class="chapter">
+<section class="chapter flow-on">
   <div class="chapter-head"><span class="no">3</span><h2>창의성 및 차별성</h2><span class="pts">배점 25</span></div>
   <div class="criteria"><b>평가 기준</b> 기존 대비 분명한 차별점의 존재 여부(새로운 알고리즘/운영모델/서비스)</div>
 
@@ -351,8 +353,8 @@
   </div>
 </section>
 
-<section class="pb">
-  <h3 style="margin-top:0">3.5 판단을 돕는 화면 — 근거를 함께 보여 준다</h3>
+<section>
+  <h3>3.5 판단을 돕는 화면 — 근거를 함께 보여 준다</h3>
   <p>담당자가 계산 결과를 믿고 확정할 수 있도록, 모든 제안에 시간표·지도·입력 근거를 붙였다. 아래는 시연 BHMN(반입 마감 07:10에서 04:40으로 앞당김)의 원래 배차와 최소 변경안이다.</p>
   <figure><img src="figures/03-comparison-gantt.png"><figcaption><b>그림 6.</b> 원래 배차와 최소 변경안(차량별 시간 막대). 원래 배차에서는 부산 92바 5520과 경남 88자 7136의 작업 4건(빨강)이 마감을 넘긴다. 최소 변경안은 이 작업들을 다른 차량과 맞바꿔 3건을 마감 안에 넣고, 바뀐 작업은 5건(초록), 관련 차량은 4대다. 나머지 4대는 그대로다. 상차 준비가 늦은 100208 3은 어떤 차량으로도 맞출 수 없어 '미배정'과 원인을 표시한다. 자물쇠는 이미 출발한 작업, 점선은 각 작업의 반입 마감이다.</figcaption></figure>
   <h4>담당자의 질문과 화면이 주는 근거</h4>
@@ -366,8 +368,8 @@
   </table>
 </section>
 
-<section class="pb">
-  <div class="two" style="align-items:start">
+<section>
+  <div class="two" style="align-items:start;margin-top:10px">
     <figure style="margin:0"><img src="figures/04-dispatch-map.png"><figcaption><b>그림 7.</b> 차량 현황 지도. 위성 사진 위에 실시간 도로 혼잡(초록·노랑)을 겹치고, 지금 시각의 차량 위치를 배차 일정과 실제 도로 경로로 계산해 표시한다. 트럭 색은 마감까지 남은 시간 여유를 나타내고, 같은 곳에 있는 차량은 숫자로 묶는다. 기사가 위치 공유에 동의하면 그 차량은 실제 위치로 바뀐다.</figcaption></figure>
     <figure style="margin:0"><img src="figures/05-revision-crop.png"><figcaption><b>그림 8.</b> 조건 보완 화면. 상차 준비 시각, 차량 근무 시간이나 오늘 운행 불가, 외부 차량 추가를 입력하고 이유를 남겨 다시 계산한다. 화주 확인 전이면 '확인 전(미리 계산)'으로 결과만 본다. 이미 출발한 작업과 반입 마감은 고칠 수 없다.</figcaption></figure>
   </div>
@@ -375,7 +377,7 @@
 </section>
 
 <!-- ───────────── 4. 실현 가능성 ───────────── -->
-<section class="chapter">
+<section class="chapter flow-on">
   <div class="chapter-head"><span class="no">4</span><h2>실현 가능성</h2><span class="pts">배점 15</span></div>
   <div class="criteria"><b>평가 기준</b> 제시한 기술 스택, 데이터 가용성, 일정/자원 계획이 현실적으로 실현 가능한 정도(리스크·대응 제시)</div>
 
@@ -477,7 +479,7 @@
 </section>
 
 <!-- ───────────── 5. 기대효과 ───────────── -->
-<section class="chapter">
+<section class="chapter flow-on">
   <div class="chapter-head"><span class="no">5</span><h2>기대효과 — 정량·파급</h2><span class="pts">배점 20</span></div>
   <div class="criteria"><b>평가 기준</b> 물류 KPI 개선 효과를 정량적 또는 구체적으로 추정하고 산출 근거를 제시했는지</div>
 
@@ -557,7 +559,7 @@
 </section>
 
 <!-- ───────────── 6. 한계와 다음 단계 ───────────── -->
-<section class="chapter">
+<section class="chapter flow-on">
   <div class="chapter-head"><span class="no">6</span><h2>한계와 다음 단계</h2></div>
   <table>
     <tr><th style="width:28%">한계</th><th>다음 단계</th></tr>

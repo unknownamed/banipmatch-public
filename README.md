@@ -87,8 +87,8 @@ $env:VITE_API_MODE='v2'; npm run dev   # http://localhost:5173
 ## 시험
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q          # 서버·엔진 667개
-cd frontend; npm test                            # 화면 180개
+.\.venv\Scripts\python.exe -m pytest -q          # 서버·엔진 668개
+cd frontend; npm test                            # 화면 183개
 python tools/check_engine_robustness.py .        # 무작위 입력 24회, 별도 규칙 검사
 ```
 
