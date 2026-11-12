@@ -523,3 +523,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .invite-copy { display: flex; gap: 8px; }
 .invite-copy input { flex: 1; min-width: 0; font-size: 12.5px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; }
 .send-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* 공통 버튼 모양(기사 전달 영역): 주 버튼은 남색, 보조 버튼은 흰 바탕 테두리 */
+.btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 16px; border: 0; border-radius: 8px; background: #16294D !important; color: #fff !important; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+.btn-primary:hover { background: #22396A !important; }
+.btn-primary:disabled { opacity: .55; cursor: default; }
+.btn-line { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border: 1px solid #c9d2e0 !important; border-radius: 7px; background: #fff !important; color: #16294D !important; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-line:hover { border-color: #16294D !important; }
+.btn-line.subtle { color: var(--ink-3) !important; }
+.btn-line:disabled { opacity: .55; cursor: default; }
+.send-row { flex-direction: column; align-items: flex-start !important; gap: 6px !important; }

@@ -172,12 +172,12 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
               {r ? (
                 <>
                   <span className={`st ${r.subscription_status === 'active' ? 'ok' : 'warn'}`}>{SUBSCRIPTION_LABEL[r.subscription_status]}</span>
-                  <button type="button" className="secondary" onClick={() => revoke(r.recipient_id)}>연결 해제</button>
+                  <button type="button" className="btn-line subtle" onClick={() => revoke(r.recipient_id)}>연결 해제</button>
                 </>
               ) : (
                 <>
                   <span className="st wait">연결 안 됨</span>
-                  {authorized && <button type="button" className="secondary" disabled={busy !== null} onClick={() => create(v)}>{busy === v ? '만드는 중…' : '휴대폰 연결'}</button>}
+                  {authorized && <button type="button" className="btn-line" disabled={busy !== null} onClick={() => create(v)}>{busy === v ? '만드는 중…' : '휴대폰 연결'}</button>}
                 </>
               )}
             </li>
@@ -192,7 +192,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
             <p className="small muted">한 번만 쓸 수 있고 {kstDateTime(invite.expires_at)}까지 유효합니다.</p>
             <div className="invite-copy">
               <input readOnly value={invite.link} aria-label="연결 링크" onFocus={(e) => e.currentTarget.select()} />
-              <button type="button" className="secondary" onClick={() => { navigator.clipboard?.writeText(invite.link); setCopied(true) }}>{copied ? '복사됨' : '링크 복사'}</button>
+              <button type="button" className="btn-line" onClick={() => { navigator.clipboard?.writeText(invite.link); setCopied(true) }}>{copied ? '복사됨' : '링크 복사'}</button>
             </div>
             <p className="small muted">아이폰은 Safari에서 공유 › 홈 화면에 추가한 뒤, 그 아이콘으로 열어 링크를 붙여넣어야 알림이 옵니다.</p>
           </div>
@@ -233,7 +233,7 @@ function Send({ client, preview, authorized, dispatchId, onSent }: {
         <p className="small muted">이 배차의 변경을 이미 보냈습니다. 아래에서 기사 응답을 확인하세요.</p>
       ) : (
         <div className="send-row">
-          <button type="button" disabled={busy} onClick={send}>{busy ? '보내는 중…' : '연결된 기사에게 보내기'}</button>
+          <button type="button" className="btn-primary" disabled={busy} onClick={send}>{busy ? '보내는 중…' : '연결된 기사에게 보내기'}</button>
           <span className="small muted">잠금 화면에는 ‘배차 변경 확인 요청’만 보입니다.</span>
         </div>
       )}
