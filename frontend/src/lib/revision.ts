@@ -59,9 +59,13 @@ export function listChanges(s: Snapshot, edits: Edits): FieldChange[] {
 export function revisedSnapshot(s: Snapshot, changes: FieldChange[], confirmation: Confirmation, now: Date, added: VehicleDraft[] = []): Snapshot {
   const next = structuredClone(s)
   // 입력 시각은 분 단위이고, 기준시각(as_of) 이후 수신한 근거는 쓸 수 없다.
-  // 지금 확인한 값이므로 기준시각을 확인 시각으로 옮긴다(되돌리지는 않음). 서버 비교가 '기준시각도 바뀜'을 한계로 표시한다.
+  // 실제 자료: 지금 확인한 값이므로 기준시각을 확인 시각으로 옮긴다(되돌리지는 않음). 서버 비교가 '기준시각도 바뀜'을 한계로 표시한다.
+  // 모의 자료: 차량 위치·진행이 모의 시각(as_of)에 멈춰 있어, 기준시각만 옮기면 그동안 차량이 차고지에 서 있던 것처럼
+  // 계산돼 결과가 나빠진다. 모의 시계는 흐르지 않으므로 같은 기준시각에서 조건만 바꿔 다시 계산한다.
   const minute = new Date(Math.floor(now.getTime() / 60000) * 60000)
-  const receivedAt = new Date(Math.max(minute.getTime(), Date.parse(s.as_of))).toISOString().replace('.000Z', 'Z')
+  const receivedAt = s.data_mode === 'simulated'
+    ? s.as_of
+    : new Date(Math.max(minute.getTime(), Date.parse(s.as_of))).toISOString().replace('.000Z', 'Z')
   next.as_of = receivedAt
   const evidence = (old: Evidence): Evidence => ({
     ...old,

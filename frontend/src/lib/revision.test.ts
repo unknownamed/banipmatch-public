@@ -41,8 +41,16 @@ describe('조건 보완 입력', () => {
     expect(row.evidence.source_ref).toBe('dispatcher:condition-revision')
     expect(s.jobs.find((j) => j.job_id === movable.job_id)!.ready_at).toBe(movable.ready_at)
     expect(hasAssumedCondition(next)).toBe(false)
-    // 확인 시각을 분 단위로 내리고 기준시각도 그 시각으로 옮긴다.
-    expect(row.evidence.received_at).toBe('2026-11-07T00:10:00Z')
+    // 모의 자료는 모의 시계가 흐르지 않으므로 같은 기준시각에서 조건만 바꾼다.
+    expect(row.evidence.received_at).toBe(s.as_of)
+    expect(next.as_of).toBe(s.as_of)
+  })
+
+  it('실제·혼합 자료는 확인 시각(분 단위)으로 기준시각을 옮긴다', () => {
+    const observed = { ...structuredClone(s), data_mode: 'mixed' } as Snapshot
+    const changes = listChanges(observed, { [`job:${movable.job_id}:ready_at`]: '2026-11-07T09:30' })
+    const next = revisedSnapshot(observed, changes, 'confirmed_simulation', new Date('2026-11-07T00:10:42.5Z'))
+    expect(next.jobs.find((j) => j.job_id === movable.job_id)!.evidence.received_at).toBe('2026-11-07T00:10:00Z')
     expect(next.as_of).toBe('2026-11-07T00:10:00Z')
   })
 
