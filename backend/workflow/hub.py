@@ -14,6 +14,7 @@ from backend.api.contracts import ApiError, ROOT, utc_now
 from backend.api.engine_replay import EngineReplay
 from backend.api.runs import ReplayJobs
 from backend.db.database import Database
+from backend.db.database import ensure_field_columns
 from backend.db.store import Store
 from .push import WebPushSender
 from .security import IDENTIFIER, Secrets, csrf, hashed
@@ -50,6 +51,10 @@ class DomainDatabase(Database):
                 conn.executescript((CONTRACT / "schema.sql").read_text(encoding="utf-8"))
         elif version != 2:
             raise RuntimeError("지원하지 않는 세션 DB 버전")
+        else:
+            with self.connect() as conn:
+                ensure_field_columns(conn)
+                conn.commit()
 
 
 class Hub:

@@ -217,7 +217,7 @@ def main():
     test("negative_duration_rejected", lambda: reject(conn, lambda:
          conn.execute("INSERT INTO travel_times VALUES ('S001','D','O',-1,'{}')"), "CHECK"))
     test("negative_capacity_rejected", lambda: reject(conn, lambda:
-         conn.execute("INSERT INTO vehicles VALUES ('S001','BAD','D',NULL,'2026-11-07T09:00:00Z',-1,'[\"DRY40\"]','{}')"), "CHECK"))
+         conn.execute("INSERT INTO vehicles(scenario_id,vehicle_id,start_location_id,available_at,shift_end_at,capacity_kg,equipment_types_json,evidence_json) VALUES ('S001','BAD','D',NULL,'2026-11-07T09:00:00Z',-1,'[\"DRY40\"]','{}')"), "CHECK"))
     test("duplicate_job_assignment_rejected", lambda: reject(conn, lambda:
          insert(conn, "baseline_assignments", {"scenario_id":"S001", **s["baseline_assignments"][0]}), "UNIQUE"))
     test("zero_sequence_rejected", lambda: reject(conn, lambda:

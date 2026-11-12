@@ -29,8 +29,8 @@
     },
     {
       "path": "검수/validate_db.py",
-      "bytes": 29063,
-      "sha256": "9e9818416d2309b0ca6cc74437b4d285b9f77d0e2e65e027dffde3fac2465867"
+      "bytes": 29178,
+      "sha256": "87b93b4ec7567430700c41bd2b1b6760378f587f3e358fd5c5e68c1af9c72300"
     },
     {
       "path": "검수/계약_예제_검증.json",
@@ -104,8 +104,8 @@
     },
     {
       "path": "공통 규격/schema.sql",
-      "bytes": 24083,
-      "sha256": "2b2dba6a861251c81c997976d8b84b42d3c081b6e04977863c2d8ececfebd728"
+      "bytes": 24833,
+      "sha256": "cb72cb7183e9f5310e31f8203188617f7d94c22fba141a567ecc7eb8f43f8ae8"
     },
     {
       "path": "공통 규격/의미검증_규칙.txt",
@@ -203,6 +203,16 @@
       "date": "2026-11-12",
       "file": "공통 규격/contracts.schema.json, openapi.json, openapi.yaml",
       "change": "Job.container_no/booking_no/cargo_owner, Vehicle.plate_no 선택 필드 추가(기존 입력 호환). 팀 동의(대겸 전달) 후 반영"
+    },
+    {
+      "date": "2026-11-12",
+      "file": "공통 규격/schema.sql",
+      "change": "jobs.container_no/booking_no/cargo_owner, vehicles.plate_no 선택 열. 기존 DB는 시작 시 열을 덧붙임"
+    },
+    {
+      "date": "2026-11-12",
+      "file": "검수/validate_db.py",
+      "change": "열 추가에 맞춰 위치 기반 INSERT를 열 이름 지정으로 변경(검사 의미 동일)"
     }
   ]
 }
