@@ -182,9 +182,10 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
     }
     for (const gate of gateEls.current.values()) {
       const gp = proj.containerPointFromCoords(ll(gate.pos))
-      const hit = clusters.some(c => Math.hypot(c.x - gp.x, c.y - gp.y) < 30)
-      gate.el.style.marginRight = hit && gate.west ? '20px' : ''
-      gate.el.style.marginLeft = hit && !gate.west ? '20px' : ''
+      // 게이트 이름표가 놓이는 쪽(서쪽 터미널은 왼쪽, 동쪽은 오른쪽)에 차량 묶음이 있으면 이름표를 점 위로 올린다.
+      const w = gate.el.offsetWidth || 90
+      const blocked = clusters.some(c => Math.abs(c.y - gp.y) < 30 && (gate.west ? c.x > gp.x - w - 24 && c.x < gp.x + 12 : c.x > gp.x - 12 && c.x < gp.x + w + 24))
+      gate.el.style.transform = blocked ? 'translateY(-38px)' : ''
     }
     for (const c of clusters) {
       const at = placeAt.get(c)

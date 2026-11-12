@@ -200,7 +200,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
           </span>
           <span className="vm-eta">
             {v.vessel.outbound ? <span className="muted">{v.vessel.port} 향발{v.etaMin !== null ? `, 외해까지 ${formatDuration(v.etaMin - t)}` : ''}</span>
-              : v.etaMin !== null ? <><b>{formatDuration(v.etaMin - t)}</b> 후 도착 추정 <span className="muted">· {kst(at(base, v.etaMin))}</span></>
+              : v.etaMin !== null ? <><b>{formatDuration(v.etaMin - t)}</b> 후 도착 추정 <span className="muted">({kst(at(base, v.etaMin))})</span></>
               : <span className="muted">{v.etaNote}</span>}
           </span>
           {!v.vessel.outbound && <span className="vm-bar" aria-hidden="true"><span style={{ width: `${Math.round(progress * 100)}%` }} /></span>}
@@ -260,7 +260,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
             <InfoCard v={sel} t={t} base={base} cut={cutoffOf(sel.vessel.voyage, sel.vessel.terminal, sel.vessel.cutoffMin)} link={link} />
             <div className="toolbar vm-tools">
               <div className="seg" role="group" aria-label="터미널 범위">
-                <button type="button" aria-pressed={scope === 'HJNC'} onClick={() => setScope('HJNC')}>HJNC행<span className="n">{fleet.filter(v => v.vessel.terminal === 'HJNC').length}척</span></button>
+                <button type="button" aria-pressed={scope === 'HJNC'} onClick={() => setScope('HJNC')}>HJNC<span className="n">{fleet.filter(v => v.vessel.terminal === 'HJNC').length}척</span></button>
                 <button type="button" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>신항 전체<span className="n">{fleet.length}척</span></button>
               </div>
               <label className="search">
