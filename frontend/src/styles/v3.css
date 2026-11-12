@@ -547,3 +547,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .map-credit-line { margin: 4px 0 0; text-align: right; font-size: 11px; color: var(--ink-3); }
 .vm-map-wrap .map-credit { display: none; }
 @media (max-width: 576px) { .map-legend.two-rows .lg-group { min-width: 0; width: 100%; } }
+/* HJNC행만 볼 때 다른 터미널 배는 흐리게 */
+.vm-ship.dim { opacity: .3; }
+.vm-ship.dim span, .vm-ship.dim .vm-count { display: none !important; }
