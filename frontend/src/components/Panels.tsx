@@ -133,34 +133,34 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
       )}
       {results && (
         <div className="table-wrap">
-          <table className="grid small">
+          <table className="grid small stack run-table">
             <thead>
               <tr>
-                <th>방법</th>
+                <th className="nowrap">방법</th>
                 <th>결과 출처</th>
                 <th>해 상태</th>
-                <th>엔진</th>
-                <th>목표 단계</th>
+                <th className="col-tech">엔진</th>
+                <th className="col-tech">목표 단계</th>
                 <th>독립 검사</th>
               </tr>
             </thead>
             <tbody>
               {results.map((r) => (
                 <tr key={r.method}>
-                  <td>{r.method}</td>
-                  <td>
+                  <td className="nowrap method-cell"><b>{r.method}</b></td>
+                  <td data-label="결과 출처">
                     {r.result_origin === 'illustrative_fixture' ? (
                       <span className="badge fixture">설명용 예시</span>
                     ) : (
                       <span className="badge">계산</span>
                     )}
                   </td>
-                  <td>{solutionLabel(r)}</td>
-                  <td>
+                  <td data-label="해 상태">{solutionLabel(r)}</td>
+                  <td className="col-tech" data-label="엔진">
                     <code>{r.engine_version}</code>
                   </td>
-                  <td>{r.objective_stages.length ? r.objective_stages.map((o) => `${o.objective}:${o.status}`).join(', ') : '없음(계산 안 함)'}</td>
-                  <td>{r.validation_status === 'not_run' ? '실행 안 함' : r.validation_status}</td>
+                  <td className="col-tech" data-label="목표 단계">{r.objective_stages.length ? r.objective_stages.map((o) => `${o.objective}:${o.status}`).join(', ') : '없음(계산 안 함)'}</td>
+                  <td data-label="독립 검사">{r.validation_status === 'not_run' ? '실행 안 함' : r.validation_status}</td>
                 </tr>
               ))}
             </tbody>

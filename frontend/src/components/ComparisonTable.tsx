@@ -49,7 +49,7 @@ export function ComparisonTable({
   const hasCand = candLabel !== null
   return (
     <div className="table-wrap">
-      <table className="grid">
+      <table className="grid stack">
         <thead>
           <tr>
             <th>작업</th>
@@ -78,8 +78,8 @@ export function ComparisonTable({
                     </div>
                   )}
                 </td>
-                <td>{kstTimeWithDay(r.window?.closes_at ?? null, asOf)}</td>
-                <td>
+                <td data-label="마감">{kstTimeWithDay(r.window?.closes_at ?? null, asOf)}</td>
+                <td data-label={baseLabel}>
                   <Cell a={r.baseline} refUtc={asOf} closesAt={r.window?.closes_at} />
                   {r.baselineIssues.map((i, k) => (
                     <div key={k} className="warn small">
@@ -88,7 +88,7 @@ export function ComparisonTable({
                   ))}
                 </td>
                 {hasCand && (
-                  <td>
+                  <td data-label={candLabel ?? undefined}>
                     {r.candidateUnassigned ? (
                       <span className="badge unassigned">미처리</span>
                     ) : r.candidateMissing ? (
@@ -99,7 +99,7 @@ export function ComparisonTable({
                   </td>
                 )}
                 {hasCand && (
-                  <td>
+                  <td data-label="변경 · 이유">
                     {r.locked ? (
                       preserved ? (
                         <span className="dot dot-muted">원안 유지</span>
