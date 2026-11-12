@@ -12,7 +12,8 @@ from .security import MAX_BODY
 class BodyLimit:
     def __init__(self, app):
         self.app = app
-        self.slots = threading.BoundedSemaphore(16)
+        # 발표장 30명이 동시에 열고 새로고침해도 받도록 동시 처리 요청 상한을 64로 둔다(본문 크기 상한은 그대로).
+        self.slots = threading.BoundedSemaphore(64)
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http" or not scope["path"].startswith("/v2/"):

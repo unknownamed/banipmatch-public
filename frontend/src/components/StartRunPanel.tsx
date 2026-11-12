@@ -14,6 +14,7 @@ import { buildRows } from '../lib/compare'
 import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type StartAttempt } from '../lib/startRun'
 import { ComparisonSection } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
+import { withQueueRetry } from '../lib/queueRetry'
 
 const EXAMPLES = [
   { id: '02', label: '신항 저녁 배차', size: '트럭 8대 · 컨테이너 20개 · HJNC·PNIT', what: '모선 BM 하모니호(BH045E)의 HJNC 반입 마감(컷오프)이 2시간 30분 앞당겨졌습니다. 원래 배차로는 컨테이너 4개가 마감을 넘깁니다. PNIT 작업은 영향이 없습니다.', tag: '추천', snapshot: s02 },
@@ -78,7 +79,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       step = '계산 요청'
       setStatus({ state: 'sending', step })
       const { body, key } = runFor(attempt, picked)
-      const run = await client.createRun!(body, key)
+      const run = await withQueueRetry(() => client.createRun!(body, key), () => setStatus({ state: 'sending', step: '다른 사용자 계산을 기다리는' }))
       location.search = `?scenario=${encodeURIComponent(run.scenario_id)}&run=${encodeURIComponent(run.run_id)}`
     } catch (error) {
       if (step === '계산 요청' && isInputRejection(error)) {

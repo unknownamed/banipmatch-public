@@ -2,6 +2,7 @@
 // 화면은 CSRF 값만 메모리에 들고 있는다(저장소·로그에 남기지 않음). 관리자 토큰은 쓰지 않는다.
 import { readJson, type ApiClient } from './client'
 import type { Plan, ResultsResponse, Run, Snapshot } from './types'
+import { withQueueRetry } from '../lib/queueRetry'
 
 export interface SessionPlan {
   plan_id: string
@@ -37,10 +38,13 @@ export function createV2Client(base = ''): V2Client {
   let current: Promise<SessionState> | null = null
 
   async function open(): Promise<SessionState> {
-    const res = await fetch(`${base}/v2/session`)
-    if (res.status !== 401 && res.status !== 410) return readJson<SessionState>(res)
-    // 쿠키가 없거나 만료됨 → 새 세션. 생성 요청은 Origin만 검사한다(브라우저가 자동으로 붙임).
-    return readJson<SessionState>(await fetch(`${base}/v2/session`, { method: 'POST' }))
+    // 많은 사람이 한꺼번에 열 때 서버가 잠깐 바쁘면(503 REQUEST_CAPACITY) 조금 기다렸다 다시 연다.
+    return withQueueRetry(async () => {
+      const res = await fetch(`${base}/v2/session`)
+      if (res.status !== 401 && res.status !== 410) return readJson<SessionState>(res)
+      // 쿠키가 없거나 만료됨 → 새 세션. 생성 요청은 Origin만 검사한다(브라우저가 자동으로 붙임).
+      return readJson<SessionState>(await fetch(`${base}/v2/session`, { method: 'POST' }))
+    }, undefined, 10, 1500)
   }
 
   function session() {

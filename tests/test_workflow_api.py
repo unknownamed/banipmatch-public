@@ -591,15 +591,16 @@ def test_queue_and_active_session_limits_are_global_and_do_not_admit_extra_work(
     config = replace(settings,workflow_enabled=True,workflow_dir=tmp_path/"queue")
     with TestClient(create_app(config,workflow_replay=replay),base_url=ORIGIN,client=("127.0.0.1",50000)) as client:
         try:
-            actors = [new_manager(client) for _ in range(5)]
+            from backend.workflow.hub import QUEUE_LIMIT
+            actors = [new_manager(client) for _ in range(QUEUE_LIMIT + 1)]
             snapshots = [seed(actor) for actor in actors]
             body = lambda snap:{"scenario_id":snap["scenario_id"],"base_plan_version":1,"methods":["B1"],"time_limit_seconds":1,"seed":42}
             assert actors[0].post("/v2/runs",body(snapshots[0])).status_code == 202
             assert actors[0].post("/v2/runs",body(snapshots[0])).status_code == 429
-            for actor,snap in zip(actors[1:4],snapshots[1:4]):
+            for actor,snap in zip(actors[1:QUEUE_LIMIT],snapshots[1:QUEUE_LIMIT]):
                 assert actor.post("/v2/runs",body(snap)).status_code == 202
-            assert actors[4].post("/v2/runs",body(snapshots[4])).status_code == 429
-            assert len(client.app.state.workflow.pending) == 4
+            assert actors[QUEUE_LIMIT].post("/v2/runs",body(snapshots[QUEUE_LIMIT])).status_code == 429
+            assert len(client.app.state.workflow.pending) == QUEUE_LIMIT
         finally:
             replay.release.set()
 

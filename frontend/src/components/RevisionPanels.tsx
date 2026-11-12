@@ -6,6 +6,7 @@ import { EMPTY_DRAFT, draftProblems, freezeLabel, isBlankDraft, isCompleteInput,
 import { kstDateTime } from '../lib/time'
 import { jobName, vehicleName } from '../lib/labels'
 import { Hint } from './Hint'
+import { withQueueRetry } from '../lib/queueRetry'
 
 const FIELD_LABEL = { ready_at: '상차 준비시각', available_at: '차량 가용 시작', shift_end_at: '근무 종료' } as const
 
@@ -61,10 +62,10 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
       step = '재계산 요청'
       setStatus({ state: 'sending', step })
       // 전후 비교가 공정하도록 이전 실행과 같은 방법·제한시간·seed를 쓴다.
-      const next = await client.createRun!(
+      const next = await withQueueRetry(() => client.createRun!(
         { scenario_id: rev.scenario_id, base_plan_version: rev.base_plan_version, methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed },
         `revision-run-${id}`,
-      )
+      ), () => setStatus({ state: 'sending', step: '다른 사용자 계산을 기다리는' }))
       const q = new URLSearchParams({ scenario: rev.scenario_id, run: next.run_id, revision: rev.revision_id })
       if (rerun.beforeRunId) q.set('before', rerun.beforeRunId)
       location.search = `?${q}`
@@ -210,8 +211,9 @@ export function NextPlanPanel({ client, planId, rerun }: { client: V2Client; pla
       }
       step = '새 기준 계산'
       setStatus({ busy: true, step })
-      const next = await client.createRun!({ scenario_id: current.snapshot.scenario_id, base_plan_version: current.snapshot.base_plan_version,
-        methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed }, `next-run-${current.id}`)
+      const snap = current.snapshot!
+      const next = await withQueueRetry(() => client.createRun!({ scenario_id: snap.scenario_id, base_plan_version: snap.base_plan_version,
+        methods: rerun.methods, time_limit_seconds: rerun.time_limit_seconds, seed: rerun.seed }, `next-run-${current.id}`), () => setStatus({ busy: true, step: '다른 사용자 계산을 기다리는' }))
       location.search = `?${new URLSearchParams({ scenario: next.scenario_id, run: next.run_id })}`
     } catch (error) { setStatus({ busy: false, step, error }) }
   }
