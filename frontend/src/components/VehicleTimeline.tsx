@@ -13,7 +13,8 @@ export interface Bar {
   width: number // % (출발~복귀)
   arrival: number // % (게이트 도착)
   locked: boolean
-  late: boolean // 도착이 그 작업 시간창 마감보다 늦음
+  late: boolean // 도착 + 게이트 여유가 그 작업의 반입 마감을 넘김(엔진 위반 기준과 같다)
+  cut: number | null // 그 작업 항차의 반입 마감 위치(%)
   changed: boolean // 조정안에서 차량·순서·시각이 바뀜
   label: string
 }
@@ -28,7 +29,7 @@ export interface TimelineModel {
 }
 
 /** 원안·조정안 배정을 차량별 시간 막대로 바꾼다. 응답에 있는 시각만 쓰고, 없는 값은 만들지 않는다. */
-export function timelineModel(rows: JobRow[], hasCand: boolean): TimelineModel | null {
+export function timelineModel(rows: JobRow[], hasCand: boolean, buffer = 0): TimelineModel | null {
   const all = rows.flatMap((r) => [r.baseline, hasCand ? r.candidate : undefined]).filter((a): a is Assignment => !!a)
   if (!rows.length) return null
   // 계약상 도착·복귀는 null일 수 있다. 런타임의 누락·형식 오류도 축에 전파하지 않는다.
@@ -56,7 +57,8 @@ export function timelineModel(rows: JobRow[], hasCand: boolean): TimelineModel |
       width: pct(t(a.return_at)) - pct(t(a.pickup_departure_at)),
       arrival: pct(t(a.gate_arrival_at)),
       locked: r.locked,
-      late: !!closes && t(a.gate_arrival_at) > t(closes),
+      late: !!closes && t(a.gate_arrival_at) + buffer * 60000 > t(closes),
+      cut: closes && start !== null && end !== null && t(closes) >= start && t(closes) <= end ? pct(t(closes)) : null,
       changed,
       label: `${jobName(r.job.job_id)} · 출발 ${kstTime(a.pickup_departure_at)} · 도착 ${kstTime(a.gate_arrival_at)} · 복귀 ${kstTime(a.return_at)}`,
     }
@@ -84,13 +86,14 @@ export function timelineModel(rows: JobRow[], hasCand: boolean): TimelineModel |
   }
 }
 
-function Lane({ name, bars, model, incomplete }: { name: string; bars: Bar[]; model: TimelineModel; incomplete: boolean }) {
+function Lane({ name, bars, incomplete }: { name: string; bars: Bar[]; model?: TimelineModel; incomplete: boolean }) {
   return (
     <div className="lane">
       <span className="lane-name" title={name}>{hasVehicleName(name) ? <><b>{vehicleShort(name)}</b><small>{vehicleName(name)}</small></> : name}</span>
       <div className="lane-track">
-        {model.deadlines.map((d) => (
-          <span key={d.label} className="deadline" style={{ left: `${d.pct}%` }} />
+        {/* 마감선은 차량 전체가 아니라 그 막대 작업의 항차 마감에만 긋는다(다른 항차 작업이 넘긴 것처럼 보이지 않게) */}
+        {bars.filter((b) => b.cut !== null).map((b) => (
+          <span key={`cut-${b.jobId}`} className={`cut-mark${b.late ? ' late' : ''}`} style={{ left: `${b.cut}%` }} title={`${jobShort(b.jobId)} 반입 마감`} />
         ))}
         {bars.length === 0 && <span className="muted small lane-empty">{incomplete ? '시각 확인 필요' : '배정 없음'}</span>}
         {bars.map((b) => (
@@ -111,38 +114,26 @@ function Lane({ name, bars, model, incomplete }: { name: string; bars: Bar[]; mo
 }
 
 /** 차량별 카드: 원안 줄과 조정안 줄을 같은 시간축에 그린다. 막대는 출발~복귀, 점은 게이트 도착. */
-export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]; baseLabel: string; candLabel: string | null }) {
-  const model = timelineModel(rows, candLabel !== null)
+export function VehicleTimeline({ rows, baseLabel, candLabel, buffer = 0 }: { rows: JobRow[]; baseLabel: string; candLabel: string | null; buffer?: number }) {
+  const model = timelineModel(rows, candLabel !== null, buffer)
   if (!model) return <p className="muted">배정된 작업이 없어 차량별 일정을 그릴 수 없습니다.</p>
-  // 가까운 마감 이름표는 줄을 나눠 겹치지 않게 한다.
-  const rowEnds: number[] = []
-  const labels = [...model.deadlines].sort((a, b) => a.pct - b.pct).map((d) => {
-    let row = rowEnds.findIndex((end) => d.pct - end > 14)
-    if (row === -1) { row = rowEnds.length; rowEnds.push(d.pct) } else rowEnds[row] = d.pct
-    return { ...d, row }
-  })
   return (
     <div className="timeline">
       {/* 범례는 실제 막대와 같은 모양의 견본으로 보여준다 */}
       <ul className="timeline-legend small muted">
         <li><i className="sw sw-bar" />출발~복귀</li>
         <li><i className="sw sw-dot" />게이트 도착</li>
-        <li><i className="sw sw-deadline" />반입 마감</li>
-        <li><i className="sw sw-late" />마감 초과</li>
+        <li><i className="sw sw-deadline" />그 작업의 반입 마감</li>
+        <li><i className="sw sw-late" />마감 넘김(여유 {buffer}분 포함)</li>
         <li><i className="sw sw-changed" />조정안 변경</li>
         <li><i className="sw sw-locked"><Icon name="lock" size={10} /></i>고정</li>
       </ul>
       <div className="lane axis">
         <span className="lane-name" />
-        <div className="lane-track" style={{ height: 34 + Math.max(0, rowEnds.length - 1) * 15 }}>
+        <div className="lane-track">
           {model.ticks.map((tk) => (
             <span key={tk.pct} className="tick" style={{ left: `${tk.pct}%` }}>
               {tk.label}
-            </span>
-          ))}
-          {labels.map((d) => (
-            <span key={d.label} className="deadline-label" style={{ left: `${d.pct}%`, bottom: d.row * 15 }}>
-              {d.label}
             </span>
           ))}
         </div>

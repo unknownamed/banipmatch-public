@@ -31,10 +31,14 @@ export function kstDateTime(utc: string | null | undefined): string {
   return dateTimeFmt.format(d)
 }
 
-/** 같은 날이 아닐 때만 날짜를 붙인다(예: 전날 23:50 UTC → 08:50 KST). */
+/** 같은 날은 시각만, 하루 차이는 현장 표기대로 '익일·전일', 그 밖에는 날짜를 붙인다. */
 export function kstTimeWithDay(utc: string | null | undefined, refUtc: string): string {
   if (!utc) return '미확인'
-  return dayKey(utc) === dayKey(refUtc) ? kstTime(utc) : dateTimeFmt.format(new Date(utc))
+  const diff = Math.round((Date.parse(`${dayKey(utc).replace(/\. ?/g, '-').replace(/-$/, '')}T00:00:00Z`) - Date.parse(`${dayKey(refUtc).replace(/\. ?/g, '-').replace(/-$/, '')}T00:00:00Z`)) / 86400000)
+  if (diff === 0) return kstTime(utc)
+  if (diff === 1) return `익일 ${kstTime(utc)}`
+  if (diff === -1) return `전일 ${kstTime(utc)}`
+  return dateTimeFmt.format(new Date(utc))
 }
 
 const dayFmt = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' })

@@ -86,7 +86,7 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
         </button>
       </div>
       {layout === 'vehicle' ? (
-        <VehicleTimeline rows={rows} baseLabel={baseLabel} candLabel={candLabel} />
+        <VehicleTimeline rows={rows} baseLabel={baseLabel} candLabel={candLabel} buffer={snapshot.policy?.buffer_minutes ?? 0} />
       ) : (
         <ComparisonTable rows={rows} asOf={snapshot.as_of} buffer={snapshot.policy?.buffer_minutes ?? 0} baseLabel={baseLabel} candLabel={candLabel} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
       )}

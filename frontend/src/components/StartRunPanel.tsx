@@ -18,6 +18,7 @@ import { ChangeEvidence, Header } from './Panels'
 import { withQueueRetry } from '../lib/queueRetry'
 import { NowPanel } from './NowPanel'
 import { FleetToday } from './FleetToday'
+import { DispatchMap } from './DispatchMap'
 import { Icon, type IconName } from './Icon'
 
 // 홈은 담당자가 받은 변경을 처리하는 알림함이다(물류 관제 화면의 '조치가 필요한 예외 목록' 구성).
@@ -101,6 +102,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         <span className="updated"><span className="live" aria-hidden="true" />실시간 수신</span>
       </header>
       <div className="start-grid">
+      <div className="start-left">
       <section className="card start-main inbox-card">
         <div className="toolbar">
           <div className="seg" role="group" aria-label="변경 종류">
@@ -192,6 +194,11 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         )}
       </section>
       <NowPanel />
+      </div>
+      {/* 관제 화면처럼 첫 화면 오른쪽에 오늘 저녁 차량 지도를 크게 둔다(현재 배차표 기준 위치) */}
+      <div className="card home-map">
+        <DispatchMap snapshot={tonight} base={undefined} cand={undefined} selectedJob={null} onSelectJob={() => {}} />
+      </div>
       </div>
       {status.state !== 'rejected' && <FleetToday snapshot={tonight} />}
       {status.state === 'rejected' && <RejectedInput snapshot={status.snapshot} reason={status.error.message} />}

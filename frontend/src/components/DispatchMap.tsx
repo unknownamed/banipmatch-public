@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MethodResult, Snapshot } from '../api/types'
 import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
 import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
+import { Icon } from './Icon'
+import { ROAD_ATTRIBUTION, roadPath } from '../lib/fleetPosition'
 import { kstTime } from '../lib/time'
 import { jobName, jobInfo, planName, vehicleName, vehicleShort } from '../lib/labels'
 import { TripStepper } from './TripStepper'
@@ -33,16 +35,18 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
 }) {
   const pts = useMemo(() => locationPoints(snapshot), [snapshot])
   const [usePlan, setUsePlan] = useState<'cand' | 'base'>(cand ? 'cand' : 'base')
-  const [now, setNow] = useState(() => Date.now())
-  // 기본은 실제 시각. 발표 시연에서는 10·60배로 흘려 일정대로 움직이는 모습을 보여 준다.
-  const [speed, setSpeed] = useState<1 | 10 | 60>(1)
+  const [clock, setClock] = useState(() => Date.now())
+  // 담당자가 '지금 / 30분 뒤 / 1시간 뒤 / 새 반입 마감 시각'에 차량이 어디 있을지 미리 본다.
+  const cutoffAt = Date.parse(snapshot.windows.find((w) => w.window_id === snapshot.change.new_window_id)?.closes_at ?? '')
+  const [ahead, setAhead] = useState<'now' | '30' | '60' | 'cut'>('now')
+  const now = ahead === 'now' ? clock : ahead === 'cut' && Number.isFinite(cutoffAt) ? cutoffAt : clock + Number(ahead === 'cut' ? 0 : ahead) * 60000
   const [traffic, setTraffic] = useState(false)
-  const [sky, setSky] = useState(false)
+  const sky = false
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
   useEffect(() => {
-    const id = setInterval(() => setNow(x => (speed === 1 ? Date.now() : x + 1000 * speed)), speed === 1 ? 15000 : 1000)
+    const id = setInterval(() => setClock(Date.now()), 15000)
     return () => clearInterval(id)
-  }, [speed])
+  }, [])
 
   const plan = usePlan === 'cand' && cand ? cand.assignments : base?.assignments ?? snapshot.baseline_assignments
   const planLabel = usePlan === 'cand' && cand ? planName(cand.method) : '원래 배차'
@@ -56,6 +60,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
   const kmap = useRef<any>(null)
   const pins = useRef<any[]>([])
   const jobLine = useRef<any>(null)
+  const legLines = useRef<any[]>([])
   const allBounds = useRef<any>(null)
 
   useEffect(() => {
@@ -67,7 +72,9 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
       const ll = (p: Pt) => new maps.LatLng(p.lat, p.lon)
       const m = new maps.Map(box.current, { center: ll([...pts.values()][0]), level: 8 })
       kmap.current = m
-      unobserve = keepLaidOut(m, box.current)
+      let touched = false
+      maps.event.addListener(m, 'dragstart', () => { touched = true })
+      unobserve = keepLaidOut(m, box.current, () => { if (!touched && allBounds.current) m.setBounds(allBounds.current, 40, 40, 40, 40) })
       const bounds = new maps.LatLngBounds()
       for (const loc of snapshot.locations ?? []) {
         const p = pts.get(loc.location_id)
@@ -108,6 +115,12 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
     // 같은 자리(약 100m 안)의 차량은 핀 하나로 묶는다. 이동 중인 차량은 각자 목적지와 도착 시각을 보여 준다.
     for (const o of pins.current) o.setMap(null)
     pins.current = []
+    // 달리고 있는 차량은 지금 구간의 도로 경로를 마감 여유 색으로 옅게 그린다.
+    for (const l of legLines.current) l.setMap(null)
+    legLines.current = fleet.filter(v => v.path && v.path.length > 1).map(v => new maps.Polyline({
+      map: kmap.current, path: v.path!.map(ll), strokeWeight: v.vehicleId === selVehicle ? 6 : 4,
+      strokeColor: v.gate === 'late' ? '#c0262d' : v.gate === 'tight' ? '#d97706' : '#15803d', strokeOpacity: v.vehicleId === selVehicle ? 0.9 : 0.45,
+    }))
     const groups = new Map<string, VehicleNow[]>()
     for (const v of fleet) {
       if (!v.pos) continue
@@ -135,7 +148,8 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
     const a = selectedJob ? plan.find(x => x.job_id === selectedJob) : null
     const j = selectedJob ? snapshot.jobs.find(x => x.job_id === selectedJob) : null
     const from = j && pts.get(j.origin_id), to = j && pts.get(j.terminal_id)
-    jobLine.current?.setPath(a && from && to ? [ll(from), ll(to)] : [])
+    const road = j ? roadPath(j.origin_id, j.terminal_id) : null
+    jobLine.current?.setPath(a && road ? road.map(ll) : a && from && to ? [ll(from), ll(to)] : [])
   }, [fleet, mapState.ok, selVehicle, selectedJob, plan, snapshot, pts, onSelectJob])
 
   const sel = fleet.find(v => v.vehicleId === selVehicle) ?? null
@@ -160,7 +174,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
       <div className="dm-head">
         <div>
           <h3>차량 현황 · 게이트 도착</h3>
-          <p className="muted small"><b>{kstTime(new Date(now).toISOString())}</b> {speed === 1 ? '현재' : `${speed}배속`} · {planLabel} 기준 위치</p>
+          <p className="muted small"><b>{kstTime(new Date(now).toISOString())}</b> {ahead === 'now' ? '현재' : '예상'} · {planLabel} 기준 위치</p>
         </div>
         <div className="dm-tools">
           {cand && (
@@ -169,15 +183,14 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
               <button type="button" role="radio" aria-checked={usePlan === 'cand'} onClick={() => setUsePlan('cand')}>{planName(cand.method)}</button>
             </div>
           )}
-          <label className="vm-speed small">시간 배속
-            <select value={speed} onChange={e => { const v = Number(e.target.value) as 1 | 10 | 60; setSpeed(v); if (v === 1) setNow(Date.now()) }}>
-              <option value={1}>실시간</option>
-              <option value={10}>10배</option>
-              <option value={60}>60배</option>
-            </select>
-          </label>
-          <label className="dm-toggle"><input type="checkbox" checked={traffic} onChange={e => setTraffic(e.target.checked)} disabled={!mapState.ok} /> 실시간 교통</label>
-          <label className="dm-toggle"><input type="checkbox" checked={sky} onChange={e => setSky(e.target.checked)} disabled={!mapState.ok} /> 위성</label>
+          <div className="seg" role="group" aria-label="언제 위치를 볼지">
+            {([['now', '지금'], ['30', '30분 뒤'], ['60', '1시간 뒤'], ['cut', '마감 시각']] as const).map(([id, label]) => (
+              <button key={id} type="button" aria-pressed={ahead === id} disabled={id === 'cut' && !Number.isFinite(cutoffAt)} onClick={() => setAhead(id)}>{label}</button>
+            ))}
+          </div>
+          <button type="button" className="chip-toggle" aria-pressed={traffic} disabled={!mapState.ok} onClick={() => setTraffic(!traffic)}>
+            <Icon name="route" size={14} /> 실시간 교통
+          </button>
         </div>
       </div>
       <div className="dm-body">
@@ -186,9 +199,10 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
           {!mapState.ok && <p className="vm-map-msg muted small" role="status">{mapState.msg}</p>}
           {mapState.ok && (
             <div className="map-legend" aria-label="범례">
-              <span><i className="lg ok-g" />마감 여유</span><span><i className="lg tight" />빠듯(20분 미만)</span><span><i className="lg late" />마감 초과</span><span><i className="lg idle" />작업 없음</span>
+              <span><i className="lg ok-g" />여유 있음</span><span><i className="lg tight" />빠듯함(20분 미만)</span><span><i className="lg late" />마감 넘김</span><span><i className="lg idle" />대기</span>
             </div>
           )}
+          {mapState.ok && <span className="map-credit">{ROAD_ATTRIBUTION}</span>}
           {mapState.ok && (
             <div className="dm-mapbtns">
               <button type="button" onClick={() => allBounds.current && kmap.current?.setBounds(allBounds.current, 40, 40, 40, 40)}>전체</button>

@@ -38,12 +38,14 @@ export type MapType = (typeof MAP_TYPES)[number][0]
 
 /** 지도 상자의 크기가 바뀌면(화면 회전·창 크기·레이아웃 변화) 타일을 다시 깔아 빈 회색 영역이 남지 않게 한다. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function keepLaidOut(map: any, el: HTMLElement): () => void {
+export function keepLaidOut(map: any, el: HTMLElement, refit?: () => void): () => void {
   if (typeof ResizeObserver === 'undefined') return () => {}
   const ro = new ResizeObserver(() => {
     const c = map.getCenter()
     map.relayout()
-    map.setCenter(c)
+    // 범위를 다시 맞출 함수가 있으면(차량·터미널 전체 보기) 새 크기에 맞춰 다시 맞춘다.
+    if (refit) refit()
+    else map.setCenter(c)
   })
   ro.observe(el)
   return () => ro.disconnect()

@@ -84,8 +84,11 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
 
       {p.followups.length > 0 && <Followups items={p.followups} title="담당자가 확인할 사항" />}
 
-      <PushGuide authorized={authorized} linked={recipients.some((r) => !r.revoked && r.subscription_status === 'active')} />
-      {!authorized && <TeamCodeUnlock client={client} onUnlocked={setSession} />}
+      <div className="push-box">
+        <h3>기사 앱으로 알림 보내기</h3>
+        <PushGuide authorized={authorized} linked={recipients.some((r) => !r.revoked && r.subscription_status === 'active')} />
+        {!authorized && <TeamCodeUnlock client={client} onUnlocked={setSession} />}
+      </div>
       <Invitations client={client} planId={planId} vehicles={p.vehicle_changes.map((v) => v.vehicle_id)} authorized={authorized} recipients={recipients} onChange={loadRecipients} />
 
       <Send client={client} preview={p} authorized={authorized} dispatchId={dispatchId} onSent={(id) => {
@@ -154,8 +157,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
 
   return (
     <>
-      <h3>기사 앱 연결</h3>
-      {!authorized && <p className="small muted">알림 사용 코드를 넣으면 기사 연결 링크를 만들 수 있습니다.</p>}
+      {authorized && <h3>기사 앱 연결</h3>}
       {recipients.length > 0 && (
         <table className="grid small">
           <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>

@@ -2,7 +2,7 @@
 // 모든 선박·항차·속력·마감은 모의다. 도착은 추정이며 반입 마감을 바꾸지 않는다.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BUOYS, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
-import { MAP_TYPES, keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
+import { keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
 import { Icon } from './Icon'
 import type { Snapshot } from '../api/types'
 
@@ -27,12 +27,14 @@ function shipSvg(heading: number) {
 export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null }) {
   // 화면을 연 시각이 모의 상황의 시작점이다. 기본은 실제 시간과 같은 속도로 흐른다(상황판).
   const base = useMemo(() => new Date(), [])
-  const [t, setT] = useState(0)
-  const [speed, setSpeed] = useState<1 | 10 | 60>(1)
+  // 실제 흐르는 시각(분) + 담당자가 고른 미리보기 간격. '3시간 뒤'를 누르면 그때 모선 위치를 본다.
+  const [rt, setRt] = useState(0)
+  const [ahead, setAhead] = useState<0 | 60 | 180 | 360>(0)
+  const t = Math.min(MAX_MIN, rt + ahead)
   const [picked, setPicked] = useState<string>('BM-01')
   const [scope, setScope] = useState<'HJNC' | 'all'>('HJNC')
   const [vq, setVq] = useState('')
-  const [mapType, setMapType] = useState<MapType>('ROADMAP')
+  const mapType: MapType = 'ROADMAP'
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
   const fleet = useMemo(() => fleetAt(t), [t])
   const inboundHjnc = fleet.filter(v => v.vessel.terminal === 'HJNC' && !v.vessel.outbound && v.status !== 'berthed').length
@@ -54,9 +56,9 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
   const paths = useRef<{ passed: any; ahead: any } | null>(null)
 
   useEffect(() => {
-    const id = setInterval(() => setT(x => Math.min(MAX_MIN, x + speed / 60)), 1000)
+    const id = setInterval(() => setRt(x => Math.min(MAX_MIN, x + 1 / 60)), 1000)
     return () => clearInterval(id)
-  }, [speed])
+  }, [])
 
   // 지도와 고정 요소(항로·부표·터미널)는 한 번만 그린다.
   useEffect(() => {
@@ -190,21 +192,13 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         )}
 
         <div className="vm-toolbar">
-          <div className="vm-seg" role="radiogroup" aria-label="지도 종류">
-            {MAP_TYPES.map(([id, label]) => (
-              <button key={id} type="button" role="radio" aria-checked={mapType === id} disabled={!mapState.ok} onClick={() => setMapType(id)}>{label}</button>
-            ))}
-          </div>
           <div className="vm-play">
-            <span className="vm-clock"><span className="vm-live" aria-hidden="true" /><b>{kst(at(base, t))}</b> <span className="muted">{speed === 1 ? '현재 시각' : `${speed}배속`}</span></span>
-            <label className="vm-speed small">시간 배속
-              <select value={speed} onChange={e => setSpeed(Number(e.target.value) as 1 | 10 | 60)}>
-                <option value={1}>실시간</option>
-                <option value={10}>10배</option>
-                <option value={60}>60배</option>
-              </select>
-            </label>
-            {t >= MAX_MIN && <button type="button" className="secondary" onClick={() => setT(0)}>처음부터 다시</button>}
+            <span className="vm-clock"><span className="vm-live" aria-hidden="true" /><b>{kst(at(base, t))}</b> <span className="muted">{ahead === 0 ? '현재' : '예상'}</span></span>
+            <div className="seg" role="group" aria-label="언제 위치를 볼지">
+              {([[0, '지금'], [60, '1시간 뒤'], [180, '3시간 뒤'], [360, '6시간 뒤']] as const).map(([v, label]) => (
+                <button key={v} type="button" aria-pressed={ahead === v} onClick={() => setAhead(v)}>{label}</button>
+              ))}
+            </div>
           </div>
         </div>
 

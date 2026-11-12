@@ -2,6 +2,27 @@
 // 이동 구간은 두 지점 사이를 시간 비율로 직선 보간한다(도로 경로 아님).
 // 실제 차량 위치가 연결되면 source='gps'로 대체할 수 있도록 출처를 함께 돌려준다.
 import type { Assignment, Snapshot } from '../api/types'
+import roadRoutes from '../fixtures/road-routes.osm.json'
+
+// 표시용 실제 도로 경로(OpenStreetMap·OSRM). 같은 위치 쌍이 있으면 직선 대신 도로를 따라 움직인다.
+const ROADS = (roadRoutes as unknown as { routes: Record<string, { path: [number, number][] }> }).routes
+export const ROAD_ATTRIBUTION = (roadRoutes as { attribution: string }).attribution
+export function roadPath(fromId: string, toId: string): Pt[] | null {
+  const r = ROADS[`${fromId}>${toId}`]
+  return r ? r.path.map(([lat, lon]) => ({ lat, lon })) : null
+}
+function along(path: Pt[], f: number): Pt {
+  if (path.length < 2) return path[0]
+  const seg: number[] = []
+  let total = 0
+  for (let i = 1; i < path.length; i++) { const d = Math.hypot(path[i].lat - path[i - 1].lat, path[i].lon - path[i - 1].lon); seg.push(d); total += d }
+  let goal = Math.min(1, Math.max(0, f)) * total
+  for (let i = 0; i < seg.length; i++) {
+    if (goal <= seg[i] || i === seg.length - 1) { const k = seg[i] ? goal / seg[i] : 0; return { lat: path[i].lat + (path[i + 1].lat - path[i].lat) * k, lon: path[i].lon + (path[i + 1].lon - path[i].lon) * k } }
+    goal -= seg[i]
+  }
+  return path[path.length - 1]
+}
 
 export type Pt = { lat: number; lon: number }
 export type Phase = 'idle' | 'to_origin' | 'loading_wait' | 'to_gate' | 'at_gate' | 'returning' | 'done'
@@ -28,6 +49,7 @@ export type VehicleNow = {
   marginMin: number | null // 마감 - (도착 + 여유)
   gate: GateStatus | null
   source: 'plan_inferred'
+  path?: Pt[] | null // 지금 달리는 구간의 도로 경로(있으면)
 }
 
 const ms = (iso: string) => Date.parse(iso)
@@ -71,12 +93,12 @@ export function vehiclesAt(s: Snapshot, plan: Assignment[], now: number): Vehicl
       const gs = gateStatus(a.gate_arrival_at, cut, buffer)
       const job = { jobId: a.job_id, gateEta: a.gate_arrival_at, cutoff: cut, ...gs }
       if (now < ret) {
-        if (now >= dep && now < arr) return { ...base, ...job, phase: 'to_gate' as Phase, pos: origin && gate && lerp(origin, gate, frac(now, dep, arr)), from: origin, to: gate }
+        if (now >= dep && now < arr) { const road = roadPath(j.origin_id, j.terminal_id); const f = frac(now, dep, arr); return { ...base, ...job, phase: 'to_gate' as Phase, pos: road ? along(road, f) : origin && gate && lerp(origin, gate, f), from: origin, to: gate, path: road } }
         if (now >= arr && now < done) return { ...base, ...job, phase: 'at_gate' as Phase, pos: gate, from: null, to: null }
-        if (now >= done) return { ...base, ...job, phase: 'returning' as Phase, pos: gate && back && lerp(gate, back, frac(now, done, ret)), from: gate, to: back }
+        if (now >= done) { const road = roadPath(j.terminal_id, j.return_location_id); const f = frac(now, done, ret); return { ...base, ...job, phase: 'returning' as Phase, pos: road ? along(road, f) : gate && back && lerp(gate, back, f), from: gate, to: back, path: road } }
         const leave = Math.max(freeAt, dep - approach)
         if (now < leave) return { ...base, ...job, phase: 'idle' as Phase, pos: here, from: null, to: null }
-        if (now < leave + approach) return { ...base, ...job, phase: 'to_origin' as Phase, pos: here && origin && lerp(here, origin, frac(now, leave, leave + approach)), from: here, to: origin }
+        if (now < leave + approach) { const road = roadPath(location, j.origin_id); const f = frac(now, leave, leave + approach); return { ...base, ...job, phase: 'to_origin' as Phase, pos: road ? along(road, f) : here && origin && lerp(here, origin, f), from: here, to: origin, path: road } }
         return { ...base, ...job, phase: 'loading_wait' as Phase, pos: origin, from: null, to: null }
       }
       location = j.return_location_id
