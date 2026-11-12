@@ -532,3 +532,18 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .btn-line.subtle { color: var(--ink-3) !important; }
 .btn-line:disabled { opacity: .55; cursor: default; }
 .send-row { flex-direction: column; align-items: flex-start !important; gap: 6px !important; }
+/* 지도 범례: 차량 상태(점)와 도로 막힘(선)을 구분 */
+.lg-group { font-weight: 700; color: var(--ink); margin-right: -6px; }
+.lg-sep { width: 1px; height: 14px; background: var(--line); margin: 0 4px; }
+.lg-road { display: inline-block; width: 18px; height: 4px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+.lg-road.ok { background: #3bb54a; }
+.lg-road.slow { background: #f5a623; }
+.lg-road.jam { background: #e2382d; }
+/* 범례 두 줄: 무엇의 색인지 먼저 밝힌다 */
+.map-legend.two-rows { display: grid !important; gap: 6px; margin-top: 8px; }
+.map-legend.two-rows .lg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 12.5px; color: var(--ink-2); }
+.map-legend.two-rows .lg-group { display: inline-flex; align-items: baseline; gap: 6px; min-width: 190px; margin-right: 0; font-weight: 700; color: var(--ink); }
+.map-legend.two-rows .lg-group small { font-weight: 500; color: var(--ink-3); font-size: 11.5px; }
+.map-credit-line { margin: 4px 0 0; text-align: right; font-size: 11px; color: var(--ink-3); }
+.vm-map-wrap .map-credit { display: none; }
+@media (max-width: 576px) { .map-legend.two-rows .lg-group { min-width: 0; width: 100%; } }
