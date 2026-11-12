@@ -1,5 +1,5 @@
 import qrcode from 'qrcode-generator'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { SessionState, V2Client } from '../api/v2'
 import {
@@ -270,6 +270,54 @@ function Send({ client, preview, authorized, dispatchId, onSent, linked }: {
   )
 }
 
+// 기사가 응답하면 담당자가 표를 보고 있지 않아도 알 수 있게: 화면 알림 카드, 탭 제목 (N), 선택하면 PC 알림.
+type Toast = { id: string; vehicle: string; response: DispatchState['notifications'][number]['response']; note: string; at: string }
+function ResponseAlerts({ notifications }: { notifications: DispatchState['notifications'] }) {
+  const seen = useRef<Map<string, string | null> | null>(null)
+  const [toasts, setToasts] = useState<Toast[]>([])
+  const [perm, setPerm] = useState(() => (typeof Notification === 'undefined' ? 'unsupported' : Notification.permission))
+  useEffect(() => {
+    // 처음 불러온 응답은 이미 본 것으로 치고, 그 뒤에 새로 오거나 바뀐 응답만 알린다.
+    if (!seen.current) { seen.current = new Map(notifications.map((n) => [n.notification_id, n.responded_at])); return }
+    const fresh: Toast[] = []
+    for (const n of notifications) {
+      if (n.response === 'none' || !n.responded_at || seen.current.get(n.notification_id) === n.responded_at) continue
+      seen.current.set(n.notification_id, n.responded_at)
+      fresh.push({ id: `${n.notification_id}:${n.responded_at}`, vehicle: n.vehicle_ids.map(vehicleName).join(', '), response: n.response, note: n.response_history.at(-1)?.note ?? '', at: n.responded_at })
+    }
+    if (!fresh.length) return
+    setToasts((t) => [...t, ...fresh])
+    if (perm === 'granted' && document.hidden)
+      for (const f of fresh) new Notification('반입맞춤 기사 응답', { body: `${f.vehicle}: ${RESPONSE_LABEL[f.response] ?? f.response}${f.note ? `, ${f.note}` : ''}`, tag: f.id })
+  }, [notifications, perm])
+  useEffect(() => {
+    const base = document.title.replace(/^\(\d+\) /, '')
+    document.title = toasts.length ? `(${toasts.length}) ${base}` : base
+    return () => { document.title = base }
+  }, [toasts.length])
+  const dismiss = (id: string) => setToasts((t) => t.filter((x) => x.id !== id))
+  return (
+    <>
+      {perm === 'default' && (
+        <p className="small muted">기사 응답을 PC 알림으로도 받으려면 <button type="button" className="btn-link" onClick={async () => setPerm(await Notification.requestPermission())}>PC 알림 켜기</button></p>
+      )}
+      {toasts.length > 0 && (
+        <div className="resp-toasts" role="status" aria-live="polite">
+          {toasts.map((t) => (
+            <div key={t.id} className={`resp-toast ${t.response === 'cannot_perform' ? 'bad' : 'ok'}`}>
+              <div>
+                <b>{t.vehicle}</b> 기사 응답 <span className="small muted">{kstTime(t.at)}</span>
+                <p>{RESPONSE_LABEL[t.response] ?? t.response}{t.note ? `, “${t.note}”` : ''}</p>
+              </div>
+              <button type="button" className="btn-line" onClick={() => { dismiss(t.id); document.querySelector('.dispatch-status')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }}>확인</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  )
+}
+
 function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; dispatchId: string; recipients: RecipientSummary[] }) {
   const [state, setState] = useState<{ data?: DispatchState; error?: unknown; at?: number }>({})
   const [retryError, setRetryError] = useState<unknown>(null)
@@ -298,6 +346,7 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
   const d = state.data
   return (
     <>
+      <ResponseAlerts notifications={d.notifications} />
       <h3>전달 결과와 응답 {!d.is_current && <span className="badge fixture">이전 계획</span>}</h3>
       <p className="small muted">{state.at ? `${kstTime(new Date(state.at).toISOString())} 기준, 자동으로 새로 고침` : ''}</p>
       <table className="grid small dispatch-status">

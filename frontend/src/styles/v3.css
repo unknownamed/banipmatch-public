@@ -602,3 +602,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .resp-history { margin-top: 2px; }
 .resp-history summary { cursor: pointer; color: var(--ink-2); }
 .resp-history ol { margin: 4px 0 0; padding-left: 18px; }
+
+/* 기사 응답 알림 카드: 담당자 화면 오른쪽 아래 */
+.resp-toasts { position: fixed; right: 20px; bottom: 20px; z-index: 60; display: grid; gap: 10px; width: min(360px, calc(100vw - 32px)); }
+.resp-toast { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--line); border-left: 4px solid #15803d; box-shadow: 0 8px 24px rgba(15, 23, 42, .18); }
+.resp-toast.bad { border-left-color: #c0262d; }
+.resp-toast p { margin: 4px 0 0; font-weight: 600; }
+.resp-toast.bad p { color: #c0262d; }
+.btn-link { background: none; border: 0; padding: 0; color: #2457E6; font: inherit; text-decoration: underline; cursor: pointer; }
+@media (max-width: 576px) { .resp-toasts { right: 16px; bottom: 76px; } }
