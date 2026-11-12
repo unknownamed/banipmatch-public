@@ -45,7 +45,7 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
     <Shell demo={demo}>
       <section className="card">
         <h2>배차 알림 연결</h2>
-        <p className="small muted">배차 담당자가 확정한 변경을 이 휴대폰으로 받아 보고 바로 응답할 수 있습니다.</p>
+        <p className="small muted">확정된 배차 변경을 이 휴대폰으로 받고 바로 응답합니다.</p>
         {install ? (
           <InstallGuide hasInvite={!!invite} />
         ) : invite ? (
@@ -298,9 +298,9 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
                 <span className="small">
                   이전: {c.before ? `${who(c.before.vehicle_id)} · ${kstTime(c.before.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.before.gate_arrival_at)}` : c.before_outside_scope ? '다른 차량(상세 비공개)' : '배정 없음'}
                   <br />
-                  변경: {c.after ? `${who(c.after.vehicle_id)} · ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : c.after_outside_scope ? '다른 차량으로 이동(상세 비공개)' : '보류 · 담당자 확인 중'}
+                  변경: {c.after ? `${who(c.after.vehicle_id)} · ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : c.after_outside_scope ? '다른 차량으로 이동(상세 비공개)' : '미배정 · 담당자 확인 중'}
                 </span>
-                {c.instruction && <p className="small muted">{c.instruction}</p>}
+                {c.instruction && c.kind === 'removed_from_plan' && <p className="small muted">{c.instruction}</p>}
               </li>
               )
             })}

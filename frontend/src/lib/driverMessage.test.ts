@@ -14,6 +14,6 @@ it('기사 안내문은 번호판·컨테이너 번호·상차지·게이트 시
   expect(text).toContain('BNJU 100203')
   expect(text).toContain('녹산산단 상차지 19:20 출발 → HJNC 게이트 19:35 도착')
   expect(text).toContain('7136 차량에서 넘어온 작업')
-  expect(text).toContain('보류(담당자 확인 중)')
+  expect(text).toContain('미배정(담당자 확인 중)')
   expect(text).not.toContain('J03')
 })

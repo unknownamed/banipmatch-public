@@ -424,7 +424,7 @@
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
-      "ready_at": "2026-11-07T11:30:00Z",
+      "ready_at": "2026-11-07T11:00:00Z",
       "gross_weight_kg": 25000,
       "equipment_type": "DRY40",
       "service_minutes": 20,

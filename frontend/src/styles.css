@@ -605,3 +605,12 @@ button.secondary:hover { background: var(--color-hover); }
 .hint-pop { display: none; position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); z-index: 30; width: max-content; max-width: min(320px, 80vw); padding: 10px 12px; border-radius: var(--radius-md); background: #1d1d1d; color: #fff; font-size: 12px; line-height: 1.55; font-weight: 400; letter-spacing: 0; text-align: left; white-space: normal; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
 .hint:hover .hint-pop, .hint:focus .hint-pop, .hint:focus-within .hint-pop { display: block; }
 @media (max-width: 640px) { .hint-pop { left: auto; right: -8px; transform: none; } }
+/* 확인 필요 패널 */
+.count-pill { display: inline-grid; place-items: center; min-width: 22px; height: 22px; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--color-danger); color: #fff; font-size: 12px; vertical-align: 2px; }
+.issue-card { padding: 12px 0; border-top: var(--border); display: grid; gap: 4px; }
+.issue-card:first-of-type { border-top: 0; padding-top: 4px; }
+.issue-title { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+.issue-body p { margin: 2px 0; }
+.next-step { margin: 4px 0 0; padding: 8px 10px; border-radius: var(--radius-md); background: #fff4ee; color: #8a2e05; font-weight: 600; line-height: 1.5; }
+.job-bar .arrival { bottom: 0; height: 3px; width: 3px; margin-left: -1.5px; border-radius: 1px 1px 0 0; opacity: 1; }
+.job-bar { padding-bottom: 2px; line-height: 1; }

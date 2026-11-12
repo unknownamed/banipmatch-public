@@ -22,7 +22,7 @@ export function Header({ s }: { s: Snapshot }) {
       <div>
         <h1>반입시간 변경 배차 점검</h1>
         <p className="muted">
-          {c.voyage_id} · {c.terminal_id} 반입 마감 변경에 따른 남은 배차 점검 · {kstDateTime(s.as_of)} 기준
+          {c.voyage_id} · {c.terminal_id} 반입 마감(컷오프) 변경에 따른 남은 배차 점검 · {kstDateTime(s.as_of)} 기준
         </p>
         <details className="tech-info">
           <summary>세부 정보</summary>
@@ -51,7 +51,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const moved = shiftText(c.previous_closes_at, w?.closes_at)
   return (
     <section className="card evidence">
-      <h2>반입 마감 변경 <Hint text="선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다. 선박이 늦어도 터미널이 바꾸기 전에는 마감이 그대로입니다." /></h2>
+      <h2>반입 마감(컷오프) 변경 <Hint text="선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다. 선박이 늦어도 터미널이 바꾸기 전에는 마감이 그대로입니다." /></h2>
       {w && (
         <p className="change-lead">
           <b>{c.voyage_id} · {c.terminal_id}</b> 반입 마감이 <s>{kstTime(c.previous_closes_at)}</s> → <b className="change-new">{kstTime(w.closes_at)}</b>
@@ -242,7 +242,7 @@ function Metric({ label, a, b, icon }: { label: string; a: number | null; b: num
 export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodResult }) {
   return (
     <div className="metrics">
-      <Metric label="보류(배정 못 함)" icon="warning" a={base.metrics.unassigned_count} b={cand.metrics.unassigned_count} />
+      <Metric label="미배정" icon="warning" a={base.metrics.unassigned_count} b={cand.metrics.unassigned_count} />
       {/* movable_violation_count는 마감 외 제약 위반도 포함한다(PR #4 리뷰). 마감만 따로 세려면 계약 합의 필요 */}
       <Metric label="마감·조건 위반" icon="clock" a={base.metrics.movable_violation_count} b={cand.metrics.movable_violation_count} />
       <Metric label="출발한 차량 위험" icon="lock" a={base.metrics.fixed_risk_count} b={cand.metrics.fixed_risk_count} />
@@ -257,42 +257,51 @@ export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodRes
   )
 }
 
+// 이유별 다음 행동(R3). 해결을 보장하지 않고, 확인할 곳과 다음 단계만 안내한다.
+const NEXT_STEP: Record<string, string> = {
+  READY_TOO_LATE: '화주에게 상차 준비를 앞당길 수 있는지 확인 → 확인되면 아래 ‘조건 보완’에서 준비 시각을 고쳐 다시 계산',
+  SEARCH_LIMIT: '쓸 수 있는 차량이 더 있는지 확인 → 있으면 아래 ‘조건 보완’에서 차량을 추가해 다시 계산',
+  VEHICLE_UNAVAILABLE: '차량 가용 시각·근무 종료 시각을 기사에게 확인 → ‘조건 보완’에서 고쳐 다시 계산',
+  SHIFT_EXCEEDED: '기사 근무 연장이 가능한지 확인 → ‘조건 보완’에서 근무 종료 시각을 고쳐 다시 계산',
+  CUTOFF_EXCEEDED: '터미널에 반입 연장(예외 반입)이 가능한지 문의 → 터미널이 공지를 바꾸면 새로 점검',
+  INCOMPATIBLE_EQUIPMENT: '컨테이너 규격에 맞는 장비 차량이 있는지 확인',
+  CAPACITY_EXCEEDED: '중량을 실을 수 있는 차량이 있는지 확인',
+  INPUT_MISSING: '비어 있는 값(준비 시각·이동 시간 등)을 확인해 입력',
+}
+
 export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodResult }) {
   const unresolved = rows.filter((r) => r.candidateUnassigned)
   const lockedRisk = rows.filter((r) => r.locked && r.candidateIssues.length > 0)
   const general = cand.issues.filter((i) => i.job_id === null)
   return (
-    <section className="card">
-      <h2>미해결 · 고정 위험</h2>
-      {unresolved.length === 0 && lockedRisk.length === 0 && general.length === 0 && <p className="muted">응답에 미해결 항목이 없습니다.</p>}
+    <section className="card unresolved">
+      <h2>확인 필요 {unresolved.length + lockedRisk.length > 0 && <span className="count-pill">{unresolved.length + lockedRisk.length}</span>}</h2>
+      {unresolved.length === 0 && lockedRisk.length === 0 && general.length === 0 && <p className="ok">확인할 작업이 없습니다.</p>}
       {unresolved.map((r) => (
-        <details key={r.job.job_id} open className="issue">
-          <summary>
-            <b>{jobName(r.job.job_id)}</b> 미처리 — {r.candidateIssues.map((i) => ISSUE_LABEL[i.code] ?? i.code).join(', ') || '이유 미제공'}
-          </summary>
-          {r.candidateIssues.length === 0 && <p className="warn">응답에 이유가 없습니다. 엔진 담당에게 확인이 필요합니다.</p>}
+        <div key={r.job.job_id} className="issue-card">
+          <p className="issue-title">
+            <b>{jobName(r.job.job_id)}</b> <span className="badge unassigned">미배정</span>{' '}
+            {r.candidateIssues.map((i) => ISSUE_LABEL[i.code] ?? i.code).join(', ') || '이유 미제공'}
+            {r.candidateIssues[0] && <Hint text={`판단 근거: ${PROOF_LABEL[r.candidateIssues[0].proof_level]}`} />}
+          </p>
+          {r.candidateIssues.length === 0 && <p className="warn small">계산 결과에 이유가 없습니다. 개발 담당 확인이 필요합니다.</p>}
           {r.candidateIssues.map((i, k) => (
-            <ul key={k}>
-              <li>{humanizeTimes(i.explanation)}</li>
-              <li className="muted">
-                근거 수준: {PROOF_LABEL[i.proof_level]} · 근거: {i.evidence_refs.join(', ') || '없음'}
-              </li>
-              <li className="muted">
-                추가 확인: 준비시각 {kstDateTime(r.job.ready_at)} · 마감 {kstTime(r.window?.closes_at)}
-              </li>
-            </ul>
+            <div key={k} className="issue-body small">
+              <p>{humanizeTimes(i.explanation)}</p>
+              <p className="muted">준비 {kstTime(r.job.ready_at)} · 반입 마감 {kstTime(r.window?.closes_at)}</p>
+              {NEXT_STEP[i.code] && <p className="next-step">→ {NEXT_STEP[i.code]}</p>}
+            </div>
           ))}
-        </details>
+        </div>
       ))}
       {lockedRisk.map((r) => (
-        <details key={`l-${r.job.job_id}`} open className="issue">
-          <summary>
-            <b>{jobName(r.job.job_id)}</b> 고정 작업 잔여 위험 (유지됨)
-          </summary>
+        <div key={`l-${r.job.job_id}`} className="issue-card">
+          <p className="issue-title"><b>{jobName(r.job.job_id)}</b> <span className="badge lock">출발함</span> 마감 위험(배차 유지)</p>
           {r.candidateIssues.map((i, k) => (
-            <p key={k}>{humanizeTimes(i.explanation)}</p>
+            <p key={k} className="small">{humanizeTimes(i.explanation)}</p>
           ))}
-        </details>
+          <p className="next-step small">→ 기사에게 현재 위치와 게이트 도착 예상을 확인</p>
+        </div>
       ))}
       {general.map((i, k) => (
         <p key={`g-${k}`} className="warn">

@@ -113,6 +113,13 @@ function Lane({ name, bars, model, incomplete }: { name: string; bars: Bar[]; mo
 export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]; baseLabel: string; candLabel: string | null }) {
   const model = timelineModel(rows, candLabel !== null)
   if (!model) return <p className="muted">배정된 작업이 없어 차량별 일정을 그릴 수 없습니다.</p>
+  // 가까운 마감 이름표는 줄을 나눠 겹치지 않게 한다.
+  const rowEnds: number[] = []
+  const labels = [...model.deadlines].sort((a, b) => a.pct - b.pct).map((d) => {
+    let row = rowEnds.findIndex((end) => d.pct - end > 14)
+    if (row === -1) { row = rowEnds.length; rowEnds.push(d.pct) } else rowEnds[row] = d.pct
+    return { ...d, row }
+  })
   return (
     <div className="timeline">
       {/* 범례는 실제 막대와 같은 모양의 견본으로 보여준다 */}
@@ -126,14 +133,14 @@ export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]
       </ul>
       <div className="lane axis">
         <span className="lane-name" />
-        <div className="lane-track">
+        <div className="lane-track" style={{ height: 34 + Math.max(0, rowEnds.length - 1) * 15 }}>
           {model.ticks.map((tk) => (
             <span key={tk.pct} className="tick" style={{ left: `${tk.pct}%` }}>
               {tk.label}
             </span>
           ))}
-          {model.deadlines.map((d) => (
-            <span key={d.label} className="deadline-label" style={{ left: `${d.pct}%` }}>
+          {labels.map((d) => (
+            <span key={d.label} className="deadline-label" style={{ left: `${d.pct}%`, bottom: d.row * 15 }}>
               {d.label}
             </span>
           ))}
@@ -141,7 +148,7 @@ export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]
       </div>
       {model.vehicles.map((v) => (
         <section key={v.id} className="vehicle-card" aria-label={`차량 ${v.id}`}>
-          <h3>{v.id}</h3>
+          <h3>{vehicleName(v.id)}{vehicleName(v.id) !== v.id && <span className="muted small"> {v.id}</span>}</h3>
           <Lane name={baseLabel} bars={v.base} model={model} incomplete={model.incomplete.some((a) => a.vehicleId === v.id && a.side === 'base')} />
           {candLabel && <Lane name={candLabel} bars={v.cand} model={model} incomplete={model.incomplete.some((a) => a.vehicleId === v.id && a.side === 'cand')} />}
           {model.incomplete.filter((a) => a.vehicleId === v.id).map((a) => (
@@ -152,11 +159,11 @@ export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]
         </section>
       ))}
       {model.ticks.length === 0 && <p className="muted">확인된 배정 시각이 없어 시간축을 그릴 수 없습니다.</p>}
-      {model.baselineUnassigned.length > 0 && <p className="unassigned-row">{baseLabel} 배정 없음: {model.baselineUnassigned.join(', ')}</p>}
+      {model.baselineUnassigned.length > 0 && <p className="unassigned-row">{baseLabel} 배정 없음: {model.baselineUnassigned.map(jobName).join(', ')}</p>}
       {model.missing.length > 0 && <p className="warn">조정안 결과 누락(배정·미처리 모두 아님): {model.missing.join(', ')}</p>}
       {model.unassigned.length > 0 && (
         <p className="unassigned-row">
-          <span className="badge unassigned">미처리</span> {model.unassigned.join(', ')} — 조정안에서 어느 차량에도 배정되지 않았습니다.
+          <span className="badge unassigned">미배정</span> {model.unassigned.map(jobName).join(', ')} — 조정안에서 어느 차량에도 배정되지 않았습니다.
         </p>
       )}
     </div>

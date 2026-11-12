@@ -163,8 +163,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       <section className="card">
         <div className="vm-head">
           <div>
-            <h2>입항 선박 · 반입 마감</h2>
-            <p className="muted small">대상 터미널 HJNC 항차가 언제 도착할지(추정)와 그 항차의 반입 마감을 함께 봅니다.</p>
+            <h2>입항 모선 · 반입 마감</h2>
+            <p className="muted small">HJNC로 들어오는 모선의 도착 예상과 항차별 반입 마감(컷오프)</p>
           </div>
         </div>
         {link ? (

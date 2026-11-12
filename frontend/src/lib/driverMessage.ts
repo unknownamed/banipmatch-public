@@ -21,8 +21,8 @@ export function driverMessage(vehicleId: string, changes: ChangeLine[], version:
     })
   }
   if (removed.length) {
-    lines.push('', '■ 취소된 작업(다른 차량 배정 또는 보류)')
-    removed.forEach(c => lines.push(`- ${jobName(c.job_id)}${c.after?.vehicle_id ? ` → ${vehicleShort(c.after.vehicle_id)} 차량` : ' → 보류(담당자 확인 중)'}`))
+    lines.push('', '■ 빠진 작업(다른 차량 배정 또는 미배정)')
+    removed.forEach(c => lines.push(`- ${jobName(c.job_id)}${c.after?.vehicle_id ? ` → ${vehicleShort(c.after.vehicle_id)} 차량` : ' → 미배정(담당자 확인 중)'}`))
   }
   lines.push('', '확인하셨으면 "확인", 수행이 어려우면 "곤란"으로 회신 부탁드립니다.')
   return lines.join('\n')

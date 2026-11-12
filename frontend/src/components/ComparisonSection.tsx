@@ -63,9 +63,9 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
       {base && cand && <MetricsRow base={base} cand={cand} />}
       {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
         <p className="warn">
-          {cand.method} 조정안은 {cand.metrics.unassigned_count}건을 배정하지 못하고 보류했습니다
-          {heldWereLate(base, cand) ? '(원래 배차에서도 마감을 넘기던 작업)' : ''}. 위반이 줄어든 데에는 이 보류가 포함되어 있으니,
-          보류된 작업은 오른쪽 ‘확인 필요’에서 처리하세요.
+          {cand.method} 조정안은 {cand.metrics.unassigned_count}건을 배정하지 못했습니다(미배정)
+          {heldWereLate(base, cand) ? '(원래 배차에서도 마감을 넘기던 작업)' : ''}. 위반이 줄어든 데에는 이 미배정이 포함되어 있으니,
+          오른쪽 ‘확인 필요’에서 처리하세요.
         </p>
       )}
       {broken.length > 0 && (
