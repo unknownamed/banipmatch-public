@@ -414,7 +414,6 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                   {v.live && v.live.offKm >= 2 && <span className="st warn">일정상 위치와 약 {Math.round(v.live.offKm)}km 떨어짐</span>}
                   {v.gate && v.marginMin !== null && <span className={`st ${v.gate === 'late' ? 'bad' : v.gate === 'tight' ? 'warn' : 'ok'}`}>{v.gate === 'late' ? `${-v.marginMin}분 늦음` : `${v.marginMin}분 여유`}</span>}
                 </span>
-                {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} compact />}
                 {v.jobId && v.gateEta ? (
                   <span className="dmi-line"><BoxNo jobId={v.jobId} /> <span className="nowrap">게이트 <b>{kstTime(v.gateEta)}</b>, 마감 {kstTime(v.cutoff)}</span></span>
                 ) : <span className="dmi-line">남은 작업 없음</span>}
