@@ -10,6 +10,7 @@ import { ROAD_ATTRIBUTION, roadPath } from '../lib/fleetPosition'
 import { kstTime } from '../lib/time'
 import { jobName, jobInfo, planName, vehicleName, vehicleShort } from '../lib/labels'
 import { TripStepper } from './TripStepper'
+import { useMapStyle } from '../lib/mapStyle'
 
 
 // 옆에서 본 트럭(방향은 글자 화살표로 표시). 핀 안에서는 회전하지 않는다.
@@ -44,7 +45,9 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
   const now = ahead === 'now' ? clock : ahead === 'cut' && Number.isFinite(cutoffAt) ? cutoffAt : clock + Number(ahead === 'cut' ? 0 : ahead) * 60000
   // 실시간 교통은 도착 판단에 바로 쓰이므로 기본으로 켠다. 위성 사진은 '레이어'에서 고른다.
   const [traffic, setTraffic] = useState(true)
-  const [sky, setSky] = useState(false)
+  const [style, setStyle] = useMapStyle('dispatch', 'map')
+  const sky = style === 'sky'
+  const setSky = (on: boolean) => setStyle(on ? 'sky' : 'map')
   const [layersOpen, setLayersOpen] = useState(false)
   // 지도를 확대·이동할 때마다 화면 거리 기준으로 차량 묶음을 다시 계산한다.
   const [viewTick, setViewTick] = useState(0)
@@ -69,6 +72,9 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
   const jobLine = useRef<any>(null)
   const legLines = useRef<any[]>([])
   const allBounds = useRef<any>(null)
+  const focusBounds = useRef<any>(null)
+  // 기본 보기: 지금 차량이 있는 곳 + 게이트. 상차지 전체는 '전체', 게이트 앞은 '게이트'.
+  const [mapView, setMapView] = useState<'fleet' | 'gate' | 'all'>('fleet')
 
   useEffect(() => {
     if (pts.size === 0) return
@@ -81,7 +87,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       kmap.current = m
       let touched = false
       maps.event.addListener(m, 'dragstart', () => { touched = true })
-      unobserve = keepLaidOut(m, box.current, () => { if (!touched && allBounds.current) m.setBounds(allBounds.current, 40, 40, 40, 40) })
+      unobserve = keepLaidOut(m, box.current, () => { if (!touched && focusBounds.current) m.setBounds(focusBounds.current, 50, 110, 50, 110) })
       const bounds = new maps.LatLngBounds()
       for (const loc of snapshot.locations ?? []) {
         const p = pts.get(loc.location_id)
@@ -100,7 +106,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
         new maps.CustomOverlay({ map: m, position: ll(p), content: dot, zIndex: 1 })
       }
       allBounds.current = bounds
-      m.setBounds(bounds, 40, 40, 40, 40)
+      // 차량 중심 범위: 게이트 + 지금(계획 기준) 차량 위치
+      const focus = new maps.LatLngBounds()
+      for (const loc of snapshot.locations ?? []) if (loc.kind === 'terminal' && pts.get(loc.location_id)) focus.extend(ll(pts.get(loc.location_id)!))
+      for (const v of vehiclesAt(snapshot, plan, Date.now())) if (v.pos) focus.extend(ll(v.pos))
+      focusBounds.current = focus
+      m.setBounds(focus, 50, 110, 50, 110)
+      if (m.getLevel() < 6) m.setLevel(6)
       // 넓게 볼 때는 차량 번호만, 확대하면 목적지·도착 시각까지 보여 준다.
       const zoomClass = () => box.current?.classList.toggle('dm-far', m.getLevel() >= 8)
       maps.event.addListener(m, 'zoom_changed', zoomClass)
@@ -226,6 +238,18 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
               <button type="button" role="radio" aria-checked={usePlan === 'cand'} onClick={() => setUsePlan('cand')}>{planName(cand.method)}</button>
             </div>
           )}
+          <div className="seg" role="group" aria-label="지도 범위">
+            {([['fleet', '차량 중심'], ['gate', '게이트'], ['all', '전체']] as const).map(([id, label]) => (
+              <button key={id} type="button" aria-pressed={mapView === id} disabled={!mapState.ok || (id === 'gate' && !gate)} onClick={() => {
+                setMapView(id)
+                const m = kmap.current, maps = window.kakao?.maps
+                if (!m || !maps) return
+                if (id === 'all' && allBounds.current) m.setBounds(allBounds.current, 40, 110, 40, 110)
+                else if (id === 'fleet' && focusBounds.current) { m.setBounds(focusBounds.current, 50, 110, 50, 110); if (m.getLevel() < 6) m.setLevel(6) }
+                else if (id === 'gate' && gate) { m.setLevel(4); m.panTo(new maps.LatLng(gate.lat, gate.lon)) }
+              }}>{label}</button>
+            ))}
+          </div>
           <div className="seg" role="group" aria-label="언제 위치를 볼지">
             {([['now', '지금'], ['30', '30분 뒤'], ['60', '1시간 뒤'], ['cut', '마감 시각']] as const).map(([id, label]) => (
               <button key={id} type="button" aria-pressed={ahead === id} disabled={id === 'cut' && !Number.isFinite(cutoffAt)} onClick={() => setAhead(id)}>{label}</button>
@@ -257,12 +281,6 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
             </div>
           )}
           {mapState.ok && <span className="map-credit">{ROAD_ATTRIBUTION}</span>}
-          {mapState.ok && (
-            <div className="dm-mapbtns">
-              <button type="button" onClick={() => allBounds.current && kmap.current?.setBounds(allBounds.current, 40, 40, 40, 40)}>전체</button>
-              {gate && <button type="button" onClick={() => { const maps = window.kakao.maps; kmap.current?.setLevel(4); kmap.current?.panTo(new maps.LatLng(gate.lat, gate.lon)) }}>게이트</button>}
-            </div>
-          )}
         </div>
         {!compact && <div className="dm-side">
         {sel ? (
@@ -275,7 +293,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                   <div><dt>컨테이너</dt><dd>{jobName(cur.job_id)} · {curJob.equipment_type === 'DRY40' ? '40ft' : curJob.equipment_type === 'DRY20' ? '20ft' : curJob.equipment_type}</dd></div>
                   <div><dt>항차 · 화주</dt><dd>{curJob.voyage_id}{curJob.cargo_owner ? ` · ${curJob.cargo_owner}` : ''}{jobInfo(cur.job_id)?.booking ? ` · 부킹 ${jobInfo(cur.job_id)!.booking}` : ''}</dd></div>
                   <div><dt>경로</dt><dd>{placeName(curJob.origin_id)} → {placeName(curJob.terminal_id)}</dd></div>
-                  <div><dt>일정</dt><dd>출발 {kstTime(cur.pickup_departure_at)} · 도착 <b>{kstTime(cur.gate_arrival_at)}</b> · 복귀 {kstTime(cur.return_at)}</dd></div>
+                  <div><dt>일정</dt><dd>상차지 출발 {kstTime(cur.pickup_departure_at)} · 게이트 도착 <b>{kstTime(cur.gate_arrival_at)}</b> · 복귀 {kstTime(cur.return_at)}</dd></div>
                   <div><dt>반입 마감</dt><dd>{kstTime(sel.cutoff)}{sel.marginMin !== null && (sel.gate === 'late' ? <b className="dm-late"> · 마감 초과</b> : ` · 여유 ${sel.marginMin}분`)}</dd></div>
                   <div><dt>다음 작업</dt><dd>{next ? `${jobName(next.job_id)} · ${kstTime(next.pickup_departure_at)} 출발` : '없음'}</dd></div>
                 </>
@@ -285,7 +303,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
           </div>
         ) : <p className="muted small dm-hint">지도에서 차량을 누르거나 목록·작업표에서 고르면 일정이 보입니다.</p>}
         <ol className="dm-list" aria-label="차량별 현재 상태">
-          {fleet.map(v => (
+          {[...fleet].sort((a, b) => ((a.gate === 'late' ? 0 : a.gate === 'tight' ? 1 : a.gate === 'ok' ? 2 : 3) * 10000 + (a.marginMin ?? 9999)) - ((b.gate === 'late' ? 0 : b.gate === 'tight' ? 1 : b.gate === 'ok' ? 2 : 3) * 10000 + (b.marginMin ?? 9999))).map(v => (
             <li key={v.vehicleId}>
               <button type="button" className={`dm-item${v.vehicleId === selVehicle ? ' picked' : ''}`} onClick={() => focusVehicle(v)}>
                 <span className="dmi-top">

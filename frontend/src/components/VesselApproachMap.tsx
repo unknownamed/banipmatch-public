@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { BUOYS, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
 import { keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
 import { Icon } from './Icon'
+import { demoAnchor } from '../lib/shift'
+import { useMapStyle } from '../lib/mapStyle'
 import { SeaWeatherLine } from './LiveReference'
 import type { Snapshot } from '../api/types'
 
@@ -27,15 +29,17 @@ function shipSvg(heading: number) {
 
 export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null }) {
   // 화면을 연 시각이 모의 상황의 시작점이다. 기본은 실제 시간과 같은 속도로 흐른다(상황판).
-  const base = useMemo(() => new Date(), [])
+  const base = useMemo(() => demoAnchor(), [])
   // 실제 흐르는 시각(분) + 담당자가 고른 미리보기 간격. '3시간 뒤'를 누르면 그때 모선 위치를 본다.
-  const [rt, setRt] = useState(0)
+  const [rt, setRt] = useState(() => Math.min(MAX_MIN, (Date.now() - base.getTime()) / 60000))
   const [ahead, setAhead] = useState<0 | 60 | 180 | 360>(0)
   const t = Math.min(MAX_MIN, rt + ahead)
   const [picked, setPicked] = useState<string>('BM-01')
   const [scope, setScope] = useState<'HJNC' | 'all'>('HJNC')
   const [vq, setVq] = useState('')
-  const mapType: MapType = 'ROADMAP'
+  const [style, setStyle] = useMapStyle('vessel', 'sky')
+  const mapType: MapType = style === 'sky' ? 'HYBRID' : 'ROADMAP'
+  const [layersOpen, setLayersOpen] = useState(false)
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
   const fleet = useMemo(() => fleetAt(t), [t])
   const inboundHjnc = fleet.filter(v => v.vessel.terminal === 'HJNC' && !v.vessel.outbound && v.status !== 'berthed').length
@@ -200,6 +204,18 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
                 <button key={v} type="button" aria-pressed={ahead === v} onClick={() => setAhead(v)}>{label}</button>
               ))}
             </div>
+          </div>
+          <div className="layers">
+            <button type="button" className="chip-toggle" aria-expanded={layersOpen} disabled={!mapState.ok} onClick={() => setLayersOpen(!layersOpen)}>
+              <Icon name="map" size={14} /> 레이어
+            </button>
+            {layersOpen && (
+              <div className="layers-pop" role="dialog" aria-label="지도 레이어">
+                <p className="layers-h">지도</p>
+                <label><input type="radio" name="vm-base" checked={style === 'map'} onChange={() => { setStyle('map'); setLayersOpen(false) }} /> 일반 지도</label>
+                <label><input type="radio" name="vm-base" checked={style === 'sky'} onChange={() => { setStyle('sky'); setLayersOpen(false) }} /> 위성 사진</label>
+              </div>
+            )}
           </div>
         </div>
 

@@ -299,7 +299,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
                   <p className="rc-note">{c.kind === 'removed_from_plan' ? '담당자가 확인 중입니다. 별도 연락 전까지 이 작업은 하지 않습니다.' : '다른 차량이 맡습니다. 이 작업은 하지 않습니다.'}</p>
                 ) : (
                   <div className="rc-times">
-                    <span>출발 {c.before && mine(c.before.vehicle_id) && c.before.pickup_departure_at !== c.after.pickup_departure_at && <s>{t(c.before.pickup_departure_at)}</s>} <b>{t(c.after.pickup_departure_at)}</b></span>
+                    <span>상차지 출발 {c.before && mine(c.before.vehicle_id) && c.before.pickup_departure_at !== c.after.pickup_departure_at && <s>{t(c.before.pickup_departure_at)}</s>} <b>{t(c.after.pickup_departure_at)}</b></span>
                     <span>게이트 도착 <b>{t(c.after.gate_arrival_at)}</b></span>
                   </div>
                 )}

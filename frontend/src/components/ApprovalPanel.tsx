@@ -91,7 +91,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
         <p>
           <label>
             <input type="checkbox" checked={checked} disabled={otherBusy || !gate.allowed || (status.state !== 'idle' && !(status.state === 'error' && status.retryable))} onChange={(e) => setChecked(e.target.checked)} />{' '}
-            미처리·고정 위험 작업 <b>{ack.map(jobName).join(', ')}</b>을(를) 확인했습니다.
+            마감 안에 못 넣는 작업 확인함: <b>{ack.map(jobName).join(', ')}</b>
           </label>
         </p>
       )}

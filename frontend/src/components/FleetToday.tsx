@@ -40,7 +40,9 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
     { label: '다음 반입 마감', value: nextCut ? kstTimeWithDay(nextCut, snapshot.as_of) : '—', unit: '' },
   ]
   const q = query.trim().toLowerCase().replace(/\s/g, '')
-  const rows = vehicles.filter((v) => {
+  // 급한 순: 마감 넘김 → 빠듯함 → 여유(적은 순) → 남은 작업 없음
+  const urgency = (v: (typeof vehicles)[number]) => (v.gate === 'late' ? 0 : v.gate === 'tight' ? 1 : v.gate === 'ok' ? 2 : 3) * 10000 + (v.marginMin ?? 9999)
+  const rows = [...vehicles].sort((a, b) => urgency(a) - urgency(b)).filter((v) => {
     const tone = PHASE_TONE[v.phase]
     if (filter === 'run' && tone === 'wait') return false
     if (filter === 'wait' && tone !== 'wait') return false

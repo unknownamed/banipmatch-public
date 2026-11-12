@@ -378,11 +378,11 @@ function changeText(vehicleId: string, c: { kind: string; before?: Slot; after?:
   const t = (x: string | null | undefined) => kstTime(x ?? null)
   const b = c.before, a = c.after
   if (!a) return '미처리로 전환 · 운송 취소 아님, 담당자 확인 필요'
-  const when = `출발 ${t(a.pickup_departure_at)} · 게이트 ${t(a.gate_arrival_at)}`
+  const when = `상차지 출발 ${t(a.pickup_departure_at)} · 게이트 도착 ${t(a.gate_arrival_at)}`
   if (!b) return `새로 배정 · ${when}`
   if (b.vehicle_id !== a.vehicle_id)
     return b.vehicle_id === vehicleId ? `다른 차량(${vehicleShort(a.vehicle_id)})으로 넘어감 · 이 차량은 수행하지 않음` : `${vehicleShort(b.vehicle_id)} 차량에서 넘어옴 · ${when}`
   const moved = b.pickup_departure_at !== a.pickup_departure_at
   const order = b.sequence !== a.sequence ? ` · 순서 ${b.sequence}번째 → ${a.sequence}번째` : ''
-  return moved ? `출발 ${t(b.pickup_departure_at)} → ${t(a.pickup_departure_at)} · 게이트 ${t(a.gate_arrival_at)}${order}` : `시각 그대로${order}`
+  return moved ? `상차지 출발 ${t(b.pickup_departure_at)} → ${t(a.pickup_departure_at)} · 게이트 도착 ${t(a.gate_arrival_at)}${order}` : `시각 그대로${order}`
 }

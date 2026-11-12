@@ -250,7 +250,7 @@ h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
 .rc-when { margin-left: 6px; font-size: 13px; font-weight: 600; color: var(--ink-3); }
 .rc-answer { display: flex; align-items: center; gap: 10px; margin: 16px 0 8px; }
 .rc-memo { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; resize: vertical; }
-.evidence-strip { grid-template-columns: 1.3fr 1fr 1.5fr 1fr 1.3fr !important; }
+.evidence-strip { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; max-width: 720px; }
 .evidence-strip dd { white-space: nowrap; }
 @media (max-width: 900px) { .evidence-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .evidence-strip dd { white-space: normal; } }
 /* 작업별 반입 마감 표시: 그 막대가 속한 항차의 마감에만 짧은 빨간 선 */
@@ -388,3 +388,18 @@ button:not(.secondary):not(.chip-toggle):not([role='tab']):not([role='radio']):n
 @media (max-width: 576px) { .top, .page-head { align-items: flex-start !important; } }
 .tl-table td:nth-child(2) .st { white-space: nowrap; }
 @media (max-width: 640px) { .tl-table td:nth-child(2) { display: block !important; justify-self: end; } }
+
+/* 지도 위를 가리지 않게: 범례는 지도 아래, 버튼은 지도 밖 도구 줄 */
+.vm-map-wrap .map-legend { position: static !important; margin: 8px 0 0; padding: 0 !important; background: transparent !important; box-shadow: none !important; border: 0 !important; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; }
+.dm-mapbtns { display: none !important; }
+
+/* 홈: 지도 카드가 왼쪽 열 높이만큼 채워 아래 빈 공간이 생기지 않게 */
+@media (min-width: 1101px) {
+  .start-grid > .home-map { align-self: stretch !important; display: flex !important; flex-direction: column; }
+  .home-map .dispatch-map { flex: 1; display: flex; flex-direction: column; }
+  .home-map .dm-body { flex: 1; display: flex !important; align-items: stretch !important; }
+  .home-map .vm-map-wrap { align-self: stretch !important; }
+  .home-map .vm-map-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .home-map .dm-map { flex: 1; height: auto !important; min-height: 560px !important; }
+}
+.vm-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }

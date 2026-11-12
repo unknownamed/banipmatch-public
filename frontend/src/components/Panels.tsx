@@ -49,7 +49,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
       <h2>반입 마감(컷오프) 변경</h2>
       {w && (
         <p className="change-lead">
-          <b>{c.voyage_id} · {c.terminal_id}</b> 반입 마감이 <s>{kstTime(c.previous_closes_at)}</s> → <b className="change-new">{kstTime(w.closes_at)}</b>
+          반입 마감 <s>{kstTimeWithDay(c.previous_closes_at, s.as_of)}</s> → <b className="change-new">{kstTimeWithDay(w.closes_at, s.as_of)}</b>
           {moved && <span className="change-delta">{moved}</span>}
         </p>
       )}
@@ -61,21 +61,9 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
       )}
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}
       <dl className="evidence-strip">
-        <div className="dup">
-          <dt>항차 · 터미널</dt>
-          <dd>
-            {c.voyage_id} · {c.terminal_id}
-          </dd>
-        </div>
         <div>
           <dt>반입 시작</dt>
           <dd>{kstTimeWithDay(w?.opens_at ?? c.previous_opens_at, s.as_of)}</dd>
-        </div>
-        <div className="evidence-new">
-          <dt>반입 마감</dt>
-          <dd>
-            {w ? <><s>{kstTimeWithDay(c.previous_closes_at, s.as_of)}</s> → <b>{c.previous_closes_at ? kstTimeWithDay(w.closes_at, c.previous_closes_at) : kstTimeWithDay(w.closes_at, s.as_of)}</b></> : <span className="warn">새 반입 마감을 찾지 못했습니다</span>}
-          </dd>
         </div>
         <div>
           <dt>상태</dt>
@@ -134,26 +122,24 @@ const CHECK_LABEL: Record<string, string> = { passed: '통과', failed: '실패'
 export function RunStatusPanel({ run, results }: { run: Run; results: MethodResult[] | null }) {
   return (
     <section className="card">
-      <h2>계산 결과</h2>
+      <h2>조정안 계산</h2>
       <p>
-        <span className={`badge run-${run.status}`}>{RUN_LABEL[run.status]}</span> 같은 입력·조건으로 {run.methods.length}가지 방법을 비교했습니다
-        <span className="muted"> · 방법별 {run.config.time_limit_seconds}초 이내</span>
+        <span className={`st ${run.status === 'failed' || run.status === 'cancelled' ? 'bad' : 'run'}`}>{RUN_LABEL[run.status]}</span>{' '}
+        {run.status === 'failed' || run.status === 'cancelled'
+          ? '조정안을 만들지 못했습니다.'
+          : `원래 배차와 조정안 ${Math.max(0, run.methods.length - 1)}가지를 같은 조건으로 계산하고 있습니다. 보통 ${run.config.time_limit_seconds}초 안에 끝납니다.`}
       </p>
-      <details className="tech-info">
-        <summary>기술 정보(재현용)</summary>
-        실행 {run.run_id} · 방법 {run.methods.join(', ')} · seed {run.config.seed}
-      </details>
       {run.status === 'failed' && (
         <div className="warn" role="alert">
-          <p>실패 이유: {run.error ? `${run.error.code} — ${run.error.message}` : '사유 미제공'}</p>
+          <p>실패 이유: {run.error ? run.error.message : '사유 미제공'}</p>
           {/* 실패 방법·이유는 details에 온다(예: "B2: 실행 제한시간 초과"). 실패한 실행의 결과는 승인하지 않는다. */}
           {run.error?.details?.map((d, i) => (
             <p key={i} className="small">
               <code>{d.path}</code> {d.reason}
             </p>
           ))}
-          {run.error?.request_id && <p className="muted small">요청 ID {run.error.request_id} (서버 기록 확인용)</p>}
-          <p className="muted small">한 방법이라도 실패하면 이 실행의 결과는 저장되지 않습니다. 원인을 확인한 뒤 새로 계산을 요청하세요.</p>
+          {run.error && <p className="muted small">오류 코드 {run.error.code}{run.error.request_id ? ` · 요청 ${run.error.request_id}` : ''}</p>}
+          <p className="muted small">이번 계산 결과는 저장하지 않았습니다. 받은 변경에서 다시 계산하세요.</p>
         </div>
       )}
       {results && (
@@ -244,11 +230,11 @@ export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodRes
 
 // 이유별 다음 행동(R3). 해결을 보장하지 않고, 확인할 곳과 다음 단계만 안내한다.
 const NEXT_STEP: Record<string, string> = {
-  READY_TOO_LATE: '화주에게 상차 준비를 앞당길 수 있는지 확인 → 확인되면 아래 ‘조건 보완’에서 준비 시각을 고쳐 다시 계산',
+  READY_TOO_LATE: '화주에게 상차 준비를 앞당길 수 있는지 확인 → 가능하면 아래 ‘조건 보완’에서 준비 시각을 고쳐 다시 계산, 어려우면 선사와 다음 항차 선적을 협의',
   SEARCH_LIMIT: '쓸 수 있는 차량이 더 있는지 확인 → 있으면 아래 ‘조건 보완’에서 차량을 추가해 다시 계산',
   VEHICLE_UNAVAILABLE: '차량 가용 시각·근무 종료 시각을 기사에게 확인 → ‘조건 보완’에서 고쳐 다시 계산',
   SHIFT_EXCEEDED: '기사 근무 연장이 가능한지 확인 → ‘조건 보완’에서 근무 종료 시각을 고쳐 다시 계산',
-  CUTOFF_EXCEEDED: '터미널에 반입 연장(예외 반입)이 가능한지 문의 → 터미널이 공지를 바꾸면 새로 점검',
+  CUTOFF_EXCEEDED: '터미널에 예외 반입이 가능한지 문의 → 안 되면 선사와 다음 항차 선적을 협의',
   INCOMPATIBLE_EQUIPMENT: '컨테이너 규격에 맞는 장비 차량이 있는지 확인',
   CAPACITY_EXCEEDED: '중량을 실을 수 있는 차량이 있는지 확인',
   INPUT_MISSING: '비어 있는 값(준비 시각·이동 시간 등)을 확인해 입력',

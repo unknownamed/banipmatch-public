@@ -151,7 +151,7 @@ describe('수신자 화면', () => {
     await act(async () => button('초대 수락')!.click())
     await flush()
     await flush()
-    expect(container.textContent).toContain('BNJU 100217 0')
+    expect(container.textContent).toContain('BNJU 100218 6')
     await act(async () => button('수행 가능')!.click())
     await flush()
     expect(container.textContent).toMatch(/응답\s*수행 가능/)

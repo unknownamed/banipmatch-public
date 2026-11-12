@@ -843,7 +843,7 @@
     {
       "from_location_id": "D",
       "to_location_id": "O5",
-      "minutes": 25,
+      "minutes": 30,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -865,7 +865,7 @@
     {
       "from_location_id": "D",
       "to_location_id": "PNIT",
-      "minutes": 10,
+      "minutes": 14,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -953,7 +953,7 @@
     {
       "from_location_id": "O1",
       "to_location_id": "PNIT",
-      "minutes": 8,
+      "minutes": 18,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1041,7 +1041,7 @@
     {
       "from_location_id": "O2",
       "to_location_id": "PNIT",
-      "minutes": 33,
+      "minutes": 42,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1217,7 +1217,7 @@
     {
       "from_location_id": "O4",
       "to_location_id": "PNIT",
-      "minutes": 40,
+      "minutes": 47,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1228,7 +1228,7 @@
     {
       "from_location_id": "O5",
       "to_location_id": "D",
-      "minutes": 25,
+      "minutes": 30,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1305,7 +1305,7 @@
     {
       "from_location_id": "O5",
       "to_location_id": "PNIT",
-      "minutes": 32,
+      "minutes": 35,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1404,7 +1404,7 @@
     {
       "from_location_id": "PNIT",
       "to_location_id": "D",
-      "minutes": 10,
+      "minutes": 14,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1415,7 +1415,7 @@
     {
       "from_location_id": "PNIT",
       "to_location_id": "O1",
-      "minutes": 8,
+      "minutes": 18,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1426,7 +1426,7 @@
     {
       "from_location_id": "PNIT",
       "to_location_id": "O2",
-      "minutes": 33,
+      "minutes": 42,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1448,7 +1448,7 @@
     {
       "from_location_id": "PNIT",
       "to_location_id": "O4",
-      "minutes": 40,
+      "minutes": 47,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1459,7 +1459,7 @@
     {
       "from_location_id": "PNIT",
       "to_location_id": "O5",
-      "minutes": 32,
+      "minutes": 35,
       "evidence": {
         "kind": "assumed",
         "source_ref": "fixture:demo_02_travel",
@@ -1535,9 +1535,9 @@
       "job_id": "J16",
       "vehicle_id": "T2",
       "sequence": 3,
-      "pickup_departure_at": "2026-11-07T12:49:00Z",
-      "gate_arrival_at": "2026-11-07T13:19:00Z",
-      "return_at": "2026-11-07T14:17:00Z"
+      "pickup_departure_at": "2026-11-07T12:54:00Z",
+      "gate_arrival_at": "2026-11-07T13:24:00Z",
+      "return_at": "2026-11-07T14:22:00Z"
     },
     {
       "job_id": "J04",
@@ -1575,33 +1575,33 @@
       "job_id": "J11",
       "vehicle_id": "T4",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T11:58:00Z",
-      "gate_arrival_at": "2026-11-07T12:28:00Z",
-      "return_at": "2026-11-07T13:26:00Z"
+      "pickup_departure_at": "2026-11-07T12:03:00Z",
+      "gate_arrival_at": "2026-11-07T12:33:00Z",
+      "return_at": "2026-11-07T13:31:00Z"
     },
     {
       "job_id": "J13",
       "vehicle_id": "T4",
       "sequence": 3,
-      "pickup_departure_at": "2026-11-07T13:46:00Z",
-      "gate_arrival_at": "2026-11-07T14:01:00Z",
-      "return_at": "2026-11-07T14:59:00Z"
+      "pickup_departure_at": "2026-11-07T13:51:00Z",
+      "gate_arrival_at": "2026-11-07T14:06:00Z",
+      "return_at": "2026-11-07T15:04:00Z"
     },
     {
       "job_id": "J06",
       "vehicle_id": "T5",
       "sequence": 1,
-      "pickup_departure_at": "2026-11-07T10:55:00Z",
-      "gate_arrival_at": "2026-11-07T11:25:00Z",
-      "return_at": "2026-11-07T12:23:00Z"
+      "pickup_departure_at": "2026-11-07T11:00:00Z",
+      "gate_arrival_at": "2026-11-07T11:30:00Z",
+      "return_at": "2026-11-07T12:28:00Z"
     },
     {
       "job_id": "J07",
       "vehicle_id": "T5",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T12:31:00Z",
-      "gate_arrival_at": "2026-11-07T12:46:00Z",
-      "return_at": "2026-11-07T13:44:00Z"
+      "pickup_departure_at": "2026-11-07T12:36:00Z",
+      "gate_arrival_at": "2026-11-07T12:51:00Z",
+      "return_at": "2026-11-07T13:49:00Z"
     },
     {
       "job_id": "J03",
@@ -1624,32 +1624,32 @@
       "vehicle_id": "T7",
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T10:10:00Z",
-      "gate_arrival_at": "2026-11-07T10:18:00Z",
-      "return_at": "2026-11-07T11:08:00Z"
+      "gate_arrival_at": "2026-11-07T10:28:00Z",
+      "return_at": "2026-11-07T11:22:00Z"
     },
     {
       "job_id": "J19",
       "vehicle_id": "T7",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T11:43:00Z",
-      "gate_arrival_at": "2026-11-07T12:16:00Z",
-      "return_at": "2026-11-07T13:06:00Z"
+      "pickup_departure_at": "2026-11-07T11:57:00Z",
+      "gate_arrival_at": "2026-11-07T12:39:00Z",
+      "return_at": "2026-11-07T13:33:00Z"
     },
     {
       "job_id": "J18",
       "vehicle_id": "T8",
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T10:55:00Z",
-      "gate_arrival_at": "2026-11-07T11:35:00Z",
-      "return_at": "2026-11-07T12:25:00Z"
+      "gate_arrival_at": "2026-11-07T11:42:00Z",
+      "return_at": "2026-11-07T12:36:00Z"
     },
     {
       "job_id": "J20",
       "vehicle_id": "T8",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T12:50:00Z",
-      "gate_arrival_at": "2026-11-07T13:22:00Z",
-      "return_at": "2026-11-07T14:12:00Z"
+      "pickup_departure_at": "2026-11-07T13:06:00Z",
+      "gate_arrival_at": "2026-11-07T13:41:00Z",
+      "return_at": "2026-11-07T14:35:00Z"
     }
   ],
   "change": {
