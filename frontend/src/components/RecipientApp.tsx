@@ -48,12 +48,20 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
       </Shell>
     )
 
-  async function accept(token: string) {
+  // 버튼 한 번: 알림 허용을 먼저 묻고(버튼을 누른 순간에만 물을 수 있음) → 연결 → 허용했으면 알림 구독까지.
+  async function accept(token: string, before?: () => Promise<void>) {
     setBusy(true)
     setError(null)
+    let permission: NotificationPermission | 'unsupported' = 'unsupported'
+    if (env.pushSupported && !demo) { try { permission = await Notification.requestPermission() } catch { permission = 'default' } }
     try {
-      setSession(await client.claim(token, await claimKey(token)))
+      if (before) await before()
+      const s = await client.claim(token, await claimKey(token))
       setInvite(null)
+      if (permission === 'granted') {
+        try { await subscribePush(client); s.subscription_status = 'active' } catch { /* 연결은 됐으므로 아래 '알림 허용' 버튼으로 다시 시도 */ }
+      }
+      setSession({ ...s })
     } catch (e) {
       setError(e)
     } finally {
@@ -63,27 +71,15 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
 
   if (session === undefined) return <Shell demo={demo}><p className="muted" role="status">연결 확인 중…</p></Shell>
   // 이미 연결된 휴대폰으로 새 초대를 열면(다음 배차 등) 예전 연결 대신 새 초대를 받을지 묻는다.
-  async function switchTo(token: string) {
-    setBusy(true)
-    setError(null)
-    try {
-      await client.leave().catch(() => {})
-      setSession(await client.claim(token, await claimKey(token)))
-      setInvite(null)
-    } catch (e) {
-      setError(e)
-      setSession(null)
-    } finally {
-      setBusy(false)
-    }
-  }
+  // 예전 연결을 끊고(같은 기기 쿠키를 새 연결로 바꿈) 새 초대로 연결한다. 알림 권한은 버튼을 누른 순간 먼저 묻는다.
+  const switchTo = (token: string) => accept(token, () => client.leave().then(() => {}, () => {}))
   if (session && invite && !mustInstallFirst(env))
     return (
       <Shell demo={demo}>
         <section className="card">
           <h2>새 배차 초대</h2>
           <p>이 휴대폰을 새 배차 알림에 연결합니다. 예전 연결은 끊깁니다.</p>
-          <button type="button" disabled={busy} onClick={() => switchTo(invite)}>{busy ? '연결 중…' : '새 초대 수락'}</button>
+          <button type="button" disabled={busy} onClick={() => switchTo(invite)}>{busy ? '연결 중…' : env.pushSupported ? '연결하고 알림 받기' : '연결하기'}</button>
           <button type="button" className="secondary" disabled={busy} onClick={() => setInvite(null)}>예전 연결 유지</button>
         </section>
       </Shell>
@@ -101,7 +97,7 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
         ) : invite ? (
           <>
             <p>연결하면 이 휴대폰으로 배차 알림을 받습니다. 이름·전화번호는 저장하지 않습니다.</p>
-            <button type="button" disabled={busy} onClick={() => accept(invite)}>{busy ? '수락 중…' : '초대 수락'}</button>
+            <button type="button" disabled={busy} onClick={() => accept(invite)}>{busy ? '연결 중…' : env.pushSupported ? '연결하고 알림 받기' : '연결하기'}</button>
           </>
         ) : (
           <PasteInvite busy={busy} onInvite={accept} />
@@ -292,6 +288,16 @@ function LocationShare({ client, session }: { client: RecipientClient; session: 
   )
 }
 
+/** 알림 구독: 서비스 워커 등록 → 브라우저 구독 → 서버 저장. 권한은 이미 허용된 상태여야 한다. */
+async function subscribePush(client: RecipientClient) {
+  const config = await client.pushConfig()
+  if (!config.configured || !config.application_server_key) throw new Error('알림 서버가 준비되지 않았습니다. 잠시 후 다시 시도하세요.')
+  const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+  await navigator.serviceWorker.ready
+  const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64UrlToBytes(config.application_server_key) }))
+  return client.subscribe(sub.toJSON())
+}
+
 function PushControl({ client, session, env }: { client: RecipientClient; session: RecipientSession; env: PlatformInfo }) {
   const [status, setStatus] = useState(session.subscription_status)
   const [note, setNote] = useState<string | null>(null)
@@ -305,12 +311,7 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
       // 권한 요청은 반드시 버튼을 누른 동작 안에서 한다(자동 요청하지 않음).
       const result = await Notification.requestPermission()
       if (result !== 'granted') return setNote('알림이 허용되지 않았습니다. 화면을 직접 열어 변경을 확인할 수 있습니다.')
-      const config = await client.pushConfig()
-      if (!config.configured || !config.application_server_key) return setNote('알림 서버가 준비되지 않았습니다. 잠시 후 다시 시도하세요.')
-      const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
-      await navigator.serviceWorker.ready
-      const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64UrlToBytes(config.application_server_key) }))
-      const saved = await client.subscribe(sub.toJSON())
+      const saved = await subscribePush(client)
       setStatus(saved.subscription_status as RecipientSession['subscription_status'])
     } catch (e) {
       setNote(`알림 연결 실패: ${errText(e)}`)
