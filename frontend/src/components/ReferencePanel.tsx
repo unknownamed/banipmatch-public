@@ -13,7 +13,7 @@ export function ReferencePanel() {
       <header className="top">
         <div>
           <h1>터미널 일정</h1>
-          <p className="muted">터미널 반입 일정과 해상 기상·도로 이동 시간</p>
+          <p className="muted">항차별 반입 시작·마감과 모선 접안 예정</p>
         </div>
       </header>
       <LiveReference />

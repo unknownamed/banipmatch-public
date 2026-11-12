@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { createV2Client } from '../api/v2'
 import { display, type ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
-import { RoadReference, type RoadData } from './RoadReference'
+import { type RoadData } from './RoadReference'
 import { Icon } from './Icon'
 
 interface Weather {
@@ -53,10 +53,6 @@ export function LiveReference() {
   }
   const rows = all.filter((it) => (tlFilter === 'all' || stateOf(it.values) === tlFilter) && (!tlQuery.trim() || String(it.values.VOY_NO).toLowerCase().includes(tlQuery.trim().toLowerCase())))
   const received = d.sample?.received_at ?? data.hjnc.last_success?.received_at ?? null
-  const sea = data.weather.find(w => w.kind === 'sea')
-  const warn = data.weather.find(w => w.kind === 'warning')
-  const obs = sea?.report?.observations[0]
-  const val = (o: NonNullable<typeof obs>, key: string, v: string, unit: string) => (o.missing_or_invalid_nonnegative_fields.includes(key) ? '—' : `${v}${unit}`)
 
   return <>
     <section className="card tl-card" aria-labelledby="tl-hjnc">
@@ -104,26 +100,22 @@ export function LiveReference() {
       ) : <p className="muted">{d.headline}</p>}
     </section>
 
-    <div className="tl-grid">
-      <section className="card tl-card" aria-labelledby="tl-sea">
-        <h3 id="tl-sea">해상 기상 · 거제도 부이</h3>
-        {obs ? (
-          <>
-            <div className="tl-kpis">
-              <div><span>유의파고</span><b>{val(obs, 'WH', obs.wh_m_original, 'm')}</b></div>
-              <div><span>풍속</span><b>{val(obs, 'WS', obs.ws_m_s_original, 'm/s')}</b></div>
-              <div><span>순간풍속</span><b>{val(obs, 'WS_GST', obs.gust_m_s_original, 'm/s')}</b></div>
-            </div>
-            <p className="small muted">관측 {kstDateTime(obs.observed_at_utc)} · {age(obs.observed_at_utc)}</p>
-          </>
-        ) : <p className="muted">관측 자료가 없습니다.</p>}
-        <p className="small">
-          기상특보: {warn?.status === 'empty_framed_response' ? '해당 지역 발효 기록 없음' : warn?.report?.selected_records.length
-            ? warn.report.selected_records.map(r => `${r.region_name} ${r.kind} ${r.level}`).join(', ') : '확인 필요'}
-        </p>
-      </section>
-      <RoadReference road={data.road} />
-    </div>
 
   </>
+}
+
+/** 입항 선박 화면용 한 줄 해상 기상(모선 도착이 늦어질 수 있는 참고). 배차 계산에는 쓰지 않는다. */
+export function SeaWeatherLine() {
+  const [data, setData] = useState<LiveData | null>(null)
+  useEffect(() => {
+    const client = createV2Client()
+    client.session().then(() => client.get<LiveData>('/v2/references/current')).then(setData, () => setData(null))
+  }, [])
+  const obs = data?.weather.find(w => w.kind === 'sea')?.report?.observations[0]
+  const warn = data?.weather.find(w => w.kind === 'warning')
+  if (!obs) return null
+  const warnText = warn?.status === 'empty_framed_response' ? '특보 없음' : warn?.report?.selected_records.length ? warn.report.selected_records.map(r => `${r.kind} ${r.level}`).join(', ') : ''
+  return (
+    <span className="sea-line">해상 기상 · 거제도 부이 파고 <b>{obs.wh_m_original}m</b> · 풍속 <b>{obs.ws_m_s_original}m/s</b>{warnText && ` · ${warnText}`} <span className="sea-age">({age(obs.observed_at_utc)} 관측)</span></span>
+  )
 }

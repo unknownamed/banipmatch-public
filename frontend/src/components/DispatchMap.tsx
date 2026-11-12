@@ -5,12 +5,12 @@ import type { MethodResult, Snapshot } from '../api/types'
 import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
 import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
 import { Icon } from './Icon'
+import { BoxNo, Plate } from './Ids'
 import { ROAD_ATTRIBUTION, roadPath } from '../lib/fleetPosition'
 import { kstTime } from '../lib/time'
 import { jobName, jobInfo, planName, vehicleName, vehicleShort } from '../lib/labels'
 import { TripStepper } from './TripStepper'
 
-const GATE_LABEL = { ok: '여유', tight: '빠듯', late: '마감 초과' } as const
 
 // 옆에서 본 트럭(방향은 글자 화살표로 표시). 핀 안에서는 회전하지 않는다.
 function truckSvg(_heading?: number) {
@@ -42,8 +42,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
   const cutoffAt = Date.parse(snapshot.windows.find((w) => w.window_id === snapshot.change.new_window_id)?.closes_at ?? '')
   const [ahead, setAhead] = useState<'now' | '30' | '60' | 'cut'>('now')
   const now = ahead === 'now' ? clock : ahead === 'cut' && Number.isFinite(cutoffAt) ? cutoffAt : clock + Number(ahead === 'cut' ? 0 : ahead) * 60000
-  const [traffic, setTraffic] = useState(false)
-  const sky = false
+  // 실시간 교통은 도착 판단에 바로 쓰이므로 기본으로 켠다. 위성 사진은 '레이어'에서 고른다.
+  const [traffic, setTraffic] = useState(true)
+  const [sky, setSky] = useState(false)
+  const [layersOpen, setLayersOpen] = useState(false)
+  // 지도를 확대·이동할 때마다 화면 거리 기준으로 차량 묶음을 다시 계산한다.
+  const [viewTick, setViewTick] = useState(0)
+  const [openCluster, setOpenCluster] = useState<string | null>(null)
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
   useEffect(() => {
     const id = setInterval(() => setClock(Date.now()), 15000)
@@ -85,7 +90,11 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
         const el = document.createElement('div')
         el.className = `dm-place ${loc.kind}`
         el.textContent = loc.kind === 'terminal' ? `${loc.location_id} 게이트` : loc.name.replace('(모의)', '').trim()
-        new maps.CustomOverlay({ map: m, position: ll(p), content: el, yAnchor: 1.3, zIndex: loc.kind === 'terminal' ? 4 : 2 })
+        // 터미널 두 곳은 가까워서 이름표가 겹친다: 서쪽 터미널은 점의 왼쪽, 동쪽은 오른쪽에 붙인다.
+        const terms = (snapshot.locations ?? []).filter(l => l.kind === 'terminal' && l.longitude != null)
+        const midLon = terms.reduce((sum, l) => sum + (l.longitude ?? 0), 0) / Math.max(1, terms.length)
+        const side = loc.kind === 'terminal' && terms.length > 1 ? (p.lon < midLon ? { xAnchor: 1.08, yAnchor: 0.5 } : { xAnchor: -0.08, yAnchor: 0.5 }) : { yAnchor: 1.3 }
+        new maps.CustomOverlay({ map: m, position: ll(p), content: el, ...side, zIndex: loc.kind === 'terminal' ? 4 : 2 })
         const dot = document.createElement('div')
         dot.className = `dm-dot ${loc.kind}`
         new maps.CustomOverlay({ map: m, position: ll(p), content: dot, zIndex: 1 })
@@ -95,8 +104,9 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       // 넓게 볼 때는 차량 번호만, 확대하면 목적지·도착 시각까지 보여 준다.
       const zoomClass = () => box.current?.classList.toggle('dm-far', m.getLevel() >= 8)
       maps.event.addListener(m, 'zoom_changed', zoomClass)
+      maps.event.addListener(m, 'idle', () => setViewTick(x => x + 1))
       zoomClass()
-      jobLine.current = new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#ff3c00', strokeOpacity: 0.85, strokeStyle: 'dash' })
+      jobLine.current = new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#2457E6', strokeOpacity: 0.85, strokeStyle: 'dash' })
       setMapState({ ok: true, msg: '' })
     }).catch((e: Error) => alive && setMapState({ ok: false, msg: `${e.message} 아래 차량별 목록으로 확인할 수 있습니다.` }))
     return () => { alive = false; unobserve(); pins.current = []; kmap.current = null }
@@ -123,36 +133,67 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       map: kmap.current, path: v.path!.map(ll), strokeWeight: v.vehicleId === selVehicle ? 6 : 4,
       strokeColor: v.gate === 'late' ? '#c0262d' : v.gate === 'tight' ? '#d97706' : '#15803d', strokeOpacity: v.vehicleId === selVehicle ? 0.9 : 0.45,
     }))
-    const groups = new Map<string, VehicleNow[]>()
+    // 화면에서 46px 안에 있는 차량은 하나의 묶음으로 합친다(지도 서비스의 마커 묶음 방식). 누르면 확대해 풀린다.
+    const proj = kmap.current.getProjection()
+    const clusters: { x: number; y: number; list: VehicleNow[] }[] = []
     for (const v of fleet) {
       if (!v.pos) continue
-      const moving = v.phase === 'to_gate' || v.phase === 'to_origin' || v.phase === 'returning'
-      const key = moving ? v.vehicleId : `${v.pos.lat.toFixed(3)},${v.pos.lon.toFixed(3)}`
-      groups.set(key, [...(groups.get(key) ?? []), v])
+      const pt = proj.containerPointFromCoords(ll(v.pos))
+      const near = clusters.find(c => Math.hypot(c.x - pt.x, c.y - pt.y) < 46)
+      if (near) near.list.push(v)
+      else clusters.push({ x: pt.x, y: pt.y, list: [v] })
     }
-    for (const list of groups.values()) {
+    const zoomedIn = kmap.current.getLevel() <= 6
+    for (const c of clusters) {
+      const list = c.list
       const v = list[0]
       const el = document.createElement('div')
       const picked = list.some(x => x.vehicleId === selVehicle)
       const worst = list.some(x => x.gate === 'late') ? 'late' : list.some(x => x.gate === 'tight') ? 'tight' : list.some(x => x.gate === 'ok') ? 'ok' : 'none'
+      if (list.length > 1) {
+        const key = list.map(x => x.vehicleId).sort().join(',')
+        el.className = `dm-cluster ${worst}${picked ? ' picked' : ''}${openCluster === key ? ' open' : ''}`
+        el.title = list.map(x => vehicleName(x.vehicleId)).join(', ')
+        el.innerHTML = `<b>${list.length}</b><span>대</span>`
+        // 같은 자리(차고지 대기 등)에 모인 차량은 확대해도 갈라지지 않으므로 목록을 펼친다. 흩어져 있으면 확대한다.
+        const spread = Math.max(...list.map(x => Math.hypot((x.pos!.lat - v.pos!.lat) * 111000, (x.pos!.lon - v.pos!.lon) * 91000)))
+        const pop = document.createElement('div')
+        pop.className = 'cl-list'
+        for (const x of list) {
+          const b = document.createElement('button')
+          b.type = 'button'
+          b.className = `cl-item ${x.gate ?? 'none'}`
+          b.innerHTML = `<b>${vehicleName(x.vehicleId)}</b><span>${PHASE_LABEL[x.phase]}</span>`
+          b.onclick = (e) => { e.stopPropagation(); setPickedVehicle(x.vehicleId); onSelectJob(x.jobId) }
+          pop.appendChild(b)
+        }
+        el.appendChild(pop)
+        el.onclick = () => {
+          const m = kmap.current
+          if (spread > 60 && m.getLevel() > 3) m.setLevel(Math.max(1, m.getLevel() - 2), { anchor: ll(v.pos!) })
+          else setOpenCluster(openCluster === key ? null : key)
+        }
+        pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos!), content: el, yAnchor: 0.5, zIndex: picked ? 9 : 7, clickable: true }))
+        continue
+      }
       el.className = `dm-pin ${worst}${picked ? ' picked' : ''}`
       const heading = v.from && v.to ? bearing(v.from, v.to) : 90
-      const ids = list.map(x => vehicleShort(x.vehicleId)).join(' · ')
-      const what = list.length > 1 ? PHASE_LABEL[v.phase]
-        : v.phase === 'to_gate' && v.gateEta ? `→ 게이트 ${kstTime(v.gateEta)}`
-        : v.phase === 'to_origin' && v.jobId ? `→ 상차지 ${placeName(snapshot.jobs.find(j => j.job_id === v.jobId)?.origin_id ?? '')}`
-        : v.phase === 'returning' ? '→ 차고지 복귀'
+      const what = v.phase === 'to_gate' && v.gateEta ? `→ 게이트 ${kstTime(v.gateEta)}`
+        : v.phase === 'to_origin' && v.jobId ? `→ ${placeName(snapshot.jobs.find(j => j.job_id === v.jobId)?.origin_id ?? '')}`
+        : v.phase === 'returning' ? '→ 차고지'
         : PHASE_LABEL[v.phase]
-      el.innerHTML = `${truckSvg(heading)}<b>${ids}</b><span>${what}</span>`
+      // 이름표는 짧게(번호판 뒤 4자리). 목적지·도착 시각은 고른 차량이거나 충분히 확대했을 때만.
+      el.innerHTML = `${truckSvg(heading)}<b>${vehicleShort(v.vehicleId)}</b>${picked || zoomedIn ? `<span>${what}</span>` : ''}`
+      el.title = `${vehicleName(v.vehicleId)} · ${PHASE_LABEL[v.phase]}`
       el.onclick = () => { setPickedVehicle(v.vehicleId); onSelectJob(v.jobId) }
-      pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos!), content: el, yAnchor: 1.25, zIndex: picked ? 9 : list.length > 1 ? 5 : 6, clickable: true }))
+      pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos!), content: el, yAnchor: 1.25, zIndex: picked ? 9 : 6, clickable: true }))
     }
     const a = selectedJob ? plan.find(x => x.job_id === selectedJob) : null
     const j = selectedJob ? snapshot.jobs.find(x => x.job_id === selectedJob) : null
     const from = j && pts.get(j.origin_id), to = j && pts.get(j.terminal_id)
     const road = j ? roadPath(j.origin_id, j.terminal_id) : null
     jobLine.current?.setPath(a && road ? road.map(ll) : a && from && to ? [ll(from), ll(to)] : [])
-  }, [fleet, mapState.ok, selVehicle, selectedJob, plan, snapshot, pts, onSelectJob])
+  }, [fleet, mapState.ok, selVehicle, selectedJob, plan, snapshot, pts, onSelectJob, viewTick, openCluster])
 
   const sel = fleet.find(v => v.vehicleId === selVehicle) ?? null
   const selPlan = sel ? plan.filter(a => a.vehicle_id === sel.vehicleId).sort((x, y) => x.sequence - y.sequence) : []
@@ -190,9 +231,20 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
               <button key={id} type="button" aria-pressed={ahead === id} disabled={id === 'cut' && !Number.isFinite(cutoffAt)} onClick={() => setAhead(id)}>{label}</button>
             ))}
           </div>
-          <button type="button" className="chip-toggle" aria-pressed={traffic} disabled={!mapState.ok} onClick={() => setTraffic(!traffic)}>
-            <Icon name="route" size={14} /> 실시간 교통
-          </button>
+          <div className="layers">
+            <button type="button" className="chip-toggle" aria-expanded={layersOpen} disabled={!mapState.ok} onClick={() => setLayersOpen(!layersOpen)}>
+              <Icon name="map" size={14} /> 레이어
+            </button>
+            {layersOpen && (
+              <div className="layers-pop" role="dialog" aria-label="지도 레이어">
+                <p className="layers-h">지도</p>
+                <label><input type="radio" name="dm-base" checked={!sky} onChange={() => setSky(false)} /> 일반 지도</label>
+                <label><input type="radio" name="dm-base" checked={sky} onChange={() => setSky(true)} /> 위성 사진</label>
+                <p className="layers-h">겹쳐 보기</p>
+                <label><input type="checkbox" checked={traffic} onChange={(e) => setTraffic(e.target.checked)} /> 실시간 도로 교통</label>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <div className="dm-body">
@@ -236,13 +288,15 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
           {fleet.map(v => (
             <li key={v.vehicleId}>
               <button type="button" className={`dm-item${v.vehicleId === selVehicle ? ' picked' : ''}`} onClick={() => focusVehicle(v)}>
-                <span className="dm-item-top"><b>{vehicleName(v.vehicleId)}</b> <span className="muted">{PHASE_LABEL[v.phase]}</span>
-                  {v.gate && <span className={`dm-gate ${v.gate}`}>{GATE_LABEL[v.gate]}{v.marginMin !== null && v.gate !== 'late' ? ` ${v.marginMin}분` : ''}</span>}
+                <span className="dmi-top">
+                  <Plate id={v.vehicleId} />
+                  <span className="dmi-phase">{PHASE_LABEL[v.phase]}</span>
+                  {v.gate && v.marginMin !== null && <span className={`st ${v.gate === 'late' ? 'bad' : v.gate === 'tight' ? 'warn' : 'ok'}`}>{v.gate === 'late' ? `${-v.marginMin}분 늦음` : `${v.marginMin}분 여유`}</span>}
                 </span>
-                {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} />}
+                {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} compact />}
                 {v.jobId && v.gateEta ? (
-                  <span className="small">{jobName(v.jobId)} · 게이트 <b>{kstTime(v.gateEta)}</b> · 마감 {kstTime(v.cutoff)}</span>
-                ) : <span className="small muted">남은 작업 없음</span>}
+                  <span className="dmi-line"><BoxNo jobId={v.jobId} /> · 게이트 <b>{kstTime(v.gateEta)}</b> · 마감 {kstTime(v.cutoff)}</span>
+                ) : <span className="dmi-line">남은 작업 없음</span>}
               </button>
             </li>
           ))}

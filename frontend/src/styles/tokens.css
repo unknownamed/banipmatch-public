@@ -10,10 +10,10 @@
   --color-line-strong: #dcdcdc;
   --color-hover: #f4f4f4;
 
-  /* 강조: 로고·막대·아이콘(그래픽 전용 #ff3c00), 글자·버튼 바탕은 대비용 진한 주황 */
-  --color-accent: #ff3c00;
-  --color-accent-strong: #d23a06;
-  --color-accent-soft: #ffe3d8;
+  /* 강조: 로고·막대·아이콘(그래픽 전용 #2457E6), 글자·버튼 바탕은 대비용 진한 주황 */
+  --color-accent: #2457E6;
+  --color-accent-strong: #2457E6;
+  --color-accent-soft: #DCE6FF;
   --color-on-accent: #ffffff;
 
   /* 상태 알약(원본 배지 계열) */

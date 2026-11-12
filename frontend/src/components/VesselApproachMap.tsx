@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { BUOYS, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
 import { keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
 import { Icon } from './Icon'
+import { SeaWeatherLine } from './LiveReference'
 import type { Snapshot } from '../api/types'
 
 export type ScenarioLink = { snapshot: Snapshot; reviewHref: string }
@@ -97,8 +98,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         new maps.CustomOverlay({ map: m, position: ll(term), content: el, yAnchor: 1.2, zIndex: 2 })
       }
       paths.current = {
-        passed: new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#ff3c00', strokeOpacity: 0.9 }),
-        ahead: new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#ff3c00', strokeOpacity: 0.9, strokeStyle: 'dash' }),
+        passed: new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#2457E6', strokeOpacity: 0.9 }),
+        ahead: new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#2457E6', strokeOpacity: 0.9, strokeStyle: 'dash' }),
       }
       for (const v of VESSELS) {
         const el = document.createElement('div')
@@ -182,7 +183,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
           <div className="vm-brief">
             <span><b>HJNC로 오는 모선 {inboundHjnc}척</b></span>
             <span>다음 반입 마감 <b>{nextCut.vessel.voyage}</b> {kst(at(base, nextCut.vessel.cutoffMin!))} · <b className="vm-left">{formatDuration(nextCut.vessel.cutoffMin! - t)} 남음</b></span>
-            <span className="vm-tip">배 모양을 누르면 항차·반입 마감이 보입니다</span>
+            <SeaWeatherLine />
           </div>
         )}
         {link ? (
