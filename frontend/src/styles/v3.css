@@ -370,3 +370,21 @@ button:not(.secondary):not(.chip-toggle):not([role='tab']):not([role='radio']):n
 .trip-bar i.now { background: #8FB0FF; }
 .trip-bar.late i.done, .trip-bar.late i.now { background: #c0262d; }
 .dm-list { display: grid; gap: 6px; }
+/* 내용이 짧은 화면에서 남는 높이가 머리줄로 몰려 빈 공간이 생기지 않게 */
+#root { align-content: start; }
+.timeline-view > .page-head { justify-self: stretch; text-align: left; }
+@media (max-width: 640px) {
+  .tl-table thead { display: none; }
+  .tl-table, .tl-table tbody { display: block; }
+  .tl-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 2px; border-bottom: 1px solid var(--line-2); }
+  .tl-table td { display: block; padding: 0 !important; border: 0 !important; font-size: 13.5px; }
+  .tl-table td:nth-child(3)::before { content: '반입 시작 '; color: var(--ink-3); font-size: 12px; }
+  .tl-table td:nth-child(4)::before { content: '마감 '; color: var(--ink-3); font-size: 12px; font-weight: 400; }
+  .tl-table td:nth-child(5)::before { content: '접안 '; color: var(--ink-3); font-size: 12px; }
+  .tl-table td:nth-child(3) { grid-column: 1 / -1; }
+  .tl-table td:nth-child(5) { justify-self: end; }
+  .tl-card .dt-wrap { border: 0; }
+}
+@media (max-width: 576px) { .top, .page-head { align-items: flex-start !important; } }
+.tl-table td:nth-child(2) .st { white-space: nowrap; }
+@media (max-width: 640px) { .tl-table td:nth-child(2) { display: block !important; justify-self: end; } }
