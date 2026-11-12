@@ -611,3 +611,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .resp-toast.bad p { color: #c0262d; }
 .btn-link { background: none; border: 0; padding: 0; color: #2457E6; font: inherit; text-decoration: underline; cursor: pointer; }
 @media (max-width: 576px) { .resp-toasts { right: 16px; bottom: 76px; } }
+
+/* 조정안 비교 묶음: 공통 카드 테두리가 덧씌워져 여백 없이 선만 생기던 문제 → 다른 칸과 같은 카드로 맞춤 */
+.card.comparison { padding: 18px 20px !important; background: #fff !important; }
+.card.comparison > h2 { margin-bottom: 14px !important; }
+@media (max-width: 576px) { .card.comparison { padding: 14px 12px !important; } }
