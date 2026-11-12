@@ -20,7 +20,7 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
   return (
     <header className="appbar">
       <a className="brand" href="?">
-        <img className="brand-mark" src="/brand.svg" alt="" width="32" height="32" />
+        <img className="brand-mark" src="/brand.svg?v=navy1" alt="" width="32" height="32" />
         반입맞춤
       </a>
       <nav className="side-nav" aria-label="화면">

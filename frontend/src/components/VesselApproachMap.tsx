@@ -1,6 +1,8 @@
 // 배차 담당자용 입항 선박 지도: 대상 터미널(HJNC) 항차가 언제 들어오는지와, 그 항차의 반입 마감을 한 화면에서 본다.
 // 모든 선박·항차·속력·마감은 모의다. 도착은 추정이며 반입 마감을 바꾸지 않는다.
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { Ship } from 'lucide-react'
 import { BUOYS, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
 import { keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
 import { Icon } from './Icon'
@@ -21,17 +23,10 @@ const kst = (d: Date) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute
 const at = (base: Date, min: number) => new Date(base.getTime() + min * 60000)
 
 // 위에서 내려다본 컨테이너선(선수가 위). 진행 방향으로 회전한다.
-// 선박 길이(m): 선형 크기(TEU)로 대략 잡는다. 지도 축척에 맞춰 그려 실제보다 몇 배 크게 보이지 않게 한다.
-const shipLengthM = (teu: number) => (teu < 3000 ? 200 : teu < 8000 ? 300 : 366)
-// 카카오 지도 레벨별 대략적인 1픽셀당 미터(레벨 3 ≈ 1m, 한 단계마다 두 배).
-const metersPerPx = (level: number) => 2 ** (level - 3)
-const hullScale = (teu: number, level: number) => Math.max(0.6, Math.min(1, shipLengthM(teu) / metersPerPx(level) / 42))
-
-function shipSvg(heading: number, scale = 1) {
-  const rows = [10, 15, 20, 25].map(y => `<rect x="4" y="${y}" width="8" height="4" rx="0.6" class="box"/>`).join('')
-  return `<svg class="hull" viewBox="0 0 16 42" width="16" height="42" style="transform:rotate(${heading}deg) scale(${scale.toFixed(2)})" aria-hidden="true">`
-    + `<path class="body" d="M8 0.8 C11.6 5 13.6 9 13.6 13 L13.6 37.5 Q13.6 41 10.6 41 L5.4 41 Q2.4 41 2.4 37.5 L2.4 13 C2.4 9 4.4 5 8 0.8 Z"/>`
-    + rows + `<rect x="4.2" y="31" width="7.6" height="5" rx="1" class="bridge"/></svg>`
+// 지도 위 선박 표식: 동그란 표식 안에 배 아이콘, 바깥 화살촉으로 진행 방향을 보인다(선박 관제 화면의 표식 방식).
+const SHIP_ICON = renderToStaticMarkup(<Ship size={15} strokeWidth={2.2} aria-hidden="true" />)
+function shipMark(heading: number | null) {
+  return `<div class="vm-mark">${heading === null ? '' : `<i class="vm-dir" style="transform:rotate(${heading}deg)"></i>`}<b>${SHIP_ICON}</b></div>`
 }
 
 export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null }) {
@@ -165,7 +160,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       const name = v.vessel.name ?? '이름 미수신'
       const tail = v.vessel.outbound ? `${v.vessel.port}행 출항` : v.etaMin !== null ? `${formatDuration(v.etaMin - t)} 후 도착` : STATUS_LABEL[v.status]
       const label = v.vessel.id === sel.vessel.id ? `${name} <small>${tail}</small>` : name
-      mk.el.innerHTML = `${shipSvg(v.status === 'anchored' ? 20 : v.heading, hullScale(v.vessel.teu, level))}${labelOn.has(v.vessel.id) ? `<span>${label}</span>` : ''}`
+      mk.el.innerHTML = `${shipMark(v.status === 'underway' ? v.heading : null)}${labelOn.has(v.vessel.id) ? `<span>${label}</span>` : ''}`
     }
     if (paths.current) {
       paths.current.passed.setPath(sel.passed.length > 1 ? sel.passed.map(ll) : [])

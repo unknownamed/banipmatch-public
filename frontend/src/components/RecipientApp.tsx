@@ -76,7 +76,7 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
 function Shell({ children }: { children: React.ReactNode; demo?: boolean }) {
   return (
     <main className="recipient">
-      <header className="recipient-head"><img className="brand-mark" src="/brand.svg" alt="" width="28" height="28" /> 반입맞춤 기사</header>
+      <header className="recipient-head"><img className="brand-mark" src="/brand.svg?v=navy1" alt="" width="28" height="28" /> 반입맞춤 기사</header>
       {children}
     </main>
   )

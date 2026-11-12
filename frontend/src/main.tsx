@@ -43,12 +43,12 @@ if (recipient) {
   // 홈 화면 추가(iPhone 웹 푸시 조건)는 수신자 화면에서만 제공한다.
   for (const [tag, attrs] of [
     ['link', { rel: 'manifest', href: '/manifest.webmanifest' }],
-    ['link', { rel: 'apple-touch-icon', href: '/icon-180.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/icon-180.png?v=navy1' }],
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
-    ['meta', { name: 'theme-color', content: '#d23a06' }],
+    ['meta', { name: 'theme-color', content: '#16294D' }],
   ] as const)
     document.head.append(Object.assign(document.createElement(tag), attrs))
-  document.title = '반입맞춤 · 기사 알림'
+  document.title = '반입맞춤'
 }
 // React(StrictMode는 초기화를 두 번 실행)보다 먼저 한 번만 읽고 지운다.
 const recipientBoot = recipient ? takeFragment() : null
