@@ -242,13 +242,13 @@ function Metric({ label, a, b, icon }: { label: string; a: number | null; b: num
 export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodResult }) {
   return (
     <div className="metrics">
-      <Metric label="미처리" icon="warning" a={base.metrics.unassigned_count} b={cand.metrics.unassigned_count} />
+      <Metric label="보류(배정 못 함)" icon="warning" a={base.metrics.unassigned_count} b={cand.metrics.unassigned_count} />
       {/* movable_violation_count는 마감 외 제약 위반도 포함한다(PR #4 리뷰). 마감만 따로 세려면 계약 합의 필요 */}
-      <Metric label="제약 위반 작업(조정 가능)" icon="clock" a={base.metrics.movable_violation_count} b={cand.metrics.movable_violation_count} />
-      <Metric label="고정 작업 위험" icon="lock" a={base.metrics.fixed_risk_count} b={cand.metrics.fixed_risk_count} />
-      <Metric label="변경 작업 수" icon="swap" a={base.metrics.changed_job_ids.length} b={cand.metrics.changed_job_ids.length} />
+      <Metric label="마감·조건 위반" icon="clock" a={base.metrics.movable_violation_count} b={cand.metrics.movable_violation_count} />
+      <Metric label="출발한 차량 위험" icon="lock" a={base.metrics.fixed_risk_count} b={cand.metrics.fixed_risk_count} />
+      <Metric label="바뀌는 작업" icon="swap" a={base.metrics.changed_job_ids.length} b={cand.metrics.changed_job_ids.length} />
       <Metric
-        label="이동 부담(분)"
+        label="총 이동 시간(분)"
         icon="truck"
         a={base.metrics.movable_travel_minutes}
         b={cand.metrics.movable_travel_minutes}

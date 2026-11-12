@@ -44,13 +44,13 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
   return (
     <Shell demo={demo}>
       <section className="card">
-        <h2>시험 수신 연결</h2>
-        <p className="small muted">배차 담당자가 확정한 <b>모의</b> 변경을 받아 보고 응답하는 시험 화면입니다. 실제 운송 지시가 아닙니다.</p>
+        <h2>배차 알림 연결</h2>
+        <p className="small muted">배차 담당자가 확정한 변경을 이 휴대폰으로 받아 보고 바로 응답할 수 있습니다.</p>
         {install ? (
           <InstallGuide hasInvite={!!invite} />
         ) : invite ? (
           <>
-            <p>초대를 수락하면 이 기기가 지정된 차량의 시험 수신자로 연결됩니다. 이름·전화번호는 받지 않습니다.</p>
+            <p>연결하면 이 휴대폰이 지정된 차량의 배차 알림을 받습니다. 이름·전화번호는 저장하지 않습니다.</p>
             <button type="button" disabled={busy} onClick={() => accept(invite)}>{busy ? '수락 중…' : '초대 수락'}</button>
           </>
         ) : (
@@ -75,7 +75,7 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
 function Shell({ children, demo }: { children: React.ReactNode; demo: boolean }) {
   return (
     <main className="recipient">
-      <header className="recipient-head"><span className="brand-mark" aria-hidden="true">반</span> 반입맞춤 <span className="badge mode-simulated">시험 수신</span></header>
+      <header className="recipient-head"><span className="brand-mark" aria-hidden="true">반</span> 반입맞춤 <span className="demo-pill">기사용</span></header>
       {demo && (
         <div className="banner fixture" role="note">
           모의 화면입니다. 서버·웹 푸시 없이 이 탭의 가짜 자료로만 동작하며, 응답은 어디에도 전달·저장되지 않습니다.
@@ -150,7 +150,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
     <>
       <section className="card">
         <h2>내 차량 {session.vehicle_ids.join(', ')}</h2>
-        <p className="small muted">연결 만료 {kstDateTime(session.expires_at)} · 모의 배차 시험</p>
+        <p className="small muted">연결 만료 {kstDateTime(session.expires_at)}</p>
         {demo ? <p className="small muted">모의 화면에서는 알림 권한을 묻거나 구독하지 않습니다.</p> : <PushControl client={client} session={session} env={env} />}
       </section>
 
@@ -187,7 +187,7 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
       const result = await Notification.requestPermission()
       if (result !== 'granted') return setNote('알림이 허용되지 않았습니다. 화면을 직접 열어 변경을 확인할 수 있습니다.')
       const config = await client.pushConfig()
-      if (!config.configured || !config.application_server_key) return setNote('서버의 웹 푸시 설정이 아직 없습니다. 배포 서버에서 설정된 뒤 다시 시도하세요.')
+      if (!config.configured || !config.application_server_key) return setNote('알림 서버가 준비되지 않았습니다. 잠시 후 다시 시도하세요.')
       const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
       await navigator.serviceWorker.ready
       const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64UrlToBytes(config.application_server_key) }))
@@ -216,7 +216,7 @@ function PushControl({ client, session, env }: { client: RecipientClient; sessio
   }
 
   if (!env.pushSupported)
-    return <p className="small warn">이 브라우저는 웹 푸시를 지원하지 않습니다{env.ios ? '(iPhone은 iOS 16.4 이상 홈 화면 앱 필요)' : ''}. 이 화면을 열어 직접 확인해야 합니다.</p>
+    return <p className="small warn">이 브라우저는 알림을 지원하지 않습니다{env.ios ? '(iPhone은 iOS 16.4 이상에서 홈 화면에 추가한 뒤 사용)' : ''}. 이 화면을 열어 직접 확인해 주세요.</p>
   return (
     <div className="push-control">
       {status === 'active' && permission === 'granted' ? (
@@ -281,7 +281,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
   return (
     <section className="card recipient-detail" aria-labelledby="detail-title">
       <h2 id="detail-title">변경 내용 <span className="small muted">계획 v{d.payload.plan_version} · {kstDateTime(d.created_at)}</span></h2>
-      <p className="small muted">담당자가 확정한 모의 변경입니다. 실제 운송·터미널 예약 변경을 뜻하지 않습니다.</p>
+      <p className="small muted">담당자가 확정한 배차 변경입니다. 터미널 예약은 바뀌지 않으니 게이트 도착 시각을 지켜 주세요.</p>
       {d.payload.vehicle_changes.map((v) => (
         <div key={v.vehicle_id}>
           <h3>{v.plate_no ?? v.vehicle_id}</h3>

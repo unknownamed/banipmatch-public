@@ -4,7 +4,6 @@ import { BLOCKER_LABEL, KIND_LABEL, display, type ReferenceView } from '../lib/r
 import { kstDateTime } from '../lib/time'
 import { LiveReference } from './LiveReference'
 
-type Source = 'live' | 'replay' | 'mock'
 const cases = fixture.cases as unknown as { id: string; label: string; view: ReferenceView }[]
 
 /**
@@ -12,40 +11,28 @@ const cases = fixture.cases as unknown as { id: string; label: string; view: Ref
  * 실제 수신 결과는 인증된 /v2/references/current에서 읽는다. 과거 재생과 모의 예제는 구분한다.
  */
 export function ReferencePanel() {
-  const [source, setSource] = useState<Source>('live')
   const [caseId, setCaseId] = useState(cases[0].id)
   const picked = cases.find((c) => c.id === caseId)!
 
   return (
-    <main>
-      <section className="card reference" aria-labelledby="ref-title">
-        <h2 id="ref-title">실제 자료 수신 현황</h2>
-        <p className="small muted">
-          외부 기관에서 받은 최신 자료입니다. 배차 계산에는 확정된 반입 시간만 쓰고, 이 자료는 판단을 돕는 참고 정보로 보여 줍니다.
-        </p>
-        <div className="tabs" role="radiogroup" aria-label="자료 종류">
-          {([['live', '최근 수신'], ['mock', '상태별 예시']] as const).map(([id, label]) => (
-            <button key={id} type="button" role="radio" aria-checked={source === id} aria-selected={source === id} onClick={() => setSource(id)}>{label}</button>
-          ))}
+    <main className="timeline-view">
+      <header className="top">
+        <div>
+          <h1>터미널 일정</h1>
+          <p className="muted">반입 마감을 확인하는 터미널 공지와, 배차 판단에 참고할 해상 기상·도로 이동 시간입니다.</p>
         </div>
-
-        {source === 'live' ? <LiveReference /> : source !== 'mock' ? (
-          <p className="warn small" role="status">
-            과거 저장 자료 재생은 아직 연결되지 않았습니다. 마지막 실제 수신 자료는 첫 번째 탭에서 확인할 수 있습니다. 모의 자료로 대신 채우지 않습니다.
-          </p>
-        ) : (
-          <>
-            <p className="small muted" role="note">정상·부분 응답·조회 실패 같은 상황에서 화면이 어떻게 보이는지 보여 주는 예시입니다(실제 수신 아님).</p>
-            <label className="small">
-              모의 상태{' '}
-              <select value={caseId} onChange={(e) => setCaseId(e.target.value)}>
-                {cases.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-              </select>
-            </label>
-            <ReferenceStatus view={picked.view} />
-          </>
-        )}
-      </section>
+      </header>
+      <LiveReference />
+      <details className="tech-info">
+        <summary>수신 실패·부분 응답일 때 화면 예시</summary>
+        <label className="small">
+          상황{' '}
+          <select value={caseId} onChange={(e) => setCaseId(e.target.value)}>
+            {cases.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+          </select>
+        </label>
+        <ReferenceStatus view={picked.view} />
+      </details>
     </main>
   )
 }

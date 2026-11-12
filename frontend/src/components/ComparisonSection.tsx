@@ -25,6 +25,12 @@ interface Props {
  * 원안 표는 입력(snapshot)만 있으면 항상 보인다. 결과가 대기·실패·B0 단독이어도 원안은 남기고,
  * 조정안 열과 지표만 결과가 준비됐을 때 연다. (PR #4 리뷰 반영)
  */
+/** 보류된 작업이 모두 원안에서 이미 마감 초과·준비 지연이었는지 */
+function heldWereLate(base: MethodResult, cand: MethodResult) {
+  const late = new Set(base.issues.filter((i) => i.code === 'CUTOFF_EXCEEDED' || i.code === 'READY_TOO_LATE').map((i) => i.job_id))
+  return cand.unassigned_job_ids.length > 0 && cand.unassigned_job_ids.every((id) => late.has(id))
+}
+
 export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle' }: Props) {
   const list = results.state === 'ready' ? results.data.results : null
   const broken = lockedViolations(rows)
@@ -57,8 +63,9 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
       {base && cand && <MetricsRow base={base} cand={cand} />}
       {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
         <p className="warn">
-          미처리가 {base.metrics.unassigned_count}건 → {cand.metrics.unassigned_count}건으로 늘었습니다. 제약 위반 감소에는 미처리로 남긴 작업이
-          포함되어 있으므로 전체 해결이 아닙니다.
+          {cand.method} 조정안은 {cand.metrics.unassigned_count}건을 배정하지 못하고 보류했습니다
+          {heldWereLate(base, cand) ? '(원래 배차에서도 마감을 넘기던 작업)' : ''}. 위반이 줄어든 데에는 이 보류가 포함되어 있으니,
+          보류된 작업은 오른쪽 ‘확인 필요’에서 처리하세요.
         </p>
       )}
       {broken.length > 0 && (

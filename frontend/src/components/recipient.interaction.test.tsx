@@ -95,7 +95,7 @@ describe('수신자 화면', () => {
     await flush()
     expect(client.claim).toHaveBeenCalledWith('sec.ret', await claimKey('sec.ret'))
     expect(container.textContent).toContain('내 차량 T1')
-    expect(container.textContent).toContain('웹 푸시를 지원하지 않습니다')
+    expect(container.textContent).toContain('알림을 지원하지 않습니다')
   })
 
   it('iPhone Safari에서는 수락 버튼 대신 홈 화면 추가 안내만 보여준다', async () => {

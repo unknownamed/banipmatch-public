@@ -30,7 +30,7 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
         {link('review', '배차 점검', `?${reviewParams.toString()}`, 'grid')}
         <p className="nav-group">상황 확인</p>
         {link('map', '입항 선박', `?${mapParams.toString()}`, 'map')}
-        {link('reference', '실제 자료', `?${refParams.toString()}`, 'clock')}
+        {link('reference', '터미널 일정', `?${refParams.toString()}`, 'clock')}
       </nav>
       <span className="appbar-note">{mode === 'http' ? '시연용 모의 배차' : '공통 예제'}</span>
     </header>

@@ -65,9 +65,9 @@ describe('변경 전달 화면', () => {
     await flush()
     expect(container.textContent).toContain('J1 · 차량 변경')
     expect(container.textContent).toContain('상차 준비 완료 시각을 확인하세요.')
-    expect(container.textContent).toContain('시험 발송 허가가 없어')
-    expect(container.textContent).not.toContain('초대 링크 만들기')
-    expect([...container.querySelectorAll('button')].some((b) => b.textContent === '변경 전달')).toBe(false)
+    expect(container.textContent).toContain('앱 알림 발송 권한이 없습니다')
+    expect(container.textContent).not.toContain('연결 링크 만들기')
+    expect([...container.querySelectorAll('button')].some((b) => b.textContent === '기사에게 보내기')).toBe(false)
   })
 
   it('동의 체크 후 초대를 만들고 비밀은 fragment 링크로만 보여준다', async () => {
@@ -76,8 +76,8 @@ describe('변경 전달 화면', () => {
     await flush()
     await clickText('T1')
     expect(container.querySelector<HTMLButtonElement>('fieldset.invite button')!.disabled).toBe(true)
-    await clickText('시험 수신자(동의한 팀원)')
-    await clickText('초대 링크 만들기')
+    await clickText('이 차량 기사에게만 연결 링크')
+    await clickText('연결 링크 만들기')
     await flush()
     expect(post).toHaveBeenCalledWith('/v2/invitations', { plan_id: 'P1', vehicle_ids: ['T1'], consent_acknowledged: true }, expect.stringMatching(/^invite-/))
     const link = container.querySelector<HTMLInputElement>('.invite-link input')!.value
@@ -89,9 +89,9 @@ describe('변경 전달 화면', () => {
     const { client, post } = fakeClient(true)
     await act(async () => root.render(<DispatchPanel client={client} planId="P1" />))
     await flush()
-    const sendButton = () => [...container.querySelectorAll('button')].find((b) => b.textContent === '변경 전달')!
+    const sendButton = () => [...container.querySelectorAll('button')].find((b) => b.textContent === '기사에게 보내기')!
     expect(sendButton().disabled).toBe(true)
-    await clickText('웹 푸시로 보냅니다')
+    await clickText('기사 휴대폰으로 보냅니다')
     await act(async () => sendButton().click())
     await flush()
     expect(post).toHaveBeenCalledWith('/v2/plans/P1/dispatches', { approval_id: 'A1', expected_version: 2, confirm_test_send: true }, 'dispatch-A1')

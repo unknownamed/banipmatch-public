@@ -1,8 +1,9 @@
+// 터미널 일정: 배차 담당자가 확인하는 외부 공지(HJNC 항차별 반입 일정)와 판단 참고 정보(해상 기상·도로 이동시간).
+// 서버에 보관된 마지막 실제 수신 결과를 보여 준다. 수신 실패 시 예시 자료로 바꾸지 않는다.
 import { useEffect, useMemo, useState } from 'react'
 import { createV2Client } from '../api/v2'
-import type { ReferenceView } from '../lib/reference'
+import { display, type ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
-import { ReferenceStatus } from './ReferencePanel'
 import { RoadReference, type RoadData } from './RoadReference'
 
 interface Weather {
@@ -14,6 +15,14 @@ interface Weather {
 interface LiveData { checked_at: string; hjnc: ReferenceView; weather: Weather[]; road?: RoadData | null; ais: null | {
   status: string; finished_at: string; max_seconds: number; subscription_confirmed: boolean; valid_position_events: number; unique_position_mmsi_count: number; connection_closed: boolean
 } }
+
+/** 원문 "2026-11-09 22:00" → "11/09 22:00" (원문 시간대는 바꾸지 않는다) */
+const short = (raw: string | undefined) => (raw && /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(raw) ? `${raw.slice(5, 7)}/${raw.slice(8, 10)} ${raw.slice(11, 16)}` : raw ?? '—')
+const age = (iso: string | null | undefined) => {
+  if (!iso) return null
+  const h = (Date.now() - Date.parse(iso)) / 3600000
+  return h < 1 ? '1시간 이내' : h < 24 ? `${Math.floor(h)}시간 전` : `${Math.floor(h / 24)}일 전`
+}
 
 export function LiveReference() {
   const client = useMemo(() => createV2Client(), [])
@@ -27,27 +36,84 @@ export function LiveReference() {
     finally { setLoading(false) }
   }
   useEffect(() => { void load() }, [client])
+
+  if (error) return <p className="warn" role="alert">터미널 일정을 불러오지 못했습니다: {error}</p>
+  if (!data) return <p className="muted" role="status">{loading ? '불러오는 중…' : ''}</p>
+
+  const d = display(data.hjnc)
+  const rows = [...(d.sample?.items ?? [])].sort((a, b) => String(a.values.YARD_CLOSE).localeCompare(String(b.values.YARD_CLOSE)))
+  const received = d.sample?.received_at ?? data.hjnc.last_success?.received_at ?? null
+  const sea = data.weather.find(w => w.kind === 'sea')
+  const warn = data.weather.find(w => w.kind === 'warning')
+  const obs = sea?.report?.observations[0]
+  const val = (o: NonNullable<typeof obs>, key: string, v: string, unit: string) => (o.missing_or_invalid_nonnegative_fields.includes(key) ? '—' : `${v}${unit}`)
+
   return <>
-    <p className="small muted">서버에서 마지막으로 실제 수신한 자료입니다. 자동 실시간 갱신이나 확정된 반입시간 변경을 뜻하지 않습니다. 조회 버튼은 서버에 보관된 수신 결과를 다시 읽습니다.</p>
-    <button type="button" className="secondary" disabled={loading} onClick={load}>{loading ? '불러오는 중…' : '수신 결과 새로 읽기'}</button>
-    {error && <p className="warn" role="alert">실제 자료 조회 실패: {error} 모의 자료로 전환하지 않았습니다.</p>}
-    {data && <>
-      <ReferenceStatus view={data.hjnc} />
-      <p className="small"><a href="https://www.hjnc.co.kr/esvc/vessel/berthScheduleT" target="_blank" rel="noreferrer">출처: HJNC 공개 선석배정현황</a> · 원문 시간대·전체 범위·변경 확인은 별도입니다.</p>
-      <h3>기상청 · 부산 신항 인근 참고 관측</h3>
-      <p className="small muted">거제도 부이(22104)는 터미널 내부 관측이 아닙니다. 기상과 지연이 동시에 나타나도 지연 원인으로 확정하지 않습니다. 1시간 이상 지난 관측은 과거 자료로 봅니다.</p>
-      {data.weather.map(w => <div className="card" key={w.kind}>
-        <h4>{w.kind === 'sea' ? '해양 관측' : '기상특보 조회'}</h4>
-        <p className="small">{w.status === 'sample_received' ? '실제 수신' : w.status === 'empty_framed_response' ? '정상 응답 · 자료 0건(특보 없음의 증거는 아님)' : `조회 확인 필요: ${w.status}`} · HTTP {w.http_status ?? '—'} · 수신 {w.received_at ? kstDateTime(w.received_at) : '없음'}</p>
-        {!!w.report?.station_mismatch_rows && <p className="warn">요청 지점과 다른 관측입니다.</p>}
-        {!!w.report?.future_observation_rows && <p className="warn">수신 시각 이후 관측이 포함되어 현재 판단 근거로 쓸 수 없습니다.</p>}
-        {w.report?.observations.map((o,i) => <p key={i}>관측 {kstDateTime(o.observed_at_utc)}{Date.now()-Date.parse(o.observed_at_utc)>3600000 && <b className="warn"> · 오래된 관측</b>}<br/>유의파고 {o.missing_or_invalid_nonnegative_fields.includes('WH') ? '미확인' : o.wh_m_original + ' m'} · 풍속 {o.missing_or_invalid_nonnegative_fields.includes('WS') ? '미확인' : o.ws_m_s_original + ' m/s'} · 순간풍속 {o.missing_or_invalid_nonnegative_fields.includes('WS_GST') ? '미확인' : o.gust_m_s_original + ' m/s'}</p>)}
-        {w.report?.selected_records.map((r,i) => <p key={i}>{r.region_name} · {r.kind} {r.level} · {r.command}<br/>발표 {kstDateTime(r.published_at_utc)} · 발효 원문(KST) {r.effective_time_original_kst}</p>)}
-      </div>)}
-      <p className="small"><a href="https://apihub.kma.go.kr/" target="_blank" rel="noreferrer">자료: 기상청 API허브</a> · 관측·발표·발효·수신 시각을 구분합니다. 배차 계산에는 넣지 않았습니다.</p>
-      <h3>AIS · 부산 제한 수신 시험</h3>
-      {data.ais ? <p className="small">{data.ais.subscription_confirmed ? '구독 응답 확인' : '구독 확인 안 됨'} · {data.ais.max_seconds}초 동안 위치 {data.ais.valid_position_events}건 / 선박 {data.ais.unique_position_mmsi_count}척 · 상태 {data.ais.status}<br/>시험 종료 {kstDateTime(data.ais.finished_at)} · {data.ais.connection_closed ? '연결 종료 확인' : '종료 확인 필요'}<br/>무수신은 부산에 선박이 없다는 뜻이 아닙니다. 지도에서 모의 재생을 별도로 선택할 수 있습니다.</p> : <p>실제 AIS 시험 기록이 아직 없습니다.</p>}
+    <section className="card tl-card" aria-labelledby="tl-hjnc">
+      <div className="tl-head">
+        <div>
+          <h3 id="tl-hjnc">HJNC 항차별 반입 일정</h3>
+          <p className="small muted">
+            <a href="https://www.hjnc.co.kr/esvc/vessel/berthScheduleT" target="_blank" rel="noreferrer">HJNC 공개 선석배정현황</a> 기준
+            {received && <> · 마지막 수신 {kstDateTime(received)} <span className={`tl-age${(Date.now() - Date.parse(received)) > 6 * 3600000 ? ' stale' : ''}`}>{age(received)}</span></>}
+          </p>
+        </div>
+        <button type="button" className="secondary" disabled={loading} onClick={load}>{loading ? '불러오는 중…' : '다시 불러오기'}</button>
+      </div>
+      {rows.length ? (
+        <div className="table-wrap">
+          <table className="grid tl-table">
+            <thead><tr><th scope="col">항차</th><th scope="col">반입 시작</th><th scope="col">반입 마감</th><th scope="col">접안 예정</th></tr></thead>
+            <tbody>
+              {rows.map((it, i) => (
+                <tr key={`${it.values.VOY_NO}:${i}`}>
+                  <td className="tl-voy">{it.values.VOY_NO}</td>
+                  <td>{short(it.values.YARD_OPEN)}</td>
+                  <td><b>{short(it.values.YARD_CLOSE)}</b></td>
+                  <td>{short(it.values.ETB)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : <p className="muted">{d.headline}</p>}
+      <p className="small muted tl-note">공개 화면의 시각을 그대로 옮겼습니다. 배차 계산에는 담당자가 확정한 반입 마감만 쓰고, 이 표는 확인용입니다.</p>
+    </section>
+
+    <div className="tl-grid">
+      <section className="card tl-card" aria-labelledby="tl-sea">
+        <h3 id="tl-sea">해상 기상 · 거제도 부이</h3>
+        {obs ? (
+          <>
+            <div className="tl-kpis">
+              <div><span>유의파고</span><b>{val(obs, 'WH', obs.wh_m_original, 'm')}</b></div>
+              <div><span>풍속</span><b>{val(obs, 'WS', obs.ws_m_s_original, 'm/s')}</b></div>
+              <div><span>순간풍속</span><b>{val(obs, 'WS_GST', obs.gust_m_s_original, 'm/s')}</b></div>
+            </div>
+            <p className="small muted">관측 {kstDateTime(obs.observed_at_utc)} · {age(obs.observed_at_utc)}</p>
+          </>
+        ) : <p className="muted">관측 자료가 없습니다.</p>}
+        <p className="small">
+          기상특보: {warn?.status === 'empty_framed_response' ? '해당 지역 발효 기록 없음' : warn?.report?.selected_records.length
+            ? warn.report.selected_records.map(r => `${r.region_name} ${r.kind} ${r.level}`).join(', ') : '확인 필요'}
+        </p>
+        <p className="small muted">기상청 API허브 · 기상과 지연이 겹쳐도 지연 원인으로 단정하지 않습니다.</p>
+      </section>
       <RoadReference road={data.road} />
-    </>}
+    </div>
+
+    <details className="tech-info tl-status">
+      <summary>데이터 연결 상태</summary>
+      <table className="grid small">
+        <thead><tr><th>자료</th><th>상태</th><th>마지막 수신</th></tr></thead>
+        <tbody>
+          <tr><td>HJNC 반입 일정</td><td>{d.headline}</td><td>{received ? kstDateTime(received) : '—'}</td></tr>
+          {data.weather.map(w => <tr key={w.kind}><td>{w.kind === 'sea' ? '기상청 해양 관측' : '기상청 특보'}</td><td>{w.status === 'sample_received' ? '수신' : w.status === 'empty_framed_response' ? '정상 응답(0건)' : w.status} · HTTP {w.http_status ?? '—'}</td><td>{w.received_at ? kstDateTime(w.received_at) : '—'}</td></tr>)}
+          <tr><td>도로 이동시간(ORS)</td><td>{data.road?.status ?? '없음'}</td><td>{data.road?.received_at ? kstDateTime(data.road.received_at) : '—'}</td></tr>
+          <tr><td>AIS 선박 위치</td><td>{data.ais ? `${data.ais.max_seconds}초 시험 · 위치 ${data.ais.valid_position_events}건(부산 제한 구역)` : '기록 없음'}</td><td>{data.ais ? kstDateTime(data.ais.finished_at) : '—'}</td></tr>
+        </tbody>
+      </table>
+      <p className="small muted">자동 반복 수집은 하지 않습니다. 제공기관 이용 조건을 확인한 범위에서 받은 결과만 보관합니다. AIS 무수신은 선박이 없다는 뜻이 아닙니다.</p>
+    </details>
   </>
 }

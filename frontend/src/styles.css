@@ -569,3 +569,24 @@ button.secondary:hover { background: var(--color-hover); }
   .evidence-strip { display: grid; grid-template-columns: 1fr 1fr; }
 }
 .rev-row > b { min-width: 9.5em; font-variant-numeric: tabular-nums; }
+.table-filter { display: flex; gap: 12px; align-items: center; margin: 0 0 8px; }
+.table-filter label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; font-weight: 600; }
+/* 터미널 일정 */
+.timeline-view { display: grid; gap: var(--space-4); }
+.tl-card { display: grid; gap: var(--space-3); }
+.tl-card h3 { margin: 0 0 2px; font-size: var(--fs-h3); }
+.tl-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); flex-wrap: wrap; }
+.tl-head p { margin: 0; }
+.tl-age { margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: var(--color-hover); font-size: 11px; font-weight: 600; }
+.tl-age.stale { background: #fff4e0; color: #a15c00; }
+.tl-table td, .tl-table th { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tl-voy { font-weight: 600; }
+.tl-note { margin: 0; }
+.tl-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--space-4); align-items: start; }
+.tl-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+.tl-kpis > div { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-canvas); }
+.tl-kpis span { font-size: var(--fs-caption); color: var(--color-muted); }
+.tl-kpis b { font-size: 22px; font-variant-numeric: tabular-nums; }
+.tl-status table { margin-top: 8px; }
+@media (max-width: 960px) { .tl-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .tl-table th:nth-child(2), .tl-table td:nth-child(2) { display: none; } }

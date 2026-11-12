@@ -54,13 +54,13 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
   return (
     <section className="card dispatch" aria-labelledby="dispatch-title">
       <h2 id="dispatch-title">
-        변경 전달 · 응답 <span className="badge mode-simulated">{p.data_mode === 'simulated' ? '모의 배차' : p.data_mode}</span>
+        기사 전달 · 응답
       </h2>
       <p className="muted small">
-        내부 계획 v{p.approved_version}({p.method}) 기준 차량별 변경입니다. 내부 승인은 기사 통보가 아닙니다. 아래에서 명시적으로 전달할 때만 시험 수신자에게 웹 푸시가 갑니다.
+        확정한 계획 v{p.approved_version}({p.method}) 기준으로 바뀌는 차량입니다. 기사 앱으로 알림을 보내거나, 안내문을 복사해 문자·카톡으로 보낼 수 있습니다.
       </p>
 
-      <h3>차량별 변경 명세</h3>
+      <h3>차량별 변경 내용</h3>
       <div className="vehicle-changes">
         {p.vehicle_changes.map((v) => (
           <div key={v.vehicle_id} className="vehicle-change">
@@ -97,7 +97,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
 
       {dispatchId && <DispatchStatus client={client} dispatchId={dispatchId} recipients={recipients} />}
 
-      <ul className="small muted">{p.limits.map((l) => <li key={l}>{l}</li>)}</ul>
+      <details className="tech-info"><summary>유의사항</summary><ul className="small muted">{p.limits.map((l) => <li key={l}>{l}</li>)}</ul></details>
     </section>
   )
 }
@@ -156,20 +156,20 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
 
   return (
     <>
-      <h3>시험 수신자 연결</h3>
+      <h3>기사 앱 연결</h3>
       {!authorized && (
         <p className="small warn">
-          이 세션은 시험 발송 허가가 없어 초대·전달을 할 수 없습니다. 동의한 팀원 기기로 시험할 때만 운영자가 세션 ID를 확인해 허가합니다. 공개 방문자는 허가받을 수 없습니다.
+          이 계정은 앱 알림 발송 권한이 없습니다. 위의 안내문 복사로 전달할 수 있습니다. (시연에서는 동의한 팀원 휴대폰에만 관리자가 권한을 엽니다.)
         </p>
       )}
       {recipients.length > 0 && (
         <table className="grid small">
-          <thead><tr><th scope="col">수신자</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">만료</th><th /></tr></thead>
+          <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>
           <tbody>
             {recipients.map((r) => (
               <tr key={r.recipient_id}>
-                <td><code>{r.recipient_id.slice(0, 8)}</code></td>
-                <td>{r.vehicle_ids.join(', ')}</td>
+                <td className="muted">기기 {r.recipient_id.slice(-4)}</td>
+                <td>{r.vehicle_ids.map(vehicleName).join(', ')}</td>
                 <td>{r.revoked ? '해제됨' : SUBSCRIPTION_LABEL[r.subscription_status]}</td>
                 <td>{kstDateTime(r.expires_at)}</td>
                 <td>{!r.revoked && <button type="button" className="secondary" onClick={() => revoke(r.recipient_id)}>연결 해제</button>}</td>
@@ -180,23 +180,23 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
       )}
       {authorized && (
         <fieldset disabled={busy} className="invite">
-          <legend className="small">초대할 차량 (이미 연결된 차량은 해제 후 새로 초대)</legend>
+          <legend className="small">연결할 차량 (이미 연결된 차량은 해제 후 다시 연결)</legend>
           {vehicles.map((v) => (
             <label key={v} className="rev-choice">
               <input type="checkbox" disabled={taken.has(v)} checked={picked.includes(v)} onChange={(e) => setPicked((x) => (e.target.checked ? [...x, v] : x.filter((y) => y !== v)))} />
-              {' '}{v}{taken.has(v) && <span className="small muted"> · 연결됨</span>}
+              {' '}{vehicleName(v)}{taken.has(v) && <span className="small muted"> · 연결됨</span>}
             </label>
           ))}
           <label className="rev-choice">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />{' '}
-            이 차량의 시험 수신자(동의한 팀원)에게만 초대 링크를 전달합니다. 이름·전화번호는 받지 않습니다.
+            이 차량 기사에게만 연결 링크를 보냅니다. 기사가 휴대폰에서 열고 알림을 허용하면 연결됩니다. 이름·전화번호는 저장하지 않습니다.
           </label>
-          <button type="button" disabled={!picked.length || !consent} onClick={create}>초대 링크 만들기</button>
+          <button type="button" disabled={!picked.length || !consent} onClick={create}>연결 링크 만들기</button>
         </fieldset>
       )}
       {invite && (
         <div className="invite-link" role="status">
-          <p className="small">초대 링크(1회용 · {kstDateTime(invite.expires_at)}까지). 수신자가 알림을 허용해야 받을 수 있습니다.</p>
+          <p className="small">연결 링크(1회용 · {kstDateTime(invite.expires_at)}까지). 기사에게 이 링크를 보내 주세요.</p>
           <input readOnly value={invite.link} aria-label="초대 링크" onFocus={(e) => e.currentTarget.select()} />
           <button type="button" className="secondary" onClick={() => navigator.clipboard?.writeText(invite.link)}>복사</button>
           <p className="small muted">
@@ -235,16 +235,16 @@ function Send({ client, preview, authorized, dispatchId, onSent }: {
 
   return (
     <>
-      <h3>전달</h3>
+      <h3>앱 알림 보내기</h3>
       {dispatchId ? (
-        <p className="small muted">이 승인 계획은 전달 요청했습니다. 같은 승인으로 다시 보내지 않습니다.</p>
+        <p className="small muted">이 계획의 변경을 이미 보냈습니다. 아래에서 기사 응답을 확인하세요.</p>
       ) : (
         <fieldset disabled={busy}>
           <label className="rev-choice">
             <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />{' '}
-            내부 계획 v{preview.approved_version}의 변경을 연결된 시험 수신자에게 웹 푸시로 보냅니다. 잠금 화면에는 일반 문구만 표시됩니다.
+            확정한 계획 v{preview.approved_version}의 변경을 연결된 기사 휴대폰으로 보냅니다. 잠금 화면에는 ‘배차 변경 확인 요청’만 표시됩니다.
           </label>
-          <button type="button" disabled={!confirm} onClick={send}>{busy ? '전달 요청 중…' : '변경 전달'}</button>
+          <button type="button" disabled={!confirm} onClick={send}>{busy ? '보내는 중…' : '기사에게 보내기'}</button>
         </fieldset>
       )}
       {error !== null && <p className="warn small" role="alert">전달 실패: {errText(error)}</p>}

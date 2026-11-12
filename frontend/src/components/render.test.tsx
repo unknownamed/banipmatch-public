@@ -48,7 +48,7 @@ function render(state: DispatchView['results'], withB0 = false, withB3 = false, 
   )
 }
 
-const hasBaselineTable = (html: string) => ['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`<b>${id}</b>`)) && html.includes('T1</b> #2')
+const hasBaselineTable = (html: string) => ['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`<b>${id}</b>`)) && html.includes('>T1</b>') && html.includes('2번째')
 
 describe('원안 표는 결과 상태와 무관하게 남는다', () => {
   it('차량별 보기(기본)도 계산 중에 원안 막대를 보여준다', () => {
@@ -82,7 +82,7 @@ describe('원안 표는 결과 상태와 무관하게 남는다', () => {
   it('조정안이 있으면 지표는 제약 위반으로 표시하고 마감 위반으로 단정하지 않는다', () => {
     const html = render({ state: 'ready', data: results }, true, true)
     expect(html).toContain('B3 조정안</th>')
-    expect(html).toContain('제약 위반 작업(조정 가능)')
+    expect(html).toContain('마감·조건 위반')
     expect(html).not.toContain('마감 위반')
   })
 })
