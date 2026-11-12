@@ -4,6 +4,7 @@ import type { Method, Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
 import { EMPTY_DRAFT, draftProblems, freezeLabel, isBlankDraft, isCompleteInput, listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits, type VehicleDraft } from '../lib/revision'
 import { kstDateTime } from '../lib/time'
+import { jobName, vehicleName } from '../lib/labels'
 
 const FIELD_LABEL = { ready_at: '상차 준비시각', available_at: '차량 가용 시작', shift_end_at: '근무 종료' } as const
 
@@ -105,8 +106,8 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
 
       <fieldset disabled={sending}>
         <legend>작업 준비시각</legend>
-        {movable.map((j) => <div key={j.job_id} className="rev-row"><b>{j.job_id}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>)}
-        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b>{j.job_id}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
+        {movable.map((j) => <div key={j.job_id} className="rev-row"><b title={j.job_id}>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>)}
+        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b title={j.job_id}>{jobName(j.job_id)}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
       </fieldset>
 
       {!!snapshot.vehicles?.length && (
@@ -114,7 +115,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
           <legend>차량 가용 · 근무</legend>
           {snapshot.vehicles.map((v) => (
             <div key={v.vehicle_id} className="rev-row">
-              <b>{v.vehicle_id}</b>
+              <b title={v.vehicle_id}>{vehicleName(v.vehicle_id)}</b>
               {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
               {field(`vehicle:${v.vehicle_id}:shift_end_at`, v.shift_end_at, FIELD_LABEL.shift_end_at)}
             </div>
@@ -129,7 +130,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
           시작 위치는 이동시간이 이미 있는 기존 위치에서만 고를 수 있습니다.
         </p>
         <div className="rev-row">
-          <label className="rev-field"><span className="small muted">차량 ID</span><input value={draft.vehicle_id} maxLength={32} placeholder="예: T3" onChange={(e) => setD({ vehicle_id: e.target.value })} /></label>
+          <label className="rev-field"><span className="small muted">차량 ID</span><input value={draft.vehicle_id} maxLength={32} placeholder="예: T9 (내부 관리 번호)" onChange={(e) => setD({ vehicle_id: e.target.value })} /></label>
           <label className="rev-field">
             <span className="small muted">시작 위치</span>
             <select value={draft.start_location_id} onChange={(e) => setD({ start_location_id: e.target.value })}>

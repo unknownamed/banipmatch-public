@@ -12,6 +12,7 @@ import type { V2Client } from './api/v2'
 import { ConditionRevisionPanel, NextPlanPanel, RevisionComparison } from './components/RevisionPanels'
 import { DispatchPanel } from './components/DispatchPanel'
 import { registerLabels } from './lib/labels'
+import { ActionSummary } from './components/ActionSummary'
 
 function recommend(list: MethodResult[]): MethodResult | undefined {
   const ok = list.filter((r) => r.result_origin === 'computed' && r.validation_status !== 'failed')
@@ -76,13 +77,17 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && (
         <>
           <Header s={snapshot} />
+          {view.results.state === 'ready' && (
+            <ActionSummary base={base} cand={cand} recommended={recommended?.method} rows={rows}
+              approved={!!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))} />
+          )}
           <ChangeEvidence s={snapshot} />
         </>
       )}
 
       {view.run.state === 'loading' && <Skeleton label="실행 상태 조회 중…" lines={2} />}
       {view.run.state === 'error' && <p className="card warn">실행 상태 조회 실패: {view.run.message}</p>}
-      {run && <RunStatusPanel run={run} results={results} />}
+      {run && run.status !== 'completed' && <RunStatusPanel run={run} results={results} />}
       {assumed && (
         <div className="banner fixture" role="alert">
           가정 시험 입력입니다. 준비·가용 조건에 가정이 섞여 있어 비교만 할 수 있고 승인·전달할 수 없습니다.
@@ -129,6 +134,9 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {v2 && snapshot && run && view.results.state === 'ready' && (approvedPlan
         ? <NextPlanPanel key={`next:${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: null }} />
         : <ConditionRevisionPanel key={snapshot.scenario_id} client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />)}
+
+      {/* 계산 방법별 상태·독립 검사는 검증용 정보라 아래에 둔다(실패하면 위에 바로 보인다). */}
+      {run && run.status === 'completed' && <RunStatusPanel run={run} results={results} />}
     </main>
   )
 }

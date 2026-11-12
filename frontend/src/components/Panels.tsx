@@ -1,7 +1,7 @@
 import type { MethodResult, Run, Snapshot } from '../api/types'
 import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
-import { kstDateTime, kstTime } from '../lib/time'
+import { humanizeTimes, kstDateTime, kstTime } from '../lib/time'
 import { jobName } from '../lib/labels'
 
 const DATA_MODE: Record<Snapshot['data_mode'], string> = { simulated: '모의', observed: '관측', mixed: '혼합' }
@@ -60,7 +60,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}
       <p className="muted small">선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다.</p>
       <dl className="evidence-strip">
-        <div>
+        <div className="dup">
           <dt>항차 · 터미널</dt>
           <dd>
             {c.voyage_id} · {c.terminal_id}
@@ -72,7 +72,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
             {kstTime(c.previous_opens_at)} ~ {kstTime(c.previous_closes_at)}
           </dd>
         </div>
-        <div className="evidence-new">
+        <div className="evidence-new dup">
           <dt>변경 후 반입 시간</dt>
           <dd>
             {w ? (
@@ -273,7 +273,7 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
           {r.candidateIssues.length === 0 && <p className="warn">응답에 이유가 없습니다. 엔진 담당에게 확인이 필요합니다.</p>}
           {r.candidateIssues.map((i, k) => (
             <ul key={k}>
-              <li>{i.explanation}</li>
+              <li>{humanizeTimes(i.explanation)}</li>
               <li className="muted">
                 근거 수준: {PROOF_LABEL[i.proof_level]} · 근거: {i.evidence_refs.join(', ') || '없음'}
               </li>
@@ -290,13 +290,13 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
             <b>{jobName(r.job.job_id)}</b> 고정 작업 잔여 위험 (유지됨)
           </summary>
           {r.candidateIssues.map((i, k) => (
-            <p key={k}>{i.explanation}</p>
+            <p key={k}>{humanizeTimes(i.explanation)}</p>
           ))}
         </details>
       ))}
       {general.map((i, k) => (
         <p key={`g-${k}`} className="warn">
-          {ISSUE_LABEL[i.code] ?? i.code}: {i.explanation}
+          {ISSUE_LABEL[i.code] ?? i.code}: {humanizeTimes(i.explanation)}
         </p>
       ))}
     </section>

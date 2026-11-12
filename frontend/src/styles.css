@@ -546,3 +546,26 @@ button.secondary:hover { background: var(--color-hover); }
 .copy-notice { margin-top: 6px; display: grid; gap: 4px; }
 .copy-notice > button { justify-self: start; }
 .notice-text { margin: 4px 0 0; padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-canvas); border: var(--border); font: inherit; font-size: var(--fs-caption); line-height: 1.6; white-space: pre-wrap; }
+/* 지금 할 일 요약 */
+.action-summary { display: grid; gap: var(--space-3); border-color: var(--color-text); }
+.action-summary.ok { border-color: var(--color-success); }
+.as-head { margin: 0; }
+.as-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); }
+.as-cell { display: grid; gap: 2px; padding: 10px 12px; border-radius: var(--radius-md); background: var(--color-canvas); }
+.as-num { font-size: 28px; font-weight: var(--fw-bold); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.as-label { font-size: var(--fs-caption); color: var(--color-muted); line-height: 1.35; }
+.as-cell.bad .as-num { color: var(--color-danger); }
+.as-cell.good .as-num { color: var(--color-success); }
+.as-cell.warn .as-num { color: #a15c00; }
+.as-todo { margin: 0; padding-left: var(--space-5); }
+.as-todo li { margin-bottom: 2px; }
+.as-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.as-actions > button:not(.secondary) { padding: 10px 18px; border-radius: var(--radius-md); border: 0; background: var(--color-accent-strong); color: #fff; font-weight: var(--fw-bold); cursor: pointer; }
+.as-actions > button.secondary { padding: 9px 14px; }
+@media (max-width: 640px) {
+  .as-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .as-actions > button { flex: 1 1 auto; min-height: 44px; }
+  .evidence-strip .dup { display: none; }
+  .evidence-strip { display: grid; grid-template-columns: 1fr 1fr; }
+}
+.rev-row > b { min-width: 9.5em; font-variant-numeric: tabular-nums; }
