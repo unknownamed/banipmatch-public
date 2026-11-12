@@ -5,7 +5,7 @@
   "source": "docs/development/v0.1/예제 데이터/01_snapshot.json",
   "source_sha256": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e",
   "tool": "tools/dispatch_response.py",
-  "tool_sha256": "60394edca2db5293786a21f1eb8a6c15d76ead667ed19d3c6e9a38d466e0bad7",
+  "tool_sha256": "31f29d509890f911a9dff953ca1934731a7b3bce63f5f0833640763a06e193e4",
   "python": "3.12.14",
   "method": "B1",
   "seed": 42,
@@ -16,6 +16,12 @@
   "note": "공통 예제의 과거 시각을 유지한 로직 검수. 현재 승인/발송 가능한 데이터가 아님.",
   "files": {
     "computed-result.json": "ef3a803694ac6e6f5d7690cb6593cd5c16c85a58d6d434c21cb92beaa5d0a563",
-    "response-preview.json": "627e7232e129a451daf6b81c7375a60e49577c6c5e7d15e69043a96d17fbc754"
-  }
+    "response-preview.json": "3e925c11bcaeab685ab14ad9ddd35f0e539691adaf0653703fbb23920ae3c982"
+  },
+  "regenerated": [
+    {
+      "date": "2026-11-12",
+      "reason": "변경 명세에 현장 표시 정보(display, plate_no) 추가 후 같은 입력·결과로 재생성. 일정·대상 차량·변경 판정은 동일"
+    }
+  ]
 }

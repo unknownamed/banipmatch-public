@@ -39,6 +39,16 @@ def assignment_index(rows: list[dict]) -> dict[str, dict]:
     return indexed
 
 
+def job_display(snapshot: dict, job_id: str) -> dict:
+    """기사·담당자 화면용 현장 식별 정보(입력에 있을 때만). 내부 job_id는 연결 키로 남는다."""
+    job = next(j for j in snapshot["jobs"] if j["job_id"] == job_id)
+    place = {loc["location_id"]: loc["name"] for loc in snapshot.get("locations", [])}
+    size = {"DRY40": "40ft", "DRY20": "20ft"}.get(job["equipment_type"], job["equipment_type"])
+    return {"container_no": job.get("container_no"), "booking_no": job.get("booking_no"), "cargo_owner": job.get("cargo_owner"),
+            "origin_name": place.get(job["origin_id"], job["origin_id"]), "terminal_id": job["terminal_id"],
+            "voyage_id": job["voyage_id"], "size": size}
+
+
 def build_response_preview(snapshot: dict, result: dict) -> dict:
     """Recheck a computed candidate, preserving issues and exact schedule differences.
 
@@ -64,7 +74,7 @@ def build_response_preview(snapshot: dict, result: dict) -> dict:
         kind = "removed_from_plan" if new is None else "newly_assigned" if old is None else "reassigned" if old["vehicle_id"] != new["vehicle_id"] else "schedule_changed"
         fields = sorted(k for k in set(old or {}) | set(new or {}) if k != "job_id" and (old or {}).get(k) != (new or {}).get(k))
         change = {"job_id": job_id, "kind": kind, "changed_fields": fields,
-                  "before": deepcopy(old), "after": deepcopy(new),
+                  "before": deepcopy(old), "after": deepcopy(new), "display": job_display(snapshot, job_id),
                   "instruction": "담당자 확인 전에는 운송 지시가 아닙니다."}
         if new is None:
             change["instruction"] = "조정안에서 미처리로 남았습니다. 담당자 확인이 필요하며 실제 운송 취소를 뜻하지 않습니다."
@@ -72,6 +82,7 @@ def build_response_preview(snapshot: dict, result: dict) -> dict:
         # Reassigned jobs must reach both old and new vehicle owners, never only the new one.
         for vehicle_id in sorted({a["vehicle_id"] for a in (old, new) if a is not None}):
             by_vehicle.setdefault(vehicle_id, []).append(deepcopy(change))
+    plates = {v["vehicle_id"]: v.get("plate_no") for v in snapshot["vehicles"]}
     followups = []
     for issue in result["issues"]:
         owner, check = CHECKS[issue["code"]]
@@ -93,7 +104,7 @@ def build_response_preview(snapshot: dict, result: dict) -> dict:
                              "verification": snapshot["change"]["verification"],
                              "evidence": deepcopy(snapshot["change"]["evidence"])},
         "changes": changed,
-        "vehicle_changes": [{"vehicle_id": vid, "changes": rows} for vid, rows in sorted(by_vehicle.items())],
+        "vehicle_changes": [{"vehicle_id": vid, "plate_no": plates.get(vid), "changes": rows} for vid, rows in sorted(by_vehicle.items())],
         "followups": followups,
         "unassigned_job_ids": sorted(result["unassigned_job_ids"]),
         "limits": ["자료 파일의 검수 결과이며 현재 서버 계획·권한·유효기간의 확인을 대신하지 않습니다.",

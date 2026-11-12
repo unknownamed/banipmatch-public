@@ -4,6 +4,7 @@ import type { RecipientClient, RecipientNotification, RecipientSession } from '.
 import { CHANGE_LABEL, RESPONSE_LABEL } from '../lib/dispatch'
 import { base64UrlToBytes, claimKey, inviteFromPaste, mustInstallFirst, platform, type Fragment, type PlatformInfo } from '../lib/recipient'
 import { kstDateTime, kstTime } from '../lib/time'
+import { formatContainer } from '../lib/labels'
 
 const errText = (e: unknown) =>
   e instanceof ApiRequestError && e.body ? `${e.body.code} — ${e.message}` : e instanceof Error ? e.message : String(e)
@@ -283,20 +284,26 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
       <p className="small muted">담당자가 확정한 모의 변경입니다. 실제 운송·터미널 예약 변경을 뜻하지 않습니다.</p>
       {d.payload.vehicle_changes.map((v) => (
         <div key={v.vehicle_id}>
-          <h3>{v.vehicle_id}</h3>
+          <h3>{v.plate_no ?? v.vehicle_id}</h3>
           <ul>
-            {v.changes.map((c) => (
+            {v.changes.map((c) => {
+              const d = c.display
+              const name = d?.container_no ? formatContainer(d.container_no) : c.job_id
+              const route = d?.origin_name ? `${d.origin_name} → ${d.terminal_id} 게이트` : ''
+              const who = (vid?: string) => (vid === v.vehicle_id ? '내 차량' : vid ?? '')
+              return (
               <li key={c.job_id}>
-                <b>{c.job_id}</b> {CHANGE_LABEL[c.kind] ?? c.kind}
-                <br />
+                <b>{name}</b> {d?.size && <span className="small muted">{d.size}</span>} <span className="badge change">{CHANGE_LABEL[c.kind] ?? c.kind}</span>
+                {(d?.cargo_owner || route) && <div className="small muted">{[d?.cargo_owner, route, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(' · ')}</div>}
                 <span className="small">
-                  이전: {c.before ? `${c.before.vehicle_id} · 상차지 출발 ${kstTime(c.before.pickup_departure_at)} · 게이트 ${kstTime(c.before.gate_arrival_at)}` : c.before_outside_scope ? '다른 차량(상세 비공개)' : '배정 없음'}
+                  이전: {c.before ? `${who(c.before.vehicle_id)} · ${kstTime(c.before.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.before.gate_arrival_at)}` : c.before_outside_scope ? '다른 차량(상세 비공개)' : '배정 없음'}
                   <br />
-                  변경: {c.after ? `${c.after.vehicle_id} · 상차지 출발 ${kstTime(c.after.pickup_departure_at)} · 게이트 ${kstTime(c.after.gate_arrival_at)}` : c.after_outside_scope ? '다른 차량으로 이동(상세 비공개)' : '미처리 · 담당자 확인 중'}
+                  변경: {c.after ? `${who(c.after.vehicle_id)} · ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : c.after_outside_scope ? '다른 차량으로 이동(상세 비공개)' : '보류 · 담당자 확인 중'}
                 </span>
                 {c.instruction && <p className="small muted">{c.instruction}</p>}
               </li>
-            ))}
+              )
+            })}
           </ul>
         </div>
       ))}
