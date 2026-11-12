@@ -1,3 +1,4 @@
+import { issueText } from '../lib/issueText'
 import type { MethodResult, Run, Snapshot } from '../api/types'
 import { ISSUE_LABEL, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
@@ -256,7 +257,7 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
           {r.candidateIssues.length === 0 && <p className="warn small">배정하지 못한 이유를 받지 못했습니다. 화주나 기사에게 직접 확인하세요.</p>}
           {r.candidateIssues.map((i, k) => (
             <div key={k} className="issue-body small">
-              <p>{humanizeTimes(i.explanation)}</p>
+              <p>{issueText(i.code, i.explanation)}</p>
               {NEXT_STEP[i.code] && <p className="next-step"><b>할 일</b> {NEXT_STEP[i.code]}</p>}
             </div>
           ))}
