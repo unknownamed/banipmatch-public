@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import s01 from '@examples/01_snapshot.json'
 import s07 from '@examples/07_snapshot_입력누락.json'
 import s08 from '@examples/08_snapshot_미확인변경.json'
+import s02 from '../fixtures/demo-02-evening.synthetic.json'
 import runRequestJson from '@examples/02_run_request.json'
 import type { ApiClient, RunRequest } from '../api/client'
 import { ApiRequestError } from '../api/client'
@@ -15,7 +16,8 @@ import { ComparisonSection } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
 
 const EXAMPLES = [
-  { id: '01', label: '01 정상 입력', snapshot: s01 },
+  { id: '02', label: '02 신항 저녁 배차 · 트럭 6대·작업 16건 (시연 권장)', snapshot: s02 },
+  { id: '01', label: '01 정상 입력 (작은 예제)', snapshot: s01 },
   { id: '07', label: '07 입력 누락 (J1 준비시각 미확인)', snapshot: s07 },
   { id: '08', label: '08 미확인 변경 (반입시간 변경 미확정)', snapshot: s08 },
 ] as const
@@ -34,7 +36,7 @@ export const isInputRejection = (e: unknown): e is ApiRequestError =>
 
 /** http 모드에서 run 파라미터가 없을 때: 공통 예제로 입력 등록 → 계산 요청 → 결과 화면으로 이동. */
 export function StartRunPanel({ client }: { client: ApiClient }) {
-  const [exampleId, setExampleId] = useState<(typeof EXAMPLES)[number]['id']>('01')
+  const [exampleId, setExampleId] = useState<(typeof EXAMPLES)[number]['id']>('02')
   // 예제마다 한 시도를 유지한다. 실패 후 "다시 시도"는 같은 본문·같은 멱등키. 새 시도는 새로고침.
   const [attempts] = useState(() => new Map<string, StartAttempt>())
   const [status, setStatus] = useState<Status>({ state: 'idle' })
