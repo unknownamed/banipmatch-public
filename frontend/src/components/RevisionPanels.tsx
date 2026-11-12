@@ -80,21 +80,26 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
   const jobRow = (j: (typeof movable)[number]) => <div key={j.job_id} className="rev-row"><b>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>
   const frozen = snapshot.jobs.filter((j) => j.frozen)
   // 브라우저 기본 시각 입력은 기기 설정에 따라 오전/오후로 보인다. 화면 표기와 같은 24시간제로 받기 위해 날짜+시각(HH:MM)으로 나눈다.
+  // 비어 있던 값은 날짜 칸도 비어 있다. 시각만 넣으면 기준 시각의 날짜(오늘)로 채운다.
+  const today = toKstInput(snapshot.as_of).slice(0, 10)
   const timeInput = (value: string, onChange: (v: string) => void, label: string, hint: string) => {
     const [date, time = ''] = value.split('T')
     const invalid = !!value && !isCompleteInput(value)
+    // 어느 칸이 문제인지 알려 준다: 시각 형식이 틀렸는지, 날짜가 빠졌는지.
+    const timeBad = !!time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+    const problem = !invalid ? null : timeBad || !time ? '시각은 00:00~23:59 형식으로 입력하세요.' : !date ? '날짜를 고르세요.' : '날짜와 시각을 확인하세요.'
     return (
       <div className="rev-field" role="group" aria-label={`${label} (KST)`}>
         <span className="small muted">{label}<span className="rev-now">{hint}</span></span>
         <span className="rev-inputs">
-          <input type="date" aria-label="날짜" value={date} disabled={sending} onChange={(e) => onChange(`${e.target.value}T${time}`)} />
+          <input type="date" aria-label="날짜" value={date} disabled={sending} aria-invalid={invalid && !date} onChange={(e) => onChange(`${e.target.value}T${time}`)} />
           <input
             type="text" inputMode="numeric" aria-label="시각(24시간제)" placeholder="13:40" maxLength={5} size={5}
-            value={time} aria-invalid={invalid} disabled={sending}
-            onChange={(e) => onChange(`${date}T${e.target.value}`)}
+            value={time} aria-invalid={invalid && (timeBad || !time)} disabled={sending}
+            onChange={(e) => onChange(`${date || today}T${e.target.value}`)}
           />
         </span>
-        {invalid && <span className="small warn">시각은 00:00~23:59 형식으로 입력하세요.</span>}
+        {problem && <span className="small warn">{problem}</span>}
       </div>
     )
   }
@@ -261,7 +266,7 @@ const TRANSITIONS = [
   ['became_assigned', '새로 배정됨'],
   ['became_unassigned', '새로 미처리됨'],
   ['remained_unassigned', '계속 미처리'],
-  ['changed_assignments', '배정 바뀜'],
+  ['changed_assignments', '이전 계산과 배정이 다른 작업'],
   ['fixed_risks_added', '출발 차량 위험 생김'],
   ['fixed_risks_removed', '출발 차량 위험 없어짐'],
   ['fixed_risks_remaining', '출발 차량 위험 남음'],
@@ -304,7 +309,7 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
           <li key={`${x.entity_id}:${x.field}`}>{x.field.startsWith('vehicle') || x.field === 'available_at' || x.field === 'shift_end_at' ? vehicleName(x.entity_id) : jobName(x.entity_id)} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
         ))}
         {c.revision.added_vehicles.map((v) => (
-          <li key={v.vehicle_id}>차량 추가: <b>{v.vehicle_id}</b> (확보 여부는 담당자가 직접 확인)</li>
+          <li key={v.vehicle_id}>차량 추가: <b>{vehicleName(v.vehicle_id)}</b></li>
         ))}
       </ul>
       {c.before.status === 'input_blocked' && (
@@ -313,18 +318,20 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
       {c.job_transitions && (
         <dl className="rev-transitions">
           {TRANSITIONS.filter(([k]) => c.job_transitions![k].length).map(([k, label]) => (
-            <div key={k}><dt>{label}</dt><dd>{c.job_transitions![k].join(', ')}</dd></div>
+            <div key={k}><dt>{label}</dt><dd>{c.job_transitions![k].map(jobName).join(', ')}</dd></div>
           ))}
         </dl>
       )}
-      {c.metric_deltas && (
+      {c.metric_deltas && (DELTAS.some(([k]) => c.metric_deltas![k]) ? (
         <table className="grid small rev-deltas">
+          <caption className="small muted">이전 계산보다</caption>
           <thead><tr>{DELTAS.map(([, l]) => <th key={l} scope="col">{l}</th>)}</tr></thead>
           <tbody><tr>{DELTAS.map(([k]) => <td key={k}>{signed(c.metric_deltas![k])}</td>)}</tr></tbody>
         </table>
-      )}
-      {c.before.status !== 'input_blocked' && c.comparison_limits.length > 0 && (
-        <ul className="small rev-limits">{c.comparison_limits.map((l) => <li key={l}>{l}</li>)}</ul>
+      ) : <p className="small">이전 계산과 비교해 미처리·위반·변경 작업 수와 이동 시간이 같습니다.</p>)}
+      {/* 두 계산 사이에 기준 시각이 바뀌었으면 결과 차이가 보완 때문만은 아닐 수 있다는 점만 짧게 알린다. */}
+      {c.before.status !== 'input_blocked' && c.comparison_limits.some((l) => l.includes('기준시각')) && (
+        <p className="small muted">그사이 시간이 지나 결과 차이에는 시간 경과도 섞여 있습니다.</p>
       )}
 
     </section>

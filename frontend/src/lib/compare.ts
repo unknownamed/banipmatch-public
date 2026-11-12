@@ -81,7 +81,7 @@ export const ISSUE_LABEL: Record<string, string> = {
   CAPACITY_EXCEEDED: '중량 초과',
   SHIFT_EXCEEDED: '근무시간 초과',
   FIXED_RESIDUAL_RISK: '고정 작업 잔여 위험',
-  SEARCH_LIMIT: '탐색 한도 도달',
+  SEARCH_LIMIT: '맡을 차량 못 찾음',
   MODEL_INVALID: '모델 오류',
 }
 

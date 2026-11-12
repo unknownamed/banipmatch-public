@@ -18,6 +18,7 @@ import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type
 import { ComparisonSection, NOT_COMPUTED } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
 import { withQueueRetry } from '../lib/queueRetry'
+import { LAST_REVIEW } from './AppBar'
 import { NowPanel } from './NowPanel'
 import { FleetToday } from './FleetToday'
 import { DispatchMap } from './DispatchMap'
@@ -116,7 +117,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         window.setTimeout(() => document.querySelector('.rejected-input')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300)
       } else if (v2 && error instanceof ApiRequestError && ['SCENARIO_LIMIT', 'RUN_LIMIT'].includes(error.body?.code ?? '')) {
         // 이 브라우저의 보관 기록이 가득 찼다. 지난 기록을 다시 여는 화면은 없으므로 비우고 같은 변경을 바로 다시 계산한다.
-        try { sessionStorage.setItem(AUTOSTART, exampleId) } catch { /* 저장 못 하면 버튼으로 다시 시작 */ }
+        try { sessionStorage.setItem(AUTOSTART, exampleId); sessionStorage.removeItem(LAST_REVIEW) } catch { /* 저장 못 하면 버튼으로 다시 시작 */ }
         await v2.reset().catch(() => {})
         location.href = '?'
       } else setStatus({ state: 'error', step, error })

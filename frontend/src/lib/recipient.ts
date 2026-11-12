@@ -34,7 +34,11 @@ export async function claimKey(invite: string): Promise<string> {
   return `claim-${[...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 40)}`
 }
 
-export interface PlatformInfo { ios: boolean; standalone: boolean; pushSupported: boolean }
+export interface PlatformInfo {
+  ios: boolean; standalone: boolean; pushSupported: boolean
+  /** 카카오톡·네이버·인스타그램 등 앱 안 브라우저. 알림(웹 푸시)을 받을 수 없다. */
+  inApp?: 'kakao' | 'other' | null
+}
 
 /** iPhone/iPad의 웹 푸시는 홈 화면에 추가한 웹앱(standalone)에서만 된다. */
 export function platform(nav: Navigator, win: Window): PlatformInfo {
@@ -43,8 +47,15 @@ export function platform(nav: Navigator, win: Window): PlatformInfo {
   const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && nav.maxTouchPoints > 1)
   const standalone = win.matchMedia?.('(display-mode: standalone)').matches || (nav as Navigator & { standalone?: boolean }).standalone === true
   const pushSupported = 'serviceWorker' in nav && 'PushManager' in win && 'Notification' in win
-  return { ios, standalone, pushSupported }
+  const inApp = /KAKAOTALK/i.test(ua) ? 'kakao' : /NAVER\(inapp|Instagram|FBAN|FBAV|\bLine\/|DaumApps|everytimeApp/i.test(ua) ? 'other' : null
+  return { ios, standalone, pushSupported, inApp }
 }
+
+/** 초대 링크(비밀은 주소 # 뒤에만 둔다. 서버로 전송되지 않는다). */
+export const inviteUrl = (origin: string, invite: string | null) => `${origin}/recipient${invite ? `#invite=${encodeURIComponent(invite)}` : ''}`
+
+/** 카카오톡 안 브라우저에서 기본 브라우저(Chrome·Safari)로 같은 주소를 여는 카카오톡 공식 주소 형식. */
+export const kakaoExternal = (url: string) => `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`
 
 /** iPhone Safari(홈 화면 앱 아님)에서는 여기서 수락하지 말고 홈 화면 앱에서 수락해야 한다. */
 export const mustInstallFirst = (p: PlatformInfo) => p.ios && !p.standalone

@@ -575,3 +575,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .ft-table tbody tr:focus-visible { outline: 2px solid #16294D; outline-offset: -2px; }
 .vm-item.picked { background: #EEF2F8; }
 .ft-table .late-next { color: var(--red, #c0262d); font-weight: 600; }
+
+/* 휴대폰 폭에서 버튼이 많은 선택 막대는 잘리지 않고 옆으로 밀어 볼 수 있게 */
+@media (max-width: 576px) {
+  .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .seg::-webkit-scrollbar { display: none; }
+  .seg > button { flex: none; }
+}
+.vm-source { margin: 4px 0 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.vm-source .badge { margin: 0; }
