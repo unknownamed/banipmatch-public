@@ -5,6 +5,7 @@ import { RESPONSE_LABEL } from '../lib/dispatch'
 import { base64UrlToBytes, claimKey, inviteFromPaste, inviteUrl, kakaoExternal, mustInstallFirst, platform, takeFragment, type Fragment, type PlatformInfo } from '../lib/recipient'
 import { kstDateTime, kstTime } from '../lib/time'
 import { formatContainer } from '../lib/labels'
+import { copyText } from '../lib/copyText'
 import { BoxNo, Plate } from './Ids'
 
 const errText = (e: unknown) =>
@@ -133,7 +134,7 @@ function Shell({ children }: { children: React.ReactNode; demo?: boolean }) {
 function InstallGuide({ invite }: { invite: string | null }) {
   const [copied, setCopied] = useState(false)
   async function copy() {
-    try { await navigator.clipboard.writeText(inviteUrl(location.origin, invite)); setCopied(true) } catch { setCopied(false) }
+    setCopied(await copyText(inviteUrl(location.origin, invite)))
   }
   return (
     <div className="install-guide">

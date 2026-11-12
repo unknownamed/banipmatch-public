@@ -9,6 +9,7 @@ import {
 import { kstDateTime, kstTime } from '../lib/time'
 import { jobName, vehicleName, vehicleShort } from '../lib/labels'
 import { driverMessage } from '../lib/driverMessage'
+import { copyText } from '../lib/copyText'
 import { BoxNo, Plate } from './Ids'
 import { Icon } from './Icon'
 import { ISSUE_LABEL } from '../lib/compare'
@@ -138,7 +139,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
 }) {
   const [invite, setInvite] = useState<{ vehicle: string; link: string; expires_at: string } | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'no' | 'ok' | 'failed'>('no')
   const [error, setError] = useState<unknown>(null)
   const linkedBy = new Map(recipients.filter((r) => !r.revoked).flatMap((r) => r.vehicle_ids.map((v) => [v, r] as const)))
   // 기사가 연결을 마치면 그 차량의 QR·링크 상자를 닫는다.
@@ -149,7 +150,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
   async function create(vehicle: string) {
     setBusy(vehicle)
     setError(null)
-    setCopied(false)
+    setCopied('no')
     try {
       const r = await client.post<{ invitation_token: string; expires_at: string }>('/v2/invitations', { plan_id: planId, vehicle_ids: [vehicle], consent_acknowledged: true }, `invite-${crypto.randomUUID()}`)
       // 초대 비밀은 이 화면 메모리에만 둔다. 저장소·로그·주소 query에 남기지 않는다.
@@ -200,14 +201,22 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
         <div className="invite-link" role="status">
           <img className="invite-qr" src={qrDataUrl(invite.link)} alt="연결 링크 QR 코드" width={164} height={164} />
           <div className="invite-body">
-            <p><b>{vehicleName(invite.vehicle)}</b> 기사 휴대폰으로 QR을 찍거나 링크를 보내세요.</p>
+            <p><b>{vehicleName(invite.vehicle)}</b> 기사에게 링크를 카톡이나 문자로 보내세요. 기사가 옆에 있으면 QR을 찍어도 됩니다.</p>
             <p className="small muted">한 번만 쓸 수 있고 {kstDateTime(invite.expires_at)}까지 유효합니다.</p>
             <div className="invite-copy">
-              <button type="button" className="btn-line" onClick={() => { navigator.clipboard?.writeText(invite.link); setCopied(true) }}>
-                <Icon name="link" size={14} />{copied ? '복사했습니다' : '링크 복사'}
+              <button type="button" className="btn-primary" onClick={async () => {
+                // 기사가 받자마자 알 수 있게 안내 한 줄과 링크를 함께 복사한다.
+                const text = `[반입맞춤] ${vehicleName(invite.vehicle)} 배차 알림 연결 링크입니다. ${kstTime(invite.expires_at)}까지 눌러 연결해 주세요.
+${invite.link}`
+                setCopied((await copyText(text)) ? 'ok' : 'failed')
+              }}>
+                <Icon name="link" size={14} />{copied === 'ok' ? '복사했습니다' : '기사에게 보낼 링크 복사'}
               </button>
-              {copied && <span className="small muted">카톡이나 문자로 기사에게 붙여 넣으세요.</span>}
+              {copied === 'ok' && <span className="small muted">카톡이나 문자 창에 붙여 넣어 보내세요.</span>}
             </div>
+            {copied === 'failed' && (
+              <p className="small warn">복사하지 못했습니다. 아래 주소를 길게 눌러(또는 끌어서) 직접 복사하세요.<br /><span className="invite-raw">{invite.link}</span></p>
+            )}
             <p className="small muted">아이폰은 링크를 연 뒤 화면 안내대로 홈 화면에 추가해야 알림이 옵니다.</p>
           </div>
         </div>
@@ -328,7 +337,7 @@ function CopyNotice({ text }: { text: string }) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
   return (
     <div className="copy-notice">
-      <button type="button" className="secondary" onClick={() => navigator.clipboard?.writeText(text).then(() => setState('copied'), () => setState('failed')) ?? setState('failed')}>
+      <button type="button" className="secondary" onClick={async () => setState((await copyText(text)) ? 'copied' : 'failed')}>
         {state === 'copied' ? '복사했습니다. 문자나 카톡에 붙여 넣으세요' : '기사 안내문 복사'}
       </button>
       {state === 'failed' && <span className="warn small"> 복사하지 못했습니다. 아래 내용을 직접 선택해 복사하세요.</span>}
