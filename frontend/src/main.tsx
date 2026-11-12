@@ -13,9 +13,11 @@ import { createDemoRecipientClient } from './api/recipientDemo'
 import { takeFragment } from './lib/recipient'
 import { ReferencePanel } from './components/ReferencePanel'
 import './styles.css'
+import './styles/v3.css'
 
 // VITE_API_MODE=http 이면 /v1, v2 이면 담당자 대응 API(/v2, 세션 쿠키)에 연결한다. 기본은 공통 예제(fixture).
-const apiMode = import.meta.env.VITE_API_MODE
+// 기본은 서비스 모드(v2). 개발 확인용 공통 예제 화면은 VITE_API_MODE=fixture로만 연다.
+const apiMode = import.meta.env.VITE_API_MODE ?? 'v2'
 const mode = apiMode === 'http' || apiMode === 'v2' ? 'http' : 'fixture'
 const params = new URLSearchParams(location.search)
 
@@ -41,12 +43,12 @@ if (recipient) {
   // 홈 화면 추가(iPhone 웹 푸시 조건)는 수신자 화면에서만 제공한다.
   for (const [tag, attrs] of [
     ['link', { rel: 'manifest', href: '/manifest.webmanifest' }],
-    ['link', { rel: 'apple-touch-icon', href: '/icon-180.png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/icon-180.png?v=navy1' }],
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
-    ['meta', { name: 'theme-color', content: '#d23a06' }],
+    ['meta', { name: 'theme-color', content: '#16294D' }],
   ] as const)
     document.head.append(Object.assign(document.createElement(tag), attrs))
-  document.title = '반입맞춤 · 기사 알림'
+  document.title = '반입맞춤'
 }
 // React(StrictMode는 초기화를 두 번 실행)보다 먼저 한 번만 읽고 지운다.
 const recipientBoot = recipient ? takeFragment() : null

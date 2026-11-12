@@ -19,7 +19,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(GENERIC.title, {
       body: GENERIC.body,
-      icon: '/icon-192.png',
+      icon: '/icon-192.png?v=navy1',
       tag: id || 'banipmatch',
       data: { url, notification_id: id },
     }),

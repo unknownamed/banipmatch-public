@@ -10,10 +10,9 @@ import { LiveReference } from './LiveReference'
 export function ReferencePanel() {
   return (
     <main className="timeline-view">
-      <header className="top">
+      <header className="page-head top">
         <div>
           <h1>터미널 일정</h1>
-          <p className="muted">반입 마감을 확인하는 터미널 공지와, 배차 판단에 참고할 해상 기상·도로 이동 시간입니다.</p>
         </div>
       </header>
       <LiveReference />

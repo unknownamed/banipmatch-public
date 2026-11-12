@@ -30,6 +30,8 @@ export interface V2Client extends ApiClient {
   get<T>(path: string, signal?: AbortSignal): Promise<T>
   /** 쓰기 요청. 재시도에는 같은 Idempotency-Key와 같은 본문을 쓴다. */
   post<T>(path: string, body: unknown, idempotencyKey: string): Promise<T>
+  /** 이 브라우저의 작업 공간(세션)을 끝낸다. 다음 요청에서 빈 세션이 새로 열린다. */
+  reset(): Promise<void>
 }
 
 const enc = encodeURIComponent
@@ -69,9 +71,16 @@ export function createV2Client(base = ''): V2Client {
     return readJson<T>(res)
   }
 
+  async function reset() {
+    const { csrf_token } = await session()
+    await fetch(`${base}/v2/session`, { method: 'DELETE', headers: { 'X-CSRF-Token': csrf_token, 'Idempotency-Key': `reset-${crypto.randomUUID()}` } })
+    current = null
+  }
+
   return {
     mode: 'http',
     session,
+    reset,
     get,
     post,
     defaultExample: () => session().then(() => get<Snapshot>('/v2/examples/default')),

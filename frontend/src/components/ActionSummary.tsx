@@ -2,12 +2,12 @@
 // 계산 결과의 값만 쓴다(새 판단을 만들지 않는다).
 import type { MethodResult } from '../api/types'
 import { ISSUE_LABEL, type JobRow } from '../lib/compare'
-import { jobName, planName } from '../lib/labels'
-import { Icon } from './Icon'
+import { planName } from '../lib/labels'
+import { BoxNo } from './Ids'
 
 const go = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-export function ActionSummary({ base, cand, recommended, rows, approved }: {
+export function ActionSummary({ base, cand, rows, approved }: {
   base: MethodResult | undefined
   cand: MethodResult | undefined
   recommended: string | undefined
@@ -22,7 +22,7 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
     return (
       <section className="card action-summary ok" aria-label="요약">
         <p className="as-head"><b>원래 배차로 모든 컨테이너가 마감 안에 들어갑니다.</b></p>
-        <p className="small muted">바꿀 필요가 없습니다. 아래에서 차량별 일정을 확인할 수 있습니다.</p>
+        <p className="small muted">바꿀 배차가 없습니다.</p>
       </section>
     )
   const unresolved = cand ? cand.unassigned_job_ids : []
@@ -33,45 +33,36 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
     const code = r?.candidateIssues[0]?.code
     return code ? ISSUE_LABEL[code] ?? code : '확인 필요'
   }
+  const name = cand ? planName(cand.method) : ''
+  const headline = !cand
+    ? `원래 배차대로 가면 컨테이너 ${lateSet.length}개가 새 마감을 넘깁니다.`
+    : fixed === lateSet.length
+      ? `${name}을 쓰면 늦는 컨테이너 ${fixed}개를 모두 마감 안에 넣을 수 있습니다.`
+      : `${name}을 쓰면 늦는 컨테이너 ${lateSet.length}개 중 ${fixed}개를 마감 안에 넣을 수 있습니다.`
   return (
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
-      <div className="as-grid">
-        <div className="as-cell bad">
-          <span className="as-ic"><Icon name="warning" size={16} /></span>
-          <span className="as-num">{lateSet.length}</span>
-          <span className="as-label">원래 배차로<br />마감 넘김</span>
+      <div className="as-top">
+        <div>
+          <p className="as-kicker">{approved ? '확정 완료' : '판단 요약'}</p>
+          <h2 className="as-headline">{headline}</h2>
+          {cand && <p className="as-sub">작업 {changed}건의 차량이나 시각이 바뀌고{unresolved.length ? `, ${unresolved.length}건은 담당자가 확인해야 합니다.` : ', 남는 문제는 없습니다.'}</p>}
         </div>
-        {cand && (
-          <div className="as-cell good">
-            <span className="as-ic"><Icon name="check" size={16} /></span>
-            <span className="as-num">{fixed}</span>
-            <span className="as-label">{planName(cand.method)}{cand.method === recommended ? '(추천)' : ''}으로<br />해결</span>
-          </div>
-        )}
-        {cand && (
-          <div className="as-cell">
-            <span className="as-ic"><Icon name="swap" size={16} /></span>
-            <span className="as-num">{changed}</span>
-            <span className="as-label">바뀌는<br />작업</span>
-          </div>
-        )}
-        {cand && (
-          <div className={`as-cell${unresolved.length ? ' warn' : ''}`}>
-            <span className="as-ic"><Icon name="clock" size={16} /></span>
-            <span className="as-num">{unresolved.length}</span>
-            <span className="as-label">담당자<br />확인 필요</span>
-          </div>
-        )}
       </div>
+      <dl className="stat-strip">
+        <div className="ss-bad"><dt>원래 배차로 마감 넘김</dt><dd><b>{lateSet.length}</b><span>개</span></dd></div>
+        {cand && <div className="ss-good"><dt>{name}으로 해결</dt><dd><b>{fixed}</b><span>개</span></dd></div>}
+        {cand && <div><dt>바뀌는 작업</dt><dd><b>{changed}</b><span>건</span></dd></div>}
+        {cand && <div className={unresolved.length ? 'ss-warn' : undefined}><dt>담당자 확인 필요</dt><dd><b>{unresolved.length}</b><span>건</span></dd></div>}
+      </dl>
       {unresolved.length > 0 && (
-        <ul className="as-todo small">
-          {unresolved.map(id => <li key={id}><b>{jobName(id)}</b> · {reason(id)}</li>)}
+        <ul className="as-todo">
+          {unresolved.map(id => <li key={id}><span className="st warn">확인 필요</span> <BoxNo jobId={id} /> · {reason(id)}</li>)}
         </ul>
       )}
       <div className="as-actions">
         {approved ? (
           <>
-            <span className="small"><b>내부 확정 완료.</b> 이제 바뀐 차량의 기사에게 전달합니다.</span>
+            <span className="small"><b>배차를 확정했습니다.</b> 이제 바뀐 차량의 기사에게 알려 주세요.</span>
             <button type="button" onClick={() => go('.card.dispatch')}>기사 전달로 이동</button>
           </>
         ) : (

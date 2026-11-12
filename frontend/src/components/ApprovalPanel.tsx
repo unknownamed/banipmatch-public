@@ -5,7 +5,6 @@ import type { Approval, MethodResult, Run } from '../api/types'
 import { acknowledgeIds, approvalErrorHint, approvalResponseMatches, approvalRetryAllowed, currentPlanWarning, type ApprovalGate } from '../lib/approval'
 import { Icon } from './Icon'
 import { kstDateTime } from '../lib/time'
-import { Hint } from './Hint'
 import { jobName, planName } from '../lib/labels'
 
 export type Status =
@@ -76,7 +75,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
   const otherLabel = shared?.status.state === 'sending' ? '승인 요청 중입니다' : shared?.status.state === 'done' ? '승인되었습니다' : '승인 결과를 확인해야 합니다'
   return (
     <section className="card">
-      <h2>배차 계획 확정 <Hint text="우리 회사 내부 배차 계획만 확정합니다. 터미널 방문 예약·기존 TMS·기사에게는 자동으로 반영되지 않으며, 기사 전달은 다음 단계에서 합니다." /></h2>
+      <h2>배차 계획 확정</h2>
       <ApprovalSteps
         acknowledged={ack.length === 0 || checked}
         sending={status.state === 'sending'}
@@ -85,18 +84,18 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       />
       {otherBusy && (
         <p className="warn" role="status">
-          이 실행은 {shared!.method} 조정안이 {otherLabel}. {shared!.method} 탭에서 결과를 확인하세요. 다른 방법은 보낼 수 없습니다.
+          {planName(shared!.method)}이 {otherLabel}. 다른 계산안은 승인할 수 없습니다.
         </p>
       )}
       {ack.length > 0 && (
         <p>
           <label>
             <input type="checkbox" checked={checked} disabled={otherBusy || !gate.allowed || (status.state !== 'idle' && !(status.state === 'error' && status.retryable))} onChange={(e) => setChecked(e.target.checked)} />{' '}
-            미처리·고정 위험 작업 <b>{ack.map(jobName).join(', ')}</b>을(를) 확인했습니다.
+            마감 안에 넣지 못하는 작업(<b>{ack.map(jobName).join(', ')}</b>)을 확인했습니다
           </label>
         </p>
       )}
-      <button type="button" disabled={!canSend} title={gate.reasons.join('\n')} onClick={send}>
+      <button type="button" disabled={!canSend} onClick={send}>
         {status.state === 'sending' ? '승인 요청 중…' : status.state === 'error' && status.retryable ? '다시 시도' : `${planName(result.method)} 승인`}
       </button>
       {!gate.allowed && (
@@ -109,8 +108,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       {status.state === 'done' && (
         <div role="status">
           <p className="ok">
-            내부 계획 v{status.approval.version} 승인됨 · {kstDateTime(status.approval.approved_at)}
-            {' '}· 외부 반영 없음
+            배차를 확정했습니다 · {kstDateTime(status.approval.approved_at)}
           </p>
           {status.planWarning && <p className="warn">{status.planWarning}</p>}
         </div>
@@ -118,12 +116,12 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       {err !== null && (
         <div className="warn" role="alert">
           <p>
-            {status.state === 'error' && status.uncertain ? '승인 결과 확인 필요: ' : '승인 거절: '}
+            {status.state === 'error' && status.uncertain ? '승인 결과를 확인해야 합니다: ' : '승인하지 못했습니다: '}
             {err instanceof ApiRequestError
-              ? `HTTP ${err.status}${err.body ? ` ${err.body.code}` : ''} — ${err.message}`
+              ? err.message
               : err instanceof Error ? err.message : String(err)}
           </p>
-          {status.state === 'error' && status.uncertain && status.retryable && <p>서버에서 이미 처리됐을 수 있습니다. 다시 시도하면 같은 요청 내용과 키로 결과를 확인합니다.</p>}
+          {status.state === 'error' && status.uncertain && status.retryable && <p>이미 처리됐을 수 있습니다. 다시 시도해도 두 번 처리되지 않습니다.</p>}
           {err instanceof ApiRequestError && approvalErrorHint(err.status, err.body?.code) && <p>{approvalErrorHint(err.status, err.body?.code)}</p>}
           {err instanceof ApiRequestError &&
             err.body?.details?.map((d) => (
@@ -142,7 +140,7 @@ function ApprovalSteps({ acknowledged, sending, done, failed }: { acknowledged: 
   const steps = [
     { label: '위험 확인', state: acknowledged || done ? 'done' : 'todo' },
     { label: '승인 요청', state: done ? 'done' : sending ? 'active' : failed ? 'failed' : 'todo' },
-    { label: '내부 계획 확정', state: done ? 'done' : 'todo' },
+    { label: '배차 확정', state: done ? 'done' : 'todo' },
   ]
   return (
     <ol className="steps" aria-label="승인 진행">

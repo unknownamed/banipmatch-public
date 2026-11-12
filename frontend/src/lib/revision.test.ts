@@ -63,9 +63,9 @@ describe('차량 추가', () => {
   const ok = { vehicle_id: 'T9', start_location_id: 'D', capacity_kg: '30000', equipment_types: ['DRY40'], available_at: '2026-11-07T09:30', shift_end_at: '2026-11-07T18:00' }
   it('빠진 값은 채우지 않고 무엇이 빠졌는지 알려준다', () => {
     expect(draftProblems(s, EMPTY_DRAFT)).toHaveLength(6)
-    expect(draftProblems(s, { ...ok, vehicle_id: 'T1' })).toEqual(['이미 있는 차량 ID'])
+    expect(draftProblems(s, { ...ok, vehicle_id: 'T1' })).toEqual(['이미 있는 차량'])
     expect(draftProblems(s, { ...ok, start_location_id: 'NEW' })).toEqual(['시작 위치'])
-    expect(draftProblems(s, { ...ok, shift_end_at: '2026-11-07T09:00' })).toEqual(['근무 종료가 가용 시작보다 늦어야 함'])
+    expect(draftProblems(s, { ...ok, shift_end_at: '2026-11-07T09:00' })).toEqual(['근무 종료가 운행 시작보다 늦어야 함'])
     expect(draftProblems(s, ok)).toEqual([])
   })
   it('추가 차량은 입력한 값 그대로 들어가고 기존 차량·원본은 바뀌지 않는다', () => {

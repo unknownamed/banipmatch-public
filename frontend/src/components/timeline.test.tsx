@@ -31,7 +31,7 @@ describe('차량별 일정의 미확인·미배정 보존', () => {
     const html = render(s)
     expect(html).toContain('J0 · 출발')
     expect(html).toContain('미확인')
-    expect(html).toContain('막대 표시 보류')
+    expect(html).toContain('시각 확인 필요')
     expect(html).not.toMatch(/NaN|Infinity/)
   })
 
@@ -67,7 +67,7 @@ describe('차량별 일정의 미확인·미배정 보존', () => {
     const model = timelineModel(buildRows(s, undefined, candidate), true)!
     expect(model.vehicles.flatMap((v) => v.cand).map((b) => b.jobId).sort()).toEqual(candidate.assignments.map((a) => a.job_id).sort())
     expect(model.unassigned).toEqual(candidate.unassigned_job_ids)
-    expect(render(s, true)).toContain('조정안에서 어느 차량에도 배정되지 않았습니다')
+    expect(render(s, true)).toContain('조정안에서 맡을 차량을 찾지 못했습니다')
   })
 
   it('응답에서 빠진 작업을 정당한 미처리와 구분한다', () => {

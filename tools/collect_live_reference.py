@@ -35,9 +35,9 @@ def fetch(url):
                 return 502, b''
             return response.status, raw
     except HTTPError as e:
-        return e.code, b''
+        return e.code, b''  # 제공기관이 보낸 오류 코드
     except Exception:
-        return 503, b''
+        return 0, b''  # 우리 쪽 연결 실패·시간 초과(제공기관 응답 없음)
 
 
 def collect(key: str | None, transport=fetch, *, ors_key=None, ors_transport=None):
@@ -49,7 +49,7 @@ def collect(key: str | None, transport=fetch, *, ors_key=None, ors_transport=Non
                            sort='ETB', dateType='', route='', oper='', amount=100, page=1))
     status, raw = transport('https://www.hjnc.co.kr/esvc/vessel/berthScheduleT/data?' + query)
     reader = ReferenceReader('hjnc', kind='reference', sample_permission_ref='public-schedule-manual-student-reference')
-    result['hjnc'] = reader.ingest(SampleResponse(raw, now(), status))
+    result['hjnc'] = reader.ingest(SampleResponse(raw, now(), status or 503))
     for kind, resource, args in (
             ('sea', 'sea_obs.php', {'stn': '22104', 'help': '1'}),
             ('warning', 'wrn_now_data.php', {'fe': 'f', 'help': '1'})):
@@ -57,9 +57,11 @@ def collect(key: str | None, transport=fetch, *, ors_key=None, ors_transport=Non
                 'status': 'key_missing', 'received_at': None, 'http_status': None, 'report': None}
         if key:
             status, raw = transport(KMA + resource + '?' + urlencode({**args, 'authKey': key}))
-            item.update(http_status=status, received_at=now())
+            # 0은 응답을 받지 못함(연결 실패·시간 초과), 그 밖의 오류 코드는 기상청이 보낸 응답이다.
+            item.update(http_status=status or None, received_at=now(),
+                        failure='network' if status == 0 else 'provider' if status >= 400 else None)
             try:
-                report = audit_response(raw, kind, status, item['received_at'], station='22104',
+                report = audit_response(raw, kind, status or 503, item['received_at'], station='22104',
                     regions=('L1080600', 'L1082700', 'S1311000', 'S1311100', 'S1311110', 'S1311120'))
                 item.update(status=report['status'], report=report)
             except Exception:

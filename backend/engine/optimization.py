@@ -56,6 +56,7 @@ class DispatchModel:
         horizon = max([0] + [minute(v["shift_end_at"]) - c.now for v in c.vehicles.values()]
                       + [minute(a["return_at"]) - c.now for a in c.base.values()
                          if a["job_id"] in self.fixed and a["return_at"] is not None])
+        self.horizon = horizon
         max_seq = max([0] + [int(c.base[jid]["sequence"]) for jid in self.fixed]) + len(c.jobs) + 1
         # CP-SAT has finite integer domains; reject instead of coercing overflow.
         numeric = [horizon, max_seq, int(c.buffer), int(c.s["policy"]["time_change_tolerance_minutes"])]
@@ -250,6 +251,21 @@ class DispatchModel:
             reasons[right].append(inversion)
         self.objectives["changed"] = sum(self.any_of(values, f"changed:{jid}") for jid, values in reasons.items())
 
+    def departure_drift(self):
+        """원안 출발시각에서 벗어난 분의 합. 목적값이 모두 고정된 뒤 동률 안에서만 쓴다."""
+        m, c, terms = self.model, self.c, []
+        for jid in self.movable:
+            if jid not in c.base or jid not in self.duration:
+                continue
+            before = minute(c.base[jid]["pickup_departure_at"]) - c.now
+            p, d = self.selected[jid], self.departure[jid]
+            drift = m.new_int_var(0, max(abs(before), 0) + int(self.horizon), f"drift:{jid}")
+            m.add(drift >= d - before).only_enforce_if(p)
+            m.add(drift >= before - d).only_enforce_if(p)
+            m.add(drift == 0).only_enforce_if(p.Not())
+            terms.append(drift)
+        return sum(terms)
+
     def extract(self, solver):
         c = self.c
         assignments = [copy.deepcopy(c.base[jid]) for jid in sorted(self.fixed)]
@@ -309,6 +325,9 @@ class DispatchModel:
         self.model.clear_hints()
         for index, answer in sorted(values.items()):
             self.model.add_hint(self.model.get_int_var_from_proto_index(index), answer)
+
+
+POLISH_SECONDS = 2.0
 
 
 def _run_stage(model, objective, remaining, seed):
@@ -398,6 +417,22 @@ def solve_optimized(snapshot, method, config, started, engine_version):
             if detail not in input_issues:
                 input_issues.append(detail)
 
+    # 동률 다듬기: 모든 목적값을 증명·고정한 뒤, 같은 값을 갖는 일정 중 원안 출발시각에 가장 가까운 것을 고른다.
+    # 허용폭 안의 출발 흔들림(예: 01:03 → 01:08)이 기사에게 불필요한 변경으로 전달되지 않게 한다.
+    # 미처리·변경·이동 값은 바뀌지 않으며(제약으로 고정), 시간이 모자라거나 실패하면 앞 결과를 그대로 쓴다.
+    polish = "skipped"
+    if not timed_out and status == "FEASIBLE" and all(stage["status"] == "OPTIMAL" for stage in stages):
+        remaining = min(deadline - monotonic(), POLISH_SECONDS)
+        if remaining > 0:
+            solver, outcome = _run_stage(dispatch.model, dispatch.departure_drift(), remaining, effective_seed)
+            if outcome in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+                values = {name: int(solver.value(expr)) for name, expr in dispatch.objectives.items()}
+                if all(values[name] == last_values[name] for name in order):
+                    assignments, unassigned = dispatch.extract(solver)
+                    last_values = values
+                    polish = "optimal" if outcome == cp_model.OPTIMAL else "feasible"
+            else:
+                polish = "not_found"
     proven = all(stage["status"] == "OPTIMAL" for stage in stages) and not input_issues
     if proven:
         status = "OPTIMAL"
@@ -426,5 +461,6 @@ def solve_optimized(snapshot, method, config, started, engine_version):
                                          time_limit_reached=timed_out, budget_scope="input/model/all objective stages",
                                          proof_scope="known-input v0.1 integer sequence model", external_warm_start=False,
                                          warm_start_budget_seconds=1, warm_start_valid=has_incumbent,
-                                         cp_model_probing_level=0, hint_scope="complete model variables"),
+                                         cp_model_probing_level=0, hint_scope="complete model variables",
+                                         departure_tie_break=polish),
                     initial_solution_ref="internal:B1-same-input-within-total-budget", worker_count=1))

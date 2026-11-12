@@ -11,23 +11,23 @@ export function approvalGate(run: Run | null, result: MethodResult | undefined, 
   const reasons: string[] = []
   if (!run || !result) return { allowed: false, reasons: ['계산 결과가 아직 없습니다.'] }
   if (result.result_origin === 'illustrative_fixture')
-    reasons.push('설명용 예시 결과(illustrative_fixture)입니다. 실제 계산이 아니므로 승인할 수 없습니다.')
-  if (result.method === 'B0') reasons.push('B0는 원안 진단이며 승인 대상(B1~B3)이 아닙니다.')
+    reasons.push('실제 계산 결과가 아니라 승인할 수 없습니다.')
+  if (result.method === 'B0') reasons.push('원래 배차는 승인할 조정안이 아닙니다.')
   if (!['HEURISTIC', 'OPTIMAL', 'FEASIBLE'].includes(result.solution_status))
-    reasons.push(`승인 가능한 해 상태가 아닙니다(${result.solution_status}).`)
-  if (run.status !== 'completed') reasons.push(`실행 상태가 completed가 아닙니다(${run.status}).`)
-  if (!result.approval_eligible) reasons.push('서버가 승인 가능(approval_eligible)으로 표시하지 않았습니다.')
+    reasons.push('쓸 수 있는 조정안을 찾지 못해 승인할 수 없습니다.')
+  if (run.status !== 'completed') reasons.push('계산이 아직 끝나지 않았습니다.')
+  if (!result.approval_eligible) reasons.push('서버 검사에서 승인할 수 없는 결과로 표시됐습니다.')
   if (result.validation_status !== 'passed')
-    reasons.push(`독립 일정 검사를 통과하지 않았습니다(validation_status=${result.validation_status}).`)
+    reasons.push('일정 검사를 통과하지 못했습니다.')
   if (!activeScenarioId || run.scenario_id !== activeScenarioId)
-    reasons.push(`이 결과의 입력(${run.scenario_id})이 현재 입력(${activeScenarioId})과 다릅니다.`)
-  if (!run.methods.includes(result.method)) reasons.push('현재 실행에서 요청한 방법의 결과가 아닙니다.')
+    reasons.push('지금 보고 있는 변경과 다른 계산 결과입니다.')
+  if (!run.methods.includes(result.method)) reasons.push('이번 계산에서 요청한 조정안이 아닙니다.')
   if (context) {
     const { snapshot, results, runId } = context
     if (run.run_id !== runId || results.run_id !== runId || results.scenario_id !== activeScenarioId)
-      reasons.push('화면에서 요청한 실행·입력과 결과가 다릅니다.')
+      reasons.push('화면의 변경 내용과 계산 결과가 맞지 않습니다. 새로고침하세요.')
     if (snapshot.plan_id !== run.plan_id || snapshot.base_plan_version !== run.base_plan_version || results.base_plan_version !== run.base_plan_version)
-      reasons.push('입력·실행·결과의 계획 또는 기준 버전이 다릅니다.')
+      reasons.push('계산한 뒤 배차가 바뀌었습니다. 최신 배차로 다시 계산하세요.')
   }
   return { allowed: reasons.length === 0, reasons }
 }
@@ -40,14 +40,14 @@ export function acknowledgeIds(result: MethodResult): string[] {
 
 /** 승인 실패 응답을 담당자가 할 일로 바꾼다. Error.code 기준이며 모르는 코드는 서버 메시지만 쓴다. */
 export function approvalErrorHint(status: number, code: string | undefined): string | null {
-  if (code === 'PLAN_VERSION_CONFLICT') return '검토하는 동안 계획이 바뀌었습니다. 최신 계획과 입력으로 다시 계산한 뒤 승인하세요.'
-  if (code === 'IDEMPOTENCY_CONFLICT') return '같은 요청 키로 다른 내용을 보냈습니다. 화면을 새로고침한 뒤 요청 내용을 확인하세요.'
-  if (code === 'RESULT_NOT_COMPUTED') return '설명용 예시 결과는 승인할 수 없습니다.'
-  if (code === 'APPROVAL_NOT_IMPLEMENTED') return '현재 서버의 승인 기능은 미구현입니다. 내부 계획이 승인된 것으로 처리하지 않습니다.'
-  if (code === 'STORAGE_UNAVAILABLE') return '서버 저장소를 사용할 수 없습니다. 복구 후 같은 요청으로 다시 확인하세요.'
-  if (code === 'WINDOW_UNCONFIRMED' || code === 'INPUT_EXPIRED' || code === 'INPUT_STALE') return '필수 근거의 확인 상태나 유효기간이 충족되지 않았습니다. 변경 근거를 확인하고 최신 입력으로 다시 계산하세요.'
-  if (status === 409) return '이 결과의 입력이나 계획이 현재 서버 상태와 다릅니다. 최신 입력으로 다시 계산하세요.'
-  if (status === 503) return '서버가 승인을 처리할 수 없습니다. 오류 코드와 확인 상태를 확인하세요. 원인을 유효기간 문제로 단정하지 않습니다.'
+  if (code === 'PLAN_VERSION_CONFLICT') return '검토하는 동안 배차가 바뀌었습니다. 최신 배차로 다시 계산한 뒤 승인하세요.'
+  if (code === 'IDEMPOTENCY_CONFLICT') return '같은 승인을 다른 내용으로 다시 보냈습니다. 화면을 새로고침한 뒤 확인하세요.'
+  if (code === 'RESULT_NOT_COMPUTED') return '실제 계산 결과가 아니라 승인할 수 없습니다.'
+  if (code === 'APPROVAL_NOT_IMPLEMENTED') return '이 서버에서는 승인을 처리할 수 없습니다.'
+  if (code === 'STORAGE_UNAVAILABLE') return '서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도하세요.'
+  if (code === 'WINDOW_UNCONFIRMED' || code === 'INPUT_EXPIRED' || code === 'INPUT_STALE') return '공지가 확정되지 않았거나 계산한 지 오래됐습니다. 최신 내용으로 다시 계산하세요.'
+  if (status === 409) return '계산한 뒤 내용이 바뀌었습니다. 최신 내용으로 다시 계산하세요.'
+  if (status === 503) return '서버가 지금 승인을 처리할 수 없습니다. 잠시 후 다시 시도하세요.'
   return null
 }
 
@@ -78,9 +78,9 @@ export function approvalResponseMatches(approval: Approval, run: Run, method: Me
 }
 
 export function currentPlanWarning(plan: Plan | null, approval: Approval, scenarioId: string): string | null {
-  if (!plan) return '승인 응답은 받았지만 서버 현재 계획을 조회하지 못했습니다. 현재 계획을 다시 확인하세요.'
-  if (plan.plan_id !== approval.plan_id) return '서버가 다른 계획을 반환했습니다. 현재 계획 확인이 필요합니다.'
+  if (!plan) return '승인은 됐지만 최신 배차를 불러오지 못했습니다. 새로고침해 확인하세요.'
+  if (plan.plan_id !== approval.plan_id) return '다른 배차가 돌아왔습니다. 새로고침해 확인하세요.'
   if (plan.version !== approval.version || plan.scenario_id !== scenarioId || plan.approval_id !== approval.approval_id)
-    return `서버 현재 계획(v${plan.version}, 입력 ${plan.scenario_id})이 이번 승인과 다릅니다. 최신 계획을 확인하세요.`
+    return '최신 배차가 이번 승인과 다릅니다. 새로고침해 확인하세요.'
   return null
 }

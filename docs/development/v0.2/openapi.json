@@ -5715,6 +5715,21 @@
             ],
             "title": "Http Status"
           },
+          "failure": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "network",
+                  "provider"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure"
+          },
           "report": {
             "anyOf": [
               {

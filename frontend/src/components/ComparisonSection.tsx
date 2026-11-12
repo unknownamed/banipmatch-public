@@ -20,6 +20,8 @@ interface Props {
   recommended?: string
   /** 처음 보일 보기. 기본은 차량별 일정 */
   initialLayout?: 'vehicle' | 'job'
+  /** 원래 배차로 문제가 없어 조정안이 원안과 같을 때: 원래 배차 일정만 보여 준다. */
+  unchanged?: boolean
 }
 
 /**
@@ -35,7 +37,7 @@ function heldWereLate(base: MethodResult, cand: MethodResult) {
 /** 입력 확인·확정 대기로 계산하지 않은 경우의 안내(오류가 아니다). */
 export const NOT_COMPUTED = '조정안은 계산하지 않았습니다.'
 
-export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle' }: Props) {
+export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle', unchanged = false }: Props) {
   const list = results.state === 'ready' ? results.data.results : null
   const broken = lockedViolations(rows)
   // 휴대폰 폭에서는 가로 스크롤이 필요한 타임라인 대신 작업별 카드부터 보여 준다.
@@ -46,36 +48,41 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
   const baseLabel = '원래 배차'
   return (
     <section className="card comparison">
-      <h2>원안 · 조정안 비교</h2>
-      {results.state === 'loading' && <p className="muted">결과 조회 중… 아래 원안은 입력 기준으로 먼저 보여줍니다.</p>}
+      <h2>{unchanged ? '원래 배차 일정' : '원래 배차와 조정안'}</h2>
+      {results.state === 'loading' && <p className="muted">결과를 불러오는 중입니다. 원래 배차부터 보여 줍니다.</p>}
       {results.state === 'pending' && <p className="muted">계산 중입니다. 결과가 도착하면 조정안을 자동으로 표시합니다.</p>}
       {results.state === 'error' && (results.message.startsWith(NOT_COMPUTED)
         ? <p className="note-plain">{results.message}</p>
         : <p className="warn">결과를 표시할 수 없습니다: {results.message}</p>)}
-      {list && list.length === 0 && <p className="warn">결과 목록이 비어 있습니다. 해결 완료가 아닙니다.</p>}
-      {list && list.length > 0 && !cand && <p className="muted">조정안 결과가 없습니다. 원래 배차 점검만 표시합니다.</p>}
+      {list && list.length === 0 && <p className="warn">계산 결과가 비어 있습니다. 다시 계산하세요.</p>}
+      {list && list.length > 0 && !cand && !unchanged && <p className="muted">조정안이 없어 원래 배차만 보여 줍니다.</p>}
 
+      {/* 기본 화면은 추천안만 보여 준다. 다른 계산안·세부 지표는 필요할 때 펼친다. */}
+      {(candidates.length > 1 || (base && cand)) && (
+        <details className="alt-plans">
+          <summary>다른 계산안과 세부 지표</summary>
       {candidates.length > 1 && (
-        <div className="tabs" role="tablist">
-          {candidates.map((r) => (
-            <button key={r.method} role="tab" aria-selected={r === cand} onClick={() => onPick(r.method)}>
-              {planName(r.method)}
-              {r.method === recommended && <span className="rec-tag">추천</span>}
-            </button>
-          ))}
-          {recommended && <span className="muted small rec-note">추천 기준: 미처리 → 마감 위반 → 고정 작업 위험 → 바뀌는 작업 수가 적은 순</span>}
-        </div>
-      )}
-      {base && cand && <MetricsRow base={base} cand={cand} />}
-      {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
-        <p className="warn">
-          {planName(cand.method)}은 {cand.metrics.unassigned_count}건을 어느 차량에도 넣지 못했습니다
-          {heldWereLate(base, cand) ? ' — 원래 배차에서도 마감을 넘기던 작업입니다' : ''}. 위반 수가 줄어든 데에는 이 작업이 빠진 것도 포함되니,
-          ‘확인 필요’에서 따로 처리하세요.
-        </p>
+            <div className="tabs" role="tablist">
+              {candidates.map((r) => (
+                <button key={r.method} role="tab" aria-selected={r === cand} onClick={() => onPick(r.method)}>
+                  {planName(r.method)}
+                  {r.method === recommended && <span className="rec-tag">추천</span>}
+                </button>
+              ))}
+            </div>
+          )}
+          {candidates.length > 1 && recommended && <p className="rec-note">추천 기준: 마감 안에 못 넣는 작업, 마감 위반, 이미 출발한 차량의 위험, 바뀌는 작업이 적은 순서로 고릅니다.</p>}
+          {base && cand && <MetricsRow base={base} cand={cand} />}
+          {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
+            <p className="warn">
+              {planName(cand.method)}은 {cand.metrics.unassigned_count}건을 맡을 차량을 찾지 못했습니다
+              {heldWereLate(base, cand) ? '(원래 배차에서도 마감을 넘기던 작업)' : ''}. ‘확인 필요’에서 처리하세요.
+            </p>
+          )}
+        </details>
       )}
       {broken.length > 0 && (
-        <p className="warn">고정 작업 {broken.map(jobName).join(', ')}이(가) 조정안에서 바뀌었거나 빠졌습니다. 엔진·검증 담당 확인이 필요합니다.</p>
+        <p className="warn">이미 출발한 작업({broken.map(jobName).join(', ')})이 조정안에서 바뀌었거나 빠졌습니다. 이 조정안은 승인하지 마세요.</p>
       )}
       <div className="tabs" role="tablist" aria-label="보기 방식">
         <button role="tab" aria-selected={layout === 'vehicle'} onClick={() => setLayout('vehicle')}>
@@ -86,7 +93,7 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
         </button>
       </div>
       {layout === 'vehicle' ? (
-        <VehicleTimeline rows={rows} baseLabel={baseLabel} candLabel={candLabel} />
+        <VehicleTimeline rows={rows} baseLabel={baseLabel} candLabel={candLabel} buffer={snapshot.policy?.buffer_minutes ?? 0} />
       ) : (
         <ComparisonTable rows={rows} asOf={snapshot.as_of} buffer={snapshot.policy?.buffer_minutes ?? 0} baseLabel={baseLabel} candLabel={candLabel} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
       )}

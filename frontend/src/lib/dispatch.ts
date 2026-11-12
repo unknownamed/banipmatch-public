@@ -74,12 +74,12 @@ export interface RecipientSummary {
 export const DELIVERY_LABEL: Record<DeliveryStatus, string> = {
   pending: '전송 대기',
   sending: '전송 중',
-  accepted: '중계망 접수 · 읽음 아님',
+  accepted: '전달됨',
   failed: '전송 실패',
-  unknown: '결과 불명 · 자동 재전송 안 함',
+  unknown: '전달 결과 확인 안 됨',
   expired: '구독 만료',
   unsubscribed: '구독 해제',
-  unlinked: '수신자 미연결',
+  unlinked: '기사 앱 미연결',
   superseded: '이전 계획',
 }
 
@@ -91,17 +91,17 @@ export const RESPONSE_LABEL: Record<HumanResponse, string> = {
 }
 
 export const SUBSCRIPTION_LABEL: Record<RecipientSummary['subscription_status'] | 'unlinked', string> = {
-  active: '알림 허용·구독됨',
-  missing: '연결됨 · 알림 미허용',
+  active: '알림 받는 중',
+  missing: '연결됨 · 알림 꺼짐',
   revoked: '해제됨',
   expired: '만료',
-  unlinked: '수신자 미연결',
+  unlinked: '기사 앱 미연결',
 }
 
 export const CHANGE_LABEL: Record<string, string> = {
   reassigned: '차량 변경',
   schedule_changed: '시각·순서 변경',
-  removed_from_plan: '미처리로 전환 · 운송 취소 아님',
+  removed_from_plan: '배정 보류 · 운송 취소 아님',
   newly_assigned: '새로 배정',
 }
 
@@ -112,8 +112,8 @@ export const CHANGE_LABEL: Record<string, string> = {
 export function retryBlocker(n: NotificationState, now: number): string | null {
   if (!n.is_current || n.delivery_status === 'superseded') return '이전 계획이라 다시 보내지 않습니다.'
   if (!['failed', 'unsubscribed', 'expired', 'unlinked'].includes(n.delivery_status)) return null
-  if (n.attempts >= 3) return '전송 시도 3회 상한에 도달했습니다.'
-  if (n.retry_not_before && Date.parse(n.retry_not_before) > now) return '재시도 가능 시각 전입니다.'
+  if (n.attempts >= 3) return '세 번 보냈습니다. 기사에게 직접 연락하세요.'
+  if (n.retry_not_before && Date.parse(n.retry_not_before) > now) return '잠시 뒤 다시 보낼 수 있습니다.'
   return ''
 }
 

@@ -1,34 +1,21 @@
 import type { MethodResult, Run, Snapshot } from '../api/types'
-import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
+import { ISSUE_LABEL, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
-import { humanizeTimes, kstDateTime, kstTime, kstTimeWithDay } from '../lib/time'
+import { humanizeTimes, kstDateTime, kstTimeWithDay } from '../lib/time'
 import { VESSELS } from '../lib/vesselApproach'
 import { jobName } from '../lib/labels'
-import { Hint } from './Hint'
 
 const DATA_MODE: Record<Snapshot['data_mode'], string> = { simulated: '모의', observed: '관측', mixed: '혼합' }
 const VERIFY: Record<string, string> = { confirmed: '확정', unconfirmed: '미확정', conflict: '충돌' }
-const EVIDENCE: Record<string, string> = {
-  observed: '관측',
-  simulated: '모의',
-  assumed: '가정',
-  inferred: '추정',
-  manual_verified: '수동 확인',
-}
 
 export function Header({ s }: { s: Snapshot }) {
   const c = s.change
   return (
-    <header className="top">
+    <header className="page-head top">
       <div>
-        <h1>반입 마감 변경 점검</h1>
-        <p className="muted">
-          {c.voyage_id} · {c.terminal_id} 반입 마감(컷오프) 변경에 따른 남은 배차 점검 · {kstDateTime(s.as_of)} 기준
-        </p>
-        <details className="tech-info">
-          <summary>세부 정보</summary>
-          시나리오 {s.scenario_id} · 계획 {s.plan_id} v{s.base_plan_version}
-        </details>
+        <nav className="crumbs" aria-label="위치"><a href="?">받은 변경</a><span aria-hidden="true">/</span>점검 결과</nav>
+        <h1>{c.terminal_id} {c.voyage_id} 반입 마감 변경</h1>
+        <p>{s.change.verification === 'confirmed' ? '새 마감으로 남은 배차를 점검했습니다' : '확정 전 공지라 배차는 그대로입니다'} ({kstDateTime(s.as_of)} 기준)</p>
       </div>
       {/* 데모 환경 배지가 위에 있으므로 모의 자료는 따로 표시하지 않는다. 실제·혼합 자료일 때만 구분 배지를 단다. */}
       {s.data_mode !== 'simulated' && (
@@ -54,68 +41,45 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const w = s.windows.find((x) => x.window_id === c.new_window_id)
   const moved = shiftText(c.previous_closes_at, w?.closes_at)
   // 모의 선박 일정에 같은 항차가 있으면, 반입 마감 변경과 함께 바뀐 모선 접안 예정을 보여 준다(HJNC 공개 일정의 '접안 10시간 전 마감' 간격).
-  const vessel = VESSELS.find((v) => v.voyage === c.voyage_id && v.terminal === c.terminal_id)
+  // 접안 10시간 전 마감 간격은 HJNC 공개 일정에서 확인한 값이라 HJNC에만 적용한다.
+  const vessel = c.terminal_id === 'HJNC' ? VESSELS.find((v) => v.voyage === c.voyage_id && v.terminal === c.terminal_id) : undefined
+  const later = !!(w?.closes_at && c.previous_closes_at && Date.parse(w.closes_at) > Date.parse(c.previous_closes_at))
   const plus10 = (t: string) => new Date(Date.parse(t) + 10 * 3600_000).toISOString()
   const berth = vessel?.name && w?.closes_at && c.previous_closes_at ? { name: vessel.name, prev: plus10(c.previous_closes_at), next: plus10(w.closes_at) } : null
   return (
     <section className="card evidence">
-      <h2>반입 마감(컷오프) 변경 <Hint text="선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다. 선박이 늦어도 터미널이 바꾸기 전에는 마감이 그대로입니다." /></h2>
+      <h2>반입 마감 변경</h2>
       {w && (
         <p className="change-lead">
-          <b>{c.voyage_id} · {c.terminal_id}</b> 반입 마감이 <s>{kstTime(c.previous_closes_at)}</s> → <b className="change-new">{kstTime(w.closes_at)}</b>
-          {moved && <span className="change-delta">{moved}</span>}
+          반입 마감 <s>{kstTimeWithDay(c.previous_closes_at, s.as_of)}</s> → <b className={`change-new${later ? ' later' : ''}`}>{kstTimeWithDay(w.closes_at, s.as_of)}</b>
+          {moved && <span className={`change-delta${later ? ' later' : ''}`}>{moved}</span>}
         </p>
       )}
       {w && berth && (
         <p className="change-why">
-          <Icon name="ship" size={15} /> {c.verification === 'confirmed' ? '같은 항차 모선' : '공지대로라면 모선'} <b>{berth.name}</b>의 접안 예정도 <s>{kstTimeWithDay(berth.prev, s.as_of)}</s> → <b>{kstTimeWithDay(berth.next, s.as_of)}</b>{c.verification === 'confirmed' ? '로 앞당겨졌습니다.' : '로 앞당겨집니다(확정 전).'}
-          <span className="small"> HJNC는 접안 10시간 전에 반입을 마감합니다.</span>
+          <Icon name="ship" size={15} /> <span>모선 <b>{berth.name}</b> 접안 예정도 {c.verification === 'confirmed' ? (later ? '늦춰졌습니다' : '앞당겨졌습니다') : (later ? '늦춰질 예정입니다(확정 전)' : '앞당겨질 예정입니다(확정 전)')}: <s>{kstTimeWithDay(berth.prev, s.as_of)}</s> → <b>{kstTimeWithDay(berth.next, s.as_of)}</b>.</span>
         </p>
       )}
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}
       <dl className="evidence-strip">
-        <div className="dup">
-          <dt>항차 · 터미널</dt>
-          <dd>
-            {c.voyage_id} · {c.terminal_id}
-          </dd>
-        </div>
         <div>
-          <dt>변경 전 반입 시간</dt>
-          <dd>
-            {kstTimeWithDay(c.previous_opens_at, s.as_of)} ~ {kstTimeWithDay(c.previous_closes_at, s.as_of)}
-          </dd>
-        </div>
-        <div className="evidence-new dup">
-          <dt>변경 후 반입 시간</dt>
-          <dd>
-            {w ? (
-              <>
-                {kstTimeWithDay(w.opens_at, s.as_of)} ~ <b>{kstTimeWithDay(w.closes_at, s.as_of)}</b>
-              </>
-            ) : (
-              <span className="warn">새 반입 시간({c.new_window_id})을 입력에서 찾지 못했습니다</span>
-            )}
-          </dd>
+          <dt>반입 시작</dt>
+          <dd>{kstTimeWithDay(w?.opens_at ?? c.previous_opens_at, s.as_of)}</dd>
         </div>
         <div>
           <dt>상태</dt>
           <dd>
             <span className={c.verification === 'confirmed' ? 'ok' : 'warn'}>{VERIFY[c.verification] ?? c.verification}</span>
-            <div className="small">{c.confirmed_at ? `${kstDateTime(c.confirmed_at)} 확인` : '터미널 확정 대기'}</div>
+            <div className="small">{c.confirmed_at ? `${kstDateTime(c.confirmed_at)} 확정` : '터미널 확정 대기'}</div>
           </dd>
         </div>
         <div>
           <dt>근거</dt>
-          <dd title={c.evidence.source_ref}>
-            {sourceLabel(c.evidence.source_ref)}
-            <div className="muted small">{EVIDENCE[c.evidence.kind] ?? c.evidence.kind} · {kstDateTime(c.evidence.received_at)} 수신</div>
+          <dd>
+            {c.evidence.source_ref.startsWith('fixture:') ? `${c.terminal_id} 반입 마감 변경 공지` : sourceLabel(c.evidence.source_ref)}
           </dd>
         </div>
       </dl>
-      {c.verification !== 'confirmed' && (
-        <p className="warn">확정되지 않은 변경입니다. 새 반입 시간으로 계산하거나 승인할 수 없습니다.</p>
-      )}
     </section>
   )
 }
@@ -131,8 +95,8 @@ const RUN_LABEL: Record<Run['status'], string> = {
 // HEURISTIC·FEASIBLE을 최적해로 보이지 않게 한다(엔진 인계 2026-11-07 요청).
 const SOLUTION_LABEL: Record<string, string> = {
   BASELINE: '원안 진단',
-  HEURISTIC: '빠른 탐색 · 최적 아님',
-  FEASIBLE: '실행 가능 · 최적 미증명',
+  HEURISTIC: '빠른 계산(최적 아님)',
+  FEASIBLE: '실행 가능(최적 미확인)',
   OPTIMAL: '최적',
   INFEASIBLE: '해 없음',
   UNKNOWN: '시간 내 해 미발견',
@@ -141,7 +105,7 @@ const SOLUTION_LABEL: Record<string, string> = {
 }
 
 export function solutionLabel(r: MethodResult): string {
-  const s = r.solution_status === 'OPTIMAL' && !r.objective_proven ? '최적 표시 · 증명 없음' : SOLUTION_LABEL[r.solution_status]
+  const s = r.solution_status === 'OPTIMAL' && !r.objective_proven ? '최적(확인 안 됨)' : SOLUTION_LABEL[r.solution_status]
   return s ?? `알 수 없음(${r.solution_status})`
 }
 
@@ -156,26 +120,24 @@ const CHECK_LABEL: Record<string, string> = { passed: '통과', failed: '실패'
 export function RunStatusPanel({ run, results }: { run: Run; results: MethodResult[] | null }) {
   return (
     <section className="card">
-      <h2>계산 결과</h2>
+      <h2>조정안 계산</h2>
       <p>
-        <span className={`badge run-${run.status}`}>{RUN_LABEL[run.status]}</span> 같은 입력·조건으로 {run.methods.length}가지 방법을 비교했습니다
-        <span className="muted"> · 방법별 {run.config.time_limit_seconds}초 이내</span>
+        <span className={`st ${run.status === 'failed' || run.status === 'cancelled' ? 'bad' : 'run'}`}>{RUN_LABEL[run.status]}</span>{' '}
+        {run.status === 'failed' || run.status === 'cancelled'
+          ? '조정안을 만들지 못했습니다.'
+          : `원래 배차와 조정안 ${Math.max(0, run.methods.length - 1)}가지를 같은 조건으로 계산하고 있습니다. 보통 ${run.config.time_limit_seconds}초 안에 끝납니다.`}
       </p>
-      <details className="tech-info">
-        <summary>기술 정보(재현용)</summary>
-        실행 {run.run_id} · 방법 {run.methods.join(', ')} · seed {run.config.seed}
-      </details>
       {run.status === 'failed' && (
         <div className="warn" role="alert">
-          <p>실패 이유: {run.error ? `${run.error.code} — ${run.error.message}` : '사유 미제공'}</p>
+          <p>실패 이유: {run.error ? run.error.message : '사유 미제공'}</p>
           {/* 실패 방법·이유는 details에 온다(예: "B2: 실행 제한시간 초과"). 실패한 실행의 결과는 승인하지 않는다. */}
           {run.error?.details?.map((d, i) => (
             <p key={i} className="small">
               <code>{d.path}</code> {d.reason}
             </p>
           ))}
-          {run.error?.request_id && <p className="muted small">요청 ID {run.error.request_id} (서버 기록 확인용)</p>}
-          <p className="muted small">한 방법이라도 실패하면 이 실행의 결과는 저장되지 않습니다. 원인을 확인한 뒤 새로 계산을 요청하세요.</p>
+          {run.error && <p className="muted small">오류 코드 {run.error.code}{run.error.request_id ? ` · 요청 ${run.error.request_id}` : ''}</p>}
+          <p className="muted small">이번 계산 결과는 저장하지 않았습니다. 받은 변경에서 다시 계산하세요.</p>
         </div>
       )}
       {results && (
@@ -239,7 +201,7 @@ function Metric({ label, a, b, icon }: { label: string; a: number | null; b: num
                 <Icon name={trend === 'worse' ? 'up' : 'down'} size={11} /> {Math.abs(b! - a!)}{' '}
               </span>
             )}
-            원안 {a ?? '미제공'}
+            원래 배차 {a ?? '미제공'}
           </div>
         </div>
       </div>
@@ -266,14 +228,14 @@ export function MetricsRow({ base, cand }: { base: MethodResult; cand: MethodRes
 
 // 이유별 다음 행동(R3). 해결을 보장하지 않고, 확인할 곳과 다음 단계만 안내한다.
 const NEXT_STEP: Record<string, string> = {
-  READY_TOO_LATE: '화주에게 상차 준비를 앞당길 수 있는지 확인 → 확인되면 아래 ‘조건 보완’에서 준비 시각을 고쳐 다시 계산',
-  SEARCH_LIMIT: '쓸 수 있는 차량이 더 있는지 확인 → 있으면 아래 ‘조건 보완’에서 차량을 추가해 다시 계산',
-  VEHICLE_UNAVAILABLE: '차량 가용 시각·근무 종료 시각을 기사에게 확인 → ‘조건 보완’에서 고쳐 다시 계산',
-  SHIFT_EXCEEDED: '기사 근무 연장이 가능한지 확인 → ‘조건 보완’에서 근무 종료 시각을 고쳐 다시 계산',
-  CUTOFF_EXCEEDED: '터미널에 반입 연장(예외 반입)이 가능한지 문의 → 터미널이 공지를 바꾸면 새로 점검',
-  INCOMPATIBLE_EQUIPMENT: '컨테이너 규격에 맞는 장비 차량이 있는지 확인',
-  CAPACITY_EXCEEDED: '중량을 실을 수 있는 차량이 있는지 확인',
-  INPUT_MISSING: '비어 있는 값(준비 시각·이동 시간 등)을 확인해 입력',
+  READY_TOO_LATE: '화주에게 상차 준비를 앞당길 수 있는지 확인하세요. 가능하면 아래 ‘조건 보완’에서 준비 시각을 고쳐 다시 계산하고, 어렵다면 선사와 차기 모선 선적을 협의하세요.',
+  SEARCH_LIMIT: '더 쓸 수 있는 차량이 있는지 확인하세요. 있으면 아래 ‘조건 보완’에서 차량을 추가해 다시 계산합니다.',
+  VEHICLE_UNAVAILABLE: '기사에게 차량 가용 시각과 근무 종료 시각을 확인한 뒤 ‘조건 보완’에서 고쳐 다시 계산하세요.',
+  SHIFT_EXCEEDED: '기사 근무 연장이 가능한지 확인한 뒤 ‘조건 보완’에서 근무 종료 시각을 고쳐 다시 계산하세요.',
+  CUTOFF_EXCEEDED: '터미널에 예외 반입이 가능한지 문의하고, 어렵다면 선사와 차기 모선 선적을 협의하세요.',
+  INCOMPATIBLE_EQUIPMENT: '컨테이너 규격에 맞는 장비 차량이 있는지 확인하세요.',
+  CAPACITY_EXCEEDED: '이 중량을 실을 수 있는 차량이 있는지 확인하세요.',
+  INPUT_MISSING: '비어 있는 값(준비 시각·이동 시간 등)을 확인해 입력하세요.',
 }
 
 export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodResult }) {
@@ -289,14 +251,12 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
           <p className="issue-title">
             <b>{jobName(r.job.job_id)}</b> <span className="badge unassigned">미배정</span>{' '}
             {r.candidateIssues.map((i) => ISSUE_LABEL[i.code] ?? i.code).join(', ') || '이유 미제공'}
-            {r.candidateIssues[0] && <Hint text={`판단 근거: ${PROOF_LABEL[r.candidateIssues[0].proof_level]}`} />}
           </p>
-          {r.candidateIssues.length === 0 && <p className="warn small">계산 결과에 이유가 없습니다. 개발 담당 확인이 필요합니다.</p>}
+          {r.candidateIssues.length === 0 && <p className="warn small">배정하지 못한 이유를 받지 못했습니다. 화주·기사에게 직접 확인하세요.</p>}
           {r.candidateIssues.map((i, k) => (
             <div key={k} className="issue-body small">
               <p>{humanizeTimes(i.explanation)}</p>
-              <p className="muted">준비 {kstTime(r.job.ready_at)} · 반입 마감 {kstTime(r.window?.closes_at)}</p>
-              {NEXT_STEP[i.code] && <p className="next-step">→ {NEXT_STEP[i.code]}</p>}
+              {NEXT_STEP[i.code] && <p className="next-step"><b>할 일</b> {NEXT_STEP[i.code]}</p>}
             </div>
           ))}
         </div>
@@ -307,7 +267,7 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
           {r.candidateIssues.map((i, k) => (
             <p key={k} className="small">{humanizeTimes(i.explanation)}</p>
           ))}
-          <p className="next-step small">→ 기사에게 현재 위치와 게이트 도착 예상을 확인</p>
+          <p className="next-step small"><b>할 일</b> 기사에게 현재 위치와 게이트 도착 예상 시각을 확인하세요.</p>
         </div>
       ))}
       {general.map((i, k) => (

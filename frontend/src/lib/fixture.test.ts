@@ -68,7 +68,7 @@ describe('승인 차단', () => {
   it('설명용 결과(illustrative_fixture)는 승인 버튼을 열지 않는다', () => {
     const g = approvalGate(run, b3, snapshot.scenario_id)
     expect(g.allowed).toBe(false)
-    expect(g.reasons.join(' ')).toContain('illustrative_fixture')
+    expect(g.reasons.join(' ')).toContain('실제 계산 결과가 아니라')
   })
 
   it('computed·approval_eligible·passed 이고 입력이 같을 때만 연다', () => {

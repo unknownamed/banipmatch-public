@@ -15,7 +15,7 @@ def install_assets(app, directory) -> set[str]:
         if not path.is_file() or path.is_symlink() or not path.resolve().is_relative_to(root):
             continue
         relative = path.relative_to(root).as_posix()
-        if relative in {"sw.js", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"} or re.fullmatch(
+        if relative in {"sw.js", "manifest.webmanifest", "brand.svg", "icon-180.png", "icon-192.png", "icon-512.png"} or re.fullmatch(
                 r"assets/[A-Za-z0-9_.-]+\.(?:js|css|png|svg|woff2?)", relative):
             files["/" + relative] = path
     for url, path in files.items():

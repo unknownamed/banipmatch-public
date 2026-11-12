@@ -8,11 +8,12 @@ import {
 import { kstDateTime, kstTime } from '../lib/time'
 import { jobName, vehicleName, vehicleShort } from '../lib/labels'
 import { driverMessage } from '../lib/driverMessage'
+import { BoxNo, Plate } from './Ids'
 import { ISSUE_LABEL } from '../lib/compare'
 
 const enc = encodeURIComponent
 const errText = (e: unknown) =>
-  e instanceof ApiRequestError && e.body ? `HTTP ${e.status} ${e.body.code} — ${e.message}` : e instanceof Error ? e.message : String(e)
+  e instanceof ApiRequestError && e.body ? e.message : e instanceof Error ? e.message : String(e)
 
 /**
  * 내부 승인 이후: 차량별 변경 명세 → 시험 수신자 초대·연결 → 명시적 전달 → 대상별 전달·사람 응답 상태.
@@ -41,14 +42,14 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
     const notApproved = preview.error instanceof ApiRequestError && preview.error.body?.code === 'PLAN_VERSION_CONFLICT'
     return (
       <section className="card dispatch">
-        <h2>변경 전달 · 응답</h2>
+        <h2>기사 전달</h2>
         <p className={notApproved ? 'muted' : 'warn'}>
-          {notApproved ? '최신 입력으로 독립 검사를 통과하고 내부 승인한 계획만 전달 대상을 만들 수 있습니다.' : `변경 명세 조회 실패: ${errText(preview.error)}`}
+          {notApproved ? '배차를 확정한 뒤에 기사에게 전달할 수 있습니다.' : `전달할 변경 내용을 불러오지 못했습니다: ${errText(preview.error)}`}
         </p>
       </section>
     )
   }
-  if (!preview.data) return <section className="card dispatch" role="status"><h2>변경 전달 · 응답</h2><p className="muted">변경 명세 불러오는 중…</p></section>
+  if (!preview.data) return <section className="card dispatch" role="status"><h2>기사 전달</h2><p className="muted">전달할 변경 내용 불러오는 중…</p></section>
   const p = preview.data
   const authorized = !!session?.push_test_authorized
 
@@ -58,7 +59,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
         기사 전달 · 응답
       </h2>
       <p className="muted small">
-        확정한 계획(v{p.approved_version}) 기준으로 바뀌는 차량입니다. 기사 앱으로 알림을 보내거나, 안내문을 복사해 문자·카톡으로 보낼 수 있습니다.
+        확정한 배차에서 바뀌는 차량입니다. 기사 앱으로 알림을 보내거나, 안내문을 복사해 문자·카톡으로 보낼 수 있습니다.
       </p>
 
       <h3>차량별 변경 내용</h3>
@@ -66,14 +67,14 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
         {p.vehicle_changes.map((v) => (
           <div key={v.vehicle_id} className="vehicle-change">
             <p>
-              <b>{vehicleName(v.vehicle_id)}</b>{' '}
-              <span className={`badge ${v.recipient_status === 'active' ? 'change' : 'unassigned'}`}>
+              <Plate id={v.vehicle_id} />{' '}
+              <span className={`st ${v.recipient_status === 'active' ? 'ok' : 'wait'}`}>
                 {SUBSCRIPTION_LABEL[v.recipient_status as keyof typeof SUBSCRIPTION_LABEL] ?? v.recipient_status}
               </span>
             </p>
             <ul className="small">
               {v.changes.map((c) => (
-                <li key={c.job_id}><b>{jobName(c.job_id)}</b> · {changeText(v.vehicle_id, c)}</li>
+                <li key={c.job_id}><BoxNo jobId={c.job_id} /> <span className="vc-text">{changeText(v.vehicle_id, c)}</span></li>
               ))}
             </ul>
             <CopyNotice text={driverMessage(v.vehicle_id, v.changes, p.approved_version)} />
@@ -83,8 +84,11 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
 
       {p.followups.length > 0 && <Followups items={p.followups} title="담당자가 확인할 사항" />}
 
-      <PushGuide authorized={authorized} linked={recipients.some((r) => !r.revoked && r.subscription_status === 'active')} />
-      {!authorized && <TeamCodeUnlock client={client} onUnlocked={setSession} />}
+      <div className="push-box">
+        <h3>기사 앱으로 알림 보내기</h3>
+        <PushGuide authorized={authorized} linked={recipients.some((r) => !r.revoked && r.subscription_status === 'active')} />
+        {!authorized && <TeamCodeUnlock client={client} onUnlocked={setSession} />}
+      </div>
       <Invitations client={client} planId={planId} vehicles={p.vehicle_changes.map((v) => v.vehicle_id)} authorized={authorized} recipients={recipients} onChange={loadRecipients} />
 
       <Send client={client} preview={p} authorized={authorized} dispatchId={dispatchId} onSent={(id) => {
@@ -95,8 +99,6 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
       }} />
 
       {dispatchId && <DispatchStatus client={client} dispatchId={dispatchId} recipients={recipients} />}
-
-      <details className="tech-info"><summary>유의사항</summary><ul className="small muted">{p.limits.map((l) => <li key={l}>{l}</li>)}</ul></details>
     </section>
   )
 }
@@ -155,8 +157,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
 
   return (
     <>
-      <h3>기사 앱 연결</h3>
-      {!authorized && <p className="small muted">알림 사용 코드를 넣으면 기사 연결 링크를 만들 수 있습니다. 코드가 없으면 위의 안내문 복사로 전달하세요.</p>}
+      {authorized && <h3>기사 앱 연결</h3>}
       {recipients.length > 0 && (
         <table className="grid small">
           <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>
@@ -232,12 +233,12 @@ function Send({ client, preview, authorized, dispatchId, onSent }: {
     <>
       <h3>앱 알림 보내기</h3>
       {dispatchId ? (
-        <p className="small muted">이 계획의 변경을 이미 보냈습니다. 아래에서 기사 응답을 확인하세요.</p>
+        <p className="small muted">이 배차의 변경을 이미 보냈습니다. 아래에서 기사 응답을 확인하세요.</p>
       ) : (
         <fieldset disabled={busy}>
           <label className="rev-choice">
             <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />{' '}
-            확정한 계획 v{preview.approved_version}의 변경을 연결된 기사 휴대폰으로 보냅니다. 잠금 화면에는 ‘배차 변경 확인 요청’만 표시됩니다.
+            확정한 배차의 변경 내용을 연결된 기사 휴대폰으로 보냅니다. 잠금 화면에는 ‘배차 변경 확인 요청’만 표시됩니다.
           </label>
           <button type="button" disabled={!confirm} onClick={send}>{busy ? '보내는 중…' : '기사에게 보내기'}</button>
         </fieldset>
@@ -275,9 +276,9 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
   const d = state.data
   return (
     <>
-      <h3>대상별 전달 · 응답 {!d.is_current && <span className="badge fixture">이전 계획</span>}</h3>
+      <h3>전달 결과와 응답 {!d.is_current && <span className="badge fixture">이전 계획</span>}</h3>
       <p className="small muted">
-        중계망 접수는 읽음이 아니고, 확인·수행 가능은 운송 완료가 아닙니다. 응답이 없으면 자동으로 재촉하지 않습니다. 갱신 {state.at ? kstTime(new Date(state.at).toISOString()) : ''}
+        ‘전달됨’은 휴대폰까지 보냈다는 뜻이고, 기사가 읽었는지는 ‘열람’에서 봅니다. 응답이 없으면 기사에게 직접 연락해 확인하세요. 갱신 {state.at ? kstTime(new Date(state.at).toISOString()) : ''}
       </p>
       <table className="grid small dispatch-status">
         <thead>
@@ -339,8 +340,8 @@ function PushGuide({ authorized, linked }: { authorized: boolean; linked: boolea
   const steps: [string, boolean][] = [
     ['알림 사용 코드로 알림 기능 켜기', authorized],
     ['차량을 골라 연결 링크를 만들고 기사 휴대폰으로 보내기', linked],
-    ['기사 휴대폰에서 링크 열기 → 알림 허용 (아이폰은 공유 → 홈 화면에 추가 후 그 아이콘으로 열기)', linked],
-    ['아래 ‘기사에게 보내기’ → 기사가 확인·곤란으로 응답하면 이 화면에 표시', false],
+    ['기사 휴대폰에서 링크를 열고 알림 허용하기(아이폰은 공유 › 홈 화면에 추가 후 그 아이콘으로 열기)', linked],
+    ['아래 ‘기사에게 보내기’를 누르면 기사 응답이 이 화면에 표시됨', false],
   ]
   return (
     <ol className="push-guide small" aria-label="앱 알림 받는 방법">
@@ -376,12 +377,12 @@ type Slot = { vehicle_id?: string; sequence?: number; pickup_departure_at?: stri
 function changeText(vehicleId: string, c: { kind: string; before?: Slot; after?: Slot }) {
   const t = (x: string | null | undefined) => kstTime(x ?? null)
   const b = c.before, a = c.after
-  if (!a) return '미처리로 전환 · 운송 취소 아님, 담당자 확인 필요'
-  const when = `출발 ${t(a.pickup_departure_at)} · 게이트 ${t(a.gate_arrival_at)}`
+  if (!a) return '배정 보류(운송 취소 아님, 담당자 확인 중)'
+  const when = `상차지 출발 ${t(a.pickup_departure_at)} · 게이트 도착 ${t(a.gate_arrival_at)}`
   if (!b) return `새로 배정 · ${when}`
   if (b.vehicle_id !== a.vehicle_id)
     return b.vehicle_id === vehicleId ? `다른 차량(${vehicleShort(a.vehicle_id)})으로 넘어감 · 이 차량은 수행하지 않음` : `${vehicleShort(b.vehicle_id)} 차량에서 넘어옴 · ${when}`
   const moved = b.pickup_departure_at !== a.pickup_departure_at
   const order = b.sequence !== a.sequence ? ` · 순서 ${b.sequence}번째 → ${a.sequence}번째` : ''
-  return moved ? `출발 ${t(b.pickup_departure_at)} → ${t(a.pickup_departure_at)} · 게이트 ${t(a.gate_arrival_at)}${order}` : `시각 그대로${order}`
+  return moved ? `상차지 출발 ${t(b.pickup_departure_at)} → ${t(a.pickup_departure_at)} · 게이트 도착 ${t(a.gate_arrival_at)}${order}` : `시각 그대로${order}`
 }
