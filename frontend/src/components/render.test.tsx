@@ -48,7 +48,7 @@ function render(state: DispatchView['results'], withB0 = false, withB3 = false, 
   )
 }
 
-const hasBaselineTable = (html: string) => ['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`<b>${id}</b>`)) && html.includes('>T1</b>') && html.includes('2번째')
+const hasBaselineTable = (html: string) => ['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`>${id}</span>`)) && html.includes('>T1</span>') && html.includes('2번째')
 
 describe('원안 표는 결과 상태와 무관하게 남는다', () => {
   it('차량별 보기(기본)도 계산 중에 원안 막대를 보여준다', () => {
@@ -94,7 +94,7 @@ describe('미확인 입력 표시', () => {
       <ComparisonTable rows={buildRows(s07, undefined, undefined)} asOf={s07.as_of} baseLabel="원안(입력)" candLabel={null} />,
     )
     expect(html.match(/준비시각 미확인/g)).toHaveLength(1)
-    expect(html).toContain('<b>J1</b>')
+    expect(html).toContain('>J1</span>')
   })
 })
 

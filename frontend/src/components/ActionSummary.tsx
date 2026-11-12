@@ -2,8 +2,8 @@
 // 계산 결과의 값만 쓴다(새 판단을 만들지 않는다).
 import type { MethodResult } from '../api/types'
 import { ISSUE_LABEL, type JobRow } from '../lib/compare'
-import { jobName, planName } from '../lib/labels'
-import { Icon } from './Icon'
+import { planName } from '../lib/labels'
+import { BoxNo } from './Ids'
 
 const go = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
@@ -33,39 +33,28 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
     const code = r?.candidateIssues[0]?.code
     return code ? ISSUE_LABEL[code] ?? code : '확인 필요'
   }
+  const name = cand ? planName(cand.method) : ''
+  const headline = !cand
+    ? `원래 배차대로면 컨테이너 ${lateSet.length}개가 새 마감을 넘깁니다.`
+    : `${name}${cand.method === recommended ? '(추천)' : ''}으로 ${lateSet.length}개 중 ${fixed}개를 마감 안에 맞춥니다.`
   return (
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
-      <div className="as-grid">
-        <div className="as-cell bad">
-          <span className="as-ic"><Icon name="warning" size={16} /></span>
-          <span className="as-num">{lateSet.length}</span>
-          <span className="as-label">원래 배차로<br />마감 넘김</span>
+      <div className="as-top">
+        <div>
+          <p className="as-kicker">{approved ? '확정 완료' : '판단 요약'}</p>
+          <h2 className="as-headline">{headline}</h2>
+          {cand && <p className="as-sub">작업 {changed}건의 차량·시각이 바뀌고{unresolved.length ? `, ${unresolved.length}건은 담당자 확인이 필요합니다.` : ', 남는 문제는 없습니다.'}</p>}
         </div>
-        {cand && (
-          <div className="as-cell good">
-            <span className="as-ic"><Icon name="check" size={16} /></span>
-            <span className="as-num">{fixed}</span>
-            <span className="as-label">{planName(cand.method)}{cand.method === recommended ? '(추천)' : ''}으로<br />해결</span>
-          </div>
-        )}
-        {cand && (
-          <div className="as-cell">
-            <span className="as-ic"><Icon name="swap" size={16} /></span>
-            <span className="as-num">{changed}</span>
-            <span className="as-label">바뀌는<br />작업</span>
-          </div>
-        )}
-        {cand && (
-          <div className={`as-cell${unresolved.length ? ' warn' : ''}`}>
-            <span className="as-ic"><Icon name="clock" size={16} /></span>
-            <span className="as-num">{unresolved.length}</span>
-            <span className="as-label">담당자<br />확인 필요</span>
-          </div>
-        )}
       </div>
+      <dl className="stat-strip">
+        <div className="ss-bad"><dt>원래 배차로 마감 넘김</dt><dd><b>{lateSet.length}</b><span>개</span></dd></div>
+        {cand && <div className="ss-good"><dt>{name}으로 해결</dt><dd><b>{fixed}</b><span>개</span></dd></div>}
+        {cand && <div><dt>바뀌는 작업</dt><dd><b>{changed}</b><span>건</span></dd></div>}
+        {cand && <div className={unresolved.length ? 'ss-warn' : undefined}><dt>담당자 확인 필요</dt><dd><b>{unresolved.length}</b><span>건</span></dd></div>}
+      </dl>
       {unresolved.length > 0 && (
-        <ul className="as-todo small">
-          {unresolved.map(id => <li key={id}><b>{jobName(id)}</b> · {reason(id)}</li>)}
+        <ul className="as-todo">
+          {unresolved.map(id => <li key={id}><span className="st warn">확인 필요</span> <BoxNo jobId={id} /> · {reason(id)}</li>)}
         </ul>
       )}
       <div className="as-actions">

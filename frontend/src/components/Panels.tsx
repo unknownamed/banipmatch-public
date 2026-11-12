@@ -19,16 +19,11 @@ const EVIDENCE: Record<string, string> = {
 export function Header({ s }: { s: Snapshot }) {
   const c = s.change
   return (
-    <header className="top">
+    <header className="page-head top">
       <div>
-        <h1>반입 마감 변경 점검</h1>
-        <p className="muted">
-          {c.voyage_id} · {c.terminal_id} 반입 마감(컷오프) 변경에 따른 남은 배차 점검 · {kstDateTime(s.as_of)} 기준
-        </p>
-        <details className="tech-info">
-          <summary>세부 정보</summary>
-          시나리오 {s.scenario_id} · 계획 {s.plan_id} v{s.base_plan_version}
-        </details>
+        <nav className="crumbs" aria-label="위치"><a href="?">받은 변경</a><span aria-hidden="true">/</span>점검 결과</nav>
+        <h1>{c.terminal_id} · {c.voyage_id} 반입 마감 변경</h1>
+        <p>남은 배차를 새 마감에 맞춰 점검했습니다 · {kstDateTime(s.as_of)} 기준</p>
       </div>
       {/* 데모 환경 배지가 위에 있으므로 모의 자료는 따로 표시하지 않는다. 실제·혼합 자료일 때만 구분 배지를 단다. */}
       {s.data_mode !== 'simulated' && (

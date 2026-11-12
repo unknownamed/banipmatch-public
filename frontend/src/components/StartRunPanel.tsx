@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import s07 from '../fixtures/demo-02-missing-ready.synthetic.json'
 import s08 from '../fixtures/demo-02-unconfirmed.synthetic.json'
 import s02 from '../fixtures/demo-02-evening.synthetic.json'
@@ -9,6 +9,7 @@ import type { Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
 import { shiftSnapshot } from '../lib/shift'
 import { readableDetail } from '../lib/labels'
+import { kstTime } from '../lib/time'
 import { ConditionRevisionPanel } from './RevisionPanels'
 import { buildRows } from '../lib/compare'
 import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type StartAttempt } from '../lib/startRun'
@@ -22,6 +23,7 @@ import { Icon, type IconName } from './Icon'
 // 홈은 담당자가 받은 변경을 처리하는 알림함이다(물류 관제 화면의 '조치가 필요한 예외 목록' 구성).
 // 시연용 예제를 실제로 받을 수 있는 알림 종류로 보여 준다: 확정 공지 / 확정 전 공지 / 입력 누락.
 type Tone = 'danger' | 'caution' | 'neutral'
+const FILTERS: ['all' | Tone, string][] = [['all', '전체'], ['danger', '조치 필요'], ['caution', '확인 대기']]
 const EXAMPLES = [
   { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'HJNC · BHMN-2026-0045 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 같은 저녁 PNIT 반입 작업은 영향이 없습니다.', snapshot: s02 },
   { id: '08', group: 'todo', icon: 'bell', tone: 'caution', chip: '확정 대기', title: 'HJNC · BORT-2026-0112 반입 마감 1시간 앞당김(확정 전)', meta: '모선 BM 오리엔트호 · 터미널 공지 접수 · 아직 확정되지 않음', stats: ['트럭 8대', '컨테이너 20개'], what: '공지가 확정되기 전에는 배차를 바꾸지 않습니다. 열면 공지 내용과 지금 배차를 확인할 수 있습니다.', snapshot: s08 },
@@ -43,6 +45,8 @@ export const isInputRejection = (e: unknown): e is ApiRequestError =>
 /** http 모드에서 run 파라미터가 없을 때: 공통 예제로 입력 등록 → 계산 요청 → 결과 화면으로 이동. */
 export function StartRunPanel({ client }: { client: ApiClient }) {
   const [exampleId, setExampleId] = useState<(typeof EXAMPLES)[number]['id']>('02')
+  const [filter, setFilter] = useState<'all' | Tone>('all')
+  const [query, setQuery] = useState('')
   // 예제마다 한 시도를 유지한다. 실패 후 "다시 시도"는 같은 본문·같은 멱등키. 새 시도는 새로고침.
   const [attempts] = useState(() => new Map<string, StartAttempt>())
   const [status, setStatus] = useState<Status>({ state: 'idle' })
@@ -50,6 +54,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   const picked: ReadonlySet<MethodId> = new Set(ALL_METHODS)
   const v2 = 'defaultExample' in client ? (client as V2Client) : null
   const example = EXAMPLES.find((e) => e.id === exampleId)!
+  const q = query.trim().toLowerCase().replace(/\s/g, '')
+  const shown = EXAMPLES.filter((e) => (filter === 'all' || e.tone === filter) && (!q || `${e.title}${e.meta}${e.what}`.toLowerCase().replace(/\s/g, '').includes(q)))
   // 홈의 '오늘 저녁 배차 현황'은 예제 02의 현재 배차표를 지금 시각으로 옮겨 보여 준다(모의).
   const tonight = useMemo(() => shiftSnapshot(s02 as unknown as Snapshot, new Date()), [])
   // 07·08도 같은 규칙으로 지금 시각에 옮긴다(만료가 아니라 원래 의도한 입력 누락·미확인 변경으로 막히게).
@@ -87,61 +93,71 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   const err = status.state === 'error' ? status.error : null
   return (
     <main>
-      <section className="start-hero">
-        <h1>받은 변경</h1>
-        <p className="start-lead">반입 마감 변경을 골라 남은 배차에 주는 영향을 확인하고, 바꿀 차량만 기사에게 전달합니다.</p>
-        <ol className="start-steps">
-          <li className="on"><b>1</b> 변경 선택</li>
-          <li><b>2</b> 영향 확인 · 조정안 비교</li>
-          <li><b>3</b> 확정 · 기사 전달</li>
-        </ol>
-      </section>
-      <div className="start-grid">
-      <section className="card start-main">
-        <div role="radiogroup" aria-label="처리할 변경 선택" className="inbox">
-          {(['todo'] as const).map((g) => (
-            <div key={g} className="inbox-group">
-              <h2 className="inbox-head">
-                처리할 변경
-                <span className="inbox-count">{EXAMPLES.filter((e) => e.group === g).length}</span>
-              </h2>
-              {EXAMPLES.filter((e) => e.group === g).map((e) => {
-                const on = exampleId === e.id
-                return (
-                  <button
-                    key={e.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    className={`inbox-row${on ? ' on' : ''}`}
-                    disabled={status.state === 'sending'}
-                    onClick={() => {
-                      setExampleId(e.id)
-                      setStatus({ state: 'idle' })
-                    }}
-                  >
-                    <span className={`ib-ic ${e.tone}`}><Icon name={e.icon} size={18} /></span>
-                    <span className="ib-main">
-                      <span className="ib-title"><b>{e.title}</b><span className={`ib-chip ${e.tone}`}>{e.chip}</span></span>
-                      <span className="ib-meta">{e.meta}</span>
-                      {on && <span className="ib-what">{e.what}</span>}
-                      {on && <span className="sc-stats">{e.stats.map((t) => <span key={t}>{t}</span>)}</span>}
-                    </span>
-                    <span className="ib-side">
-                      <span className="ib-when">{receivedAgo(e.snapshot as unknown as Snapshot)}</span>
-                      <span className="ib-radio" aria-hidden="true" />
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          ))}
+      <header className="page-head">
+        <div>
+          <h1>받은 변경</h1>
+          <p>터미널 반입 마감 변경을 확인하고, 남은 배차를 다시 맞춥니다.</p>
         </div>
-        {status.state !== 'rejected' && (
-          <button type="button" disabled={status.state === 'sending'} onClick={start}>
-            {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '선택한 변경 영향 확인'}
-          </button>
-        )}
+        <span className="updated"><span className="live" aria-hidden="true" />실시간 수신</span>
+      </header>
+      <div className="start-grid">
+      <section className="card start-main inbox-card">
+        <div className="toolbar">
+          <div className="seg" role="group" aria-label="변경 종류">
+            {FILTERS.map(([id, label]) => (
+              <button key={id} type="button" aria-pressed={filter === id} onClick={() => setFilter(id)}>
+                {label}<span className="n">{EXAMPLES.filter((e) => id === 'all' || e.tone === id).length}</span>
+              </button>
+            ))}
+          </div>
+          <label className="search">
+            <Icon name="search" size={15} />
+            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="항차·컨테이너 번호·화주 검색" aria-label="받은 변경 검색" />
+          </label>
+        </div>
+        <div role="radiogroup" aria-label="처리할 변경 선택" className="inbox">
+          {shown.length === 0 && <p className="ib-empty">조건에 맞는 변경이 없습니다.</p>}
+          {shown.map((e) => {
+            const on = exampleId === e.id
+            return (
+              <div key={e.id} className={`ib-item${on ? ' on' : ''}`}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  className={`inbox-row${on ? ' on' : ''}`}
+                  disabled={status.state === 'sending'}
+                  onClick={() => {
+                    setExampleId(e.id)
+                    setStatus({ state: 'idle' })
+                  }}
+                >
+                  <span className={`ib-ic ${e.tone}`}><Icon name={e.icon} size={16} /></span>
+                  <span className="ib-main">
+                    <span className="ib-title"><b>{e.title}</b></span>
+                    <span className="ib-meta"><span className={`st ${e.tone === 'danger' ? 'bad' : 'warn'}`}>{e.chip}</span> · {e.meta}</span>
+                  </span>
+                  <span className="ib-when">{receivedAgo(e.snapshot as unknown as Snapshot)}</span>
+                </button>
+                {on && (
+                  <div className="ib-detail">
+                    <p className="ib-what">{e.what}</p>
+                    <div className="ib-facts">
+                      {source && <Countdown snapshot={source} />}
+                      <span>{e.stats.join(' · ')}</span>
+                    </div>
+                    {status.state !== 'rejected' && (
+                      <button type="button" className="ib-go" disabled={status.state === 'sending'} onClick={start}>
+                        {status.state === 'sending' ? `${status.step} 중…` : status.state === 'error' ? '다시 시도' : '영향 확인하고 조정안 보기'}
+                        <Icon name="arrow" size={15} />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
         {err !== null && (
           <div className="warn" role="alert">
             <p>
@@ -207,4 +223,24 @@ function receivedAgo(s: Snapshot) {
   const t = s.change.confirmed_at ?? s.change.evidence.received_at
   const min = t ? Math.round((Date.parse(s.as_of) - Date.parse(t)) / 60000) : null
   return min === null ? '' : min <= 1 ? '방금' : `${min}분 전`
+}
+
+/** 선택한 변경의 (새) 반입 마감까지 남은 시간. 1초마다 줄어든다. */
+function Countdown({ snapshot }: { snapshot: Snapshot }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [])
+  const w = snapshot.windows.find((x) => x.window_id === snapshot.change.new_window_id)
+  if (!w?.closes_at) return null
+  const left = Math.max(0, Math.floor((Date.parse(w.closes_at) - now) / 1000))
+  const hh = Math.floor(left / 3600), mm = Math.floor((left % 3600) / 60), ss = left % 60
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const confirmed = snapshot.change.verification === 'confirmed'
+  return (
+    <span className="countdown">
+      {confirmed ? '새 반입 마감' : '공지대로면 새 마감'} <b>{kstTime(w.closes_at)}</b>까지 <b className="cd-num">{hh}:{pad(mm)}:{pad(ss)}</b>
+    </span>
+  )
 }

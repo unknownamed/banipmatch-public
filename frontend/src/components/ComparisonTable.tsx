@@ -3,6 +3,7 @@ import { ISSUE_LABEL, lockedPreserved, type ChangeKind, type JobRow } from '../l
 import { Icon } from './Icon'
 import { kstTimeWithDay } from '../lib/time'
 import { jobName, vehicleName } from '../lib/labels'
+import { BoxNo, Plate } from './Ids'
 import { useState } from 'react'
 
 const CHANGE_LABEL: Record<ChangeKind, string> = { vehicle: '차량', order: '순서', time: '시각' }
@@ -26,7 +27,7 @@ function Cell({ a, refUtc, closesAt, buffer }: { a: Assignment | undefined; refU
   const short = !late && before !== null && buffer > 0 && before < buffer ? before : null
   return (
     <div className="cell">
-      <span className="cell-main"><b title={a.vehicle_id}>{vehicleName(a.vehicle_id)}</b> <span className="small">· {a.sequence}번째</span></span>
+      <span className="cell-main"><Plate id={a.vehicle_id} /> <span className="small">{a.sequence}번째</span></span>
       <div className="small cell-times">
         출발 {kstTimeWithDay(a.pickup_departure_at, refUtc)} · 도착{' '}
         <span className={late ? 'late-time' : undefined}>
@@ -63,19 +64,33 @@ export function ComparisonTable({
   // 영향 있는 작업: 바뀌었거나, 원안에서 문제가 있었거나, 보류됐거나, 출발한 고정 작업. 나머지는 접어 둔다.
   const affected = (r: JobRow) => r.locked || r.job.ready_at === null || r.changes.length > 0 || r.baselineIssues.length > 0
     || r.candidateUnassigned || r.candidateMissing || r.candidateIssues.length > 0
-  const [onlyAffected, setOnlyAffected] = useState(true)
-  // 조정안이 있을 때만 접는다(원안만 있을 때는 전부 보여 준다).
-  const filtering = hasCand && onlyAffected
-  const shown = filtering ? rows.filter(affected) : rows
-  const hidden = hasCand ? rows.length - rows.filter(affected).length : 0
+  const isLate = (r: JobRow) => r.baselineIssues.length > 0 || r.candidateIssues.length > 0
+  type Mode = 'affected' | 'late' | 'changed' | 'unassigned' | 'all'
+  const [mode, setMode] = useState<Mode>(hasCand ? 'affected' : 'all')
+  const [query, setQuery] = useState('')
+  const MODES: [Mode, string, (r: JobRow) => boolean][] = [
+    ['affected', '영향 있는 작업', affected], ['late', '마감 문제', isLate], ['changed', '바뀐 작업', (r) => r.changes.length > 0],
+    ['unassigned', '미배정', (r) => r.candidateUnassigned], ['all', '전체', () => true],
+  ]
+  const q = query.trim().toLowerCase().replace(/\s/g, '')
+  const match = (r: JobRow) => !q || `${jobName(r.job.job_id)}${r.job.cargo_owner ?? ''}${r.job.voyage_id}${r.baseline ? vehicleName(r.baseline.vehicle_id) : ''}${r.candidate ? vehicleName(r.candidate.vehicle_id) : ''}`.toLowerCase().replace(/\s/g, '').includes(q)
+  const pass = MODES.find(([m]) => m === mode)![2]
+  const shown = rows.filter((r) => pass(r) && match(r))
   return (
     <>
-    {hidden > 0 && (
-      <div className="table-filter small">
-        <label><input type="checkbox" checked={onlyAffected} onChange={(e) => setOnlyAffected(e.target.checked)} /> 영향 있는 작업만 보기</label>
-        <span className="muted">{onlyAffected ? `변경·문제 없는 ${hidden}건 숨김` : `전체 ${rows.length}건`}</span>
-      </div>
-    )}
+    <div className="toolbar table-toolbar">
+      {hasCand && (
+        <div className="seg" role="group" aria-label="작업 걸러 보기">
+          {MODES.map(([m, label, f]) => (
+            <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)}>{label}<span className="n">{rows.filter(f).length}</span></button>
+          ))}
+        </div>
+      )}
+      <label className="search">
+        <Icon name="search" size={15} />
+        <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="컨테이너·차량 번호·화주 검색" aria-label="작업 검색" />
+      </label>
+    </div>
     <div className="table-wrap">
       <table className="grid stack">
         <thead>
@@ -98,7 +113,7 @@ export function ComparisonTable({
                 aria-selected={onSelectJob ? selectedJob === r.job.job_id : undefined}
               >
                 <td className="job-cell">
-                  <b>{jobName(r.job.job_id)}</b>
+                  <BoxNo jobId={r.job.job_id} />
                   <div className="muted small">
                     {r.job.voyage_id} · {r.job.terminal_id}{r.job.cargo_owner ? ` · ${r.job.cargo_owner}` : ''}
                   </div>
