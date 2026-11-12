@@ -32,7 +32,6 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
         {link('map', '입항 선박', `?${mapParams.toString()}`, 'map')}
         {link('reference', '터미널 일정', `?${refParams.toString()}`, 'clock')}
       </nav>
-      <span className="appbar-note">{mode === 'http' ? '시연용 모의 배차' : '공통 예제'}</span>
     </header>
   )
 }

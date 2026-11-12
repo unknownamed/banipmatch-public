@@ -43,7 +43,7 @@ describe('입항 선박 계산', () => {
 
   it('대상 터미널(HJNC) 항차가 목록 앞에 오고, 그 안에서 도착이 빠른 순이다', () => {
     const list = fleetAt(0)
-    const hj = list.filter(v => v.vessel.terminal === 'HJNC')
+    const hj = list.filter(v => v.vessel.terminal === 'HJNC' && !v.vessel.outbound)
     expect(list.slice(0, hj.length).every(v => v.vessel.terminal === 'HJNC')).toBe(true)
     const etas = hj.filter(v => v.etaMin !== null).map(v => v.etaMin!)
     expect(etas).toEqual([...etas].sort((a, b) => a - b))

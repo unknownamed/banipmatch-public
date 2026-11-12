@@ -9,7 +9,7 @@ export type ScenarioLink = { snapshot: Snapshot; reviewHref: string }
 type Cutoff = { min: number | null; prevMin: number | null; linked: boolean; confirmed: boolean }
 
 const MAX_MIN = 480
-const STATUS_LABEL = { underway: '입항 중', anchored: '묘박 대기', berthed: '접안', stale: '위치 끊김' } as const
+const STATUS_LABEL = { underway: '입항 중', anchored: '묘박 대기', berthed: '접안', stale: '위치 끊김', offshore: '외해 항해' } as const
 
 const kst = (d: Date) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
 const at = (base: Date, min: number) => new Date(base.getTime() + min * 60000)
@@ -27,7 +27,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
   const base = useMemo(() => new Date(), [])
   const [t, setT] = useState(0)
   const [speed, setSpeed] = useState<1 | 10 | 60>(1)
-  const [picked, setPicked] = useState<string>('SIM-01')
+  const [picked, setPicked] = useState<string>('BM-01')
   const [mapType, setMapType] = useState<MapType>('HYBRID')
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
   const fleet = useMemo(() => fleetAt(t), [t])
@@ -111,7 +111,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
     const maps = window.kakao?.maps
     if (!mapState.ok || !maps) return
     const ll = (p: LatLon) => new maps.LatLng(p.lat, p.lon)
-    const shown = new Set(fleet.map(v => v.vessel.id))
+    const shown = new Set(fleet.filter(v => v.status !== 'offshore').map(v => v.vessel.id))
     for (const [id, mk] of marks.current) mk.overlay.setMap(shown.has(id) ? kmap.current : null)
     for (const v of fleet) {
       const mk = marks.current.get(v.vessel.id)
@@ -245,7 +245,8 @@ function InfoCard({ v, t, base, cut, link }: { v: VesselView; t: number; base: D
   if (v.status === 'underway' && !v.vessel.outbound && v.etaMin !== null) {
     rows.push(['도착 추정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후)</>])
     rows.push(['남은 항로', `${v.remainingNm!.toFixed(1)}해리 · ${v.vessel.speedKn}노트`])
-  } else if (v.vessel.outbound) rows.push(['상태', `출항 중 · ${v.vessel.speedKn}노트`])
+  } else if (v.status === 'offshore' && v.etaMin !== null) rows.push(['접안 예정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후 · 외해 항해 중, 지도 범위 밖)</>])
+  else if (v.vessel.outbound) rows.push(['상태', `출항 중 · ${v.vessel.speedKn}노트`])
   else rows.push(['상태', v.etaNote])
   if (v.vessel.terminal === 'HJNC' && !v.vessel.outbound && cut.min !== null && cutLeft !== null)
     rows.push(['반입 마감', <>{kst(at(base, cut.min))} · {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}{cut.prevMin !== null && <span className="vm-changed"> (변경 전 {kst(at(base, cut.prevMin))})</span>}</>])

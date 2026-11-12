@@ -614,3 +614,57 @@ button.secondary:hover { background: var(--color-hover); }
 .next-step { margin: 4px 0 0; padding: 8px 10px; border-radius: var(--radius-md); background: #fff4ee; color: #8a2e05; font-weight: 600; line-height: 1.5; }
 .job-bar .arrival { bottom: 0; height: 3px; width: 3px; margin-left: -1.5px; border-radius: 1px 1px 0 0; opacity: 1; }
 .job-bar { padding-bottom: 2px; line-height: 1; }
+
+/* ===== 완성형 시각 다듬기(2026-11-12 밤) ===== */
+body { background: #f4f5f7; }
+.appbar { background: #fff; }
+main { padding-top: var(--space-8); }
+h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+.card { border-color: #e6e8ec; box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 1px 3px rgba(16, 24, 40, .03); }
+.card h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.appbar-note { display: none; }
+.side-nav a[aria-current='page'] { background: #fff1ea; color: var(--color-accent-strong); }
+.side-nav a[aria-current='page'] .icon { color: var(--color-accent-strong); }
+.side-nav a.nav-cta { background: var(--color-accent-strong); color: #fff; border-color: var(--color-accent-strong); font-weight: 700; }
+.side-nav a.nav-cta .icon { color: #fff; }
+.side-nav a.nav-cta[aria-current='page'] { background: var(--color-accent-strong); color: #fff; }
+
+/* 홈 */
+.start-hero h1 { font-size: 28px; }
+.start-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-4); align-items: start; }
+.start-main { display: grid; gap: var(--space-3); }
+.start-main h2 { margin: 0; }
+.scenario-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin: 0; }
+.scenario-card { gap: 8px; padding: 16px; border-color: #e6e8ec; }
+.scenario-card:hover { border-color: #c9ccd3; box-shadow: 0 2px 8px rgba(16,24,40,.06); }
+.scenario-card.on { border-color: var(--color-accent-strong); box-shadow: 0 0 0 1px var(--color-accent-strong), 0 4px 14px rgba(210,58,6,.10); background: #fff; }
+.sc-top { gap: 8px; font-size: 15px; }
+.sc-icon { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #f4f5f7; color: #3b3f46; }
+.scenario-card.on .sc-icon { background: #fff1ea; color: var(--color-accent-strong); }
+.sc-what { color: #4b4f57; }
+.sc-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+.sc-stats span { padding: 3px 9px; border-radius: 999px; background: #f4f5f7; font-size: 12px; font-weight: 600; color: #3b3f46; font-variant-numeric: tabular-nums; }
+.scenario-card.on .sc-stats span { background: #fff1ea; color: #8a2e05; }
+.start-main > button { justify-self: start; padding: 12px 22px; font-size: 15px; }
+/* 지금 신항 */
+.now-panel { display: grid; gap: var(--space-2); }
+.now-head { display: flex; justify-content: space-between; align-items: center; }
+.now-head h2 { margin: 0; }
+.now-clock { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.now-sub { margin: 0; font-size: 12px; font-weight: 600; color: var(--color-muted); }
+.now-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.now-list li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas: "ic main eta" "ic cut eta"; gap: 2px 10px; padding: 12px 0; border-top: 1px solid #eef0f3; align-items: center; }
+.now-list li:first-child { border-top: 0; }
+.now-ship { grid-area: ic; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #fff1ea; color: var(--color-accent-strong); }
+.now-main { grid-area: main; display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+.now-main b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.now-eta { grid-area: eta; display: grid; justify-items: end; font-variant-numeric: tabular-nums; }
+.now-eta b { font-size: 16px; }
+.now-cut { grid-area: cut; color: var(--color-danger); font-weight: 600; }
+.now-links { display: flex; gap: 14px; padding-top: 8px; border-top: 1px solid #eef0f3; }
+.now-links a { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--color-accent-strong); }
+@media (max-width: 1100px) { .start-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .scenario-cards { grid-template-columns: minmax(0, 1fr); } .start-hero h1 { font-size: 21px; } .start-main > button { width: 100%; } }
+.now-cut.muted { color: var(--color-muted); font-weight: 500; }
+.now-foot { margin: 0; display: flex; align-items: center; gap: 6px; color: #3b3f46; font-weight: 600; }
+.vm-chip.offshore { background: #eef2f6; color: #44505c; }

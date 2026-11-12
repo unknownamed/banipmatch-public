@@ -88,22 +88,29 @@ export type Vessel = {
   port: string // 입항선은 직전 출발항, 출항선은 다음 기항지(모의)
   outbound?: boolean
   appearMin?: number // 이 시각(분)에 항로 시작점에 나타난다. 그 전에는 지도에 없다
+  offshoreEtaMin?: number // 지도 범위 밖(외해)에서 항해 중. 이 시각(분)에 도착 예정이며 위치는 그리지 않는다
 }
 
 const route = (approach: LatLon[], t: TerminalId) => [...approach, ...BERTH_APPROACH[t]]
 const leave = (approach: LatLon[], t: TerminalId) => route(approach, t).reverse()
 
 // 선박명은 서비스 이름을 딴 가상 선단(BM)이다. 항차 코드는 '선박 약어+항차 번호+방향(E/W)' 형식.
+// 반입 마감은 보통 모선 접안보다 훨씬 앞선다(예: 접안 12시간 전 이후 반입 금지). 그래서 항구 앞에 와 있는 모선은
+// 반입 마감이 이미 지난 항차이고, 반입 마감이 바뀐 시나리오 항차(BH045E·BO112W·BP007E)의 모선은 아직 외해에 있다.
+const H = (etaMin: number) => etaMin - 720 // 접안 12시간 전 마감(모의 규칙)
 export const VESSELS: Vessel[] = [
-  // 대상 터미널 HJNC — 예제 02의 항차(BH045E·BO112W·BP007E)와 같은 코드
-  { id: 'BM-01', name: 'BM 하모니호', voyage: 'BH045E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 22.5, speedKn: 11, state: 'underway', cutoffMin: 90, teu: 8600, port: '상하이' },
-  { id: 'BM-02', name: 'BM 오리엔트호', voyage: 'BO112W', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 9, speedKn: 13, state: 'underway', cutoffMin: 330, teu: 4300, port: '닝보' },
-  { id: 'BM-03', name: 'BM 파이오니어호', voyage: 'BP007E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 14, state: 'underway', cutoffMin: 480, teu: 13000, port: '싱가포르' },
-  { id: 'BM-04', name: 'BM 그린호', voyage: 'BG031E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: -120, teu: 6500, port: '칭다오' },
+  // 대상 터미널 HJNC — 예제 02의 항차. 외해 항해 중(지도 범위 밖)
+  { id: 'BM-01', name: 'BM 하모니호', voyage: 'BH045E', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 16, state: 'underway', cutoffMin: 90, teu: 8600, port: '상하이', offshoreEtaMin: 810 },
+  { id: 'BM-02', name: 'BM 오리엔트호', voyage: 'BO112W', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 15, state: 'underway', cutoffMin: 330, teu: 4300, port: '닝보', offshoreEtaMin: 1050 },
+  { id: 'BM-03', name: 'BM 파이오니어호', voyage: 'BP007E', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 17, state: 'underway', cutoffMin: 480, teu: 13000, port: '싱가포르', offshoreEtaMin: 1200 },
+  // HJNC로 들어오는 중(반입 마감 지난 항차)
+  { id: 'BM-20', name: 'BM 아리아호', voyage: 'BA311E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 22.5, speedKn: 11, state: 'underway', cutoffMin: H(37), teu: 9800, port: '칭다오' },
+  { id: 'BM-21', name: 'BM 코랄호', voyage: 'BC207W', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 9, speedKn: 13, state: 'underway', cutoffMin: H(94), teu: 4800, port: '하카타' },
+  { id: 'BM-04', name: 'BM 그린호', voyage: 'BG031E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: -840, teu: 6500, port: '칭다오' },
   { id: 'BM-05', name: 'BM 블루호', voyage: 'BB208W', terminal: 'HJNC', route: leave(SOUTH_APPROACH, 'HJNC'), startNm: 0.4, speedKn: 9, state: 'underway', cutoffMin: null, teu: 5000, port: '도쿄', outbound: true },
-  { id: 'BM-06', name: 'BM 스타호', voyage: 'BS019E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 13, state: 'underway', cutoffMin: 300, teu: 9200, port: '홍콩', appearMin: 90 },
-  { id: 'BM-07', name: 'BM 코스모호', voyage: 'BC077W', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 12, state: 'underway', cutoffMin: 420, teu: 7400, port: '가오슝', appearMin: 210 },
-  { id: 'BM-08', name: 'BM 노바호', voyage: 'BN054E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 14, state: 'underway', cutoffMin: 540, teu: 11000, port: '싱가포르', appearMin: 330 },
+  { id: 'BM-06', name: 'BM 스타호', voyage: 'BS019E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 13, state: 'underway', cutoffMin: H(225), teu: 9200, port: '홍콩', appearMin: 90 },
+  { id: 'BM-07', name: 'BM 코스모호', voyage: 'BC077W', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 12, state: 'underway', cutoffMin: H(356), teu: 7400, port: '가오슝', appearMin: 210 },
+  { id: 'BM-08', name: 'BM 노바호', voyage: 'BN054E', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 14, state: 'underway', cutoffMin: H(456), teu: 11000, port: '싱가포르', appearMin: 330 },
   { id: 'BM-09', name: 'BM 루나호', voyage: 'BL162W', terminal: 'HJNC', route: leave(SOUTH_APPROACH, 'HJNC'), startNm: 0, speedKn: 10, state: 'underway', cutoffMin: null, teu: 6000, port: '부산 북항', outbound: true, appearMin: 150 },
   // 다른 신항 터미널
   { id: 'BM-11', name: 'BM 오션호', voyage: 'BE221E', terminal: 'PNIT', route: route(SOUTH_APPROACH, 'PNIT'), startNm: 15, speedKn: 12, state: 'underway', cutoffMin: null, teu: 9000, port: '가오슝' },
@@ -159,7 +166,7 @@ export type VesselView = {
   heading: number
   passed: LatLon[]
   ahead: LatLon[]
-  status: 'underway' | 'anchored' | 'berthed' | 'stale'
+  status: 'underway' | 'anchored' | 'berthed' | 'stale' | 'offshore'
   remainingNm: number | null
   etaMin: number | null // 재생 시작 기준 도착 추정(분). 산정할 수 없으면 null
   etaNote: string
@@ -172,6 +179,11 @@ export function isVisible(v: Vessel, t: number) {
 }
 
 export function vesselAt(v: Vessel, t0: number): VesselView {
+  if (v.offshoreEtaMin !== undefined) {
+    const left = v.offshoreEtaMin - t0
+    return { vessel: v, pos: v.route[0], heading: 0, passed: [], ahead: [], positionAgeMin: 0, status: 'offshore',
+      remainingNm: null, etaMin: v.offshoreEtaMin, etaNote: left > 0 ? '외해 항해 중 · 지도 범위 밖' : '도착 예정 시각 지남' }
+  }
   const t = v.appearMin === undefined ? t0 : Math.max(0, t0 - v.appearMin)
   const total = routeLengthNm(v.route)
   const stale = v.staleAfterMin !== undefined && t > v.staleAfterMin
@@ -192,11 +204,11 @@ export function vesselAt(v: Vessel, t0: number): VesselView {
 }
 
 export function fleetAt(t: number) {
-  const order = { underway: 0, stale: 1, anchored: 2, berthed: 3 } as const
+  const order = { underway: 0, offshore: 1, stale: 2, anchored: 3, berthed: 4 } as const
   return VESSELS.filter(v => isVisible(v, t)).map(v => {
     const view = vesselAt(v, t)
     // 늦게 나타난 선박도 화면의 시각(t) 기준으로 남은 시간을 계산한다.
-    return v.appearMin === undefined || view.etaMin === null ? view : { ...view, etaMin: view.etaMin + v.appearMin }
+    return v.appearMin === undefined || v.offshoreEtaMin !== undefined || view.etaMin === null ? view : { ...view, etaMin: view.etaMin + v.appearMin }
   }).sort((a, b) =>
     Number(b.vessel.terminal === 'HJNC') - Number(a.vessel.terminal === 'HJNC') ||
     Number(!!a.vessel.outbound) - Number(!!b.vessel.outbound) ||
