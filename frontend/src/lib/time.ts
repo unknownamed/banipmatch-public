@@ -28,7 +28,7 @@ export function kstDateTime(utc: string | null | undefined): string {
   if (!utc) return '미확인'
   const d = new Date(utc)
   if (Number.isNaN(d.getTime())) return `형식 오류(${utc})`
-  return `${dateTimeFmt.format(d)} KST`
+  return dateTimeFmt.format(d)
 }
 
 /** 같은 날이 아닐 때만 날짜를 붙인다(예: 전날 23:50 UTC → 08:50 KST). */

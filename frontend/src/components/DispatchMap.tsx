@@ -145,7 +145,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
   const next = cur ? selPlan.find(a => a.sequence > cur.sequence) : undefined
 
   if (pts.size === 0)
-    return <p className="muted small">이 입력에는 위치 좌표가 없어 차량 지도를 표시하지 않습니다. 예제 02로 계산하면 지도를 볼 수 있습니다.</p>
+    return <p className="muted small">위치 정보가 없어 지도를 표시하지 않습니다.</p>
 
   const focusVehicle = (v: VehicleNow) => {
     setPickedVehicle(v.vehicleId)

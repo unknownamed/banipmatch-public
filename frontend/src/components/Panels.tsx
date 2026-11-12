@@ -109,7 +109,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
         </div>
       </dl>
       {c.verification !== 'confirmed' && (
-        <p className="warn">확정되지 않은 변경입니다. 새 반입 시간으로 계산하거나 승인할 수 없습니다.</p>
+        <p className="warn">확정 전 공지라 계산·확정하지 않습니다.</p>
       )}
     </section>
   )

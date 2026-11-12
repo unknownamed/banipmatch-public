@@ -51,7 +51,7 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
           <InstallGuide hasInvite={!!invite} />
         ) : invite ? (
           <>
-            <p>연결하면 이 휴대폰이 지정된 차량의 배차 알림을 받습니다. 이름·전화번호는 저장하지 않습니다.</p>
+            <p>연결하면 이 휴대폰으로 배차 알림을 받습니다. 이름·전화번호는 저장하지 않습니다.</p>
             <button type="button" disabled={busy} onClick={() => accept(invite)}>{busy ? '수락 중…' : '초대 수락'}</button>
           </>
         ) : (
@@ -271,12 +271,12 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
     return (
       <section className="card">
         <h2>이전 계획의 알림</h2>
-        <p className="muted">담당자가 이후 계획을 바꿔 이 알림의 상세를 가렸습니다. 새 운송 지시가 아니며 응답할 수 없습니다. 최신 알림을 확인하세요.</p>
+        <p className="muted">계획이 바뀐 이전 알림입니다. 최신 알림을 확인하세요.</p>
       </section>
     )
   return (
     <section className="card recipient-detail" aria-labelledby="detail-title">
-      <h2 id="detail-title">변경 내용 <span className="small muted">계획 v{d.payload.plan_version} · {kstDateTime(d.created_at)}</span></h2>
+      <h2 id="detail-title">변경 내용 <span className="rc-when">{kstTime(d.created_at)} 받음</span></h2>
       <p className="rc-lead">담당자가 확정한 배차 변경입니다. 게이트 도착 시각을 지켜 주세요.</p>
       {d.payload.vehicle_changes.map((v) => (
         <div key={v.vehicle_id}>
@@ -311,18 +311,13 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
         </div>
       ))}
 
-      <h3>응답</h3>
-      <p className="small">현재: <b>{RESPONSE_LABEL[d.response]}</b>{d.responded_at && ` · ${kstTime(d.responded_at)}`}</p>
-      <label className="rev-reason">
-        메모 (선택 · 개인정보 쓰지 않기)
-        <textarea rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} />
-      </label>
+      <h3 className="rc-answer">응답 <span className={`st ${d.response === 'none' ? 'wait' : d.response === 'cannot_perform' ? 'bad' : 'ok'}`}>{d.response === 'none' ? '아직 응답 안 함' : `${RESPONSE_LABEL[d.response]}${d.responded_at ? ` · ${kstTime(d.responded_at)}` : ''}`}</span></h3>
+      <textarea className="rc-memo" rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} placeholder="메모 (선택)" aria-label="메모" />
       <div className="respond-buttons">
         <button type="button" disabled={busy} className="rb-primary" onClick={() => respond('can_perform')}>수행 가능</button>
         <button type="button" disabled={busy} className="danger" onClick={() => respond('cannot_perform')}>수행 곤란</button>
         <button type="button" disabled={busy} className="rb-ghost" onClick={() => respond('acknowledged')}>내용만 확인함</button>
       </div>
-      <p className="small muted">&lsquo;수행 곤란&rsquo;은 담당자에게 후속 확인으로 전달됩니다. 자동으로 다른 차량에 다시 배정되지 않습니다.</p>
       {sendError !== null && (
         <p className="warn small" role="alert">
           {isCode(sendError, 'NOTIFICATION_SUPERSEDED') ? '그 사이 계획이 바뀌어 이 알림에는 응답할 수 없습니다. 최신 알림을 확인하세요.' : `응답 실패: ${errText(sendError)}`}

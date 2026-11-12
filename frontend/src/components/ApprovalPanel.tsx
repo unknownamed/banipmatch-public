@@ -123,7 +123,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
               ? `HTTP ${err.status}${err.body ? ` ${err.body.code}` : ''} — ${err.message}`
               : err instanceof Error ? err.message : String(err)}
           </p>
-          {status.state === 'error' && status.uncertain && status.retryable && <p>서버에서 이미 처리됐을 수 있습니다. 다시 시도하면 같은 요청 내용과 키로 결과를 확인합니다.</p>}
+          {status.state === 'error' && status.uncertain && status.retryable && <p>이미 처리됐을 수 있습니다. 다시 시도해도 두 번 처리되지 않습니다.</p>}
           {err instanceof ApiRequestError && approvalErrorHint(err.status, err.body?.code) && <p>{approvalErrorHint(err.status, err.body?.code)}</p>}
           {err instanceof ApiRequestError &&
             err.body?.details?.map((d) => (

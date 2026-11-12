@@ -193,7 +193,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
             <li key={c.key}>{c.id} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
           ))}
           {added.map((d) => (
-            <li key={d.vehicle_id}>차량 추가: <b>{d.vehicle_id.trim()}</b> · {d.start_location_id} 출발 · {d.capacity_kg}kg · {d.equipment_types.join('/')} · 가용 {d.available_at.replace('T', ' ')} ~ 근무 종료 {d.shift_end_at.replace('T', ' ')} KST</li>
+            <li key={d.vehicle_id}>차량 추가: <b>{d.vehicle_id.trim()}</b> · {d.start_location_id} 출발 · {d.capacity_kg}kg · {d.equipment_types.join('/')} · 가용 {d.available_at.replace('T', ' ')} ~ 근무 종료 {d.shift_end_at.replace("T", " ")}</li>
           ))}
         </ul>
       )}
@@ -311,7 +311,7 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
         ))}
       </ul>
       {c.before.status === 'input_blocked' && (
-        <p className="small">이전 입력은 값이 비어 있어 계산하지 않았으므로, 전후 수치 비교 없이 새 결과만 보여 줍니다.</p>
+        <p className="small">이전 입력은 계산되지 않아 새 결과만 보여 줍니다.</p>
       )}
       {c.job_transitions && (
         <dl className="rev-transitions">

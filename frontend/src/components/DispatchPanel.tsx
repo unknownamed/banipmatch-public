@@ -157,7 +157,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
   return (
     <>
       <h3>기사 앱 연결</h3>
-      {!authorized && <p className="small muted">알림 사용 코드를 넣으면 기사 연결 링크를 만들 수 있습니다. 코드가 없으면 위의 안내문 복사로 전달하세요.</p>}
+      {!authorized && <p className="small muted">알림 사용 코드를 넣으면 기사 연결 링크를 만들 수 있습니다.</p>}
       {recipients.length > 0 && (
         <table className="grid small">
           <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>
