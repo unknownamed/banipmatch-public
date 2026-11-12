@@ -200,7 +200,37 @@ def build():
     return snapshot
 
 
+def missing_ready(base: dict) -> dict:
+    """같은 저녁 배차에서 컨테이너 한 개의 상차 준비 시각을 아직 받지 못한 경우(계산 전 입력 확인)."""
+    d = json.loads(json.dumps(base))
+    d.update(scenario_id="S002-M", plan_id="P002-M")
+    for j in d["jobs"]:
+        if j["job_id"] == "J10":
+            j["ready_at"] = None
+    return d
+
+
+def unconfirmed_notice(base: dict) -> dict:
+    """BORT-2026-0112 반입 마감을 1시간 앞당긴다는 공지를 받았지만 아직 확정되지 않은 경우(배차를 바꾸지 않음)."""
+    d = json.loads(json.dumps(base))
+    d.update(scenario_id="S002-U", plan_id="P002-U")
+    v1, v2 = f"W-{VOYAGE_CODE['V1']}", f"W-{VOYAGE_CODE['V2']}"
+    for w in d["windows"]:
+        if w["window_id"] == v1:
+            w["closes_at"] = at(V1_PREVIOUS_CLOSE)  # 이 경우에는 BHMN 변경이 없다
+        if w["window_id"] == v2:
+            w["closes_at"] = at(CLOSES["V2"] - 60)
+    d["change"] = dict(change_id="C002-U", voyage_id=VOYAGE_CODE["V2"], terminal_id="HJNC", previous_opens_at=at(WINDOWS["V2"][0]),
+                       previous_closes_at=at(CLOSES["V2"]), new_window_id=v2, verification="unconfirmed",
+                       confirmed_by=None, confirmed_at=None, evidence=ev())
+    return d
+
+
 if __name__ == "__main__":
     data = build()
-    OUT.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"wrote {OUT.relative_to(ROOT)}: jobs={len(data['jobs'])} vehicles={len(data['vehicles'])}")
+    outputs = {OUT: data,
+               OUT.with_name("demo-02-missing-ready.synthetic.json"): missing_ready(data),
+               OUT.with_name("demo-02-unconfirmed.synthetic.json"): unconfirmed_notice(data)}
+    for path, snap in outputs.items():
+        path.write_bytes((json.dumps(snap, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        print(f"wrote {path.relative_to(ROOT)}: jobs={len(snap['jobs'])} vehicles={len(snap['vehicles'])}")

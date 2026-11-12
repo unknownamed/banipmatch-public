@@ -1,7 +1,7 @@
 {
-  "name": "반입맞춤 시험 수신",
+  "name": "반입맞춤 기사",
   "short_name": "반입맞춤",
-  "description": "배차 담당자가 확정한 모의 변경을 받아 보고 응답하는 시험 화면",
+  "description": "배차 담당자가 확정한 변경을 받아 보고 바로 응답합니다",
   "lang": "ko",
   "id": "/recipient",
   "start_url": "/recipient",

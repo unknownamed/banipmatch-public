@@ -52,3 +52,34 @@ export function vehicleShort(id: string | null | undefined) {
 export function hasVehicleName(id: string) {
   return plates.has(id)
 }
+
+/** 계산 방법을 담당자에게 보이는 이름으로. 코드(B0~B3)는 기술 정보에만 남긴다. */
+const PLAN_NAME: Record<string, string> = { B0: '원래 배차', B1: '마감순 재배치안', B2: '전체 재배치안', B3: '최소 변경안' }
+export function planName(method: string) {
+  return PLAN_NAME[method] ?? method
+}
+
+const FIELD_NAME: Record<string, string> = {
+  ready_at: '상차 준비 시각', gross_weight_kg: '화물 중량', service_minutes: '터미널 체류 시간', verification: '확정 여부',
+  confirmed_by: '확인자', confirmed_at: '확인 시각', available_at: '가용 시작', shift_end_at: '근무 종료', closes_at: '반입 마감', opens_at: '반입 시작',
+}
+/** 서버 입력 검사 결과의 경로(/jobs/2/ready_at)와 사유(CODE: 설명)를 담당자가 읽는 문장으로. */
+export function readableDetail(path: string, reason: string, s: Pick<Snapshot, 'jobs' | 'vehicles' | 'windows'> | null): { what: string; why: string } {
+  const why = reason.replace(/^[A-Z_]+:\s*/, '')
+  const parts = path.replace(/^\//, '').split(/[/.[\]]+/).filter(Boolean)
+  const field = (k?: string) => (k ? FIELD_NAME[k] ?? '' : '')
+  if (parts[0] === 'jobs' && s) {
+    const j = s.jobs[Number(parts[1])]
+    return { what: `${j ? jobName(j.job_id) : '작업'} ${field(parts[2])}`.trim(), why }
+  }
+  if (parts[0] === 'vehicles' && s) {
+    const v = s.vehicles?.[Number(parts[1])]
+    return { what: `${v ? vehicleName(v.vehicle_id) : '차량'} ${field(parts[2])}`.trim(), why }
+  }
+  if (parts[0] === 'windows' && s) {
+    const w = s.windows[Number(parts[1])]
+    return { what: `${w ? w.voyage_id : '항차'} ${field(parts[2]) || '반입 시간'}`.trim(), why }
+  }
+  if (parts[0] === 'change') return parts[1] === 'verification' ? { what: '터미널 공지', why: '아직 확정된 공지가 아닙니다.' } : { what: `반입 마감 변경 공지 ${field(parts[1])}`.trim(), why }
+  return { what: '입력', why }
+}

@@ -6,7 +6,7 @@ import { acknowledgeIds, approvalErrorHint, approvalResponseMatches, approvalRet
 import { Icon } from './Icon'
 import { kstDateTime } from '../lib/time'
 import { Hint } from './Hint'
-import { jobName } from '../lib/labels'
+import { jobName, planName } from '../lib/labels'
 
 export type Status =
   | { state: 'idle' }
@@ -97,7 +97,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
         </p>
       )}
       <button type="button" disabled={!canSend} title={gate.reasons.join('\n')} onClick={send}>
-        {status.state === 'sending' ? '승인 요청 중…' : status.state === 'error' && status.retryable ? '다시 시도' : `${result.method} 조정안 승인`}
+        {status.state === 'sending' ? '승인 요청 중…' : status.state === 'error' && status.retryable ? '다시 시도' : `${planName(result.method)} 승인`}
       </button>
       {!gate.allowed && (
         <ul className="warn">

@@ -20,9 +20,8 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
   return (
     <header className="appbar">
       <a className="brand" href="?">
-        <span className="brand-mark" aria-hidden="true">반</span>
+        <img className="brand-mark" src="/brand.svg" alt="" width="32" height="32" />
         반입맞춤
-        {mode === 'http' && <span className="demo-pill" title="모의 자료로 운영하는 데모 환경입니다. 실제 기사·터미널에 전달되지 않습니다.">데모 환경</span>}
       </a>
       <nav className="side-nav" aria-label="화면">
         <p className="nav-group">배차</p>

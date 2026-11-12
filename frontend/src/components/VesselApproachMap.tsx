@@ -182,15 +182,15 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
             ))}
           </div>
           <div className="vm-play">
-            <span className="vm-clock"><span className="vm-live" aria-hidden="true" /><b>{kst(at(base, t))}</b> <span className="muted">{speed === 1 ? '현재 시각' : `시연 ${speed}배속`}</span></span>
-            <label className="vm-speed small">시연 속도
+            <span className="vm-clock"><span className="vm-live" aria-hidden="true" /><b>{kst(at(base, t))}</b> <span className="muted">{speed === 1 ? '현재 시각' : `${speed}배속`}</span></span>
+            <label className="vm-speed small">시간 배속
               <select value={speed} onChange={e => setSpeed(Number(e.target.value) as 1 | 10 | 60)}>
                 <option value={1}>실시간</option>
                 <option value={10}>10배</option>
                 <option value={60}>60배</option>
               </select>
             </label>
-            {t >= MAX_MIN && <button type="button" className="secondary" onClick={() => setT(0)}>모의 상황 다시 시작</button>}
+            {t >= MAX_MIN && <button type="button" className="secondary" onClick={() => setT(0)}>처음부터 다시</button>}
           </div>
         </div>
 

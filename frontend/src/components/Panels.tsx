@@ -21,7 +21,7 @@ export function Header({ s }: { s: Snapshot }) {
   return (
     <header className="top">
       <div>
-        <h1>반입시간 변경 배차 점검</h1>
+        <h1>반입 마감 변경 점검</h1>
         <p className="muted">
           {c.voyage_id} · {c.terminal_id} 반입 마감(컷오프) 변경에 따른 남은 배차 점검 · {kstDateTime(s.as_of)} 기준
         </p>
@@ -30,14 +30,17 @@ export function Header({ s }: { s: Snapshot }) {
           시나리오 {s.scenario_id} · 계획 {s.plan_id} v{s.base_plan_version}
         </details>
       </div>
-      <span className={`badge mode-${s.data_mode}`} title="입력 자료 구분">
-        {DATA_MODE[s.data_mode]} 자료
-      </span>
+      {/* 데모 환경 배지가 위에 있으므로 모의 자료는 따로 표시하지 않는다. 실제·혼합 자료일 때만 구분 배지를 단다. */}
+      {s.data_mode !== 'simulated' && (
+        <span className={`badge mode-${s.data_mode}`} title="입력 자료 구분">
+          {DATA_MODE[s.data_mode]} 자료
+        </span>
+      )}
     </header>
   )
 }
 
-const sourceLabel = (ref: string) => (ref.startsWith('fixture:') ? '시연용 모의 시나리오' : ref)
+const sourceLabel = (ref: string) => (ref.startsWith('fixture:') ? '데모 시나리오' : ref)
 function shiftText(prev: string | null, next: string | null | undefined) {
   if (!prev || !next) return null
   const m = Math.round((Date.parse(next) - Date.parse(prev)) / 60000)
@@ -65,7 +68,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
       )}
       {w && berth && (
         <p className="change-why">
-          <Icon name="ship" size={15} /> 같은 항차 모선 <b>{berth.name}</b>의 접안 예정도 <s>{kstTimeWithDay(berth.prev, s.as_of)}</s> → <b>{kstTimeWithDay(berth.next, s.as_of)}</b>로 앞당겨졌습니다.
+          <Icon name="ship" size={15} /> {c.verification === 'confirmed' ? '같은 항차 모선' : '공지대로라면 모선'} <b>{berth.name}</b>의 접안 예정도 <s>{kstTimeWithDay(berth.prev, s.as_of)}</s> → <b>{kstTimeWithDay(berth.next, s.as_of)}</b>{c.verification === 'confirmed' ? '로 앞당겨졌습니다.' : '로 앞당겨집니다(확정 전).'}
           <span className="small"> HJNC는 접안 10시간 전에 반입을 마감합니다.</span>
         </p>
       )}
@@ -99,7 +102,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
           <dt>상태</dt>
           <dd>
             <span className={c.verification === 'confirmed' ? 'ok' : 'warn'}>{VERIFY[c.verification] ?? c.verification}</span>
-            <div className="muted small">{kstDateTime(c.confirmed_at)} 확인</div>
+            <div className="small">{c.confirmed_at ? `${kstDateTime(c.confirmed_at)} 확인` : '터미널 확정 대기'}</div>
           </dd>
         </div>
         <div>

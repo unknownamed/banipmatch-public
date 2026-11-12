@@ -148,7 +148,7 @@ export function VehicleTimeline({ rows, baseLabel, candLabel }: { rows: JobRow[]
       </div>
       {model.vehicles.map((v) => (
         <section key={v.id} className="vehicle-card" aria-label={`차량 ${v.id}`}>
-          <h3>{vehicleName(v.id)}{vehicleName(v.id) !== v.id && <span className="muted small"> {v.id}</span>}</h3>
+          <h3>{vehicleName(v.id)}</h3>
           <Lane name={baseLabel} bars={v.base} model={model} incomplete={model.incomplete.some((a) => a.vehicleId === v.id && a.side === 'base')} />
           {candLabel && <Lane name={candLabel} bars={v.cand} model={model} incomplete={model.incomplete.some((a) => a.vehicleId === v.id && a.side === 'cand')} />}
           {model.incomplete.filter((a) => a.vehicleId === v.id).map((a) => (

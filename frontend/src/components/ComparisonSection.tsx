@@ -6,7 +6,7 @@ import { ComparisonTable } from './ComparisonTable'
 import { MetricsRow } from './Panels'
 import { VehicleTimeline } from './VehicleTimeline'
 import { DispatchMap } from './DispatchMap'
-import { jobName } from '../lib/labels'
+import { jobName, planName } from '../lib/labels'
 
 interface Props {
   snapshot: Snapshot
@@ -32,6 +32,9 @@ function heldWereLate(base: MethodResult, cand: MethodResult) {
   return cand.unassigned_job_ids.length > 0 && cand.unassigned_job_ids.every((id) => late.has(id))
 }
 
+/** 입력 확인·확정 대기로 계산하지 않은 경우의 안내(오류가 아니다). */
+export const NOT_COMPUTED = '조정안은 계산하지 않았습니다.'
+
 export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle' }: Props) {
   const list = results.state === 'ready' ? results.data.results : null
   const broken = lockedViolations(rows)
@@ -39,22 +42,24 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
   const narrow = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches
   const [layout, setLayout] = useState(narrow ? 'job' : initialLayout)
   const [selectedJob, setSelectedJob] = useState<string | null>(null)
-  const candLabel = cand ? `${cand.method} 조정안` : null
-  const baseLabel = base ? 'B0 원안' : '원안(입력)'
+  const candLabel = cand ? planName(cand.method) : null
+  const baseLabel = '원래 배차'
   return (
     <section className="card comparison">
       <h2>원안 · 조정안 비교</h2>
       {results.state === 'loading' && <p className="muted">결과 조회 중… 아래 원안은 입력 기준으로 먼저 보여줍니다.</p>}
       {results.state === 'pending' && <p className="muted">계산 중입니다. 결과가 도착하면 조정안을 자동으로 표시합니다.</p>}
-      {results.state === 'error' && <p className="warn">결과를 표시할 수 없습니다: {results.message}</p>}
+      {results.state === 'error' && (results.message.startsWith(NOT_COMPUTED)
+        ? <p className="note-plain">{results.message}</p>
+        : <p className="warn">결과를 표시할 수 없습니다: {results.message}</p>)}
       {list && list.length === 0 && <p className="warn">결과 목록이 비어 있습니다. 해결 완료가 아닙니다.</p>}
-      {list && list.length > 0 && !cand && <p className="muted">조정안(B1~B3) 결과가 없습니다. 원안 진단만 표시합니다.</p>}
+      {list && list.length > 0 && !cand && <p className="muted">조정안 결과가 없습니다. 원래 배차 점검만 표시합니다.</p>}
 
       {candidates.length > 1 && (
         <div className="tabs" role="tablist">
           {candidates.map((r) => (
             <button key={r.method} role="tab" aria-selected={r === cand} onClick={() => onPick(r.method)}>
-              {r.method}
+              {planName(r.method)}
               {r.method === recommended && <span className="rec-tag">추천</span>}
             </button>
           ))}
@@ -64,7 +69,7 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
       {base && cand && <MetricsRow base={base} cand={cand} />}
       {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
         <p className="warn">
-          {cand.method} 조정안은 {cand.metrics.unassigned_count}건을 어느 차량에도 넣지 못했습니다
+          {planName(cand.method)}은 {cand.metrics.unassigned_count}건을 어느 차량에도 넣지 못했습니다
           {heldWereLate(base, cand) ? ' — 원래 배차에서도 마감을 넘기던 작업입니다' : ''}. 위반 수가 줄어든 데에는 이 작업이 빠진 것도 포함되니,
           ‘확인 필요’에서 따로 처리하세요.
         </p>

@@ -124,7 +124,7 @@ describe('수신자 화면', () => {
     await flush()
     await flush()
     expect(client.opened).toHaveBeenCalledWith('N1')
-    expect(container.textContent).toContain('다른 차량(상세 비공개)')
+    expect(container.textContent).toContain('새로 맡음')
     expect(container.textContent).toContain('응답 없음')
     await act(async () => button('수행 곤란')!.click())
     await flush()
@@ -143,15 +143,15 @@ describe('수신자 화면', () => {
     expect(client.opened).not.toHaveBeenCalled()
   })
 
-  it('모의 링크는 서버 없이 수락→변경→응답까지 보여주고 모의임을 밝힌다', async () => {
+  it('모의 링크는 서버 없이 수락→변경→응답까지 보여준다', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
     await act(async () => root.render(<RecipientApp client={createDemoRecipientClient()} boot={{ invite: 'demo-invite', notification: null }} env={android} demo />))
     await flush()
-    expect(container.textContent).toContain('모의 화면입니다')
+    expect(container.textContent).toContain('배차 알림 연결')
     await act(async () => button('초대 수락')!.click())
     await flush()
     await flush()
-    expect(container.textContent).toContain('J2')
+    expect(container.textContent).toContain('BNJU 100217 0')
     await act(async () => button('수행 가능')!.click())
     await flush()
     expect(container.textContent).toContain('현재: 수행 가능')

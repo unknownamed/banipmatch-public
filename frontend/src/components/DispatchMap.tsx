@@ -5,7 +5,7 @@ import type { MethodResult, Snapshot } from '../api/types'
 import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
 import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
 import { kstTime } from '../lib/time'
-import { jobName, jobInfo, vehicleName, vehicleShort } from '../lib/labels'
+import { jobName, jobInfo, planName, vehicleName, vehicleShort } from '../lib/labels'
 import { TripStepper } from './TripStepper'
 
 const GATE_LABEL = { ok: '여유', tight: '빠듯', late: '마감 초과' } as const
@@ -45,7 +45,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
   }, [speed])
 
   const plan = usePlan === 'cand' && cand ? cand.assignments : base?.assignments ?? snapshot.baseline_assignments
-  const planLabel = usePlan === 'cand' && cand ? `${cand.method} 조정안` : '원안'
+  const planLabel = usePlan === 'cand' && cand ? planName(cand.method) : '원래 배차'
   const unassigned = usePlan === 'cand' && cand ? cand.unassigned_job_ids : base?.unassigned_job_ids ?? snapshot.baseline_unassigned_job_ids
   const fleet = useMemo(() => vehiclesAt(snapshot, plan, now), [snapshot, plan, now])
   const [pickedVehicle, setPickedVehicle] = useState<string | null>(null)
@@ -160,16 +160,16 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
       <div className="dm-head">
         <div>
           <h3>차량 현황 · 게이트 도착</h3>
-          <p className="muted small"><b>{kstTime(new Date(now).toISOString())}</b> {speed === 1 ? '현재' : `시연 ${speed}배속`} · {planLabel} 기준 위치</p>
+          <p className="muted small"><b>{kstTime(new Date(now).toISOString())}</b> {speed === 1 ? '현재' : `${speed}배속`} · {planLabel} 기준 위치</p>
         </div>
         <div className="dm-tools">
           {cand && (
             <div className="vm-seg" role="radiogroup" aria-label="표시할 배차">
               <button type="button" role="radio" aria-checked={usePlan === 'base'} onClick={() => setUsePlan('base')}>원안</button>
-              <button type="button" role="radio" aria-checked={usePlan === 'cand'} onClick={() => setUsePlan('cand')}>{cand.method} 조정안</button>
+              <button type="button" role="radio" aria-checked={usePlan === 'cand'} onClick={() => setUsePlan('cand')}>{planName(cand.method)}</button>
             </div>
           )}
-          <label className="vm-speed small">시연 속도
+          <label className="vm-speed small">시간 배속
             <select value={speed} onChange={e => { const v = Number(e.target.value) as 1 | 10 | 60; setSpeed(v); if (v === 1) setNow(Date.now()) }}>
               <option value={1}>실시간</option>
               <option value={10}>10배</option>

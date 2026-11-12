@@ -772,3 +772,73 @@ h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
 .result-nav::-webkit-scrollbar { display: none; }
 .rn-link { flex: none; padding: 7px 12px; border: 1px solid transparent; border-radius: 999px; background: transparent; color: #2b2f36; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; }
 .rn-link:hover { background: #fff; border-color: #e6e8ec; }
+
+/* 휴대폰: 화면 이동은 아래 고정 탭 막대(앱 하단 탭과 같은 방식). 위에는 서비스 이름만 남긴다 */
+@media (max-width: 640px) {
+  .appbar { position: sticky; top: 0; padding: 10px var(--space-3); }
+  .side-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0; padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); overflow: visible; background: #fff; border-top: 1px solid #e6e8ec; box-shadow: 0 -4px 14px rgba(16,24,40,.06); }
+  .side-nav a { flex-direction: column; justify-content: center; gap: 3px; padding: 7px 2px; border-radius: 10px; font-size: 11.5px; font-weight: 600; text-align: center; white-space: nowrap; background: transparent !important; color: #4b4f57; }
+  .side-nav a .icon { width: 20px; height: 20px; color: #4b4f57; }
+  .side-nav a[aria-current='page'] { color: var(--color-accent-strong); }
+  .side-nav a[aria-current='page'] .icon { color: var(--color-accent-strong); }
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .start-main > button { bottom: calc(72px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 640px) {
+  .ft-table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 12px 0; }
+  .ft-table td { display: block; padding: 0; text-align: left; }
+  .ft-table td::before { content: none; }
+  .ft-table td:nth-child(1) { font-size: 15px; }
+  .ft-table td:nth-child(2) { justify-self: end; }
+  .ft-table td:nth-child(3), .ft-table td:nth-child(4) { grid-column: 1 / -1; font-size: 13.5px; }
+  .ft-table td:nth-child(4) { color: #3b3f46; }
+  .ft-table td:nth-child(5)::before { content: '게이트 도착 '; content: '게이트 도착 ' / ''; font-size: 12.5px; color: #4b4f57; font-weight: 600; }
+  .ft-table td:nth-child(5) { font-size: 13.5px; font-weight: 600; align-self: center; }
+  .ft-table td:nth-child(6) { justify-self: end; }
+  .ft-table td:nth-child(6)::before { content: '마감 여유 '; content: '마감 여유 ' / ''; font-size: 12.5px; color: #4b4f57; font-weight: 600; }
+}
+@media (max-width: 640px) {
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .metrics > * { padding: 12px !important; }
+  .metric-value { font-size: 24px !important; }
+  .metric-label { font-size: 12.5px; }
+}
+.cell-times { color: #3b3f46; }
+@media (max-width: 640px) { table.stack td > * { grid-column: 2; } }
+
+/* 기사 화면: 변경 한 건 = 카드 한 장. 시각은 크게 */
+.rc-lead { margin: 0 0 10px; font-size: 14px; color: #2b2f36; }
+.rc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rc-item { padding: 12px 14px; border: 1px solid #e6e8ec; border-radius: 12px; background: #fff; border-left-width: 4px; }
+.rc-item.time { border-left-color: #2a6f8c; }
+.rc-item.in { border-left-color: var(--color-success); }
+.rc-item.out { border-left-color: #b0365c; background: #fffafb; }
+.rc-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.rc-box { font-size: 16px; letter-spacing: 0.01em; }
+.rc-size { font-size: 12.5px; font-weight: 600; color: #3b3f46; }
+.rc-tag { margin-left: auto; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.rc-tag.time { background: #e6f6fc; color: #1d5a73; }
+.rc-tag.in { background: var(--color-success-soft); color: var(--color-success); }
+.rc-tag.out { background: var(--color-danger-soft); color: var(--color-danger); }
+.rc-route { margin-top: 6px; font-size: 14px; font-weight: 600; color: #1f2329; }
+.rc-times { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 6px; font-size: 14px; color: #2b2f36; }
+.rc-times b { font-size: 20px; font-variant-numeric: tabular-nums; color: #141414; }
+.rc-times s { color: #6b6f76; margin-right: 2px; }
+.rc-note { margin: 6px 0 0; font-size: 14px; font-weight: 600; color: #8a2346; }
+.rc-meta { margin-top: 6px; font-size: 12.5px; color: #3b3f46; }
+.reject-list { margin: 6px 0; padding-left: 18px; font-size: 14px; }
+.reject-list li { margin: 3px 0; }
+.note-plain { margin: 0 0 8px; padding: 10px 12px; border-radius: 8px; background: #f1f4f8; color: #1f2a37; font-size: 14px; }
+/* 넓게 볼 때 접안·출항 선박 이름표는 숨겨 HJNC 앞 겹침을 줄인다(선택하면 보인다) */
+.vm-far .vm-ship.berthed:not(.picked) span, .vm-far .vm-ship.outbound:not(.picked) span { display: none; }
+.ib-side { display: grid; justify-items: end; gap: 8px; }
+.ib-when { font-size: 12px; font-weight: 600; color: #4b4f57; white-space: nowrap; }
+.inbox-row .ib-radio { margin-top: 0; }
+.inbox-row { grid-template-columns: 40px minmax(0, 1fr) auto; }
+.respond-buttons button.rb-ghost { background: #fff; color: #2b2f36; border: 1px solid #d5d8de; }
+@media (max-width: 640px) {
+  .respond-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .respond-buttons button { min-height: 52px; font-size: 16px; }
+  .respond-buttons button.rb-ghost { grid-column: 1 / -1; min-height: 44px; font-size: 14px; }
+}
+img.brand-mark { display: block; background: none; border-radius: 8px; flex: none; }
