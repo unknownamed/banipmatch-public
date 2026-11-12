@@ -49,4 +49,10 @@ jobs:
       - name: Test data inputs, API, persistence, and B0-B3 engine
         run: python -m pytest -q
       - name: Verify frozen showcase evidence without rerunning the solver
-        run: python tools/build_showcase_evidence.py --check
+        # 공개 사본은 이메일을 지우려고 이력을 다시 써서 평가 실행 커밋이 없다. 있을 때만 대조한다.
+        run: |
+          if git cat-file -e "0d2640bec9886fe344166809123bc9a2cc19bb92^{commit}" 2>/dev/null; then
+            python tools/build_showcase_evidence.py --check
+          else
+            echo "평가 실행 커밋이 없는 공개 사본이라 증거 대조를 건너뜀(원 저장소·제출 ZIP에서 확인)"
+          fi
