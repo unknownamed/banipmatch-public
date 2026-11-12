@@ -70,7 +70,7 @@ const BERTH_APPROACH: Record<TerminalId, LatLon[]> = {
   HPNT: [{ lat: 35.0605, lon: 128.796 }, { lat: 35.0625, lon: 128.818 }, { lat: 35.0665, lon: 128.829 }],
   PNIT: [{ lat: 35.0605, lon: 128.796 }, { lat: 35.0625, lon: 128.818 }, { lat: 35.0715, lon: 128.83 }, { lat: 35.0765, lon: 128.8305 }],
 }
-export const ANCHORAGE: LatLon = { lat: 34.935, lon: 128.845 } // 외해 묘박 대기(설명용)
+export const ANCHORAGE: LatLon = { lat: 34.94, lon: 128.885 } // 외해 묘박 대기(설명용)
 
 export type VesselState = 'underway' | 'anchored' | 'berthed'
 export type Vessel = {

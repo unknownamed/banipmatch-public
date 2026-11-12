@@ -10,8 +10,12 @@ const STATUS_LABEL = { underway: '입항 중', anchored: '묘박 대기', berthe
 const kst = (d: Date) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
 const at = (base: Date, min: number) => new Date(base.getTime() + min * 60000)
 
-function arrowSvg(heading: number) {
-  return `<svg viewBox="0 0 24 24" width="22" height="22" style="transform:rotate(${heading}deg)" aria-hidden="true"><path d="M12 2 L19 21 L12 17 L5 21 Z"/></svg>`
+// 위에서 내려다본 컨테이너선(선수가 위). 진행 방향으로 회전한다.
+function shipSvg(heading: number) {
+  const rows = [10, 15, 20, 25].map(y => `<rect x="4" y="${y}" width="8" height="4" rx="0.6" class="box"/>`).join('')
+  return `<svg class="hull" viewBox="0 0 16 42" width="16" height="42" style="transform:rotate(${heading}deg)" aria-hidden="true">`
+    + `<path class="body" d="M8 0.8 C11.6 5 13.6 9 13.6 13 L13.6 37.5 Q13.6 41 10.6 41 L5.4 41 Q2.4 41 2.4 37.5 L2.4 13 C2.4 9 4.4 5 8 0.8 Z"/>`
+    + rows + `<rect x="4.2" y="31" width="7.6" height="5" rx="1" class="bridge"/></svg>`
 }
 
 export function VesselApproachMap() {
@@ -42,6 +46,10 @@ export function VesselApproachMap() {
       if (!alive || !box.current) return
       const m = new maps.Map(box.current, { center: new maps.LatLng(34.99, 128.8), level: 9 })
       kmap.current = m
+      // 넓게 볼 때는 대상 터미널·선택 선박 이름만 남겨 겹침을 줄인다.
+      const zoomClass = () => box.current?.classList.toggle('vm-far', m.getLevel() >= 8)
+      maps.event.addListener(m, 'zoom_changed', zoomClass)
+      zoomClass()
       const ll = (p: LatLon) => new maps.LatLng(p.lat, p.lon)
       const seen = new Set<string>()
       for (const v of VESSELS) {
@@ -98,7 +106,7 @@ export function VesselApproachMap() {
       mk.el.className = `vm-ship ${v.status}${v.vessel.terminal === 'HJNC' ? ' target' : ''}${v.vessel.id === sel.vessel.id ? ' picked' : ''}`
       const name = v.vessel.name ?? '이름 미수신'
       const tail = v.etaMin !== null ? formatDuration(v.etaMin - t) : STATUS_LABEL[v.status]
-      mk.el.innerHTML = `${arrowSvg(v.status === 'anchored' || v.status === 'berthed' ? 0 : v.heading)}<span>${name} · ${tail}</span>`
+      mk.el.innerHTML = `${shipSvg(v.status === 'anchored' ? 20 : v.heading)}<span>${name} · ${tail}</span>`
     }
     if (paths.current) {
       paths.current.passed.setPath(sel.passed.length > 1 ? sel.passed.map(ll) : [])
