@@ -2,7 +2,7 @@
 // 계산 결과의 값만 쓴다(새 판단을 만들지 않는다).
 import type { MethodResult } from '../api/types'
 import { ISSUE_LABEL, type JobRow } from '../lib/compare'
-import { jobName } from '../lib/labels'
+import { jobName, planName } from '../lib/labels'
 import { Icon } from './Icon'
 
 const go = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -45,7 +45,7 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
           <div className="as-cell good">
             <span className="as-ic"><Icon name="check" size={16} /></span>
             <span className="as-num">{fixed}</span>
-            <span className="as-label">{cand.method}{cand.method === recommended ? '(추천)' : ''}로<br />해결</span>
+            <span className="as-label">{planName(cand.method)}{cand.method === recommended ? '(추천)' : ''}으로<br />해결</span>
           </div>
         )}
         {cand && (

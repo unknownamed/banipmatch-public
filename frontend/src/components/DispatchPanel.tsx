@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { SessionState, V2Client } from '../api/v2'
 import {
-  CHANGE_LABEL, DELIVERY_LABEL, RESPONSE_LABEL, SUBSCRIPTION_LABEL, invitationLink, linkedRecipientFor, retryBlocker,
+  DELIVERY_LABEL, RESPONSE_LABEL, SUBSCRIPTION_LABEL, invitationLink, linkedRecipientFor, retryBlocker,
   type DispatchPreview, type DispatchState, type Followup, type RecipientSummary,
 } from '../lib/dispatch'
 import { kstDateTime, kstTime } from '../lib/time'
 import { jobName, vehicleName, vehicleShort } from '../lib/labels'
 import { driverMessage } from '../lib/driverMessage'
+import { ISSUE_LABEL } from '../lib/compare'
 
 const enc = encodeURIComponent
 const errText = (e: unknown) =>
@@ -57,7 +58,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
         기사 전달 · 응답
       </h2>
       <p className="muted small">
-        확정한 계획 v{p.approved_version}({p.method}) 기준으로 바뀌는 차량입니다. 기사 앱으로 알림을 보내거나, 안내문을 복사해 문자·카톡으로 보낼 수 있습니다.
+        확정한 계획(v{p.approved_version}) 기준으로 바뀌는 차량입니다. 기사 앱으로 알림을 보내거나, 안내문을 복사해 문자·카톡으로 보낼 수 있습니다.
       </p>
 
       <h3>차량별 변경 내용</h3>
@@ -72,11 +73,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
             </p>
             <ul className="small">
               {v.changes.map((c) => (
-                <li key={c.job_id}>
-                  {jobName(c.job_id)} · {CHANGE_LABEL[c.kind] ?? c.kind}:{' '}
-                  {c.before ? `${vehicleShort(c.before.vehicle_id)} ${kstTime(c.before.pickup_departure_at)} 출발` : '배정 없음'} →{' '}
-                  {c.after ? `${vehicleShort(c.after.vehicle_id)} ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : '미처리'}
-                </li>
+                <li key={c.job_id}><b>{jobName(c.job_id)}</b> · {changeText(v.vehicle_id, c)}</li>
               ))}
             </ul>
             <CopyNotice text={driverMessage(v.vehicle_id, v.changes, p.approved_version)} />
@@ -111,9 +108,9 @@ function Followups({ items, title }: { items: Followup[]; title: string }) {
       <ul className="followups">
         {items.map((f, i) => (
           <li key={`${f.job_id}:${f.code}:${i}`}>
-            <b>{f.job_id ? jobName(f.job_id) : '전체'}</b> <code className="small">{f.code}</code>
+            <b>{f.job_id ? jobName(f.job_id) : '전체'}</b> <span className="badge unassigned">{ISSUE_LABEL[f.code] ?? '확인 필요'}</span>
             {f.check_next && <p className="small">{f.check_next}</p>}
-            {f.contact_role && <p className="small muted">확인 담당: {f.contact_role} · 해결을 보장하지 않습니다.</p>}
+            {f.contact_role && <p className="small">확인할 사람: {f.contact_role}</p>}
           </li>
         ))}
       </ul>
@@ -159,7 +156,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
   return (
     <>
       <h3>기사 앱 연결</h3>
-      {!authorized && <p className="small muted">팀 시연 코드를 입력하면 연결 링크를 만들 수 있습니다. 코드가 없으면 위의 안내문 복사로 전달하세요.</p>}
+      {!authorized && <p className="small muted">알림 사용 코드를 넣으면 기사 연결 링크를 만들 수 있습니다. 코드가 없으면 위의 안내문 복사로 전달하세요.</p>}
       {recipients.length > 0 && (
         <table className="grid small">
           <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>
@@ -340,7 +337,7 @@ function CopyNotice({ text }: { text: string }) {
 /** 앱 알림이 실제로 오기까지의 순서. 지금 어디까지 됐는지 표시한다. */
 function PushGuide({ authorized, linked }: { authorized: boolean; linked: boolean }) {
   const steps: [string, boolean][] = [
-    ['팀 시연 코드로 알림 권한 열기', authorized],
+    ['알림 사용 코드로 알림 기능 켜기', authorized],
     ['차량을 골라 연결 링크를 만들고 기사 휴대폰으로 보내기', linked],
     ['기사 휴대폰에서 링크 열기 → 알림 허용 (아이폰은 공유 → 홈 화면에 추가 후 그 아이콘으로 열기)', linked],
     ['아래 ‘기사에게 보내기’ → 기사가 확인·곤란으로 응답하면 이 화면에 표시', false],
@@ -362,14 +359,29 @@ function TeamCodeUnlock({ client, onUnlocked }: { client: V2Client; onUnlocked: 
       onUnlocked(await client.post<SessionState>('/v2/session/push-authorization', { team_code: code }, `team-code-${crypto.randomUUID()}`))
     } catch (e) {
       const c = e instanceof ApiRequestError ? e.body?.code : null
-      setError(c === 'TEAM_CODE_INVALID' ? '코드가 맞지 않습니다.' : c === 'RATE_LIMITED' ? '시도가 많습니다. 10분 뒤 다시 해 주세요.' : c === 'TEAM_CODE_NOT_CONFIGURED' ? '이 서버는 팀 시연 코드를 쓰지 않습니다.' : errText(e))
+      setError(c === 'TEAM_CODE_INVALID' ? '코드가 맞지 않습니다.' : c === 'RATE_LIMITED' ? '시도가 많습니다. 10분 뒤 다시 해 주세요.' : c === 'TEAM_CODE_NOT_CONFIGURED' ? '이 서버에서는 알림 사용 코드를 쓰지 않습니다.' : errText(e))
     } finally { setBusy(false) }
   }
   return (
     <form className="team-code" onSubmit={(e) => { e.preventDefault(); void submit() }}>
-      <label className="small">팀 시연 코드 <input value={code} onChange={(e) => setCode(e.target.value)} maxLength={32} autoComplete="off" spellCheck={false} /></label>
-      <button type="submit" disabled={busy || !code.trim()}>{busy ? '확인 중…' : '알림 권한 열기'}</button>
+      <label className="small">알림 사용 코드 <input value={code} onChange={(e) => setCode(e.target.value)} maxLength={32} autoComplete="off" spellCheck={false} /></label>
+      <button type="submit" disabled={busy || !code.trim()}>{busy ? '확인 중…' : '알림 기능 켜기'}</button>
       {error && <span className="warn small" role="alert">{error}</span>}
     </form>
   )
+}
+
+type Slot = { vehicle_id?: string; sequence?: number; pickup_departure_at?: string | null; gate_arrival_at?: string | null } | null | undefined
+/** 차량 카드 안에서 한 작업이 어떻게 바뀌는지, 기사가 바로 알아듣게 한 줄로. */
+function changeText(vehicleId: string, c: { kind: string; before?: Slot; after?: Slot }) {
+  const t = (x: string | null | undefined) => kstTime(x ?? null)
+  const b = c.before, a = c.after
+  if (!a) return '미처리로 전환 · 운송 취소 아님, 담당자 확인 필요'
+  const when = `출발 ${t(a.pickup_departure_at)} · 게이트 ${t(a.gate_arrival_at)}`
+  if (!b) return `새로 배정 · ${when}`
+  if (b.vehicle_id !== a.vehicle_id)
+    return b.vehicle_id === vehicleId ? `다른 차량(${vehicleShort(a.vehicle_id)})으로 넘어감 · 이 차량은 수행하지 않음` : `${vehicleShort(b.vehicle_id)} 차량에서 넘어옴 · ${when}`
+  const moved = b.pickup_departure_at !== a.pickup_departure_at
+  const order = b.sequence !== a.sequence ? ` · 순서 ${b.sequence}번째 → ${a.sequence}번째` : ''
+  return moved ? `출발 ${t(b.pickup_departure_at)} → ${t(a.pickup_departure_at)} · 게이트 ${t(a.gate_arrival_at)}${order}` : `시각 그대로${order}`
 }

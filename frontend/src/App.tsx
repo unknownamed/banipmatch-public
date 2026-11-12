@@ -92,7 +92,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {run && run.status !== 'completed' && <RunStatusPanel run={run} results={results} />}
       {assumed && (
         <div className="banner fixture" role="alert">
-          가정 시험 입력입니다. 준비·가용 조건에 가정이 섞여 있어 비교만 할 수 있고 승인·전달할 수 없습니다.
+          확인 전인 값을 가정해 계산한 결과입니다. 비교만 할 수 있고 확정·기사 전달은 할 수 없습니다.
         </div>
       )}
       {v2 && revisionId && run && cand && view.results.state === 'ready' && (
@@ -119,7 +119,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             <UnresolvedPanel rows={rows} cand={cand} />
             <ApprovalPanel
               key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
-              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null), assumed ? '가정 시험 입력이라 승인할 수 없습니다. 확인된 조건으로 다시 보완해 계산하세요.' : null)}
+              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? `현재 계획이 v${planNow!.version}입니다. 이 결과는 v${run!.base_plan_version} 기준이라 승인할 수 없습니다. 이미 승인됐다면 다시 보낼 필요가 없고, 아니면 최신 계획으로 다시 계산하세요.` : null), assumed ? '가정한 값으로 계산한 결과라 확정할 수 없습니다. 확인된 값으로 다시 계산하세요.' : null)}
               client={client} run={run} result={cand} idempotencyKey={approvalKey}
               shared={approval.key === approvalScope ? approval.value : null}
               onShared={(value) => setApproval({ key: approvalScope, value })}

@@ -2,27 +2,30 @@
 // 화면 확인·발표 캡처용이며 실제 수신·응답 기록이 아니다. 초대 수락만 하면 바로 연결된 상태가 된다.
 import type { RecipientClient, RecipientNotification, RecipientSession } from './recipient'
 
-const at = (minutes: number) => new Date(Date.UTC(2026, 10, 11, 4, 0) + minutes * 60000).toISOString().replace('.000Z', 'Z')
+// 지금 시각 기준(분). 열 때마다 '방금 받은 알림'처럼 보이게 한다.
+const at = (minutes: number) => new Date(Math.floor(Date.now() / 60000) * 60000 + minutes * 60000).toISOString().replace('.000Z', 'Z')
 
 export function createDemoRecipientClient(): RecipientClient {
   let session: RecipientSession | null = null
   const notifications: RecipientNotification[] = [
     {
-      notification_id: 'N-DEMO-2', delivery_status: 'accepted', created_at: at(35), opened_at: null, response: 'none', responded_at: null,
+      notification_id: 'N-DEMO-2', delivery_status: 'accepted', created_at: at(-2), opened_at: null, response: 'none', responded_at: null,
       is_current: true, vehicle_ids: ['T1'], response_history: [],
       payload: {
         plan_version: 2, data_mode: 'simulated',
         vehicle_changes: [{
-          vehicle_id: 'T1',
+          vehicle_id: 'T1', plate_no: '부산 90바 1201',
           changes: [
-            { job_id: 'J1', kind: 'reassigned', before: { vehicle_id: 'T1', pickup_departure_at: at(102), gate_arrival_at: at(132) }, after: null, after_outside_scope: true, instruction: '담당자가 확정한 모의 변경 내용입니다. 수행 가능 여부를 응답하세요. 실제 운송/예약 변경을 뜻하지 않습니다.' },
-            { job_id: 'J2', kind: 'reassigned', before: null, before_outside_scope: true, after: { vehicle_id: 'T1', pickup_departure_at: at(102), gate_arrival_at: at(132) }, instruction: '담당자가 확정한 모의 변경 내용입니다. 수행 가능 여부를 응답하세요. 실제 운송/예약 변경을 뜻하지 않습니다.' },
+            { job_id: 'J09', kind: 'schedule_changed', before: { vehicle_id: 'T1', pickup_departure_at: at(95), gate_arrival_at: at(140) }, after: { vehicle_id: 'T1', pickup_departure_at: at(100), gate_arrival_at: at(145) },
+              display: { container_no: 'BNJU1002099', cargo_owner: '누리화학(주)', origin_name: '김해 안동공단', terminal_id: 'HJNC', voyage_id: 'BORT-2026-0112', size: '40ft' }, instruction: '' },
+            { job_id: 'J17', kind: 'reassigned', before: null, before_outside_scope: true, after: { vehicle_id: 'T1', pickup_departure_at: at(215), gate_arrival_at: at(223) },
+              display: { container_no: 'BNJU1002170', cargo_owner: '가람정밀(주)', origin_name: '녹산산단 상차지', terminal_id: 'PNIT', voyage_id: 'BE221E', size: '40ft' }, instruction: '' },
           ],
         }],
       },
     },
     {
-      notification_id: 'N-DEMO-1', delivery_status: 'superseded', created_at: at(10), opened_at: at(12), response: 'none', responded_at: null,
+      notification_id: 'N-DEMO-1', delivery_status: 'superseded', created_at: at(-40), opened_at: at(-38), response: 'none', responded_at: null,
       is_current: false, vehicle_ids: ['T1'], response_history: [], payload: null,
     },
   ]

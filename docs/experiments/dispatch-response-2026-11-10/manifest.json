@@ -5,7 +5,7 @@
   "source": "docs/development/v0.1/예제 데이터/01_snapshot.json",
   "source_sha256": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e",
   "tool": "tools/dispatch_response.py",
-  "tool_sha256": "7fcd3573587f4ce1414abc12a0f74f775da75d61446fcd83b582f4cce1476a1a",
+  "tool_sha256": "bcb7a2ceb456993d43e7581ba2dc4d73b8e17ea4393f0049b326d521b488b681",
   "python": "3.12.14",
   "method": "B1",
   "seed": 42,
@@ -16,7 +16,7 @@
   "note": "공통 예제의 과거 시각을 유지한 로직 검수. 현재 승인/발송 가능한 데이터가 아님.",
   "files": {
     "computed-result.json": "ef3a803694ac6e6f5d7690cb6593cd5c16c85a58d6d434c21cb92beaa5d0a563",
-    "response-preview.json": "cc606fd3452820b2b6761e6b49d171f502c4051bb713869d09e4b235a58c82d4"
+    "response-preview.json": "c34230c638f6746235011f8a949549fbed2b9044e100d4115c7b786eaa741cb9"
   },
   "regenerated": [
     {
@@ -26,6 +26,10 @@
     {
       "date": "2026-11-12",
       "reason": "변경 비교에서 차량별 작업 순서를 1부터 다시 매겨 비교(엔진 sequence의 빈 번호만 다른 작업을 변경으로 전달하지 않음). 같은 입력·결과로 재생성"
+    },
+    {
+      "date": "2026-11-12",
+      "reason": "후속 확인 안내 문구에서 필드명(ready_at)을 '상차 준비 시각'으로 바꾼 뒤 같은 입력·결과로 재생성"
     }
   ]
 }

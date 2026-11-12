@@ -25,9 +25,9 @@ function Cell({ a, refUtc, closesAt, buffer }: { a: Assignment | undefined; refU
   const before = closesAt ? Math.round((Date.parse(closesAt) - Date.parse(a.gate_arrival_at)) / 60000) : null
   const short = !late && before !== null && buffer > 0 && before < buffer ? before : null
   return (
-    <>
-      <b title={a.vehicle_id}>{vehicleName(a.vehicle_id)}</b> <span className="muted small">{a.sequence}번째</span>
-      <div className="muted small">
+    <div className="cell">
+      <span className="cell-main"><b title={a.vehicle_id}>{vehicleName(a.vehicle_id)}</b> <span className="small">· {a.sequence}번째</span></span>
+      <div className="small cell-times">
         출발 {kstTimeWithDay(a.pickup_departure_at, refUtc)} · 도착{' '}
         <span className={late ? 'late-time' : undefined}>
           {kstTimeWithDay(a.gate_arrival_at, refUtc)}
@@ -36,7 +36,7 @@ function Cell({ a, refUtc, closesAt, buffer }: { a: Assignment | undefined; refU
         </span>{' '}
         · 복귀 {kstTimeWithDay(a.return_at, refUtc)}
       </div>
-    </>
+    </div>
   )
 }
 

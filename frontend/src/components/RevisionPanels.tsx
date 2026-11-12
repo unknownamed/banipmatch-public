@@ -4,7 +4,7 @@ import type { Method, Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
 import { EMPTY_DRAFT, draftProblems, freezeLabel, isBlankDraft, isCompleteInput, listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits, type VehicleDraft } from '../lib/revision'
 import { kstDateTime } from '../lib/time'
-import { jobName, vehicleName } from '../lib/labels'
+import { jobName, planName, vehicleName } from '../lib/labels'
 import { Hint } from './Hint'
 import { withQueueRetry } from '../lib/queueRetry'
 
@@ -174,11 +174,11 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
         <legend>조건 구분</legend>
         <label className="rev-choice">
           <input type="radio" name="confirmation" checked={confirmation === 'confirmed_simulation'} onChange={() => setConfirmation('confirmed_simulation')} />
-          확인된 조건 <span className="small muted">— 화주·기사에게 확인한 값</span>
+          확인된 조건 <span className="small">— 화주·기사에게 확인한 값</span>
         </label>
         <label className="rev-choice">
           <input type="radio" name="confirmation" checked={confirmation === 'assumed'} onChange={() => setConfirmation('assumed')} />
-          가정 시험 <span className="small muted">— 비교만 가능, 확정 불가</span>
+          가정해서 비교 <span className="small">— 아직 확인 전인 값, 비교만 하고 확정은 불가</span>
         </label>
       </fieldset>
 
@@ -298,20 +298,20 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
   return (
     <section className="card revision-compare" aria-labelledby="revcmp-title">
       <h2 id="revcmp-title">
-        조건 보완 전후 비교 ({method}){' '}
-        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정 시험 · 승인 불가' : '확인된 조건(모의)'}</span>
+        조건 보완 전후 비교 · {planName(method)}{' '}
+        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정 비교 · 확정 불가' : '확인된 조건'}</span>
       </h2>
       <p className="small">수정 이유: {c.revision.reason}</p>
       <ul className="rev-diff">
         {c.revision.changes.map((x) => (
-          <li key={`${x.entity_id}:${x.field}`}>{x.entity_id} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
+          <li key={`${x.entity_id}:${x.field}`}>{x.field.startsWith('vehicle') || x.field === 'available_at' || x.field === 'shift_end_at' ? vehicleName(x.entity_id) : jobName(x.entity_id)} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
         ))}
         {c.revision.added_vehicles.map((v) => (
-          <li key={v.vehicle_id}>차량 추가: <b>{v.vehicle_id}</b> · {v.start_location_id} 출발 (확보 여부는 담당자가 외부에서 확인)</li>
+          <li key={v.vehicle_id}>차량 추가: <b>{v.vehicle_id}</b> (확보 여부는 담당자가 직접 확인)</li>
         ))}
       </ul>
       {c.before.status === 'input_blocked' && (
-        <p className="warn small">이전 입력은 {c.before.error?.code} 때문에 계산되지 않았습니다. 이전 미처리를 0건으로 보고 비교하지 않습니다.</p>
+        <p className="small">이전 입력은 값이 비어 있어 계산하지 않았으므로, 전후 수치 비교 없이 새 결과만 보여 줍니다.</p>
       )}
       {c.job_transitions && (
         <dl className="rev-transitions">
@@ -326,9 +326,10 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
           <tbody><tr>{DELTAS.map(([k]) => <td key={k}>{signed(c.metric_deltas![k])}</td>)}</tr></tbody>
         </table>
       )}
-      <ul className="small muted">
-        {c.comparison_limits.map((l) => <li key={l}>{l}</li>)}
-      </ul>
+      {c.before.status !== 'input_blocked' && c.comparison_limits.length > 0 && (
+        <ul className="small rev-limits">{c.comparison_limits.map((l) => <li key={l}>{l}</li>)}</ul>
+      )}
+
     </section>
   )
 }

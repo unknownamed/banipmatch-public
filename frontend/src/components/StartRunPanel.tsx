@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import s07 from '@examples/07_snapshot_입력누락.json'
-import s08 from '@examples/08_snapshot_미확인변경.json'
+import s07 from '../fixtures/demo-02-missing-ready.synthetic.json'
+import s08 from '../fixtures/demo-02-unconfirmed.synthetic.json'
 import s02 from '../fixtures/demo-02-evening.synthetic.json'
 import runRequestJson from '@examples/02_run_request.json'
 import type { ApiClient, RunRequest } from '../api/client'
@@ -8,10 +8,11 @@ import { ApiRequestError } from '../api/client'
 import type { Snapshot } from '../api/types'
 import type { V2Client } from '../api/v2'
 import { shiftSnapshot } from '../lib/shift'
+import { readableDetail } from '../lib/labels'
 import { ConditionRevisionPanel } from './RevisionPanels'
 import { buildRows } from '../lib/compare'
 import { ALL_METHODS, isMethodRejection, newAttempt, runFor, type MethodId, type StartAttempt } from '../lib/startRun'
-import { ComparisonSection } from './ComparisonSection'
+import { ComparisonSection, NOT_COMPUTED } from './ComparisonSection'
 import { ChangeEvidence, Header } from './Panels'
 import { withQueueRetry } from '../lib/queueRetry'
 import { NowPanel } from './NowPanel'
@@ -23,8 +24,8 @@ import { Icon, type IconName } from './Icon'
 type Tone = 'danger' | 'caution' | 'neutral'
 const EXAMPLES = [
   { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'HJNC · BHMN-2026-0045 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 같은 저녁 PNIT 반입 작업은 영향이 없습니다.', snapshot: s02 },
-  { id: '08', group: 'todo', icon: 'bell', tone: 'caution', chip: '확정 대기', title: 'HJNC · 반입 마감 변경 공지(확정 전)', meta: '터미널 공지 접수 · 아직 확정되지 않음', stats: ['트럭 2대', '작업 4건'], what: '확정되기 전에는 배차를 바꾸지 않습니다. 열어 보면 계산이 막히는 이유와 원래 배차를 확인할 수 있습니다.', snapshot: s08 },
-  { id: '07', group: 'todo', icon: 'edit', tone: 'caution', chip: '입력 확인', title: '상차 준비 시각이 빠진 작업', meta: '운송 계획 입력 누락 · 반입 마감 변경 확정', stats: ['트럭 2대', '작업 4건'], what: '준비 시각이 비어 있으면 계산할 수 없습니다. 화주에게 확인한 시각을 넣어 다시 계산합니다.', snapshot: s07 },
+  { id: '08', group: 'todo', icon: 'bell', tone: 'caution', chip: '확정 대기', title: 'HJNC · BORT-2026-0112 반입 마감 1시간 앞당김(확정 전)', meta: '모선 BM 오리엔트호 · 터미널 공지 접수 · 아직 확정되지 않음', stats: ['트럭 8대', '컨테이너 20개'], what: '공지가 확정되기 전에는 배차를 바꾸지 않습니다. 열면 공지 내용과 지금 배차를 확인할 수 있습니다.', snapshot: s08 },
+  { id: '07', group: 'todo', icon: 'edit', tone: 'caution', chip: '입력 확인', title: 'BNJU 100210 2 상차 준비 시각 미입력', meta: '다온물산(주) · 사상 공단 상차지 · BORT-2026-0112', stats: ['트럭 8대', '컨테이너 20개'], what: '준비 시각이 비어 있으면 계산할 수 없습니다. 화주에게 확인한 시각을 넣으면 바로 다시 계산합니다.', snapshot: s07 },
 ] as const satisfies readonly { id: string; group: 'todo'; icon: IconName; tone: Tone; chip: string; title: string; meta: string; stats: readonly string[]; what: string; snapshot: unknown }[]
 
 type Status =
@@ -126,7 +127,10 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
                       {on && <span className="ib-what">{e.what}</span>}
                       {on && <span className="sc-stats">{e.stats.map((t) => <span key={t}>{t}</span>)}</span>}
                     </span>
-                    <span className="ib-radio" aria-hidden="true" />
+                    <span className="ib-side">
+                      <span className="ib-when">{receivedAgo(e.snapshot as unknown as Snapshot)}</span>
+                      <span className="ib-radio" aria-hidden="true" />
+                    </span>
                   </button>
                 )
               })}
@@ -141,42 +145,24 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         {err !== null && (
           <div className="warn" role="alert">
             <p>
-              {status.state === 'error' && status.step} 실패:{' '}
-              {err instanceof ApiRequestError && err.body
-                ? `HTTP ${err.status} ${err.body.code} — ${err.message}`
-                : err instanceof ApiRequestError
-                  ? `HTTP ${err.status}, 서버 오류 본문 없음. 개발 서버 프록시가 백엔드(127.0.0.1:8000)에 닿지 못했을 수 있습니다. python -m backend 실행 여부를 확인하세요.`
-                  : err instanceof Error
-                    ? `서버에 연결하지 못했습니다(${err.message}). python -m backend 실행 여부를 확인하세요.`
-                    : String(err)}
+              <b>계산을 시작하지 못했습니다.</b>{' '}
+              {err instanceof ApiRequestError && err.body ? err.message : '서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.'}
             </p>
-            {err instanceof ApiRequestError && err.status === 401 && (
-              <p>VITE_API_TOKEN이 서버의 BANIPMATCH_DEMO_TOKEN과 같은지 확인하세요.</p>
-            )}
-            {err instanceof ApiRequestError &&
-              err.body?.details?.map((d) => (
-                <p key={d.path} className="small">
-                  <code>{d.path}</code> {d.reason}
-                </p>
-              ))}
-            {err instanceof ApiRequestError && isMethodRejection(err.body?.code) ? (
-              <p>서버가 이 방법을 계산하지 않습니다. 설명용 모드는 B0·B3만 제공합니다. 방법 선택을 바꾼 뒤 다시 요청하세요.</p>
-            ) : (
-              <p className="muted small">다시 시도해도 중복으로 등록되지 않습니다.</p>
-            )}
+            <p className="small">다시 시도해도 같은 내용이 두 번 등록되지 않습니다.</p>
           </div>
         )}
         {status.state === 'rejected' && (
           <div className="warn" role="alert">
             <p>
-              <b>입력은 등록됐지만 계산이 막혔습니다.</b> HTTP {status.error.status} {status.error.body!.code} — {status.error.message}
+              <b>{status.error.body!.code === 'WINDOW_UNCONFIRMED' ? '반입 마감 변경이 아직 확정되지 않아 배차를 바꾸지 않았습니다.' : '비어 있거나 맞지 않는 값이 있어 계산하지 못했습니다.'}</b>
             </p>
-            {status.error.body!.details?.map((d) => (
-              <p key={d.path} className="small">
-                <code>{d.path}</code> {d.reason}
-              </p>
-            ))}
-            <p className="muted small">같은 요청을 다시 보내도 풀리지 않습니다. 누락·미확인 값을 확인한 뒤 새 입력으로 등록해야 합니다.</p>
+            <ul className="reject-list">
+              {status.error.body!.details?.map((d, k) => {
+                const r = readableDetail(d.path, d.reason, status.snapshot)
+                return <li key={`${d.path}:${k}`}><b>{r.what}</b> — {r.why}</li>
+              })}
+            </ul>
+            <p className="small">{status.error.body!.code === 'WINDOW_UNCONFIRMED' ? '터미널 공지가 확정되면 다시 점검하세요. 아래에서 원래 배차와 공지 내용은 볼 수 있습니다.' : '화주·기사에게 확인한 값을 아래 ‘조건 보완’에 넣고 다시 계산하세요.'}</p>
           </div>
         )}
       </section>
@@ -196,14 +182,14 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
 }
 
 /** 계산이 막혀도 담당자가 입력·변경 근거·원안은 볼 수 있게 한다. 조정안 열은 없다. */
-function RejectedInput({ snapshot, reason }: { snapshot: Snapshot; reason: string }) {
+function RejectedInput({ snapshot }: { snapshot: Snapshot; reason?: string }) {
   return (
     <>
       <Header s={snapshot} />
       <ChangeEvidence s={snapshot} />
       <ComparisonSection
         snapshot={snapshot}
-        results={{ state: 'error', message: `계산 요청 거절 — ${reason}` }}
+        results={{ state: 'error', message: `${NOT_COMPUTED} 지금 배차만 보여 줍니다.` }}
         base={undefined}
         cand={undefined}
         candidates={[]}
@@ -215,3 +201,10 @@ function RejectedInput({ snapshot, reason }: { snapshot: Snapshot; reason: strin
 }
 
 const pick = (r: RunRequest) => ({ methods: r.methods, time_limit_seconds: r.time_limit_seconds, seed: r.seed })
+
+/** 공지를 받은 시각을 '방금 / N분 전'으로(예제는 지금 시각 기준으로 옮겨 쓴다). */
+function receivedAgo(s: Snapshot) {
+  const t = s.change.confirmed_at ?? s.change.evidence.received_at
+  const min = t ? Math.round((Date.parse(s.as_of) - Date.parse(t)) / 60000) : null
+  return min === null ? '' : min <= 1 ? '방금' : `${min}분 전`
+}

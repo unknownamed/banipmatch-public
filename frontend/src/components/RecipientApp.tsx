@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { RecipientClient, RecipientNotification, RecipientSession } from '../api/recipient'
-import { CHANGE_LABEL, RESPONSE_LABEL } from '../lib/dispatch'
+import { RESPONSE_LABEL } from '../lib/dispatch'
 import { base64UrlToBytes, claimKey, inviteFromPaste, mustInstallFirst, platform, type Fragment, type PlatformInfo } from '../lib/recipient'
 import { kstDateTime, kstTime } from '../lib/time'
 import { formatContainer } from '../lib/labels'
@@ -72,15 +72,10 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
   )
 }
 
-function Shell({ children, demo }: { children: React.ReactNode; demo: boolean }) {
+function Shell({ children }: { children: React.ReactNode; demo?: boolean }) {
   return (
     <main className="recipient">
-      <header className="recipient-head"><span className="brand-mark" aria-hidden="true">반</span> 반입맞춤 <span className="demo-pill">기사용</span></header>
-      {demo && (
-        <div className="banner fixture" role="note">
-          모의 화면입니다. 서버·웹 푸시 없이 이 탭의 가짜 자료로만 동작하며, 응답은 어디에도 전달·저장되지 않습니다.
-        </div>
-      )}
+      <header className="recipient-head"><img className="brand-mark" src="/brand.svg" alt="" width="28" height="28" /> 반입맞춤 기사</header>
       {children}
     </main>
   )
@@ -151,7 +146,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
       <section className="card">
         <h2>내 배차 알림</h2>
         <p className="small muted">연결 만료 {kstDateTime(session.expires_at)}</p>
-        {demo ? <p className="small muted">모의 화면에서는 알림 권한을 묻거나 구독하지 않습니다.</p> : <PushControl client={client} session={session} env={env} />}
+        {!demo && <PushControl client={client} session={session} env={env} />}
       </section>
 
       {inbox.error !== undefined && <p className="card warn small" role="alert">알림 목록 조회 실패: {errText(inbox.error)}</p>}
@@ -281,26 +276,33 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
   return (
     <section className="card recipient-detail" aria-labelledby="detail-title">
       <h2 id="detail-title">변경 내용 <span className="small muted">계획 v{d.payload.plan_version} · {kstDateTime(d.created_at)}</span></h2>
-      <p className="small muted">담당자가 확정한 배차 변경입니다. 터미널 예약은 바뀌지 않으니 게이트 도착 시각을 지켜 주세요.</p>
+      <p className="rc-lead">담당자가 확정한 배차 변경입니다. 게이트 도착 시각을 지켜 주세요.</p>
       {d.payload.vehicle_changes.map((v) => (
         <div key={v.vehicle_id}>
           <h3>{v.plate_no ?? v.vehicle_id}</h3>
-          <ul>
+          <ul className="rc-list">
             {v.changes.map((c) => {
               const d = c.display
               const name = d?.container_no ? formatContainer(d.container_no) : c.job_id
-              const route = d?.origin_name ? `${d.origin_name} → ${d.terminal_id} 게이트` : ''
-              const who = (vid?: string) => (vid === v.vehicle_id ? '내 차량' : vid ?? '')
+              const mine = (vid?: string) => vid === v.vehicle_id
+              const outgoing = !!c.before && mine(c.before.vehicle_id) && (!c.after || !mine(c.after.vehicle_id))
+              const incoming = !!c.after && mine(c.after.vehicle_id) && (!c.before || !mine(c.before.vehicle_id))
+              const tag = c.kind === 'removed_from_plan' ? '보류' : outgoing ? '이 차량에서 빠짐' : incoming ? '새로 맡음' : '시각 변경'
+              const tone = outgoing || c.kind === 'removed_from_plan' ? 'out' : incoming ? 'in' : 'time'
+              const t = (x?: string | null) => kstTime(x ?? null)
               return (
-              <li key={c.job_id}>
-                <b>{name}</b> {d?.size && <span className="small muted">{d.size}</span>} <span className="badge change">{CHANGE_LABEL[c.kind] ?? c.kind}</span>
-                {(d?.cargo_owner || route) && <div className="small muted">{[d?.cargo_owner, route, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(' · ')}</div>}
-                <span className="small">
-                  이전: {c.before ? `${who(c.before.vehicle_id)} · ${kstTime(c.before.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.before.gate_arrival_at)}` : c.before_outside_scope ? '다른 차량(상세 비공개)' : '배정 없음'}
-                  <br />
-                  변경: {c.after ? `${who(c.after.vehicle_id)} · ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : c.after_outside_scope ? '다른 차량으로 이동(상세 비공개)' : '미배정 · 담당자 확인 중'}
-                </span>
-                {c.instruction && c.kind === 'removed_from_plan' && <p className="small muted">{c.instruction}</p>}
+              <li key={c.job_id} className={`rc-item ${tone}`}>
+                <div className="rc-top"><b className="rc-box">{name}</b>{d?.size && <span className="rc-size">{d.size}</span>}<span className={`rc-tag ${tone}`}>{tag}</span></div>
+                {d?.origin_name && <div className="rc-route">{d.origin_name} → {d.terminal_id} 게이트</div>}
+                {outgoing || !c.after ? (
+                  <p className="rc-note">{c.kind === 'removed_from_plan' ? '담당자가 확인 중입니다. 별도 연락 전까지 이 작업은 하지 않습니다.' : '다른 차량이 맡습니다. 이 작업은 하지 않습니다.'}</p>
+                ) : (
+                  <div className="rc-times">
+                    <span>출발 {c.before && mine(c.before.vehicle_id) && c.before.pickup_departure_at !== c.after.pickup_departure_at && <s>{t(c.before.pickup_departure_at)}</s>} <b>{t(c.after.pickup_departure_at)}</b></span>
+                    <span>게이트 도착 <b>{t(c.after.gate_arrival_at)}</b></span>
+                  </div>
+                )}
+                {(d?.cargo_owner || d?.voyage_id) && <div className="rc-meta">{[d?.cargo_owner && `화주 ${d.cargo_owner}`, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(' · ')}</div>}
               </li>
               )
             })}
@@ -315,9 +317,9 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
         <textarea rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} />
       </label>
       <div className="respond-buttons">
-        <button type="button" disabled={busy} onClick={() => respond('acknowledged')}>확인함</button>
-        <button type="button" disabled={busy} onClick={() => respond('can_perform')}>수행 가능</button>
+        <button type="button" disabled={busy} className="rb-primary" onClick={() => respond('can_perform')}>수행 가능</button>
         <button type="button" disabled={busy} className="danger" onClick={() => respond('cannot_perform')}>수행 곤란</button>
+        <button type="button" disabled={busy} className="rb-ghost" onClick={() => respond('acknowledged')}>내용만 확인함</button>
       </div>
       <p className="small muted">&lsquo;수행 곤란&rsquo;은 담당자에게 후속 확인으로 전달됩니다. 자동으로 다른 차량에 다시 배정되지 않습니다.</p>
       {sendError !== null && (

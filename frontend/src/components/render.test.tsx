@@ -54,14 +54,14 @@ describe('원안 표는 결과 상태와 무관하게 남는다', () => {
   it('차량별 보기(기본)도 계산 중에 원안 막대를 보여준다', () => {
     const html = render({ state: 'pending', run: { ...run, status: 'running' } }, false, false, 'vehicle')
     expect(['J0', 'J1', 'J2', 'J3'].every((id) => html.includes(`>${id}<`) || html.includes(` ${id}<`))).toBe(true)
-    expect(html).toContain('원안(입력)')
+    expect(html).toContain('원래 배차')
     expect(html).not.toContain('조정안</span>')
   })
 
   it('계산 중(202)', () => {
     const html = render({ state: 'pending', run: { ...run, status: 'running' } })
     expect(hasBaselineTable(html)).toBe(true)
-    expect(html).toContain('원안(입력)')
+    expect(html).toContain('원래 배차')
     expect(html).not.toContain('조정안</th>')
   })
 
@@ -74,14 +74,14 @@ describe('원안 표는 결과 상태와 무관하게 남는다', () => {
   it('B0 단독 결과', () => {
     const html = render({ state: 'ready', data: { ...results, results: [b0] } }, true, false)
     expect(hasBaselineTable(html)).toBe(true)
-    expect(html).toContain('B0 원안')
-    expect(html).toContain('원안 진단만 표시')
+    expect(html).toContain('원래 배차')
+    expect(html).toContain('원래 배차 점검만 표시')
     expect(html).not.toContain('조정안</th>')
   })
 
   it('조정안이 있으면 지표는 제약 위반으로 표시하고 마감 위반으로 단정하지 않는다', () => {
     const html = render({ state: 'ready', data: results }, true, true)
-    expect(html).toContain('B3 조정안</th>')
+    expect(html).toContain('최소 변경안</th>')
     expect(html).toContain('마감·조건 위반')
     expect(html).not.toContain('마감 위반')
   })

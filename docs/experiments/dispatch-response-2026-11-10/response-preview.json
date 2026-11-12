@@ -328,7 +328,7 @@
         "fixture:scenario_001"
       ],
       "contact_role": "화주·상차지 확인 담당",
-      "check_next": "상차 준비 완료 시각을 확인하세요. 앞당길 수 있다고 확인된 경우에만 새 ready_at으로 다시 계산하세요.",
+      "check_next": "상차 준비 완료 시각을 확인하세요. 앞당길 수 있다고 확인된 경우에만 새 상차 준비 시각으로 다시 계산하세요.",
       "action_kind": "manual_check",
       "automatic_resolution": false
     }

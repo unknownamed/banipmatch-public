@@ -46,7 +46,7 @@ if (recipient) {
     ['meta', { name: 'theme-color', content: '#d23a06' }],
   ] as const)
     document.head.append(Object.assign(document.createElement(tag), attrs))
-  document.title = '반입맞춤 · 시험 수신'
+  document.title = '반입맞춤 · 기사 알림'
 }
 // React(StrictMode는 초기화를 두 번 실행)보다 먼저 한 번만 읽고 지운다.
 const recipientBoot = recipient ? takeFragment() : null
