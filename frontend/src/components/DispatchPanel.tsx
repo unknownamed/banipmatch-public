@@ -317,6 +317,17 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
                   {RESPONSE_LABEL[n.response] ?? n.response}
                   {n.responded_at && <span className="small muted">, {kstTime(n.responded_at)}</span>}
                   {n.response_history.at(-1)?.note && <span className="small muted">, “{n.response_history.at(-1)!.note}”</span>}
+                  {/* 기사가 응답을 바꾼 적이 있으면 이전 응답도 볼 수 있게 한다. */}
+                  {n.response_history.length > 1 && (
+                    <details className="resp-history">
+                      <summary className="small">응답 {n.response_history.length - 1}번 바뀜</summary>
+                      <ol className="small muted">
+                        {n.response_history.slice(0, -1).map((h, i) => (
+                          <li key={i}>{kstTime(h.created_at)} {RESPONSE_LABEL[h.response] ?? h.response}{h.note ? `, “${h.note}”` : ''}</li>
+                        ))}
+                      </ol>
+                    </details>
+                  )}
                 </td>
                 <td>
                   {n.response !== 'none' ? null : <>

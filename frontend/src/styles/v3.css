@@ -599,3 +599,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .invite-qr-more { margin-top: 8px; }
 .invite-qr-more summary { cursor: pointer; color: var(--ink-2); }
 .invite-qr-more .invite-qr { display: block; margin-top: 8px; }
+.resp-history { margin-top: 2px; }
+.resp-history summary { cursor: pointer; color: var(--ink-2); }
+.resp-history ol { margin: 4px 0 0; padding-left: 18px; }
