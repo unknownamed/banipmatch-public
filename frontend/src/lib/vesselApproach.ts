@@ -118,7 +118,7 @@ export const VESSELS: Vessel[] = [
   { id: 'BM-13', name: 'BM 가덕호', voyage: 'BD014N', terminal: 'DGT', route: route(WEST_APPROACH, 'DGT'), startNm: 0.6, speedKn: 10, state: 'underway', cutoffMin: null, teu: 1800, port: '광양' },
   { id: 'BM-14', name: 'BM 송정호', voyage: 'BJ006S', terminal: 'DGT', route: leave(WEST_APPROACH, 'DGT'), startNm: 1.2, speedKn: 8, state: 'underway', cutoffMin: null, teu: 2200, port: '여수', outbound: true },
   { id: 'BM-15', name: 'BM 브리즈호', voyage: 'BZ311E', terminal: 'PNIT', route: [ANCHORAGE], startNm: 0, speedKn: 0, state: 'anchored', cutoffMin: null, teu: 11000, port: '롱비치' },
-  { id: 'BM-16', name: null, voyage: 'BU050W', terminal: 'BNCT', route: route(SOUTH_APPROACH, 'BNCT'), startNm: 21, speedKn: 12, state: 'underway', cutoffMin: null, staleAfterMin: 35, teu: 2500, port: '홍콩' },
+  { id: 'BM-16', name: 'BM 유니온호', voyage: 'BU050W', terminal: 'BNCT', route: route(SOUTH_APPROACH, 'BNCT'), startNm: 21, speedKn: 12, state: 'underway', cutoffMin: null, teu: 2500, port: '홍콩' },
   { id: 'BM-17', name: 'BM 펄호', voyage: 'BF118E', terminal: 'BNCT', route: route(SOUTH_APPROACH, 'BNCT'), startNm: 99, speedKn: 0, state: 'berthed', cutoffMin: null, teu: 6000, port: '하이퐁' },
   { id: 'BM-18', name: 'BM 웨이브호', voyage: 'BW070E', terminal: 'HPNT', route: route(SOUTH_APPROACH, 'HPNT'), startNm: 0, speedKn: 13, state: 'underway', cutoffMin: null, teu: 8000, port: '닝보', appearMin: 120 },
   { id: 'BM-19', name: 'BM 피더호', voyage: 'BK025N', terminal: 'DGT', route: route(WEST_APPROACH, 'DGT'), startNm: 0, speedKn: 10, state: 'underway', cutoffMin: null, teu: 1500, port: '마산', appearMin: 240 },

@@ -149,7 +149,19 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       placed.push({ x: pt.x, y: pt.y, w })
       labelOn.add(v.vessel.id)
     }
-    for (const [id, mk] of marks.current) mk.overlay.setMap(shown.has(id) ? kmap.current : null)
+    // 화면에서 26px 안에 겹치는 배(부두에 나란히 댄 배 등)는 하나만 그리고 척수를 붙인다. 고른 배는 항상 보인다.
+    const hidden = new Set<string>()
+    const extra = new Map<string, number>()
+    if (proj) {
+      const drawn: { id: string; x: number; y: number }[] = []
+      for (const v of [...fleet].filter(x => shown.has(x.vessel.id)).sort((a, b) => priority(a) - priority(b))) {
+        const pt = proj.containerPointFromCoords(ll(v.pos))
+        const near = drawn.find(d => Math.hypot(d.x - pt.x, d.y - pt.y) < 26)
+        if (near && v.vessel.id !== sel.vessel.id) { hidden.add(v.vessel.id); extra.set(near.id, (extra.get(near.id) ?? 1) + 1); labelOn.delete(v.vessel.id); continue }
+        drawn.push({ id: v.vessel.id, x: pt.x, y: pt.y })
+      }
+    }
+    for (const [id, mk] of marks.current) mk.overlay.setMap(shown.has(id) && !hidden.has(id) ? kmap.current : null)
     for (const v of fleet) {
       const mk = marks.current.get(v.vessel.id)
       if (!mk) continue
@@ -159,7 +171,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
       const name = v.vessel.name ?? '이름 미수신'
       const tail = v.vessel.outbound ? `${v.vessel.port}행 출항` : v.etaMin !== null ? `${formatDuration(v.etaMin - t)} 후 도착` : STATUS_LABEL[v.status]
       const label = v.vessel.id === sel.vessel.id ? `${name} <small>${tail}</small>` : name
-      mk.el.innerHTML = `${shipMark(v.status === 'underway' ? v.heading : null)}${labelOn.has(v.vessel.id) ? `<span>${label}</span>` : ''}`
+      const count = extra.get(v.vessel.id)
+      mk.el.innerHTML = `${shipMark(v.status === 'underway' ? v.heading : null)}${count ? `<em class="vm-count">${count}척</em>` : ''}${labelOn.has(v.vessel.id) ? `<span>${label}</span>` : ''}`
     }
     if (paths.current) {
       paths.current.passed.setPath(sel.passed.length > 1 ? sel.passed.map(ll) : [])

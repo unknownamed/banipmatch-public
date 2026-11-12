@@ -32,7 +32,8 @@ describe('입항 선박 계산', () => {
   })
 
   it('위치 갱신이 끊기면 마지막 위치에 멈추고 도착 추정을 내지 않는다', () => {
-    const s = VESSELS.find(x => x.staleAfterMin !== undefined)!
+    // 시연 선단에는 끊김 선박을 두지 않는다(화면 혼란). 규칙은 시험용 선박으로 확인한다.
+    const s = { ...VESSELS.find(x => x.id === 'BM-16')!, staleAfterMin: 35 }
     const before = vesselAt(s, s.staleAfterMin!)
     const after = vesselAt(s, s.staleAfterMin! + 20)
     expect(after.status).toBe('stale')
