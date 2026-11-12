@@ -225,7 +225,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
       )}
       {current && <NotificationDetail key={current.notification_id} client={client} summary={current} onChanged={load} />}
 
-      <p className="small"><button type="button" className="secondary" disabled={leaving} onClick={leave}>이 기기 연결 해제</button></p>
+      <p className="small"><button type="button" className="secondary" disabled={leaving} onClick={leave}>이 휴대폰 연결 끊기(알림 그만 받기)</button></p>
       {leaveError !== null && <p className="warn small" role="alert">연결 해제 실패: {errText(leaveError)}. 연결은 유지됩니다. 다시 시도해 주세요.</p>}
     </>
   )

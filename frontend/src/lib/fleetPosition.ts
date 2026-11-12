@@ -51,7 +51,7 @@ export type VehicleNow = {
   source: 'plan_inferred'
   path?: Pt[] | null // 지금 달리는 구간의 도로 경로(있으면)
   /** 기사가 동의해 보낸 휴대폰 위치(있으면 pos가 이 값) */
-  live?: { captured_at: string; accuracy_m: number }
+  live?: { captured_at: string; accuracy_m: number; offKm: number }
 }
 
 const ms = (iso: string) => Date.parse(iso)
@@ -108,4 +108,13 @@ export function vehiclesAt(s: Snapshot, plan: Assignment[], now: number): Vehicl
     }
     return { ...base, jobId: null, gateEta: null, cutoff: null, marginMin: null, gate: null, phase: (mine.length ? 'done' : 'idle') as Phase, pos: pts.get(location) ?? null, from: null, to: null }
   })
+}
+
+// 기사 휴대폰 위치와 배차 일정상 위치 사이의 직선거리(km). 지연·작업 여부로 해석하지 않고 거리 사실만 돌려준다.
+export function distanceKm(a: Pt | null, b: Pt): number {
+  if (!a) return 0
+  const R = 6371, toRad = (d: number) => (d * Math.PI) / 180
+  const dLat = toRad(b.lat - a.lat), dLon = toRad(b.lon - a.lon)
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
 }
