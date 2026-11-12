@@ -8,6 +8,7 @@ import { ApprovalPanel, type SharedApproval } from './components/ApprovalPanel'
 import { ChangeEvidence, Header, RunStatusPanel, UnresolvedPanel } from './components/Panels'
 import { acknowledgeIds, approvalGate, approvalIdempotencyKey, type ApprovalGate } from './lib/approval'
 import { buildRows } from './lib/compare'
+import { Icon } from './components/Icon'
 import { hasAssumedCondition } from './lib/revision'
 import type { V2Client } from './api/v2'
 import { ConditionRevisionPanel, NextPlanPanel, RevisionComparison } from './components/RevisionPanels'
@@ -49,6 +50,10 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   }, [client, run?.plan_id, approval.value?.status.state])
   const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
   const approvedPlan = approval.value?.status.state === 'done' || !!(run && planNow?.planId === run.plan_id && planNow.version > run.base_plan_version)
+  // 원래 배차로 마감 문제가 없고 조정안도 바꿀 것이 없으면(예: 마감 늦춰짐) 확인만 하고 끝낸다. 승인·기사 전달·조건 보완을 띄우지 않는다.
+  const unchanged = view.results.state === 'ready' && !!base && !!cand && base.metrics.movable_violation_count === 0 && base.metrics.fixed_risk_count === 0
+    && base.metrics.unassigned_count === 0 && cand.metrics.unassigned_count === 0 && cand.metrics.changed_job_ids.length === 0
+    && !base.issues.some((i) => i.code === 'INPUT_MISSING')
   const v2 = 'session' in client ? (client as V2Client) : null
   const params = new URLSearchParams(location.search)
   const revisionId = params.get('revision')
@@ -66,7 +71,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && (
         <>
           <Header s={snapshot} />
-          {view.results.state === 'ready' && <ResultNav />}
+          {view.results.state === 'ready' && <ResultNav brief={unchanged} />}
           {view.results.state === 'ready' && (
             <ActionSummary base={base} cand={cand} recommended={recommended?.method} rows={rows}
               approved={!!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))} />
@@ -94,15 +99,25 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             snapshot={snapshot}
             results={view.results}
             base={base}
-            cand={cand}
-            candidates={candidates}
+            cand={unchanged ? undefined : cand}
+            candidates={unchanged ? [] : candidates}
             recommended={recommended?.method}
-            rows={rows}
+            rows={unchanged ? buildRows(snapshot, base, undefined) : rows}
             onPick={setPicked}
+            unchanged={unchanged}
           />
         )}
 
-        {snapshot && cand && (
+        {snapshot && cand && unchanged && (
+          <aside className="side">
+            <section className="card all-clear">
+              <h2><Icon name="check" size={18} /> 확인 완료</h2>
+              <p>원래 배차 그대로 진행합니다. 기사에게 보낼 변경이 없습니다.</p>
+              <a className="button secondary" href="?">받은 변경으로 돌아가기</a>
+            </section>
+          </aside>
+        )}
+        {snapshot && cand && !unchanged && (
           <aside className="side">
             <UnresolvedPanel rows={rows} cand={cand} />
             <ApprovalPanel
@@ -121,7 +136,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         <DispatchPanel key={`dispatch:${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} />
       )}
 
-      {v2 && snapshot && run && view.results.state === 'ready' && (approvedPlan
+      {v2 && snapshot && run && view.results.state === 'ready' && !unchanged && (approvedPlan
         ? <NextPlanPanel key={`next:${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: null }} />
         : <ConditionRevisionPanel key={snapshot.scenario_id} client={v2} snapshot={snapshot} focus={[...(cand?.unassigned_job_ids ?? []), ...(cand?.issues ?? []).flatMap((i) => i.job_id ? [i.job_id] : [])]} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />)}
 

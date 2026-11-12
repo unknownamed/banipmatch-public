@@ -58,9 +58,11 @@ def travel(a: str, b: str) -> int:
 # 반입 시간은 HJNC 공개 선석배정현황(2026-11-11 수신 31개 항차)의 실제 간격을 따른다.
 #  - 반입 마감 = 접안 예정 10시간 전 (31개 항차 모두 같은 간격)
 #  - 반입 시작 = 접안 예정일 3일 전 00:00 KST
-# 시연 화면은 30분 단위로 시각을 옮기고 반입 시작을 자정에 다시 맞춘다(frontend/src/lib/shift.ts).
-CLOSES = {"V1": 90, "V2": 330, "V4": 480, "V7": 300}
+# 시연 화면은 10분 단위로 시각을 옮기고 반입 시작을 자정에 다시 맞춘다(frontend/src/lib/shift.ts).
+CLOSES = {"V1": 90, "V2": 330, "V4": 540, "V7": 300}
 V1_PREVIOUS_CLOSE = 240
+# BPNR-2026-0007은 40분 전 모선 입항 지연으로 반입 마감이 1시간 늦춰졌다(+480 → +540). 모든 예제에 반영된 사실이다.
+V4_PREVIOUS_CLOSE = 480
 BERTH_AFTER_CLOSE = 600
 KST = timezone(timedelta(hours=9))
 
@@ -226,11 +228,40 @@ def unconfirmed_notice(base: dict) -> dict:
     return d
 
 
+def _confirmed_change(base: dict, key: str, previous_close: int, new_close: int, received: int, suffix: str) -> dict:
+    """BHMN 변경을 받기 전, 다른 항차 하나의 반입 마감이 확정 변경된 경우."""
+    d = json.loads(json.dumps(base))
+    d.update(scenario_id=f"S002-{suffix}", plan_id=f"P002-{suffix}")
+    v1, target = f"W-{VOYAGE_CODE['V1']}", f"W-{VOYAGE_CODE[key]}"
+    for w in d["windows"]:
+        if w["window_id"] == v1:
+            w["closes_at"] = at(V1_PREVIOUS_CLOSE)  # BHMN 변경은 이 공지보다 나중에 왔다
+        if w["window_id"] == target:
+            w["closes_at"] = at(new_close)
+            w["confirmed_at"] = at(received)
+    d["change"] = dict(change_id=f"C002-{suffix}", voyage_id=VOYAGE_CODE[key], terminal_id=TERMINAL[key], previous_opens_at=at(WINDOWS[key][0]),
+                       previous_closes_at=at(previous_close), new_window_id=target, verification="confirmed",
+                       confirmed_by="demo-dispatcher", confirmed_at=at(received), evidence=ev())
+    return d
+
+
+def minor_earlier(base: dict) -> dict:
+    """BE221E(PNIT) 반입 마감 1시간 30분 앞당김(12분 전 확정). 원래 배차로는 1개가 늦고, 작업 2건만 바꾸면 모두 맞출 수 있다."""
+    return _confirmed_change(base, "V7", CLOSES["V7"], CLOSES["V7"] - 90, -12, "E")
+
+
+def later_notice(base: dict) -> dict:
+    """BPNR-2026-0007 모선 입항 지연으로 반입 마감 1시간 늦춰짐(40분 전 확정). 여유만 늘고 바꿀 배차가 없다(현장에서 가장 흔한 공지)."""
+    return _confirmed_change(base, "V4", V4_PREVIOUS_CLOSE, CLOSES["V4"], -40, "L")
+
+
 if __name__ == "__main__":
     data = build()
     outputs = {OUT: data,
                OUT.with_name("demo-02-missing-ready.synthetic.json"): missing_ready(data),
-               OUT.with_name("demo-02-unconfirmed.synthetic.json"): unconfirmed_notice(data)}
+               OUT.with_name("demo-02-unconfirmed.synthetic.json"): unconfirmed_notice(data),
+               OUT.with_name("demo-02-minor-earlier.synthetic.json"): minor_earlier(data),
+               OUT.with_name("demo-02-later.synthetic.json"): later_notice(data)}
     for path, snap in outputs.items():
         path.write_bytes((json.dumps(snap, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
         print(f"wrote {path.relative_to(ROOT)}: jobs={len(snap['jobs'])} vehicles={len(snap['vehicles'])}")

@@ -102,7 +102,7 @@ export const VESSELS: Vessel[] = [
   // 대상 터미널 HJNC — 예제 02의 항차. 외해 항해 중(지도 범위 밖)
   { id: 'BM-01', name: 'BM 하모니호', voyage: 'BHMN-2026-0045', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 16, state: 'underway', cutoffMin: 90, teu: 8600, port: '상하이', offshoreEtaMin: 690 },
   { id: 'BM-02', name: 'BM 오리엔트호', voyage: 'BORT-2026-0112', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 15, state: 'underway', cutoffMin: 330, teu: 4300, port: '닝보', offshoreEtaMin: 930 },
-  { id: 'BM-03', name: 'BM 파이오니어호', voyage: 'BPNR-2026-0007', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 17, state: 'underway', cutoffMin: 480, teu: 13000, port: '싱가포르', offshoreEtaMin: 1080 },
+  { id: 'BM-03', name: 'BM 파이오니어호', voyage: 'BPNR-2026-0007', terminal: 'HJNC', route: [OFFSHORE[0]], startNm: 0, speedKn: 17, state: 'underway', cutoffMin: 540, teu: 13000, port: '싱가포르', offshoreEtaMin: 1140 },
   // HJNC로 들어오는 중(반입 마감 지난 항차)
   { id: 'BM-20', name: 'BM 아리아호', voyage: 'BARA-2026-0031', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 22.5, speedKn: 11, state: 'underway', cutoffMin: H(37), teu: 9800, port: '칭다오' },
   { id: 'BM-21', name: 'BM 코랄호', voyage: 'BCRL-2026-0020', terminal: 'HJNC', route: route(SOUTH_APPROACH, 'HJNC'), startNm: 9, speedKn: 13, state: 'underway', cutoffMin: H(94), teu: 4800, port: '하카타' },

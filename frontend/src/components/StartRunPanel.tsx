@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import s07 from '../fixtures/demo-02-missing-ready.synthetic.json'
 import s08 from '../fixtures/demo-02-unconfirmed.synthetic.json'
 import s02 from '../fixtures/demo-02-evening.synthetic.json'
+import s09 from '../fixtures/demo-02-minor-earlier.synthetic.json'
+import s10 from '../fixtures/demo-02-later.synthetic.json'
 import runRequestJson from '@examples/02_run_request.json'
 import type { ApiClient, RunRequest } from '../api/client'
 import { ApiRequestError } from '../api/client'
@@ -22,13 +24,15 @@ import { DispatchMap } from './DispatchMap'
 import { Icon, type IconName } from './Icon'
 
 // 홈은 담당자가 받은 변경을 처리하는 알림함이다(물류 관제 화면의 '조치가 필요한 예외 목록' 구성).
-// 시연용 예제를 실제로 받을 수 있는 알림 종류로 보여 준다: 확정 공지 / 확정 전 공지 / 입력 누락.
+// 시연용 예제를 실제로 받을 수 있는 알림 종류로 보여 준다: 확정 공지(큰 영향·작은 영향·영향 없음) / 확정 전 공지 / 입력 누락.
 type Tone = 'danger' | 'caution' | 'neutral'
-const FILTERS: ['all' | Tone, string][] = [['all', '전체'], ['danger', '조치 필요'], ['caution', '확인 대기']]
+const FILTERS: ['all' | Tone, string][] = [['all', '전체'], ['danger', '조치 필요'], ['caution', '확인 대기'], ['neutral', '영향 없음']]
 const EXAMPLES = [
-  { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'HJNC · BHMN-2026-0045 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 같은 저녁 PNIT 반입 작업은 영향이 없습니다.', snapshot: s02 },
+  { id: '02', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'HJNC · BHMN-2026-0045 반입 마감 2시간 30분 앞당김', meta: '모선 BM 하모니호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 4개'], what: '원래 배차대로 가면 컨테이너 4개가 새 마감을 넘깁니다. 그중 1개는 상차 준비가 늦어 어떤 차량으로도 맞추기 어렵습니다.', snapshot: s02 },
+  { id: '09', group: 'todo', icon: 'warning', tone: 'danger', chip: '확정 · 조치 필요', title: 'PNIT · BE221E 반입 마감 1시간 30분 앞당김', meta: '모선 BM 오션호 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 1개'], what: '원래 배차대로 가면 새벽식품(주) 컨테이너 1개가 새 마감을 넘깁니다. 차량 몇 대만 바꾸면 맞출 수 있는지 확인하세요.', snapshot: s09 },
   { id: '08', group: 'todo', icon: 'bell', tone: 'caution', chip: '확정 대기', title: 'HJNC · BORT-2026-0112 반입 마감 1시간 앞당김(확정 전)', meta: '모선 BM 오리엔트호 · 터미널 공지 접수 · 아직 확정되지 않음', stats: ['트럭 8대', '컨테이너 20개'], what: '공지가 확정되기 전에는 배차를 바꾸지 않습니다. 열면 공지 내용과 지금 배차를 확인할 수 있습니다.', snapshot: s08 },
   { id: '07', group: 'todo', icon: 'edit', tone: 'caution', chip: '입력 확인', title: 'BNJU 100210 2 상차 준비 시각 미입력', meta: '다온물산(주) · 사상 공단 상차지 · BORT-2026-0112', stats: ['트럭 8대', '컨테이너 20개'], what: '준비 시각이 비어 있으면 계산할 수 없습니다. 화주에게 확인한 시각을 넣으면 바로 다시 계산합니다.', snapshot: s07 },
+  { id: '10', group: 'todo', icon: 'clock', tone: 'neutral', chip: '확정 · 영향 없음', title: 'HJNC · BPNR-2026-0007 반입 마감 1시간 늦춰짐', meta: '모선 BM 파이오니어호 입항 지연 · 터미널 공지 확정', stats: ['트럭 8대', '컨테이너 20개', '마감 넘김 예상 0개'], what: '마감이 늦춰져 여유만 늘었습니다. 원래 배차 그대로 가도 되는지 확인만 하면 됩니다.', snapshot: s10 },
 ] as const satisfies readonly { id: string; group: 'todo'; icon: IconName; tone: Tone; chip: string; title: string; meta: string; stats: readonly string[]; what: string; snapshot: unknown }[]
 
 type Status =
@@ -137,7 +141,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
                   <span className={`ib-ic ${e.tone}`}><Icon name={e.icon} size={16} /></span>
                   <span className="ib-main">
                     <span className="ib-title"><b>{e.title}</b></span>
-                    <span className="ib-meta"><span className={`st ${e.tone === 'danger' ? 'bad' : 'warn'}`}>{e.chip}</span><span>{e.meta}</span></span>
+                    <span className="ib-meta"><span className={`st ${e.tone === 'danger' ? 'bad' : e.tone === 'caution' ? 'warn' : 'ok'}`}>{e.chip}</span><span>{e.meta}</span></span>
                   </span>
                   <span className="ib-when">{receivedAgo(e.snapshot as unknown as Snapshot)}</span>
                 </button>
@@ -237,7 +241,8 @@ const pick = (r: RunRequest) => ({ methods: r.methods, time_limit_seconds: r.tim
 /** 공지를 받은 시각을 '방금 / N분 전'으로(예제는 지금 시각 기준으로 옮겨 쓴다). */
 function receivedAgo(s: Snapshot) {
   const t = s.change.confirmed_at ?? s.change.evidence.received_at
-  const min = t ? Math.round((Date.parse(s.as_of) - Date.parse(t)) / 60000) : null
+  // 예제의 기준시각(10분 경계)이 아니라 실제 지금 기준으로 센다.
+  const min = t ? Math.round((Date.now() - (Date.parse(t) - Date.parse(s.as_of) + Math.floor(Date.now() / 600000) * 600000)) / 60000) : null
   return min === null ? '' : min <= 1 ? '방금' : `${min}분 전`
 }
 

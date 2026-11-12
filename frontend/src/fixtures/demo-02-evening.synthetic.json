@@ -756,7 +756,7 @@
       "voyage_id": "BPNR-2026-0007",
       "terminal_id": "HJNC",
       "opens_at": "2026-11-04T15:00:00Z",
-      "closes_at": "2026-11-07T18:00:00Z",
+      "closes_at": "2026-11-07T19:00:00Z",
       "verification": "confirmed",
       "confirmed_by": "demo-dispatcher",
       "confirmed_at": "2026-11-07T09:55:00Z",

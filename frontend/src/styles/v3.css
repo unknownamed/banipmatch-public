@@ -403,3 +403,10 @@ button:not(.secondary):not(.chip-toggle):not([role='tab']):not([role='radio']):n
   .home-map .dm-map { flex: 1; height: auto !important; min-height: 560px !important; }
 }
 .vm-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.ib-ic.neutral { color: #15803d !important; }
+.change-delta.later, .change-new.later { color: #15803d !important; }
+.all-clear h2 { display: flex; align-items: center; gap: 8px; color: #15803d; }
+.all-clear p { margin: 6px 0 14px; }
+.all-clear .button { display: inline-flex; align-items: center; min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font-weight: 600; text-decoration: none; }
+.all-clear .button:hover { border-color: #2457E6; color: #2457E6; }
+.appbar .brand { color: #1D46C4 !important; font-weight: 800 !important; letter-spacing: -0.03em !important; }

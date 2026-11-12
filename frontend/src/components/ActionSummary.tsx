@@ -36,7 +36,9 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
   const name = cand ? planName(cand.method) : ''
   const headline = !cand
     ? `원래 배차대로면 컨테이너 ${lateSet.length}개가 새 마감을 넘깁니다.`
-    : `${name}${cand.method === recommended ? '(추천)' : ''}으로 ${lateSet.length}개 중 ${fixed}개를 마감 안에 맞춥니다.`
+    : fixed === lateSet.length
+      ? `${name}${cand.method === recommended ? '(추천)' : ''}으로 늦던 컨테이너 ${fixed}개를 모두 마감 안에 맞춥니다.`
+      : `${name}${cand.method === recommended ? '(추천)' : ''}으로 ${lateSet.length}개 중 ${fixed}개를 마감 안에 맞춥니다.`
   return (
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
       <div className="as-top">

@@ -8,7 +8,8 @@ const SECTIONS = [
   ['기사 전달', '.card.dispatch'],
 ] as const
 
-export function ResultNav() {
+/** brief: 바꿀 것이 없는 결과에서는 확정·기사 전달 구역이 없다. */
+export function ResultNav({ brief = false }: { brief?: boolean }) {
   const go = (sel: string) => {
     const el = document.querySelector(sel)
     if (!el) return
@@ -17,8 +18,8 @@ export function ResultNav() {
   }
   return (
     <nav className="result-nav" aria-label="결과 구역">
-      {SECTIONS.map(([label, sel]) => (
-        <button key={sel} type="button" className="rn-link" onClick={() => go(sel)}>{label}</button>
+      {SECTIONS.filter(([, sel]) => !brief || (sel !== '.side' && sel !== '.card.dispatch')).map(([label, sel]) => (
+        <button key={sel} type="button" className="rn-link" onClick={() => go(sel)}>{brief && sel === '.comparison' ? '차량별 일정' : label}</button>
       ))}
     </nav>
   )

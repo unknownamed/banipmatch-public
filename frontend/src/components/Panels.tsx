@@ -41,7 +41,9 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const w = s.windows.find((x) => x.window_id === c.new_window_id)
   const moved = shiftText(c.previous_closes_at, w?.closes_at)
   // 모의 선박 일정에 같은 항차가 있으면, 반입 마감 변경과 함께 바뀐 모선 접안 예정을 보여 준다(HJNC 공개 일정의 '접안 10시간 전 마감' 간격).
-  const vessel = VESSELS.find((v) => v.voyage === c.voyage_id && v.terminal === c.terminal_id)
+  // 접안 10시간 전 마감 간격은 HJNC 공개 일정에서 확인한 값이라 HJNC에만 적용한다.
+  const vessel = c.terminal_id === 'HJNC' ? VESSELS.find((v) => v.voyage === c.voyage_id && v.terminal === c.terminal_id) : undefined
+  const later = !!(w?.closes_at && c.previous_closes_at && Date.parse(w.closes_at) > Date.parse(c.previous_closes_at))
   const plus10 = (t: string) => new Date(Date.parse(t) + 10 * 3600_000).toISOString()
   const berth = vessel?.name && w?.closes_at && c.previous_closes_at ? { name: vessel.name, prev: plus10(c.previous_closes_at), next: plus10(w.closes_at) } : null
   return (
@@ -49,13 +51,13 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
       <h2>반입 마감(컷오프) 변경</h2>
       {w && (
         <p className="change-lead">
-          반입 마감 <s>{kstTimeWithDay(c.previous_closes_at, s.as_of)}</s> → <b className="change-new">{kstTimeWithDay(w.closes_at, s.as_of)}</b>
-          {moved && <span className="change-delta">{moved}</span>}
+          반입 마감 <s>{kstTimeWithDay(c.previous_closes_at, s.as_of)}</s> → <b className={`change-new${later ? ' later' : ''}`}>{kstTimeWithDay(w.closes_at, s.as_of)}</b>
+          {moved && <span className={`change-delta${later ? ' later' : ''}`}>{moved}</span>}
         </p>
       )}
       {w && berth && (
         <p className="change-why">
-          <Icon name="ship" size={15} /> {c.verification === 'confirmed' ? '같은 항차 모선' : '공지대로라면 모선'} <b>{berth.name}</b>의 접안 예정도 <s>{kstTimeWithDay(berth.prev, s.as_of)}</s> → <b>{kstTimeWithDay(berth.next, s.as_of)}</b>{c.verification === 'confirmed' ? '로 앞당겨졌습니다.' : '로 앞당겨집니다(확정 전).'}
+          <Icon name="ship" size={15} /> {c.verification === 'confirmed' ? '같은 항차 모선' : '공지대로라면 모선'} <b>{berth.name}</b>의 접안 예정도 <s>{kstTimeWithDay(berth.prev, s.as_of)}</s> → <b>{kstTimeWithDay(berth.next, s.as_of)}</b>{c.verification === 'confirmed' ? (later ? '로 늦춰졌습니다.' : '로 앞당겨졌습니다.') : (later ? '로 늦춰집니다(확정 전).' : '로 앞당겨집니다(확정 전).')}
           <span className="small"> HJNC는 접안 10시간 전에 반입을 마감합니다.</span>
         </p>
       )}

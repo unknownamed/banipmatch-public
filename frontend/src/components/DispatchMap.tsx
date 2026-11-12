@@ -45,7 +45,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
   const now = ahead === 'now' ? clock : ahead === 'cut' && Number.isFinite(cutoffAt) ? cutoffAt : clock + Number(ahead === 'cut' ? 0 : ahead) * 60000
   // 실시간 교통은 도착 판단에 바로 쓰이므로 기본으로 켠다. 위성 사진은 '레이어'에서 고른다.
   const [traffic, setTraffic] = useState(true)
-  const [style, setStyle] = useMapStyle('dispatch', 'map')
+  const [style, setStyle] = useMapStyle('dispatch', 'sky')
   const sky = style === 'sky'
   const setSky = (on: boolean) => setStyle(on ? 'sky' : 'map')
   const [layersOpen, setLayersOpen] = useState(false)
@@ -87,7 +87,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       kmap.current = m
       let touched = false
       maps.event.addListener(m, 'dragstart', () => { touched = true })
-      unobserve = keepLaidOut(m, box.current, () => { if (!touched && focusBounds.current) m.setBounds(focusBounds.current, 50, 110, 50, 110) })
+      // 차량 중심 맞춤: 지도 상자 크기가 정해진 뒤(홈에서는 옆 열 높이만큼 늘어남)에도 다시 맞춘다. 사용자가 움직이면 그만둔다.
+      const fitFleet = () => {
+        if (touched || !focusBounds.current) return
+        m.setBounds(focusBounds.current, 50, 110, 50, 110)
+        if (m.getLevel() < 6) m.setLevel(6)
+      }
+      unobserve = keepLaidOut(m, box.current, fitFleet)
       const bounds = new maps.LatLngBounds()
       for (const loc of snapshot.locations ?? []) {
         const p = pts.get(loc.location_id)
@@ -111,8 +117,8 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       for (const loc of snapshot.locations ?? []) if (loc.kind === 'terminal' && pts.get(loc.location_id)) focus.extend(ll(pts.get(loc.location_id)!))
       for (const v of vehiclesAt(snapshot, plan, Date.now())) if (v.pos) focus.extend(ll(v.pos))
       focusBounds.current = focus
-      m.setBounds(focus, 50, 110, 50, 110)
-      if (m.getLevel() < 6) m.setLevel(6)
+      fitFleet()
+      setTimeout(() => { m.relayout(); fitFleet() }, 400)
       // 넓게 볼 때는 차량 번호만, 확대하면 목적지·도착 시각까지 보여 준다.
       const zoomClass = () => box.current?.classList.toggle('dm-far', m.getLevel() >= 8)
       maps.event.addListener(m, 'zoom_changed', zoomClass)

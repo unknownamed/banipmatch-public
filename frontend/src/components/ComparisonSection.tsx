@@ -20,6 +20,8 @@ interface Props {
   recommended?: string
   /** 처음 보일 보기. 기본은 차량별 일정 */
   initialLayout?: 'vehicle' | 'job'
+  /** 원래 배차로 문제가 없어 조정안이 원안과 같을 때: 원래 배차 일정만 보여 준다. */
+  unchanged?: boolean
 }
 
 /**
@@ -35,7 +37,7 @@ function heldWereLate(base: MethodResult, cand: MethodResult) {
 /** 입력 확인·확정 대기로 계산하지 않은 경우의 안내(오류가 아니다). */
 export const NOT_COMPUTED = '조정안은 계산하지 않았습니다.'
 
-export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle' }: Props) {
+export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, recommended, initialLayout = 'vehicle', unchanged = false }: Props) {
   const list = results.state === 'ready' ? results.data.results : null
   const broken = lockedViolations(rows)
   // 휴대폰 폭에서는 가로 스크롤이 필요한 타임라인 대신 작업별 카드부터 보여 준다.
@@ -46,14 +48,14 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
   const baseLabel = '원래 배차'
   return (
     <section className="card comparison">
-      <h2>원안 · 조정안 비교</h2>
+      <h2>{unchanged ? '원래 배차 일정' : '원안 · 조정안 비교'}</h2>
       {results.state === 'loading' && <p className="muted">결과 조회 중… 아래 원안은 입력 기준으로 먼저 보여줍니다.</p>}
       {results.state === 'pending' && <p className="muted">계산 중입니다. 결과가 도착하면 조정안을 자동으로 표시합니다.</p>}
       {results.state === 'error' && (results.message.startsWith(NOT_COMPUTED)
         ? <p className="note-plain">{results.message}</p>
         : <p className="warn">결과를 표시할 수 없습니다: {results.message}</p>)}
       {list && list.length === 0 && <p className="warn">결과 목록이 비어 있습니다. 해결 완료가 아닙니다.</p>}
-      {list && list.length > 0 && !cand && <p className="muted">조정안 결과가 없습니다. 원래 배차 점검만 표시합니다.</p>}
+      {list && list.length > 0 && !cand && !unchanged && <p className="muted">조정안 결과가 없습니다. 원래 배차 점검만 표시합니다.</p>}
 
       {/* 기본 화면은 추천안만 보여 준다. 다른 계산안·세부 지표는 필요할 때 펼친다. */}
       {(candidates.length > 1 || (base && cand)) && (

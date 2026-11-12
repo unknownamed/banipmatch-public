@@ -36,3 +36,12 @@ it('오늘 저녁 배차의 첫 출발은 기준 10분 뒤 이후라, 10분 단�
   const first = Math.min(...s02.baseline_assignments.filter((a) => !frozen.has(a.job_id)).map((a) => Date.parse(a.pickup_departure_at)))
   expect(first - Date.parse(s02.as_of)).toBeGreaterThanOrEqual(10 * 60_000)
 })
+
+it('추가 시나리오: PNIT 마감 앞당김과 BPNR 마감 늦춰짐은 확정 공지이며 방향이 맞다', async () => {
+  const minor = (await import('../fixtures/demo-02-minor-earlier.synthetic.json')).default as unknown as Snapshot
+  const later = (await import('../fixtures/demo-02-later.synthetic.json')).default as unknown as Snapshot
+  const moved = (s: Snapshot) => Date.parse(s.windows.find((w) => w.window_id === s.change.new_window_id)!.closes_at!) - Date.parse(s.change.previous_closes_at!)
+  expect([minor.change.verification, later.change.verification]).toEqual(['confirmed', 'confirmed'])
+  expect(moved(minor)).toBe(-90 * 60_000)
+  expect(moved(later)).toBe(60 * 60_000)
+})
