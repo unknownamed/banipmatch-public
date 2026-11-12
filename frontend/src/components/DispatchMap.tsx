@@ -8,11 +8,12 @@ import { kstTime } from '../lib/time'
 
 const GATE_LABEL = { ok: '여유', tight: '빠듯', late: '마감 초과' } as const
 
-function truckSvg(heading: number) {
-  return `<svg class="truck" viewBox="0 0 14 34" width="14" height="34" style="transform:rotate(${heading}deg)" aria-hidden="true">`
-    + `<rect class="cab" x="2" y="0.8" width="10" height="7" rx="2"/>`
-    + `<rect class="box" x="1" y="9.5" width="12" height="23.5" rx="1.4"/>`
-    + `<line x1="1.5" y1="17" x2="12.5" y2="17"/><line x1="1.5" y1="25" x2="12.5" y2="25"/></svg>`
+// 옆에서 본 트럭(방향은 글자 화살표로 표시). 핀 안에서는 회전하지 않는다.
+function truckSvg(_heading?: number) {
+  return `<svg class="truck" viewBox="0 0 24 14" width="22" height="13" aria-hidden="true">`
+    + `<rect class="box" x="0.5" y="1" width="14" height="9" rx="1.2"/>`
+    + `<path class="cab" d="M15.5 4 H20 L23 7.5 V10 H15.5 Z"/>`
+    + `<circle cx="4.5" cy="11.5" r="2" class="wheel"/><circle cx="18.5" cy="11.5" r="2" class="wheel"/></svg>`
 }
 function bearing(a: Pt, b: Pt) {
   const r = Math.PI / 180
@@ -73,6 +74,10 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
       }
       allBounds.current = bounds
       m.setBounds(bounds, 40, 40, 40, 40)
+      // 넓게 볼 때는 차량 번호만, 확대하면 목적지·도착 시각까지 보여 준다.
+      const zoomClass = () => box.current?.classList.toggle('dm-far', m.getLevel() >= 8)
+      maps.event.addListener(m, 'zoom_changed', zoomClass)
+      zoomClass()
       jobLine.current = new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#ff3c00', strokeOpacity: 0.85, strokeStyle: 'dash' })
       setMapState({ ok: true, msg: '' })
     }).catch((e: Error) => alive && setMapState({ ok: false, msg: `${e.message} 아래 차량별 목록으로 확인할 수 있습니다.` }))
