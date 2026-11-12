@@ -152,8 +152,9 @@ def _settings(result: dict) -> dict | None:
 
 
 def _moved(old: dict, new: dict) -> bool:
-    """차량·순서가 바뀌었거나 출발이 허용 폭(5분)을 넘게 움직인 작업. 기준 시각이 몇 분 지난 것만으로 바뀐 작업으로 세지 않는다."""
-    if (old["vehicle_id"], old["sequence"]) != (new["vehicle_id"], new["sequence"]):
+    """차량이 바뀌었거나 출발이 허용 폭(5분)을 넘게 움직인 작업. 앞에 다른 작업이 끼어 순서 번호만 밀린 것,
+    기준 시각이 몇 분 지난 것만으로는 바뀐 작업으로 세지 않는다."""
+    if old["vehicle_id"] != new["vehicle_id"]:
         return True
     shift = abs(datetime.fromisoformat(new["pickup_departure_at"].replace("Z", "+00:00"))
                 - datetime.fromisoformat(old["pickup_departure_at"].replace("Z", "+00:00")))

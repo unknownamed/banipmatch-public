@@ -295,7 +295,7 @@ const TRANSITIONS = [
   ['became_assigned', '새로 배정됨'],
   ['became_unassigned', '새로 미처리됨'],
   ['remained_unassigned', '계속 미처리'],
-  ['changed_assignments', '이전 계산과 차량·순서·출발이 달라진 작업'],
+  ['changed_assignments', '이전 계산과 차량·출발 시각이 달라진 작업'],
   ['fixed_risks_added', '출발 차량 위험 생김'],
   ['fixed_risks_removed', '출발 차량 위험 없어짐'],
   ['fixed_risks_remaining', '출발 차량 위험 남음'],
