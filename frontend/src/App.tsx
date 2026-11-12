@@ -89,7 +89,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         </div>
       )}
       {v2 && revisionId && run && cand && view.results.state === 'ready' && (
-        <RevisionComparison client={v2} revisionId={revisionId} beforeRunId={beforeRunId} afterRunId={run.run_id} method={cand.method} />
+        <RevisionComparison client={v2} revisionId={revisionId} beforeRunId={beforeRunId} afterRunId={run.run_id} method={cand.method} snapshot={snapshot} />
       )}
 
       {/* 넓은 화면: 왼쪽 비교, 오른쪽 미해결·승인. 좁으면 위아래로 쌓인다. */}

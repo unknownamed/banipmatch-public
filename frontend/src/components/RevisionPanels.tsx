@@ -45,6 +45,18 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
     setEdits((e) => ({ ...e, [key]: value }))
     if (status.state === 'error') setStatus({ state: 'idle' })
   }
+  const unset = (key: string) => setEdits((e) => { const n = { ...e }; delete n[key]; return n })
+  // '오늘 운행 불가': 고장·기사 사정으로 이 차량을 빼고 다시 계산한다. 근무 종료를 운행 시작(또는 기준 시각)으로 당겨
+  // 남은 작업을 맡을 수 없게 한다. 이미 출발한 작업이 있는 차량은 뺄 수 없다(출발 작업은 그대로 둔다).
+  const offAt = (v: NonNullable<Snapshot['vehicles']>[number]) => {
+    const start = Math.max(Date.parse(snapshot.as_of), v.available_at ? Date.parse(v.available_at) : 0)
+    return toKstInput(new Date(Math.ceil(start / 60000) * 60000).toISOString())
+  }
+  const departedOn = (vehicleId: string) => snapshot.baseline_assignments.some((a) => a.vehicle_id === vehicleId && snapshot.jobs.find((j) => j.job_id === a.job_id)?.frozen)
+  const isOff = (vehicleId: string) => {
+    const v = snapshot.vehicles?.find((x) => x.vehicle_id === vehicleId)
+    return !!v && edits[`vehicle:${vehicleId}:shift_end_at`] === offAt(v)
+  }
 
   async function submit() {
     const sig = JSON.stringify([snapshot, changes, added, reason.trim(), confirmation, rerun])
@@ -126,15 +138,30 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
       {!!snapshot.vehicles?.length && (
         <fieldset disabled={sending}>
           <legend>차량 근무 시간</legend>
-          <details className="rev-more">
-          <summary>차량 {snapshot.vehicles.length}대</summary>
-          {snapshot.vehicles.map((v) => (
-            <div key={v.vehicle_id} className="rev-row">
-              <b>{vehicleName(v.vehicle_id)}</b>
-              {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
-              {field(`vehicle:${v.vehicle_id}:shift_end_at`, v.shift_end_at, FIELD_LABEL.shift_end_at)}
-            </div>
-          ))}
+          <details className="rev-more" open={snapshot.vehicles.some((v) => isOff(v.vehicle_id)) || undefined}>
+          <summary>차량 {snapshot.vehicles.length}대, 근무 시간 또는 운행 불가</summary>
+          {snapshot.vehicles.map((v) => {
+            const key = `vehicle:${v.vehicle_id}:shift_end_at`
+            const off = isOff(v.vehicle_id)
+            const departed = departedOn(v.vehicle_id)
+            return (
+              <div key={v.vehicle_id} className={`rev-row${off ? ' rev-off' : ''}`}>
+                <b>{vehicleName(v.vehicle_id)}</b>
+                {off ? <span className="small">남은 작업을 다른 차량으로 다시 배정합니다.</span> : (
+                  <>
+                    {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
+                    {field(key, v.shift_end_at, FIELD_LABEL.shift_end_at)}
+                  </>
+                )}
+                {departed
+                  ? <span className="small muted">출발한 작업이 있어 뺄 수 없음</span>
+                  : <button type="button" className="chip-toggle" aria-pressed={off} onClick={() => {
+                      if (off) unset(key)
+                      else { set(key, offAt(v)); unset(`vehicle:${v.vehicle_id}:available_at`) }
+                    }}>오늘 운행 불가</button>}
+              </div>
+            )
+          })}
           </details>
         </fieldset>
       )}
@@ -191,7 +218,9 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
       {(changes.length > 0 || added.length > 0) && (
         <ul className="rev-diff" aria-label="바뀌는 조건">
           {changes.map((c) => (
-            <li key={c.key}>{c.field === 'ready_at' ? jobName(c.id) : vehicleName(c.id)} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
+            c.field === 'shift_end_at' && isOff(c.id)
+              ? <li key={c.key}>{vehicleName(c.id)}: <b>오늘 운행 불가</b></li>
+              : <li key={c.key}>{c.field === 'ready_at' ? jobName(c.id) : vehicleName(c.id)} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
           ))}
           {added.map((d) => (
             <li key={d.vehicle_id || d.plate}>차량 추가: <b>{d.plate?.trim() || d.vehicle_id.trim()}</b>, {snapshot.locations?.find((l) => l.location_id === d.start_location_id)?.name.replace('(모의)', '').trim() ?? d.start_location_id}에서 {d.available_at.slice(11)}부터 {d.shift_end_at.slice(11)}까지, {d.equipment_types.map((t) => EQUIP_LABEL[t] ?? t).join('/')}</li>
@@ -281,7 +310,12 @@ const DELTAS = [
 ] as const
 
 /** 조건 보완 전후 비교(대겸 비교 로직의 서버 결과). 개선율로 해석하지 못하는 경우는 서버가 준 한계를 그대로 보여준다. */
-export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId, method }: { client: V2Client; revisionId: string; beforeRunId: string | null; afterRunId: string; method: string }) {
+export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId, method, snapshot }: { client: V2Client; revisionId: string; beforeRunId: string | null; afterRunId: string; method: string; snapshot?: Snapshot | null }) {
+  // 근무 종료를 운행 시작(또는 기준 시각) 이전으로 당긴 차량은 '오늘 운행 불가'로 뺀 차량이다.
+  const offVehicle = (id: string, after: string | null) => {
+    const v = snapshot?.vehicles?.find((x) => x.vehicle_id === id)
+    return !!(v && after && Date.parse(after) <= Math.max(Date.parse(snapshot!.as_of), v.available_at ? Date.parse(v.available_at) : 0))
+  }
   const [state, setState] = useState<{ data?: { confirmation: Confirmation; comparison: Comparison }; error?: unknown }>({})
   useEffect(() => {
     let live = true
@@ -306,7 +340,9 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
       <p className="small">수정 이유: {c.revision.reason}</p>
       <ul className="rev-diff">
         {c.revision.changes.map((x) => (
-          <li key={`${x.entity_id}:${x.field}`}>{x.field.startsWith('vehicle') || x.field === 'available_at' || x.field === 'shift_end_at' ? vehicleName(x.entity_id) : jobName(x.entity_id)} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
+          x.field === 'shift_end_at' && offVehicle(x.entity_id, x.after)
+            ? <li key={`${x.entity_id}:${x.field}`}>{vehicleName(x.entity_id)}: <b>오늘 운행 불가</b></li>
+            : <li key={`${x.entity_id}:${x.field}`}>{x.field.startsWith('vehicle') || x.field === 'available_at' || x.field === 'shift_end_at' ? vehicleName(x.entity_id) : jobName(x.entity_id)} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
         ))}
         {c.revision.added_vehicles.map((v) => (
           <li key={v.vehicle_id}>차량 추가: <b>{vehicleName(v.vehicle_id)}</b></li>

@@ -584,3 +584,5 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 }
 .vm-source { margin: 4px 0 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .vm-source .badge { margin: 0; }
+.rev-row.rev-off { background: #fdf2f2; border-radius: 8px; }
+.rev-row.rev-off > b { text-decoration: line-through; text-decoration-color: #c0262d; }

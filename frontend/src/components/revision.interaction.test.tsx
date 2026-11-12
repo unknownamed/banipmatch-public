@@ -80,3 +80,27 @@ it('확정 원안을 그대로 등록하며 재시도에도 새 next-input을 �
   expect(createRun.mock.calls[1]).toEqual(createRun.mock.calls[0])
   expect(createRun.mock.calls[0][0].base_plan_version).toBe(2)
 })
+
+it("'오늘 운행 불가'는 근무 종료를 운행 시작(또는 기준 시각)으로 당겨 보내고, 출발한 작업이 있는 차량은 뺄 수 없다", async () => {
+  const post = vi.fn().mockResolvedValue({ scenario_id: 'S2', plan_id: 'P1', base_plan_version: 1, revision_id: 'RV1' })
+  const createRun = vi.fn().mockResolvedValue({ run_id: 'R2' })
+  await act(async () => root.render(<ConditionRevisionPanel client={{ post, createRun } as unknown as V2Client} snapshot={snapshot} rerun={rerun} />))
+  const departed = new Set(snapshot.baseline_assignments.filter((a) => snapshot.jobs.find((j) => j.job_id === a.job_id)?.frozen).map((a) => a.vehicle_id))
+  const target = snapshot.vehicles!.find((v) => !departed.has(v.vehicle_id))!
+  const rows = [...el.querySelectorAll('.rev-row')].filter((r) => r.querySelector('button, .muted'))
+  for (const r of rows) {
+    const id = snapshot.vehicles!.find((v) => r.textContent!.includes(v.vehicle_id))?.vehicle_id
+    if (id && departed.has(id)) expect(r.textContent).toContain('출발한 작업이 있어 뺄 수 없음')
+  }
+  const row = rows.find((r) => r.querySelector('b')?.textContent?.includes(target.vehicle_id))!
+  await act(async () => row.querySelector<HTMLButtonElement>('button')!.click())
+  expect(el.querySelector('.rev-diff')!.textContent).toContain('오늘 운행 불가')
+  await fill(el.querySelector('textarea')!, '기사 연락, 차량 고장')
+  await click('다시 계산')
+  const sent = post.mock.calls[0][1].snapshot as Snapshot
+  const v = sent.vehicles!.find((x) => x.vehicle_id === target.vehicle_id)!
+  const floor = Math.max(Date.parse(snapshot.as_of), target.available_at ? Date.parse(target.available_at) : 0)
+  expect(Date.parse(v.shift_end_at!)).toBeGreaterThanOrEqual(floor)
+  expect(Date.parse(v.shift_end_at!) - floor).toBeLessThan(60_000)
+  expect(Date.parse(v.shift_end_at!)).toBeGreaterThanOrEqual(Date.parse(v.available_at ?? v.shift_end_at!))
+})
