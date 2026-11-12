@@ -5,7 +5,7 @@
   "source": "docs/development/v0.1/예제 데이터/01_snapshot.json",
   "source_sha256": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e",
   "tool": "tools/dispatch_response.py",
-  "tool_sha256": "31f29d509890f911a9dff953ca1934731a7b3bce63f5f0833640763a06e193e4",
+  "tool_sha256": "0d6db2f9b22540832304d4d4651fcbbb6c63e8ce133fea3b052f907aab968d36",
   "python": "3.12.14",
   "method": "B1",
   "seed": 42,
@@ -16,7 +16,7 @@
   "note": "공통 예제의 과거 시각을 유지한 로직 검수. 현재 승인/발송 가능한 데이터가 아님.",
   "files": {
     "computed-result.json": "ef3a803694ac6e6f5d7690cb6593cd5c16c85a58d6d434c21cb92beaa5d0a563",
-    "response-preview.json": "3e925c11bcaeab685ab14ad9ddd35f0e539691adaf0653703fbb23920ae3c982"
+    "response-preview.json": "cc606fd3452820b2b6761e6b49d171f502c4051bb713869d09e4b235a58c82d4"
   },
   "regenerated": [
     {
