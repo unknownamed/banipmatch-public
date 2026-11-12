@@ -628,3 +628,5 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 .lane-track .job-bar.locked { --seg: #cfe3f3; --rest: #eef6fc; }
 .lane-track .job-bar .arrival { top: 0 !important; bottom: 0 !important; height: auto !important; width: 2px !important; margin-left: -1px !important; border-radius: 0 !important; opacity: .9 !important; }
 .sw-bar { background: linear-gradient(90deg, #dfe4ec 0 60%, #fff 60% 100%) !important; }
+/* 진하게 칠한 구간의 끝이 게이트 도착이므로 별도 세로선은 그리지 않는다(작업 번호를 가리지 않게) */
+.lane-track .job-bar .arrival { display: none !important; }
