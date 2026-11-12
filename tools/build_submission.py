@@ -19,7 +19,7 @@ MANIFEST = "submission-manifest.json"
 EVALUATION = "docs/experiments/engine-evaluation-2026-11-08"
 SOURCE_COMMIT = "0d2640bec9886fe344166809123bc9a2cc19bb92"
 ALLOWED_ROOTS = {"backend", "frontend", "tools", "tests", "docs", "deployment", ".github", ".cursor"}
-ALLOWED_FILES = {".env.example", ".gitattributes", ".gitignore", "AGENTS.md", "CLAUDE.md",
+ALLOWED_FILES = {".env.example", ".gitattributes", ".gitignore", "AGENTS.md", "CLAUDE.md", "CHANGELOG.md",
                  "CONTRIBUTING.md", "README.md", "pytest.ini", "requirements.txt",
                  "requirements-dev.txt", "requirements-report.txt", "requirements-aisstream.txt",
                  "requirements-cloud.txt", "requirements-workflow.txt"}
