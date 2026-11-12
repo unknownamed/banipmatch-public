@@ -2,7 +2,7 @@
 // 다음 게이트 도착 예정이 반입 마감 안에 드는지 본다. 실시간 교통은 카카오 교통정보 레이어(실제 자료)다.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MethodResult, Snapshot } from '../api/types'
-import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
+import { PHASE_LABEL, lagMinutes, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
 import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
 import { LayerMenu } from './LayerMenu'
 import { BoxNo, Plate } from './Ids'
@@ -82,7 +82,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
   const driverLocs = useDriverLocations()
   const fleet = useMemo(() => vehiclesAt(snapshot, plan, now).map((v) => {
     const loc = ahead === 0 ? driverLocs.get(v.vehicleId) : undefined
-    return loc ? { ...v, pos: { lat: loc.latitude, lon: loc.longitude }, path: null, live: { captured_at: loc.captured_at, accuracy_m: loc.accuracy_m } } : v
+    if (!loc) return v
+    const actual = { lat: loc.latitude, lon: loc.longitude }
+    // 일정상 위치와 실제 위치의 차이만큼 늦어진다고 보고 마감 여유를 다시 계산한다(작업이 남은 차량만).
+    const lag = v.jobId && v.phase !== 'at_gate' && v.phase !== 'returning' && v.phase !== 'done' ? lagMinutes(v.pos, actual) : 0
+    const margin = v.marginMin === null ? null : v.marginMin - lag
+    const gate = margin === null ? v.gate : margin < 0 ? 'late' as const : margin < 20 ? 'tight' as const : 'ok' as const
+    return { ...v, pos: actual, path: null, marginMin: margin, gate, live: { captured_at: loc.captured_at, accuracy_m: loc.accuracy_m, delayMin: lag } }
   }), [snapshot, plan, now, driverLocs, ahead])
   const liveCount = fleet.filter((v) => v.live).length
   // 막대 끝은 이 배차의 마지막 복귀 시각(최소 1시간)까지다.
@@ -244,16 +250,27 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
         continue
       }
       el.className = `dm-pin ${worst}${picked ? ' picked' : ''}${v.live ? ' live' : ''}${showChanged && changedVehicles.has(v.vehicleId) ? ' changed' : ''}`
-      const heading = v.from && v.to ? bearing(v.from, v.to) : 90
+      // 휴대폰 위치는 일정상 진행 방향과 무관하므로 트럭 방향을 돌리지 않는다.
+      const heading = !v.live && v.from && v.to ? bearing(v.from, v.to) : 90
       const what = v.phase === 'to_gate' && v.gateEta ? `→ 게이트 ${kstTime(v.gateEta)}`
         : v.phase === 'to_origin' && v.jobId ? `→ ${placeName(snapshot.jobs.find(j => j.job_id === v.jobId)?.origin_id ?? '')}`
         : v.phase === 'returning' ? '→ 차고지'
         : PHASE_LABEL[v.phase]
       // 이름표는 짧게(번호판 뒤 4자리). 목적지·도착 시각은 고른 차량이거나 충분히 확대했을 때만.
-      el.innerHTML = `${truckSvg(heading)}<b>${vehicleShort(v.vehicleId)}</b>${picked || zoomedIn ? `<span>${what}</span>` : at ? `<span>${at}</span>` : ''}`
+      // 휴대폰 위치는 언제 받은 위치인지 항상 보여 준다.
+      const liveText = v.live ? (() => { const m = Math.round((Date.now() - Date.parse(v.live!.captured_at)) / 60000); return `기사 위치, ${m < 1 ? '방금' : `${m}분 전`}` })() : null
+      el.innerHTML = `${truckSvg(heading)}<b>${vehicleShort(v.vehicleId)}</b>${liveText ? `<span>${liveText}</span>` : picked || zoomedIn ? `<span>${what}</span>` : at ? `<span>${at}</span>` : ''}`
       el.setAttribute('aria-label', `${vehicleName(v.vehicleId)} ${PHASE_LABEL[v.phase]}`)
       el.onclick = () => { setPickedVehicle(v.vehicleId); onSelectJob(v.jobId) }
       pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos!), content: el, yAnchor: 1.25, zIndex: picked ? 9 : 6, clickable: true }))
+    }
+    // 지도 앱처럼 기사 실제 위치에 파란 점과 오차 범위 원을 그린다(묶음 안의 차량도). 이름표는 그 위에 떠 있다.
+    for (const v of fleet) {
+      if (!v.live || !v.pos) continue
+      pins.current.push(new maps.Circle({ map: kmap.current, center: ll(v.pos), radius: Math.max(20, v.live.accuracy_m), strokeWeight: 1, strokeColor: '#2457E6', strokeOpacity: 0.5, fillColor: '#2457E6', fillOpacity: 0.12 }))
+      const dot = document.createElement('div')
+      dot.className = 'dm-live-dot'
+      pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos), content: dot, zIndex: 5 }))
     }
     const a = selectedJob ? plan.find(x => x.job_id === selectedJob) : null
     const j = selectedJob ? snapshot.jobs.find(x => x.job_id === selectedJob) : null
@@ -294,7 +311,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       <div className="dm-head">
         <div>
           <h3>차량 현황</h3>
-          <p className="muted small"><b>{kstTime(new Date(now).toISOString())}</b> {ahead === 0 ? '현재' : '예상'}, {liveCount ? `휴대폰 위치 ${liveCount}대, 나머지는 ${planLabel} 일정 기준` : `${planLabel} 일정 기준 위치`}{showChanged ? `, 원래 배차와 일정이 다른 차량 ${changedVehicles.size}대` : ''}</p>
+          <p className="muted small"><b>{kstTime(new Date(now).toISOString())}</b> {ahead === 0 ? '현재' : '예상'}, {liveCount ? `기사 휴대폰 위치 ${liveCount}대, 나머지는 ${planLabel} 일정 기준` : `${planLabel} 일정 기준 위치`}{showChanged ? `, 원래 배차와 일정이 다른 차량 ${changedVehicles.size}대` : ''}</p>
         </div>
         <div className="dm-tools">
           {cand && (
@@ -333,7 +350,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
             <div className="map-legend two-rows" aria-label="범례">
               <div className="lg-row">
                 <span className="lg-group">트럭 색<small>반입 마감까지 남은 시간</small></span>
-                <span><i className="lg ok-g" />넉넉함</span><span><i className="lg tight" />20분 미만</span><span><i className="lg late" />늦음</span><span><i className="lg idle" />작업 없음</span>{liveCount > 0 && <span><i className="lg live" />휴대폰 위치</span>}{showChanged && <span><i className="lg chg" />일정 바뀐 차량</span>}
+                <span><i className="lg ok-g" />넉넉함</span><span><i className="lg tight" />20분 미만</span><span><i className="lg late" />늦음</span><span><i className="lg idle" />작업 없음</span>{liveCount > 0 && <span><i className="lg live" />기사 휴대폰 위치</span>}{showChanged && <span><i className="lg chg" />일정 바뀐 차량</span>}
               </div>
               {traffic && (
                 <div className="lg-row">
@@ -361,7 +378,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                   <div><dt>다음 작업</dt><dd>{next ? `${jobName(next.job_id)}, ${kstTime(next.pickup_departure_at)} 출발` : '없음'}</dd></div>
                 </>
               ) : <div><dt>작업</dt><dd>남은 작업 없음</dd></div>}
-              <div><dt>위치</dt><dd className="muted">{sel.live ? `기사 휴대폰, ${kstTime(sel.live.captured_at)} 측정(오차 약 ${Math.round(sel.live.accuracy_m)}m)` : '배차 일정 기준 추정'}</dd></div>
+              <div><dt>위치</dt><dd className="muted">{sel.live ? `기사 휴대폰 위치, ${kstTime(sel.live.captured_at)} 측정(오차 약 ${Math.round(sel.live.accuracy_m)}m)${sel.live.delayMin >= 5 ? `, 일정상 위치보다 약 ${sel.live.delayMin}분 늦음 추정(직선거리 기준)` : ''}` : '배차 일정 기준 추정'}</dd></div>
             </dl>
           </div>
         ) : <p className="muted small dm-hint">지도에서 차량을 누르거나 목록·작업표에서 고르면 일정이 보입니다.</p>}
@@ -373,7 +390,8 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                   <Plate id={v.vehicleId} />
                   <span className="dmi-phase">{PHASE_LABEL[v.phase]}</span>
                   {showChanged && changedVehicles.has(v.vehicleId) && <span className="st chg">일정 바뀜</span>}
-                  {v.live && <span className="st live">휴대폰 위치</span>}
+                  {v.live && <span className="st live">기사 위치</span>}
+                  {v.live && v.live.delayMin >= 5 && <span className="st warn">일정보다 약 {v.live.delayMin}분 늦음 추정</span>}
                   {v.gate && v.marginMin !== null && <span className={`st ${v.gate === 'late' ? 'bad' : v.gate === 'tight' ? 'warn' : 'ok'}`}>{v.gate === 'late' ? `${-v.marginMin}분 늦음` : `${v.marginMin}분 여유`}</span>}
                 </span>
                 {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} compact />}

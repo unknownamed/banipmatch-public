@@ -43,3 +43,14 @@ describe('배차 일정 기반 차량 위치 추정', () => {
     expect(new Set(late)).toEqual(new Set(['J03', 'J06', 'J07', 'J08']))
   })
 })
+
+it('기사 휴대폰 위치가 일정상 위치에서 떨어진 만큼 늦어질 시간을 어림한다(직선 x 1.3 ÷ 40km/h)', async () => {
+  const { lagMinutes } = await import('./fleetPosition')
+  const noksan = { lat: 35.0866, lon: 128.8410 }
+  expect(lagMinutes(noksan, noksan)).toBe(0)
+  // 창원 경남도청(약 25km) → 약 49분
+  const lag = lagMinutes(noksan, { lat: 35.2378, lon: 128.6919 })
+  expect(lag).toBeGreaterThan(40)
+  expect(lag).toBeLessThan(60)
+  expect(lagMinutes(null, noksan)).toBe(0)
+})
