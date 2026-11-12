@@ -164,13 +164,11 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
             <h2>입항 선박 · 반입 마감</h2>
             <p className="muted small">대상 터미널 HJNC 항차가 언제 도착할지(추정)와 그 항차의 반입 마감을 함께 봅니다.</p>
           </div>
-          <span className="badge fixture">모의 자료</span>
         </div>
-        <div className="banner fixture">선박·항차·속력·반입 마감은 모두 모의입니다. 도착 시각은 추정이며 반입 마감을 바꾸지 않습니다.</div>
         {link ? (
-          <p className="vm-linked small">계산 중인 시나리오 <b>{link.snapshot.scenario_id}</b>의 항차별 반입 마감을 함께 표시합니다. <a href={link.reviewHref}>배차 점검으로 돌아가기</a></p>
+          <p className="vm-linked small">지금 점검 중인 배차의 항차별 반입 마감을 함께 표시합니다. <a href={link.reviewHref}>배차 점검으로 돌아가기</a></p>
         ) : (
-          <p className="vm-linked small muted">예제를 계산하면 같은 항차(V1·V2 · HJNC)의 반입 마감이 이 지도에도 연결됩니다. <a href="?">계산 요청</a></p>
+          <p className="vm-linked small muted">배차 점검을 시작하면 같은 항차의 반입 마감이 이 지도에 연결됩니다. <a href="?">새 점검</a></p>
         )}
 
         <div className="vm-toolbar">
@@ -217,8 +215,9 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         </div>
 
         <details className="vm-notes small">
-          <summary>계산 방법과 출처</summary>
+          <summary>자료 설명</summary>
           <ul>
+            <li>선박·항차·속력·반입 마감은 시연용 모의 자료입니다. 실제 AIS가 연결되면 같은 형식으로 대체됩니다.</li>
             <li>도착 추정 = 남은 항로 길이 ÷ 현재 속력. 조류·감속·도선·선석 대기는 반영하지 않습니다.</li>
             <li>속력이 0인 묘박 선박과 위치가 끊긴 선박은 도착 시각을 만들지 않습니다(마지막 위치에서 멈춤).</li>
             <li>반입 마감은 터미널이 정하는 항차별 시간입니다. 선박 도착 추정이 바뀌어도 자동으로 바뀌지 않습니다.</li>
@@ -253,7 +252,6 @@ function InfoCard({ v, t, base, cut, link }: { v: VesselView; t: number; base: D
       <div className="vm-info-head"><b>{name}</b>{v.vessel.terminal === 'HJNC' && <span className="vm-chip underway">대상 터미널</span>}</div>
       <dl>{rows.map(([k, val]) => <div key={k}><dt>{k}</dt><dd>{val}</dd></div>)}</dl>
       {cut.linked && link && v.vessel.terminal === 'HJNC' && !v.vessel.outbound && <a className="vm-go" href={link.reviewHref}>{v.vessel.voyage} 항차 배차 점검 →</a>}
-      <p className="muted small">모의 선박입니다. 도착 시각은 남은 항로 ÷ 속력으로 계산한 추정이며 반입 마감을 바꾸지 않습니다.</p>
     </div>
   )
 }

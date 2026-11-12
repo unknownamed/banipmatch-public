@@ -40,11 +40,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
   const planLabel = usePlan === 'cand' && cand ? `${cand.method} 조정안` : '원안'
   const unassigned = usePlan === 'cand' && cand ? cand.unassigned_job_ids : base?.unassigned_job_ids ?? snapshot.baseline_unassigned_job_ids
   const fleet = useMemo(() => vehiclesAt(snapshot, plan, now), [snapshot, plan, now])
-  const selVehicle = selectedJob ? plan.find(a => a.job_id === selectedJob)?.vehicle_id ?? null : null
+  const [pickedVehicle, setPickedVehicle] = useState<string | null>(null)
+  const selVehicle = (selectedJob ? plan.find(a => a.job_id === selectedJob)?.vehicle_id : null) ?? pickedVehicle
+  const placeName = (id: string) => snapshot.locations?.find(l => l.location_id === id)?.name.replace('(모의)', '').trim() ?? id
 
   const box = useRef<HTMLDivElement>(null)
   const kmap = useRef<any>(null)
-  const trucks = useRef(new Map<string, { overlay: any; el: HTMLDivElement }>())
+  const pins = useRef<any[]>([])
   const jobLine = useRef<any>(null)
   const allBounds = useRef<any>(null)
 
@@ -72,16 +74,9 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
       allBounds.current = bounds
       m.setBounds(bounds, 40, 40, 40, 40)
       jobLine.current = new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#ff3c00', strokeOpacity: 0.85, strokeStyle: 'dash' })
-      for (const v of snapshot.vehicles ?? []) {
-        const el = document.createElement('div')
-        el.className = 'dm-truck'
-        el.setAttribute('role', 'button')
-        const overlay = new maps.CustomOverlay({ map: m, position: ll([...pts.values()][0]), content: el, zIndex: 6, clickable: true })
-        trucks.current.set(v.vehicle_id, { overlay, el })
-      }
       setMapState({ ok: true, msg: '' })
     }).catch((e: Error) => alive && setMapState({ ok: false, msg: `${e.message} 아래 차량별 목록으로 확인할 수 있습니다.` }))
-    return () => { alive = false; trucks.current.clear(); kmap.current = null }
+    return () => { alive = false; pins.current = []; kmap.current = null }
   }, [pts, snapshot])
 
   useEffect(() => {
@@ -96,22 +91,32 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
     const maps = window.kakao?.maps
     if (!mapState.ok || !maps) return
     const ll = (p: Pt) => new maps.LatLng(p.lat, p.lon)
-    // 같은 지점에 선 차량은 조금씩 비켜 그린다.
-    const seen = new Map<string, number>()
+    // 같은 자리(약 100m 안)의 차량은 핀 하나로 묶는다. 이동 중인 차량은 각자 목적지와 도착 시각을 보여 준다.
+    for (const o of pins.current) o.setMap(null)
+    pins.current = []
+    const groups = new Map<string, VehicleNow[]>()
     for (const v of fleet) {
-      const t = trucks.current.get(v.vehicleId)
-      if (!t || !v.pos) continue
-      const key = `${v.pos.lat.toFixed(4)},${v.pos.lon.toFixed(4)}`
-      const n = seen.get(key) ?? 0
-      seen.set(key, n + 1)
-      t.overlay.setPosition(ll({ lat: v.pos.lat - n * 0.0016, lon: v.pos.lon + n * 0.0022 }))
-      const heading = v.from && v.to ? bearing(v.from, v.to) : 0
-      const picked = v.vehicleId === selVehicle
-      t.el.className = `dm-truck ${v.gate ?? 'none'} ${v.phase}${picked ? ' picked' : ''}`
-      t.overlay.setZIndex(picked ? 9 : 6)
-      const tail = v.gateEta && v.phase !== 'returning' && v.phase !== 'at_gate' ? ` · ${kstTime(v.gateEta)} 도착` : ''
-      t.el.innerHTML = `${truckSvg(heading)}<span><b>${v.vehicleId}</b>${v.jobId ? ` ${v.jobId}` : ''}${tail}</span>`
-      t.el.onclick = () => onSelectJob(v.jobId)
+      if (!v.pos) continue
+      const moving = v.phase === 'to_gate' || v.phase === 'to_origin' || v.phase === 'returning'
+      const key = moving ? v.vehicleId : `${v.pos.lat.toFixed(3)},${v.pos.lon.toFixed(3)}`
+      groups.set(key, [...(groups.get(key) ?? []), v])
+    }
+    for (const list of groups.values()) {
+      const v = list[0]
+      const el = document.createElement('div')
+      const picked = list.some(x => x.vehicleId === selVehicle)
+      const worst = list.some(x => x.gate === 'late') ? 'late' : list.some(x => x.gate === 'tight') ? 'tight' : list.some(x => x.gate === 'ok') ? 'ok' : 'none'
+      el.className = `dm-pin ${worst}${picked ? ' picked' : ''}`
+      const heading = v.from && v.to ? bearing(v.from, v.to) : 90
+      const ids = list.map(x => x.vehicleId).join(' · ')
+      const what = list.length > 1 ? PHASE_LABEL[v.phase]
+        : v.phase === 'to_gate' && v.gateEta ? `→ 게이트 ${kstTime(v.gateEta)}`
+        : v.phase === 'to_origin' && v.jobId ? `→ 상차지 (${v.jobId})`
+        : v.phase === 'returning' ? '→ 차고지 복귀'
+        : PHASE_LABEL[v.phase]
+      el.innerHTML = `${truckSvg(heading)}<b>${ids}</b><span>${what}</span>`
+      el.onclick = () => { setPickedVehicle(v.vehicleId); onSelectJob(v.jobId) }
+      pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos!), content: el, yAnchor: 1.25, zIndex: picked ? 9 : list.length > 1 ? 5 : 6, clickable: true }))
     }
     const a = selectedJob ? plan.find(x => x.job_id === selectedJob) : null
     const j = selectedJob ? snapshot.jobs.find(x => x.job_id === selectedJob) : null
@@ -119,10 +124,17 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
     jobLine.current?.setPath(a && from && to ? [ll(from), ll(to)] : [])
   }, [fleet, mapState.ok, selVehicle, selectedJob, plan, snapshot, pts, onSelectJob])
 
+  const sel = fleet.find(v => v.vehicleId === selVehicle) ?? null
+  const selPlan = sel ? plan.filter(a => a.vehicle_id === sel.vehicleId).sort((x, y) => x.sequence - y.sequence) : []
+  const cur = sel?.jobId ? selPlan.find(a => a.job_id === sel.jobId) : undefined
+  const curJob = cur ? snapshot.jobs.find(j => j.job_id === cur.job_id) : undefined
+  const next = cur ? selPlan.find(a => a.sequence > cur.sequence) : undefined
+
   if (pts.size === 0)
     return <p className="muted small">이 입력에는 위치 좌표가 없어 차량 지도를 표시하지 않습니다. 예제 02로 계산하면 지도를 볼 수 있습니다.</p>
 
   const focusVehicle = (v: VehicleNow) => {
+    setPickedVehicle(v.vehicleId)
     onSelectJob(v.jobId)
     const maps = window.kakao?.maps
     if (kmap.current && maps && v.pos) kmap.current.panTo(new maps.LatLng(v.pos.lat, v.pos.lon))
@@ -152,12 +164,35 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
           <div ref={box} className="dm-map" aria-label="차량 현황 지도" />
           {!mapState.ok && <p className="vm-map-msg muted small" role="status">{mapState.msg}</p>}
           {mapState.ok && (
+            <div className="map-legend" aria-label="범례">
+              <span><i className="lg ok-g" />마감 여유</span><span><i className="lg tight" />빠듯(20분 미만)</span><span><i className="lg late" />마감 초과</span><span><i className="lg idle" />작업 없음</span>
+            </div>
+          )}
+          {mapState.ok && (
             <div className="dm-mapbtns">
               <button type="button" onClick={() => allBounds.current && kmap.current?.setBounds(allBounds.current, 40, 40, 40, 40)}>전체</button>
               {gate && <button type="button" onClick={() => { const maps = window.kakao.maps; kmap.current?.setLevel(4); kmap.current?.panTo(new maps.LatLng(gate.lat, gate.lon)) }}>게이트</button>}
             </div>
           )}
         </div>
+        <div className="dm-side">
+        {sel ? (
+          <div className="vm-info" aria-live="polite">
+            <div className="vm-info-head"><b>{sel.vehicleId}</b><span className={`dm-gate ${sel.gate ?? 'none'}`}>{PHASE_LABEL[sel.phase]}</span></div>
+            <dl>
+              {cur && curJob ? (
+                <>
+                  <div><dt>작업</dt><dd>{cur.job_id} · {curJob.voyage_id} 항차 · {curJob.equipment_type}</dd></div>
+                  <div><dt>경로</dt><dd>{placeName(curJob.origin_id)} → {placeName(curJob.terminal_id)}</dd></div>
+                  <div><dt>일정</dt><dd>출발 {kstTime(cur.pickup_departure_at)} · 도착 <b>{kstTime(cur.gate_arrival_at)}</b> · 복귀 {kstTime(cur.return_at)}</dd></div>
+                  <div><dt>반입 마감</dt><dd>{kstTime(sel.cutoff)}{sel.marginMin !== null && (sel.gate === 'late' ? <b className="dm-late"> · 마감 초과</b> : ` · 여유 ${sel.marginMin}분`)}</dd></div>
+                  <div><dt>다음 작업</dt><dd>{next ? `${next.job_id} · ${kstTime(next.pickup_departure_at)} 출발` : '없음'}</dd></div>
+                </>
+              ) : <div><dt>작업</dt><dd>남은 작업 없음</dd></div>}
+              <div><dt>위치</dt><dd className="muted">배차 일정 기준 추정</dd></div>
+            </dl>
+          </div>
+        ) : <p className="muted small dm-hint">지도에서 차량을 누르거나 목록·작업표에서 고르면 일정이 보입니다.</p>}
         <ol className="dm-list" aria-label="차량별 현재 상태">
           {fleet.map(v => (
             <li key={v.vehicleId}>
@@ -171,10 +206,14 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
               </button>
             </li>
           ))}
-          {unassigned.length > 0 && <li className="dm-unassigned small">미처리 {unassigned.join(', ')} · 배정된 차량이 없어 지도에 표시되지 않습니다</li>}
+          {unassigned.length > 0 && <li className="dm-unassigned small">미처리 {unassigned.join(', ')} · 배정된 차량 없음</li>}
         </ol>
+        </div>
       </div>
-      <p className="muted small dm-foot">차량 위치는 배차 일정으로 계산한 추정이며 실제 GPS가 아닙니다(이동은 직선으로 표시). 실시간 교통은 카카오 교통정보이며 계산된 도착 시각에 자동 반영하지 않습니다. 여유 = 반입 마감 − (도착 + 여유시간 {snapshot.policy.buffer_minutes}분).</p>
+      <details className="tech-info dm-foot">
+        <summary>자료 설명</summary>
+        차량 위치는 배차 일정으로 계산한 추정이며(이동은 직선 표시), 차량 GPS가 연결되면 실제 위치로 대체됩니다. 실시간 교통은 카카오 교통정보이며 계산된 도착 시각에 자동 반영하지 않습니다. 여유 = 반입 마감 − (도착 + 여유시간 {snapshot.policy.buffer_minutes}분).
+      </details>
     </section>
   )
 }

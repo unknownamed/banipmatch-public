@@ -102,7 +102,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       </section>
       <section className="card">
         <h2>어떤 상황인가요?</h2>
-        <p className="muted small">시연용 모의 배차입니다. 시각은 지금 기준으로 맞춰지며, 다른 접속자의 배차와 섞이지 않습니다.</p>
+        <p className="muted small">상황을 고르면 지금 시각 기준으로 배차를 불러와 계산합니다.</p>
         <div className="scenario-cards" role="radiogroup" aria-label="상황 선택">
           {EXAMPLES.map((e) => (
             <button

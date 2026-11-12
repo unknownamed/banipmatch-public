@@ -22,6 +22,7 @@ export function AppBar({ mode }: { mode: 'http' | 'fixture' }) {
       <a className="brand" href="?">
         <span className="brand-mark" aria-hidden="true">반</span>
         반입맞춤
+        {mode === 'http' && <span className="demo-pill">시연 데이터</span>}
       </a>
       <nav className="side-nav" aria-label="화면">
         {mode === 'http' && link('start', '새 점검', '?', 'plus', 'nav-cta')}
