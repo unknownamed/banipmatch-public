@@ -19,7 +19,7 @@ interface RevisionState { scenario_id: string; plan_id: string; base_plan_versio
 /** 재계산 조건. 이전 실행이 있으면 그 방법·예산·seed, 입력 부족으로 계산이 막혔으면 막힌 요청의 값(이전 실행 없음). */
 export interface Rerun { methods: Method[]; time_limit_seconds: number; seed: number; beforeRunId: string | null }
 
-export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2Client; snapshot: Snapshot; rerun: Rerun }) {
+export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: { client: V2Client; snapshot: Snapshot; rerun: Rerun; focus?: readonly string[] }) {
   const [edits, setEdits] = useState<Edits>({})
   const [reason, setReason] = useState('')
   const [confirmation, setConfirmation] = useState<Confirmation>('confirmed_simulation')
@@ -75,6 +75,8 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
   }
 
   const movable = snapshot.jobs.filter((j) => !j.frozen)
+  const isFocus = (j: (typeof movable)[number]) => j.ready_at === null || focus.includes(j.job_id) || !!edits[`job:${j.job_id}:ready_at`]
+  const jobRow = (j: (typeof movable)[number]) => <div key={j.job_id} className="rev-row"><b title={j.job_id}>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>
   const frozen = snapshot.jobs.filter((j) => j.frozen)
   // 브라우저 기본 시각 입력은 기기 설정에 따라 오전/오후로 보인다. 화면 표기와 같은 24시간제로 받기 위해 날짜+시각(HH:MM)으로 나눈다.
   const timeInput = (value: string, onChange: (v: string) => void, label: string, hint: string) => {
@@ -105,13 +107,22 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
 
       <fieldset disabled={sending}>
         <legend>작업 준비시각</legend>
-        {movable.map((j) => <div key={j.job_id} className="rev-row"><b title={j.job_id}>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>)}
-        {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b title={j.job_id}>{jobName(j.job_id)}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
+        {/* 확인이 필요한 작업(미배정·위반·준비 시각 없음)을 먼저 펼치고, 나머지는 접어 둔다 */}
+        {movable.filter(isFocus).map(jobRow)}
+        {movable.some((j) => !isFocus(j)) && (
+          <details className="rev-more" open={!movable.some(isFocus)}>
+            <summary>다른 작업 {movable.filter((j) => !isFocus(j)).length + frozen.length}건</summary>
+            {movable.filter((j) => !isFocus(j)).map(jobRow)}
+            {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b title={j.job_id}>{jobName(j.job_id)}</b><span className="small">고정 · {freezeLabel(j.freeze_reason)} — 수정 불가</span></div>)}
+          </details>
+        )}
       </fieldset>
 
       {!!snapshot.vehicles?.length && (
         <fieldset disabled={sending}>
           <legend>차량 가용 · 근무</legend>
+          <details className="rev-more">
+          <summary>차량 {snapshot.vehicles.length}대의 가용 시작·근무 종료</summary>
           {snapshot.vehicles.map((v) => (
             <div key={v.vehicle_id} className="rev-row">
               <b title={v.vehicle_id}>{vehicleName(v.vehicle_id)}</b>
@@ -119,11 +130,14 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
               {field(`vehicle:${v.vehicle_id}:shift_end_at`, v.shift_end_at, FIELD_LABEL.shift_end_at)}
             </div>
           ))}
+          </details>
         </fieldset>
       )}
 
       <fieldset disabled={sending} className="rev-add">
-        <legend>차량 추가 (선택)</legend>
+        <legend>차량 추가</legend>
+        <details className="rev-more" open={draftOpen}>
+        <summary>외부에서 확보한 차량 넣기</summary>
         <p className="small muted">
           외부에서 확보가 확인된 차량만 넣으세요. 이 화면은 차량을 구해 주지 않습니다. 모든 값을 직접 입력하며 다른 차량 값으로 채우지 않습니다.
           시작 위치는 이동시간이 이미 있는 기존 위치에서만 고를 수 있습니다.
@@ -153,6 +167,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
         </div>
         {draftOpen && missing.length > 0 && <p className="small warn">추가 차량에 빠진 값: {missing.join(', ')}. 모두 채워야 함께 보냅니다.</p>}
         {draftOpen && <button type="button" className="secondary" onClick={() => setDraft(EMPTY_DRAFT)}>차량 추가 취소</button>}
+        </details>
       </fieldset>
 
       <fieldset disabled={sending}>

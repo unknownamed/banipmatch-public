@@ -18,9 +18,12 @@ function lateDuration(a: Assignment, closesAt: string | null | undefined): strin
   return `${Math.floor(seconds / 60)}분${remainder ? ` ${remainder}초` : ''}`
 }
 
-function Cell({ a, refUtc, closesAt }: { a: Assignment | undefined; refUtc: string; closesAt: string | null | undefined }) {
+function Cell({ a, refUtc, closesAt, buffer }: { a: Assignment | undefined; refUtc: string; closesAt: string | null | undefined; buffer: number }) {
   if (!a) return <span className="muted">배정 없음</span>
   const late = lateDuration(a, closesAt)
+  // 마감 전에 도착해도 게이트 여유 시간을 못 지키면 위반이다. 그 이유를 숫자로 보여 준다.
+  const before = closesAt ? Math.round((Date.parse(closesAt) - Date.parse(a.gate_arrival_at)) / 60000) : null
+  const short = !late && before !== null && buffer > 0 && before < buffer ? before : null
   return (
     <>
       <b title={a.vehicle_id}>{vehicleName(a.vehicle_id)}</b> <span className="muted small">{a.sequence}번째</span>
@@ -29,6 +32,7 @@ function Cell({ a, refUtc, closesAt }: { a: Assignment | undefined; refUtc: stri
         <span className={late ? 'late-time' : undefined}>
           {kstTimeWithDay(a.gate_arrival_at, refUtc)}
           {late && ` (마감 ${late} 초과)`}
+          {short !== null && ` (마감 ${short}분 전 · 여유 ${buffer}분 미달)`}
         </span>{' '}
         · 복귀 {kstTimeWithDay(a.return_at, refUtc)}
       </div>
@@ -44,6 +48,7 @@ export function ComparisonTable({
   candLabel,
   selectedJob = null,
   onSelectJob,
+  buffer = 0,
 }: {
   rows: JobRow[]
   asOf: string
@@ -51,6 +56,8 @@ export function ComparisonTable({
   candLabel: string | null
   selectedJob?: string | null
   onSelectJob?: (jobId: string) => void
+  /** 게이트 도착 후 마감까지 남겨야 하는 여유(분). 입력 policy.buffer_minutes. */
+  buffer?: number
 }) {
   const hasCand = candLabel !== null
   // 영향 있는 작업: 바뀌었거나, 원안에서 문제가 있었거나, 보류됐거나, 출발한 고정 작업. 나머지는 접어 둔다.
@@ -93,7 +100,7 @@ export function ComparisonTable({
                 <td className="job-cell">
                   <b>{jobName(r.job.job_id)}</b>
                   <div className="muted small">
-                    {r.job.voyage_id} · {r.job.terminal_id}{r.job.cargo_owner ? ` · ${r.job.cargo_owner}` : ''}{jobName(r.job.job_id) !== r.job.job_id ? ` · ${r.job.job_id}` : ''}
+                    {r.job.voyage_id} · {r.job.terminal_id}{r.job.cargo_owner ? ` · ${r.job.cargo_owner}` : ''}
                   </div>
                   {r.job.ready_at === null && <div className="warn small">준비시각 미확인</div>}
                   {r.locked && (
@@ -106,7 +113,7 @@ export function ComparisonTable({
                 </td>
                 <td data-label="마감">{kstTimeWithDay(r.window?.closes_at ?? null, asOf)}</td>
                 <td data-label={baseLabel}>
-                  <Cell a={r.baseline} refUtc={asOf} closesAt={r.window?.closes_at} />
+                  <Cell a={r.baseline} refUtc={asOf} closesAt={r.window?.closes_at} buffer={buffer} />
                   {r.baselineIssues.map((i, k) => (
                     <div key={k} className="warn small">
                       <Icon name="warning" /> {ISSUE_LABEL[i.code] ?? i.code}
@@ -120,7 +127,7 @@ export function ComparisonTable({
                     ) : r.candidateMissing ? (
                       <span className="warn">결과에 없음(배정·미처리 모두 아님)</span>
                     ) : (
-                      <Cell a={r.candidate} refUtc={asOf} closesAt={r.window?.closes_at} />
+                      <Cell a={r.candidate} refUtc={asOf} closesAt={r.window?.closes_at} buffer={buffer} />
                     )}
                   </td>
                 )}

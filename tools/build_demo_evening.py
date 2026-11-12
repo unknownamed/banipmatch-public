@@ -54,10 +54,15 @@ def travel(a: str, b: str) -> int:
     return 0 if a == b else PAIRS.get((a, b)) or PAIRS[(b, a)]
 
 
-# 항차별 반입 시간창(분, T0 기준). V1은 변경 전 마감 +240 → 변경 후 +120.
-WINDOWS = {"V1": (-360, 90), "V2": (-120, 330), "V4": (60, 480), "V7": (-240, 300)}
-TERMINAL = {"V1": "HJNC", "V2": "HJNC", "V4": "HJNC", "V7": "PNIT"}
+# 항차별 반입 마감(분, T0 기준). V1(BH045E)은 변경 전 +240 → 변경 후 +90(2시간 30분 앞당김).
+# 반입 마감은 모선 접안 12시간 전(PNC 공지의 '접안 12시간 전 이후 반입 금지' 규칙을 모의 규칙으로 사용),
+# 반입 시작은 접안 72시간 전으로 둔다(터미널은 보통 며칠 전부터 반입을 받는다. 예: HPNT 선적 5일 전, 2021).
+# 둘 다 터미널·선사마다 다르므로 모의 가정값이다.
+CLOSES = {"V1": 90, "V2": 330, "V4": 480, "V7": 300}
 V1_PREVIOUS_CLOSE = 240
+_OPEN_BEFORE_CLOSE = 72 * 60 - 12 * 60  # 접안 72시간 전 시작 = 마감 60시간 전
+WINDOWS = {v: ((V1_PREVIOUS_CLOSE if v == "V1" else c) - _OPEN_BEFORE_CLOSE, c) for v, c in CLOSES.items()}
+TERMINAL = {"V1": "HJNC", "V2": "HJNC", "V4": "HJNC", "V7": "PNIT"}
 
 VEHICLES = [  # id, 가용 시작, 장비
     ("T1", -60, ["DRY20", "DRY40"]),
@@ -95,7 +100,8 @@ JOBS = [
     ("J19", "V7", "O2", 60, 23000, "DRY40", "planned"),
     ("J20", "V7", "O5", 80, 14000, "DRY20", "planned"),
 ]
-SERVICE = 20
+# 터미널 체류(게이트 진입·하차·출문) 가정값. 부산신항 체류시간은 혼잡도에 따라 크게 달라 실측 대신 30분으로 둔다.
+SERVICE = 30
 
 # 현장에서 쓰는 식별 정보(모두 가상). 항차는 '선박 약어+항차 번호+방향' 형식, 선박은 서비스 이름을 딴 가상 선단.
 VOYAGE_CODE = {"V1": "BH045E", "V2": "BO112W", "V4": "BP007E", "V7": "BE221E"}
