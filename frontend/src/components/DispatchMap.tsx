@@ -6,6 +6,7 @@ import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } fro
 import { loadKakaoMaps } from '../lib/kakaoMaps'
 import { kstTime } from '../lib/time'
 import { jobName, jobInfo, vehicleName, vehicleShort } from '../lib/labels'
+import { TripStepper } from './TripStepper'
 
 const GATE_LABEL = { ok: '여유', tight: '빠듯', late: '마감 초과' } as const
 
@@ -197,6 +198,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
         {sel ? (
           <div className="vm-info" aria-live="polite">
             <div className="vm-info-head"><b>{vehicleName(sel.vehicleId)}</b><span className={`dm-gate ${sel.gate ?? 'none'}`}>{PHASE_LABEL[sel.phase]}</span></div>
+            {sel.jobId && <TripStepper phase={sel.phase} late={sel.gate === 'late'} />}
             <dl>
               {cur && curJob ? (
                 <>
@@ -219,6 +221,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
                 <span className="dm-item-top"><b>{vehicleName(v.vehicleId)}</b> <span className="muted">{PHASE_LABEL[v.phase]}</span>
                   {v.gate && <span className={`dm-gate ${v.gate}`}>{GATE_LABEL[v.gate]}{v.marginMin !== null && v.gate !== 'late' ? ` ${v.marginMin}분` : ''}</span>}
                 </span>
+                {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} />}
                 {v.jobId && v.gateEta ? (
                   <span className="small">{jobName(v.jobId)} · 게이트 <b>{kstTime(v.gateEta)}</b> · 마감 {kstTime(v.cutoff)}</span>
                 ) : <span className="small muted">남은 작업 없음</span>}

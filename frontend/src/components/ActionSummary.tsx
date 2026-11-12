@@ -3,6 +3,7 @@
 import type { MethodResult } from '../api/types'
 import { ISSUE_LABEL, type JobRow } from '../lib/compare'
 import { jobName } from '../lib/labels'
+import { Icon } from './Icon'
 
 const go = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
@@ -36,23 +37,27 @@ export function ActionSummary({ base, cand, recommended, rows, approved }: {
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
       <div className="as-grid">
         <div className="as-cell bad">
+          <span className="as-ic"><Icon name="warning" size={16} /></span>
           <span className="as-num">{lateSet.length}</span>
           <span className="as-label">원래 배차로<br />마감 넘김</span>
         </div>
         {cand && (
           <div className="as-cell good">
+            <span className="as-ic"><Icon name="check" size={16} /></span>
             <span className="as-num">{fixed}</span>
             <span className="as-label">{cand.method}{cand.method === recommended ? '(추천)' : ''}로<br />해결</span>
           </div>
         )}
         {cand && (
           <div className="as-cell">
+            <span className="as-ic"><Icon name="swap" size={16} /></span>
             <span className="as-num">{changed}</span>
             <span className="as-label">바뀌는<br />작업</span>
           </div>
         )}
         {cand && (
           <div className={`as-cell${unresolved.length ? ' warn' : ''}`}>
+            <span className="as-ic"><Icon name="clock" size={16} /></span>
             <span className="as-num">{unresolved.length}</span>
             <span className="as-label">담당자<br />확인 필요</span>
           </div>
