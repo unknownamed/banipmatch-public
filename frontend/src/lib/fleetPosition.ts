@@ -51,7 +51,7 @@ export type VehicleNow = {
   source: 'plan_inferred'
   path?: Pt[] | null // 지금 달리는 구간의 도로 경로(있으면)
   /** 기사가 동의해 보낸 휴대폰 위치(있으면 pos가 이 값) */
-  live?: { captured_at: string; accuracy_m: number; delayMin: number }
+  live?: { captured_at: string; accuracy_m: number; offKm: number }
 }
 
 const ms = (iso: string) => Date.parse(iso)
@@ -110,15 +110,11 @@ export function vehiclesAt(s: Snapshot, plan: Assignment[], now: number): Vehicl
   })
 }
 
-// 휴대폰 위치가 일정상 있어야 할 위치에서 얼마나 떨어졌는지로 늦어질 시간을 어림한다.
-// 도로 경로가 아닌 직선거리 x 1.3(도로 우회) ÷ 40km/h(도심·항만 화물차 평균)로 보수적으로 잡은 추정치다.
-const ROAD_FACTOR = 1.3
-const TRUCK_KMH = 40
-export function lagMinutes(planned: Pt | null, actual: Pt): number {
-  if (!planned) return 0
+// 기사 휴대폰 위치와 배차 일정상 위치 사이의 직선거리(km). 지연·작업 여부로 해석하지 않고 거리 사실만 돌려준다.
+export function distanceKm(a: Pt | null, b: Pt): number {
+  if (!a) return 0
   const R = 6371, toRad = (d: number) => (d * Math.PI) / 180
-  const dLat = toRad(actual.lat - planned.lat), dLon = toRad(actual.lon - planned.lon)
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(planned.lat)) * Math.cos(toRad(actual.lat)) * Math.sin(dLon / 2) ** 2
-  const km = 2 * R * Math.asin(Math.sqrt(h))
-  return Math.round((km * ROAD_FACTOR / TRUCK_KMH) * 60)
+  const dLat = toRad(b.lat - a.lat), dLon = toRad(b.lon - a.lon)
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
 }

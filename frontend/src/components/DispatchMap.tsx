@@ -2,7 +2,7 @@
 // 다음 게이트 도착 예정이 반입 마감 안에 드는지 본다. 실시간 교통은 카카오 교통정보 레이어(실제 자료)다.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MethodResult, Snapshot } from '../api/types'
-import { PHASE_LABEL, lagMinutes, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
+import { PHASE_LABEL, distanceKm, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
 import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
 import { LayerMenu } from './LayerMenu'
 import { BoxNo, Plate } from './Ids'
@@ -84,11 +84,9 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
     const loc = ahead === 0 ? driverLocs.get(v.vehicleId) : undefined
     if (!loc) return v
     const actual = { lat: loc.latitude, lon: loc.longitude }
-    // 일정상 위치와 실제 위치의 차이만큼 늦어진다고 보고 마감 여유를 다시 계산한다(작업이 남은 차량만).
-    const lag = v.jobId && v.phase !== 'at_gate' && v.phase !== 'returning' && v.phase !== 'done' ? lagMinutes(v.pos, actual) : 0
-    const margin = v.marginMin === null ? null : v.marginMin - lag
-    const gate = margin === null ? v.gate : margin < 0 ? 'late' as const : margin < 20 ? 'tight' as const : 'ok' as const
-    return { ...v, pos: actual, path: null, marginMin: margin, gate, live: { captured_at: loc.captured_at, accuracy_m: loc.accuracy_m, delayMin: lag } }
+    // 위치만으로는 작업 중인지·늦는지 알 수 없으므로 마감 여유·색은 배차 일정 기준 그대로 두고,
+    // 일정상 위치와 떨어진 거리(사실)만 함께 보여 담당자가 기사에게 확인하게 한다.
+    return { ...v, pos: actual, path: null, live: { captured_at: loc.captured_at, accuracy_m: loc.accuracy_m, offKm: Math.round(distanceKm(v.pos, actual) * 10) / 10 } }
   }), [snapshot, plan, now, driverLocs, ahead])
   const liveCount = fleet.filter((v) => v.live).length
   // 막대 끝은 이 배차의 마지막 복귀 시각(최소 1시간)까지다.
@@ -378,7 +376,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                   <div><dt>다음 작업</dt><dd>{next ? `${jobName(next.job_id)}, ${kstTime(next.pickup_departure_at)} 출발` : '없음'}</dd></div>
                 </>
               ) : <div><dt>작업</dt><dd>남은 작업 없음</dd></div>}
-              <div><dt>위치</dt><dd className="muted">{sel.live ? `기사 휴대폰 위치, ${kstTime(sel.live.captured_at)} 측정(오차 약 ${Math.round(sel.live.accuracy_m)}m)${sel.live.delayMin >= 5 ? `, 일정상 위치보다 약 ${sel.live.delayMin}분 늦음 추정(직선거리 기준)` : ''}` : '배차 일정 기준 추정'}</dd></div>
+              <div><dt>위치</dt><dd className="muted">{sel.live ? `기사 휴대폰 위치, ${kstTime(sel.live.captured_at)} 측정(오차 약 ${Math.round(sel.live.accuracy_m)}m)${sel.live.offKm >= 2 ? `, 일정상 위치와 약 ${Math.round(sel.live.offKm)}km 떨어짐(기사에게 확인)` : ''}` : '배차 일정 기준 추정'}</dd></div>
             </dl>
           </div>
         ) : <p className="muted small dm-hint">지도에서 차량을 누르거나 목록·작업표에서 고르면 일정이 보입니다.</p>}
@@ -391,7 +389,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
                   <span className="dmi-phase">{PHASE_LABEL[v.phase]}</span>
                   {showChanged && changedVehicles.has(v.vehicleId) && <span className="st chg">일정 바뀜</span>}
                   {v.live && <span className="st live">기사 위치</span>}
-                  {v.live && v.live.delayMin >= 5 && <span className="st warn">일정보다 약 {v.live.delayMin}분 늦음 추정</span>}
+                  {v.live && v.live.offKm >= 2 && <span className="st warn">일정상 위치와 약 {Math.round(v.live.offKm)}km 떨어짐</span>}
                   {v.gate && v.marginMin !== null && <span className={`st ${v.gate === 'late' ? 'bad' : v.gate === 'tight' ? 'warn' : 'ok'}`}>{v.gate === 'late' ? `${-v.marginMin}분 늦음` : `${v.marginMin}분 여유`}</span>}
                 </span>
                 {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} compact />}
