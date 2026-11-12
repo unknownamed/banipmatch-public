@@ -1,4 +1,4 @@
-"""Export a committed, review-stage source/data bundle without local secrets or Git.
+"""Export a committed source/data bundle (review draft or final) without local secrets or Git.
 
 No server, network request, solver rerun, or deployment is performed.
 """
@@ -18,10 +18,15 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = "submission-manifest.json"
 EVALUATION = "docs/experiments/engine-evaluation-2026-11-08"
 SOURCE_COMMIT = "0d2640bec9886fe344166809123bc9a2cc19bb92"
-ALLOWED_ROOTS = {"backend", "frontend", "tools", "tests", "docs", ".github", ".cursor"}
+ALLOWED_ROOTS = {"backend", "frontend", "tools", "tests", "docs", "deployment", ".github", ".cursor"}
 ALLOWED_FILES = {".env.example", ".gitattributes", ".gitignore", "AGENTS.md", "CLAUDE.md",
                  "CONTRIBUTING.md", "README.md", "pytest.ini", "requirements.txt",
-                 "requirements-dev.txt", "requirements-report.txt", "requirements-aisstream.txt"}
+                 "requirements-dev.txt", "requirements-report.txt", "requirements-aisstream.txt",
+                 "requirements-cloud.txt", "requirements-workflow.txt"}
+# 단계별 보고서 파일명. final은 docs/report/final/report.html을 인쇄한 PDF다.
+REPORT_NAMES = {"review_draft": "반입맞춤_문제해결_보고서_검토본.pdf", "final": "반입맞춤_문제해결_보고서.pdf"}
+REPORT_INPUTS = {"review_draft": {"tools/build_submission_report.py", "requirements-report.txt"},
+                 "final": {"docs/report/final/report.html", "tools/build_final_report.py"}}
 DENIED_PARTS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache",
                 "local", "tmp", "private", "raw", "secrets", "credentials", "dist", "dist-showcase"}
 DENIED_SUFFIXES = {".db", ".sqlite", ".sqlite3", ".pem", ".key", ".log", ".pyc", ".pyo"}
@@ -101,24 +106,26 @@ def build(repo: Path, revision: str, report: Path, report_meta: Path, output: Pa
     commit, tree, blobs, excluded = collect_sources(repo, revision)
     meta = json.loads(report_meta.read_text(encoding="utf-8"))
     report_bytes = report.read_bytes()
+    stage = meta.get("stage")
     if (meta.get("source_commit") != commit or meta.get("pdf_sha256") != sha(report_bytes)
-            or meta.get("stage") != "review_draft" or not 1 <= meta.get("page_count", 0) <= 20):
+            or stage not in REPORT_NAMES or not 1 <= meta.get("page_count", 0) <= 20):
         raise ValueError("Report commit/hash/stage/page-count does not match this source bundle")
     if not report_bytes.startswith(b"%PDF-"):
         raise ValueError("Report is not a PDF")
-    if not {"tools/build_submission_report.py", "requirements-report.txt"}.issubset(meta.get("inputs", {})):
+    if not REPORT_INPUTS[stage].issubset(meta.get("inputs", {})):
         raise ValueError("Report generator and dependency hashes are required")
     for name, expected in meta["inputs"].items():
         safe_path(name)
         if name not in blobs or sha(blobs[name].replace(b"\r\n", b"\n")) != expected:
             raise ValueError(f"Report input differs from committed source: {name}")
     blobs.update(historical_sources(repo, blobs))
-    blobs["report/반입맞춤_문제해결_보고서_검토본.pdf"] = report_bytes
+    blobs["report/" + REPORT_NAMES[stage]] = report_bytes
     blobs["report/report-build.json"] = report_meta.read_bytes()
-    manifest = {"schema_version": "1", "stage": "review_draft", "source_commit": commit,
+    manifest = {"schema_version": "1", "stage": stage, "source_commit": commit,
                 "source_tree": tree, "historical_source_commit": SOURCE_COMMIT,
                 "external_actions_performed": False, "excluded_tracked_paths": excluded,
-                "limits": ["Not a completed deployment or final submission approval",
+                "limits": [("Final submission bundle; operating service https://banipmatch.duckdns.org"
+                            if stage == "final" else "Not a completed deployment or final submission approval"),
                            "No credentials, local runtime DB, Git history, or installed dependencies",
                            "Historical Git-dependent tests require the original repository; see docs/submission/README.md"],
                 "files": [{"path": n, "bytes": len(b), "sha256": sha(b)} for n, b in sorted(blobs.items())]}
@@ -133,7 +140,7 @@ def build(repo: Path, revision: str, report: Path, report_meta: Path, output: Pa
                 info.external_attr = 0o100644 << 16
                 archive.writestr(info, data)
     return {"source_commit": commit, "files": len(manifest["files"]), "zip_sha256": sha(output.read_bytes()),
-            "report_sha256": sha(report_bytes), "stage": "review_draft", "excluded_tracked_paths": excluded}
+            "report_sha256": sha(report_bytes), "stage": stage, "excluded_tracked_paths": excluded}
 
 
 def main() -> int:
