@@ -65,7 +65,8 @@ const FIELD_NAME: Record<string, string> = {
 }
 /** 서버 입력 검사 결과의 경로(/jobs/2/ready_at)와 사유(CODE: 설명)를 담당자가 읽는 문장으로. */
 export function readableDetail(path: string, reason: string, s: Pick<Snapshot, 'jobs' | 'vehicles' | 'windows'> | null): { what: string; why: string } {
-  const why = reason.replace(/^[A-Z_]+:\s*/, '')
+  // 서버 설명은 그대로 쓰되, 입력 누락은 담당자가 바로 알아듣는 말로 바꾼다.
+  const why = /^INPUT_MISSING:/.test(reason) ? '값이 비어 있어 계산할 수 없습니다.' : reason.replace(/^[A-Z_]+:\s*/, '')
   const parts = path.replace(/^\//, '').split(/[/.[\]]+/).filter(Boolean)
   const field = (k?: string) => (k ? FIELD_NAME[k] ?? '' : '')
   if (parts[0] === 'jobs' && s) {

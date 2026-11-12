@@ -195,11 +195,11 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         <button type="button" className={`vm-item${v.vessel.id === sel.vessel.id ? ' picked' : ''}`} aria-pressed={v.vessel.id === sel.vessel.id} onClick={() => focus(v)}>
           <span className="vm-item-top">
             <b>{v.vessel.name ?? '이름 미수신'}</b>
-            <span className="muted">{v.vessel.voyage} · {v.vessel.terminal}</span>
+            <span className="muted">{v.vessel.voyage}, {v.vessel.terminal}</span>
             <span className={`vm-chip ${v.vessel.outbound ? 'out' : v.status}`}>{label}</span>
           </span>
           <span className="vm-eta">
-            {v.vessel.outbound ? <span className="muted">{v.vessel.port} 향발{v.etaMin !== null ? ` · 외해까지 ${formatDuration(v.etaMin - t)}` : ''}</span>
+            {v.vessel.outbound ? <span className="muted">{v.vessel.port} 향발{v.etaMin !== null ? `, 외해까지 ${formatDuration(v.etaMin - t)}` : ''}</span>
               : v.etaMin !== null ? <><b>{formatDuration(v.etaMin - t)}</b> 후 도착 추정 <span className="muted">· {kst(at(base, v.etaMin))}</span></>
               : <span className="muted">{v.etaNote}</span>}
           </span>
@@ -220,7 +220,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         {nextCut && (
           <div className="vm-brief">
             <span><b>HJNC로 오는 모선 {inboundHjnc}척</b></span>
-            <span>다음 반입 마감 <b>{nextCut.vessel.voyage}</b> {kst(at(base, nextCut.vessel.cutoffMin!))} · <b className="vm-left">{formatDuration(nextCut.vessel.cutoffMin! - t)} 남음</b></span>
+            <span>다음 반입 마감 <b>{nextCut.vessel.voyage}</b> {kst(at(base, nextCut.vessel.cutoffMin!))}, <b className="vm-left">{formatDuration(nextCut.vessel.cutoffMin! - t)} 남음</b></span>
             <SeaWeatherLine />
           </div>
         )}
@@ -291,12 +291,12 @@ function InfoCard({ v, t, base, cut, link }: { v: VesselView; t: number; base: D
   ]
   if (v.status === 'underway' && !v.vessel.outbound && v.etaMin !== null) {
     rows.push(['도착 추정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후)</>])
-    rows.push(['남은 항로', `${v.remainingNm!.toFixed(1)}해리 · ${v.vessel.speedKn}노트`])
-  } else if (v.status === 'offshore' && v.etaMin !== null) rows.push(['접안 예정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후 · 외해 항해 중, 지도 범위 밖)</>])
-  else if (v.vessel.outbound) rows.push(['상태', `출항 중 · ${v.vessel.speedKn}노트`])
+    rows.push(['남은 항로', `${v.remainingNm!.toFixed(1)}해리, ${v.vessel.speedKn}노트`])
+  } else if (v.status === 'offshore' && v.etaMin !== null) rows.push(['접안 예정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후, 외해 항해 중, 지도 범위 밖)</>])
+  else if (v.vessel.outbound) rows.push(['상태', `출항 중, ${v.vessel.speedKn}노트`])
   else rows.push(['상태', v.etaNote])
   if (v.vessel.terminal === 'HJNC' && !v.vessel.outbound && cut.min !== null && cutLeft !== null)
-    rows.push(['반입 마감', <>{kst(at(base, cut.min))} · {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}{cut.prevMin !== null && <span className="vm-changed"> (변경 전 {kst(at(base, cut.prevMin))})</span>}</>])
+    rows.push(['반입 마감', <>{kst(at(base, cut.min))}, {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}{cut.prevMin !== null && <span className="vm-changed"> (변경 전 {kst(at(base, cut.prevMin))})</span>}</>])
   return (
     <div className="vm-info" aria-live="polite">
       <div className="vm-info-head"><b>{name}</b>{v.vessel.terminal === 'HJNC' && <span className="vm-chip underway">대상 터미널</span>}</div>

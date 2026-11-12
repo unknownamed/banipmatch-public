@@ -550,3 +550,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offs
 /* HJNC행만 볼 때 다른 터미널 배는 흐리게 */
 .vm-ship.dim { opacity: .3; }
 .vm-ship.dim span, .vm-ship.dim .vm-count { display: none !important; }
+
+/* 차량 지도 시간 막대 */
+.dispatch-map .vm-play { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }

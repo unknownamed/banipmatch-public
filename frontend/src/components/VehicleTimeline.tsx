@@ -42,7 +42,7 @@ export function timelineModel(rows: JobRow[], hasCand: boolean, buffer = 0): Tim
   const bars = (id: string, side: 'base' | 'cand'): Bar[] => rows.flatMap((r) => {
     const a = side === 'base' ? r.baseline : r.candidate
     if (!a || a.vehicle_id !== id) return []
-    const label = `${jobName(r.job.job_id)} · 출발 ${kstTime(a.pickup_departure_at)} · 도착 ${kstTime(a.gate_arrival_at)} · 복귀 ${kstTime(a.return_at)}`
+    const label = `${jobName(r.job.job_id)}, 출발 ${kstTime(a.pickup_departure_at)}, 도착 ${kstTime(a.gate_arrival_at)}, 복귀 ${kstTime(a.return_at)}`
     if (![a.pickup_departure_at, a.gate_arrival_at, a.return_at].every((v) => Number.isFinite(t(v))) || t(a.return_at) <= t(a.pickup_departure_at)) {
       incomplete.push({ jobId: r.job.job_id, vehicleId: id, side, label })
       return []
@@ -60,7 +60,7 @@ export function timelineModel(rows: JobRow[], hasCand: boolean, buffer = 0): Tim
       late: !!closes && t(a.gate_arrival_at) + buffer * 60000 > t(closes),
       cut: closes && start !== null && end !== null && t(closes) >= start && t(closes) <= end ? pct(t(closes)) : null,
       changed,
-      label: `${jobName(r.job.job_id)} · 출발 ${kstTime(a.pickup_departure_at)} · 도착 ${kstTime(a.gate_arrival_at)} · 복귀 ${kstTime(a.return_at)}`,
+      label: `${jobName(r.job.job_id)}, 출발 ${kstTime(a.pickup_departure_at)}, 도착 ${kstTime(a.gate_arrival_at)}, 복귀 ${kstTime(a.return_at)}`,
     }
   }
   const ids = [...new Set(all.map((a) => a.vehicle_id))].sort()

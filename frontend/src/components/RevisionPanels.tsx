@@ -110,8 +110,8 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
         {/* 확인이 필요한 작업(미배정·위반·준비 시각 없음)을 먼저 펼치고, 나머지는 접어 둔다 */}
         {movable.filter(isFocus).map(jobRow)}
         {movable.some((j) => !isFocus(j)) && (
-          <details className="rev-more" open={!movable.some(isFocus)}>
-            <summary>다른 작업 {movable.filter((j) => !isFocus(j)).length + frozen.length}건</summary>
+          <details className="rev-more">
+            <summary>{movable.some(isFocus) ? '다른 작업' : '작업'} {movable.filter((j) => !isFocus(j)).length + frozen.length}건</summary>
             {movable.filter((j) => !isFocus(j)).map(jobRow)}
             {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b>{jobName(j.job_id)}</b><span className="small">{freezeLabel(j.freeze_reason)}, 수정할 수 없음</span></div>)}
           </details>

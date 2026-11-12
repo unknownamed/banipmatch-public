@@ -136,7 +136,7 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
               <code>{d.path}</code> {d.reason}
             </p>
           ))}
-          {run.error && <p className="muted small">오류 코드 {run.error.code}{run.error.request_id ? ` · 요청 ${run.error.request_id}` : ''}</p>}
+          {run.error && <p className="muted small">오류 코드 {run.error.code}{run.error.request_id ? `, 요청 ${run.error.request_id}` : ''}</p>}
           <p className="muted small">이번 계산 결과는 저장하지 않았습니다. 받은 변경에서 다시 계산하세요.</p>
         </div>
       )}
@@ -242,17 +242,18 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
   const unresolved = rows.filter((r) => r.candidateUnassigned)
   const lockedRisk = rows.filter((r) => r.locked && r.candidateIssues.length > 0)
   const general = cand.issues.filter((i) => i.job_id === null)
+  // 확인할 것이 없으면 빈 칸을 보여 주지 않는다(요약에 이미 '남는 문제 없음'이 있다).
+  if (unresolved.length === 0 && lockedRisk.length === 0 && general.length === 0) return null
   return (
     <section className="card unresolved">
       <h2>확인 필요 {unresolved.length + lockedRisk.length > 0 && <span className="count-pill">{unresolved.length + lockedRisk.length}</span>}</h2>
-      {unresolved.length === 0 && lockedRisk.length === 0 && general.length === 0 && <p className="ok">확인할 작업이 없습니다.</p>}
       {unresolved.map((r) => (
         <div key={r.job.job_id} className="issue-card">
           <p className="issue-title">
             <b>{jobName(r.job.job_id)}</b> <span className="badge unassigned">미배정</span>{' '}
             {r.candidateIssues.map((i) => ISSUE_LABEL[i.code] ?? i.code).join(', ') || '이유 미제공'}
           </p>
-          {r.candidateIssues.length === 0 && <p className="warn small">배정하지 못한 이유를 받지 못했습니다. 화주·기사에게 직접 확인하세요.</p>}
+          {r.candidateIssues.length === 0 && <p className="warn small">배정하지 못한 이유를 받지 못했습니다. 화주나 기사에게 직접 확인하세요.</p>}
           {r.candidateIssues.map((i, k) => (
             <div key={k} className="issue-body small">
               <p>{humanizeTimes(i.explanation)}</p>

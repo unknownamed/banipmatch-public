@@ -37,7 +37,9 @@ export function ActionSummary({ base, cand, rows, approved }: {
   const headline = !cand
     ? `원래 배차대로 가면 컨테이너 ${lateSet.length}개가 새 마감을 넘깁니다.`
     : fixed === lateSet.length
-      ? `${name}을 쓰면 늦는 컨테이너 ${fixed}개를 모두 마감 안에 넣을 수 있습니다.`
+      ? fixed === 1
+        ? `${name}을 쓰면 늦는 컨테이너 1개를 마감 안에 넣을 수 있습니다.`
+        : `${name}을 쓰면 늦는 컨테이너 ${fixed}개를 모두 마감 안에 넣을 수 있습니다.`
       : `${name}을 쓰면 늦는 컨테이너 ${lateSet.length}개 중 ${fixed}개를 마감 안에 넣을 수 있습니다.`
   return (
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
@@ -56,7 +58,7 @@ export function ActionSummary({ base, cand, rows, approved }: {
       </dl>
       {unresolved.length > 0 && (
         <ul className="as-todo">
-          {unresolved.map(id => <li key={id}><span className="st warn">확인 필요</span> <BoxNo jobId={id} /> · {reason(id)}</li>)}
+          {unresolved.map(id => <li key={id}><span className="st warn">확인 필요</span> <BoxNo jobId={id} /> <span className="muted">{reason(id)}</span></li>)}
         </ul>
       )}
       <div className="as-actions">

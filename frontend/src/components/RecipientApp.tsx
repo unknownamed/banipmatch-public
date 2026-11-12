@@ -156,7 +156,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
         <nav className="card recipient-list" aria-label="받은 변경">
           {items.map((n) => (
             <button key={n.notification_id} type="button" className="secondary" aria-current={n.notification_id === current?.notification_id} onClick={() => setSelected(n.notification_id)}>
-              {kstTime(n.created_at)} · {n.is_current ? RESPONSE_LABEL[n.response] : '이전 계획'}
+              {kstTime(n.created_at)}, {n.is_current ? RESPONSE_LABEL[n.response] : '이전 계획'}
             </button>
           ))}
         </nav>
@@ -304,7 +304,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
                     <span>게이트 도착 <b>{t(c.after.gate_arrival_at)}</b></span>
                   </div>
                 )}
-                {(d?.cargo_owner || d?.voyage_id) && <div className="rc-meta">{[d?.cargo_owner && `화주 ${d.cargo_owner}`, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(' · ')}</div>}
+                {(d?.cargo_owner || d?.voyage_id) && <div className="rc-meta">{[d?.cargo_owner && `화주 ${d.cargo_owner}`, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(', ')}</div>}
               </li>
               )
             })}
@@ -312,7 +312,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
         </div>
       ))}
 
-      <h3 className="rc-answer">응답 <span className={`st ${d.response === 'none' ? 'wait' : d.response === 'cannot_perform' ? 'bad' : 'ok'}`}>{d.response === 'none' ? '아직 응답 안 함' : `${RESPONSE_LABEL[d.response]}${d.responded_at ? ` · ${kstTime(d.responded_at)}` : ''}`}</span></h3>
+      <h3 className="rc-answer">응답 <span className={`st ${d.response === 'none' ? 'wait' : d.response === 'cannot_perform' ? 'bad' : 'ok'}`}>{d.response === 'none' ? '아직 응답 안 함' : `${RESPONSE_LABEL[d.response]}${d.responded_at ? `, ${kstTime(d.responded_at)}` : ''}`}</span></h3>
       <textarea className="rc-memo" rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} placeholder="메모 (선택)" aria-label="메모" />
       <div className="respond-buttons">
         <button type="button" disabled={busy} className="rb-primary" onClick={() => respond('can_perform')}>수행 가능</button>

@@ -129,7 +129,7 @@ describe('수신자 화면', () => {
     await act(async () => button('수행 곤란')!.click())
     await flush()
     expect(client.respond).toHaveBeenCalledWith('N1', 'cannot_perform', '', expect.stringMatching(/^respond-N1-/))
-    expect(container.textContent).toContain('수행 곤란 · 후속 확인')
+    expect(container.textContent).toContain('수행 곤란(후속 확인 필요)')
   })
 
   it('이전 계획(payload 없음)은 상세를 보여주지 않고 응답 버튼도 없다', async () => {

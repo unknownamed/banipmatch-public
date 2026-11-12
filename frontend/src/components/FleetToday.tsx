@@ -55,7 +55,7 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
   return (
     <section className="card fleet-today" aria-labelledby="ft-title">
       <div className="ft-head">
-        <h2 id="ft-title">오늘 저녁 배차 현황</h2>
+        <h2 id="ft-title">오늘 배차 현황</h2>
         <span className="updated">위치는 배차 일정으로 추정</span>
       </div>
       <dl className="stat-strip">
@@ -80,7 +80,7 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
       <div className="dt-wrap">
         <table className="dt ft-table">
           <thead>
-            <tr><th>차량</th><th>지금</th><th>현재·다음 컨테이너</th><th>상차지 → 터미널</th><th>게이트 도착</th><th>마감 여유</th></tr>
+            <tr><th>차량</th><th>지금</th><th>컨테이너</th><th>상차지 → 터미널</th><th>게이트 도착</th><th>마감 여유</th></tr>
           </thead>
           <tbody>
             {rows.length === 0 && <tr className="empty-row"><td colSpan={6}>조건에 맞는 차량이 없습니다.</td></tr>}
@@ -91,7 +91,7 @@ export function FleetToday({ snapshot }: { snapshot: Snapshot }) {
                 <tr key={v.vehicleId}>
                   <td data-label="차량"><Plate id={v.vehicleId} /></td>
                   <td data-label="지금"><span className={`st ${PHASE_TONE[v.phase]}`}>{PHASE_LABEL[v.phase]}</span></td>
-                  <td data-label="컨테이너">{v.jobId ? <><BoxNo jobId={v.jobId} />{info && <span className="sub">{info.size} · {info.owner}</span>}</> : '—'}</td>
+                  <td data-label="컨테이너">{v.jobId ? <><BoxNo jobId={v.jobId} />{info && <span className="sub">{info.size}, {info.owner}</span>}</> : '—'}</td>
                   <td data-label="경로">{info ? <>{info.origin} → {info.terminal}<span className="sub">항차 {info.voyage}</span></> : '—'}</td>
                   <td data-label="게이트 도착" className="num">{v.gateEta ? kstTimeWithDay(v.gateEta, snapshot.as_of) : '—'}</td>
                   <td data-label="마감 여유" className="num">

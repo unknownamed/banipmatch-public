@@ -182,7 +182,7 @@ export function vesselAt(v: Vessel, t0: number): VesselView {
   if (v.offshoreEtaMin !== undefined) {
     const left = v.offshoreEtaMin - t0
     return { vessel: v, pos: v.route[0], heading: 0, passed: [], ahead: [], positionAgeMin: 0, status: 'offshore',
-      remainingNm: null, etaMin: v.offshoreEtaMin, etaNote: left > 0 ? '외해 항해 중 · 지도 범위 밖' : '도착 예정 시각 지남' }
+      remainingNm: null, etaMin: v.offshoreEtaMin, etaNote: left > 0 ? '외해 항해 중(지도 범위 밖)' : '도착 예정 시각 지남' }
   }
   const t = v.appearMin === undefined ? t0 : Math.max(0, t0 - v.appearMin)
   const total = routeLengthNm(v.route)
@@ -193,12 +193,12 @@ export function vesselAt(v: Vessel, t0: number): VesselView {
   const base = { vessel: v, pos: at.pos, heading: at.heading, passed: at.passed, ahead: at.ahead, positionAgeMin: stale ? t - v.staleAfterMin! : 0 }
   if (v.state === 'berthed') return { ...base, status: 'berthed', remainingNm: 0, etaMin: null, etaNote: '접안 중' }
   if (v.state === 'anchored' || v.speedKn <= 0)
-    return { ...base, status: 'anchored', remainingNm: null, etaMin: null, etaNote: '묘박 대기 · 도착 시각 미정' }
+    return { ...base, status: 'anchored', remainingNm: null, etaMin: null, etaNote: '묘박 대기, 도착 시각 미정' }
   const remaining = total - travelled
   if (stale) return { ...base, status: 'stale', remainingNm: remaining, etaMin: null, etaNote: `위치 신호가 ${Math.round(t - v.staleAfterMin!)}분째 없음` }
   if (remaining <= 0.01)
     return v.outbound
-      ? { ...base, status: 'underway', remainingNm: 0, etaMin: null, etaNote: `외해로 나감 · ${v.port} 향발` }
+      ? { ...base, status: 'underway', remainingNm: 0, etaMin: null, etaNote: `외해로 나감, ${v.port} 향발` }
       : { ...base, status: 'berthed', remainingNm: 0, etaMin: null, etaNote: '터미널 앞 도착' }
   return { ...base, status: 'underway', remainingNm: remaining, etaMin: t + (remaining / v.speedKn) * 60, etaNote: v.outbound ? '외해까지' : '남은 항로 ÷ 현재 속력' }
 }

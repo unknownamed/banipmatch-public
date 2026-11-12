@@ -222,7 +222,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
                 return <li key={`${d.path}:${k}`}><b>{r.what}</b>: {r.why}</li>
               })}
             </ul>
-            <p className="small">화주·기사에게 확인한 값을 아래 ‘조건 보완’에 넣고 다시 계산하세요.</p>
+            <p className="small">화주나 기사에게 확인한 값을 아래 ‘조건 보완’에 넣고 다시 계산하세요.</p>
           </div>
         )}
       </section>
