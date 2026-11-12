@@ -49,7 +49,6 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   }, [client, run?.plan_id, approval.value?.status.state])
   const planMoved = run && planNow?.planId === run.plan_id && planNow.version !== run.base_plan_version && approval.value?.status.state !== 'done'
   const approvedPlan = approval.value?.status.state === 'done' || !!(run && planNow?.planId === run.plan_id && planNow.version > run.base_plan_version)
-  const anyFixture = results?.some((r) => r.result_origin === 'illustrative_fixture')
   const v2 = 'session' in client ? (client as V2Client) : null
   const params = new URLSearchParams(location.search)
   const revisionId = params.get('revision')
@@ -61,17 +60,6 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
 
   return (
     <main>
-      {client.mode === 'fixture' && (
-        <div className="banner" role="note">
-          공통 예제(모의 자료) 화면입니다. 백엔드 없이 <code>docs/development/v0.1/예제 데이터</code>를 그대로 표시합니다.
-        </div>
-      )}
-      {anyFixture && (
-        <div className="banner fixture" role="alert">
-          설명용 예시 결과(illustrative_fixture)입니다. 최적화 엔진이 계산한 결과가 아니며 성능 근거나 승인 대상으로 쓸 수 없습니다.
-        </div>
-      )}
-
       {view.scenario.state === 'loading' && <Skeleton label="입력 불러오는 중…" lines={3} />}
       {view.scenario.state === 'error' && <p className="card warn">입력 조회 실패: {view.scenario.message}</p>}
 
@@ -138,7 +126,6 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
         : <ConditionRevisionPanel key={snapshot.scenario_id} client={v2} snapshot={snapshot} focus={[...(cand?.unassigned_job_ids ?? []), ...(cand?.issues ?? []).flatMap((i) => i.job_id ? [i.job_id] : [])]} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />)}
 
       {/* 계산 방법별 상태·독립 검사는 검증용 정보라 아래에 둔다(실패하면 위에 바로 보인다). */}
-      {run && run.status === 'completed' && <RunStatusPanel run={run} results={results} />}
     </main>
   )
 }

@@ -18,7 +18,6 @@ export function RoadReference({road}: {road: RoadData | null | undefined}) {
       const c=road.cells.find(x=>x.origin===i && x.destination===j)
       return <td key={j}>{c?.duration_seconds == null || c?.distance_meters == null ? <span className="warn">자료 없음</span> : i===j ? <span className="muted">—</span> : <><b>{Math.round(c.duration_seconds/60)}분</b> <span className="muted">{(c.distance_meters/1000).toFixed(1)}km</span></>}</td>
     })}</tr>)}</tbody></table></div>}
-    {!!road?.points.length && <details className="tech-info"><summary>조회 좌표</summary>{road.points.map((p,i)=><p className="small" key={i}>{p.label}: 경도 {p.longitude}, 위도 {p.latitude}<br/>가까운 도로까지 보정: 출발 {p.source_snap_m == null ? '미확인' : `${p.source_snap_m.toFixed(1)}m`} / 도착 {p.destination_snap_m == null ? '미확인' : `${p.destination_snap_m.toFixed(1)}m`}</p>)}</details>}
     <p className="small muted">© <a href="https://openrouteservice.org/" target="_blank" rel="noreferrer">openrouteservice by HeiGIT</a> | Data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC-BY-SA 4.0</a></p>
   </section>
 }

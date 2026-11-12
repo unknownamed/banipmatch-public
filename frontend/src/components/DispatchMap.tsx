@@ -234,10 +234,6 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
         </ol>
         </div>
       </div>
-      <details className="tech-info dm-foot">
-        <summary>자료 설명</summary>
-        차량 위치는 배차 일정으로 계산한 추정이며(이동은 직선 표시), 차량 GPS가 연결되면 실제 위치로 대체됩니다. 실시간 교통은 카카오 교통정보이며 계산된 도착 시각에 자동 반영하지 않습니다. 여유 = 반입 마감 − (도착 + 여유시간 {snapshot.policy.buffer_minutes}분).
-      </details>
     </section>
   )
 }

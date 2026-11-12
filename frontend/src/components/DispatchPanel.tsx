@@ -96,8 +96,6 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
       }} />
 
       {dispatchId && <DispatchStatus client={client} dispatchId={dispatchId} recipients={recipients} />}
-
-      <details className="tech-info"><summary>유의사항</summary><ul className="small muted">{p.limits.map((l) => <li key={l}>{l}</li>)}</ul></details>
     </section>
   )
 }

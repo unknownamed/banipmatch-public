@@ -160,11 +160,20 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         </div>
         {err !== null && (
           <div className="warn" role="alert">
-            <p>
-              <b>계산을 시작하지 못했습니다.</b>{' '}
-              {err instanceof ApiRequestError && err.body ? err.message : '서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.'}
-            </p>
-            <p className="small">다시 시도해도 같은 내용이 두 번 등록되지 않습니다.</p>
+            {err instanceof ApiRequestError && err.body?.code === 'SCENARIO_LIMIT' ? (
+              <>
+                <p><b>이 브라우저에 쌓인 점검 기록이 많아 새 점검을 저장할 수 없습니다.</b></p>
+                <button type="button" className="secondary" onClick={async () => { await v2?.reset(); location.href = '?' }}>기록 비우고 새로 시작</button>
+              </>
+            ) : (
+              <>
+                <p>
+                  <b>계산을 시작하지 못했습니다.</b>{' '}
+                  {err instanceof ApiRequestError && err.body ? err.message : '서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.'}
+                </p>
+                <p className="small">다시 시도해도 같은 내용이 두 번 등록되지 않습니다.</p>
+              </>
+            )}
           </div>
         )}
         {status.state === 'rejected' && (

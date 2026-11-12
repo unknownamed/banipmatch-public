@@ -17,7 +17,6 @@ async function mount(node: React.ReactNode) {
 
 it('지도 키가 없어도 선박 목록·남은 시간·모의 표시를 보여 주고 묘박 선박은 도착 시각을 만들지 않는다', async () => {
   const { box, unmount } = await mount(<VesselApproachMap />)
-  expect(box.textContent).toContain('시연용 모의 자료')
   expect(box.textContent).toContain('후 도착 추정')
   const all = [...box.querySelectorAll('button')].find(b => b.textContent?.startsWith('신항 전체'))!
   await act(async () => all.click())

@@ -1,7 +1,7 @@
 // 배차 담당자용 입항 선박 지도: 대상 터미널(HJNC) 항차가 언제 들어오는지와, 그 항차의 반입 마감을 한 화면에서 본다.
 // 모든 선박·항차·속력·마감은 모의다. 도착은 추정이며 반입 마감을 바꾸지 않는다.
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BUOYS, SOURCES, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
+import { BUOYS, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
 import { MAP_TYPES, keepLaidOut, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
 import { Icon } from './Icon'
 import type { Snapshot } from '../api/types'
@@ -239,19 +239,6 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
           </div>
         </div>
 
-        <details className="vm-notes small">
-          <summary>자료 설명</summary>
-          <ul>
-            <li>선박·항차·속력·반입 마감은 시연용 모의 자료입니다. 실제 AIS가 연결되면 같은 형식으로 대체됩니다.</li>
-            <li>도착 추정 = 남은 항로 길이 ÷ 현재 속력. 조류·감속·도선·선석 대기는 반영하지 않습니다.</li>
-            <li>속력이 0인 묘박 선박과 위치가 끊긴 선박은 도착 시각을 만들지 않습니다(마지막 위치에서 멈춤).</li>
-            <li>반입 마감은 터미널이 정하는 항차별 시간입니다. 선박 도착 추정이 바뀌어도 자동으로 바뀌지 않습니다.</li>
-            <li>항로선은 부표 위치를 참고해 그린 설명용 선이며 공식 항로·도선 경로가 아닙니다. 부표: {SOURCES.seamark}</li>
-            <li>터미널 표시는 대표 좌표이며 선석 위치가 아닙니다: {SOURCES.places}</li>
-            <li>위성 사진은 촬영 시점의 배경이며 실시간 영상이 아닙니다.</li>
-          </ul>
-          <p className="vm-legend"><span className="vm-buoy port" /> 좌현 표지 <span className="vm-buoy starboard" /> 우현 표지 <span className="vm-buoy safe" /> 안전수역 표지</p>
-        </details>
       </section>
     </main>
   )

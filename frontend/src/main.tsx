@@ -16,7 +16,8 @@ import './styles.css'
 import './styles/v3.css'
 
 // VITE_API_MODE=http 이면 /v1, v2 이면 담당자 대응 API(/v2, 세션 쿠키)에 연결한다. 기본은 공통 예제(fixture).
-const apiMode = import.meta.env.VITE_API_MODE
+// 기본은 서비스 모드(v2). 개발 확인용 공통 예제 화면은 VITE_API_MODE=fixture로만 연다.
+const apiMode = import.meta.env.VITE_API_MODE ?? 'v2'
 const mode = apiMode === 'http' || apiMode === 'v2' ? 'http' : 'fixture'
 const params = new URLSearchParams(location.search)
 

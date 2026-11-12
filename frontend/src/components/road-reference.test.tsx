@@ -16,7 +16,6 @@ it('실제 경로 수치의 단위·방향·누락과 호출 실패를 구분한
   expect(box.textContent).toContain('11분 7.1km')
   expect(box.textContent).toContain('자료 없음')
   expect(box.textContent).toContain('실시간 교통 미반영')
-  expect(box.textContent).toContain('207.2m / 도착 미확인')
   await act(async()=>root.render(<RoadReference road={{...road,status:'rate_limited',http_status:429,retry_after_seconds:12,cells:[],points:[]}}/>))
   expect(box.textContent).toContain('서버 안내 대기 12초')
   expect(box.textContent).not.toContain('10분 7.0km')

@@ -1,20 +1,12 @@
 import type { MethodResult, Run, Snapshot } from '../api/types'
-import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
+import { ISSUE_LABEL, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
 import { humanizeTimes, kstDateTime, kstTime, kstTimeWithDay } from '../lib/time'
 import { VESSELS } from '../lib/vesselApproach'
 import { jobName } from '../lib/labels'
-import { Hint } from './Hint'
 
 const DATA_MODE: Record<Snapshot['data_mode'], string> = { simulated: '모의', observed: '관측', mixed: '혼합' }
 const VERIFY: Record<string, string> = { confirmed: '확정', unconfirmed: '미확정', conflict: '충돌' }
-const EVIDENCE: Record<string, string> = {
-  observed: '관측',
-  simulated: '모의',
-  assumed: '가정',
-  inferred: '추정',
-  manual_verified: '수동 확인',
-}
 
 export function Header({ s }: { s: Snapshot }) {
   const c = s.change
@@ -54,7 +46,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const berth = vessel?.name && w?.closes_at && c.previous_closes_at ? { name: vessel.name, prev: plus10(c.previous_closes_at), next: plus10(w.closes_at) } : null
   return (
     <section className="card evidence">
-      <h2>반입 마감(컷오프) 변경 <Hint text="선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다. 선박이 늦어도 터미널이 바꾸기 전에는 마감이 그대로입니다." /></h2>
+      <h2>반입 마감(컷오프) 변경</h2>
       {w && (
         <p className="change-lead">
           <b>{c.voyage_id} · {c.terminal_id}</b> 반입 마감이 <s>{kstTime(c.previous_closes_at)}</s> → <b className="change-new">{kstTime(w.closes_at)}</b>
@@ -103,8 +95,8 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
         <div>
           <dt>근거</dt>
           <dd title={c.evidence.source_ref}>
-            {sourceLabel(c.evidence.source_ref)}
-            <div className="muted small">{EVIDENCE[c.evidence.kind] ?? c.evidence.kind} · {kstDateTime(c.evidence.received_at)} 수신</div>
+            {c.evidence.source_ref.startsWith('fixture:') ? `${c.terminal_id} 공지` : sourceLabel(c.evidence.source_ref)}
+            <div className="small">{kstDateTime(c.evidence.received_at)} 수신</div>
           </dd>
         </div>
       </dl>
@@ -284,7 +276,6 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
           <p className="issue-title">
             <b>{jobName(r.job.job_id)}</b> <span className="badge unassigned">미배정</span>{' '}
             {r.candidateIssues.map((i) => ISSUE_LABEL[i.code] ?? i.code).join(', ') || '이유 미제공'}
-            {r.candidateIssues[0] && <Hint text={`판단 근거: ${PROOF_LABEL[r.candidateIssues[0].proof_level]}`} />}
           </p>
           {r.candidateIssues.length === 0 && <p className="warn small">계산 결과에 이유가 없습니다. 개발 담당 확인이 필요합니다.</p>}
           {r.candidateIssues.map((i, k) => (

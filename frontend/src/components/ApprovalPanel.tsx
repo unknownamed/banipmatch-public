@@ -5,7 +5,6 @@ import type { Approval, MethodResult, Run } from '../api/types'
 import { acknowledgeIds, approvalErrorHint, approvalResponseMatches, approvalRetryAllowed, currentPlanWarning, type ApprovalGate } from '../lib/approval'
 import { Icon } from './Icon'
 import { kstDateTime } from '../lib/time'
-import { Hint } from './Hint'
 import { jobName, planName } from '../lib/labels'
 
 export type Status =
@@ -76,7 +75,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
   const otherLabel = shared?.status.state === 'sending' ? '승인 요청 중입니다' : shared?.status.state === 'done' ? '승인되었습니다' : '승인 결과를 확인해야 합니다'
   return (
     <section className="card">
-      <h2>배차 계획 확정 <Hint text="우리 회사 내부 배차 계획만 확정합니다. 터미널 방문 예약·기존 TMS·기사에게는 자동으로 반영되지 않으며, 기사 전달은 다음 단계에서 합니다." /></h2>
+      <h2>배차 계획 확정</h2>
       <ApprovalSteps
         acknowledged={ack.length === 0 || checked}
         sending={status.state === 'sending'}
