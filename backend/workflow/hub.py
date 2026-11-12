@@ -251,9 +251,13 @@ class Hub:
             raise ApiError(503, "TEAM_CODE_NOT_CONFIGURED", "이 서버는 팀 시연 코드를 쓰지 않음")
         self.rate("team-code:" + sid, limit=5, seconds=600)
         self.rate("team-code:all", limit=60, seconds=600)
-        expected = path.read_text(encoding="utf-8").strip().upper()
+        # 한 줄에 코드 하나(팀 코드, 심사용 코드 등). 빈 줄은 무시하고, 줄을 지우면 그 코드만 즉시 막힌다.
+        expected = [line.strip().upper() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
         given = (code or "").strip().upper()
-        if not expected or not hmac.compare_digest(given.encode(), expected.encode()):
+        matched = False
+        for candidate in expected:  # 모든 후보를 비교해 일치 위치가 시간 차로 드러나지 않게 한다
+            matched |= hmac.compare_digest(given.encode(), candidate.encode())
+        if not given or not matched:
             raise ApiError(403, "TEAM_CODE_INVALID", "팀 시연 코드가 맞지 않음")
         with self.registry.transaction() as conn:
             conn.execute("UPDATE sessions SET push_authorized=1, consent_note=? WHERE session_id=? AND revoked=0",
