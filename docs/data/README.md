@@ -1,4 +1,20 @@
-# 데이터 근거 · 심민준 담당
+# 데이터
+
+## 한눈에 보기
+
+| 구분 | 자료 | 위치 | 쓰임 |
+|---|---|---|---|
+| 실제 | HJNC 선석 배정(항차·반입 시작/마감·접안 예정) | 수집 [`tools/collect_live_reference.py`](../../tools/collect_live_reference.py), 검증 [hjnc-reference-verification.md](hjnc-reference-verification.md) | 터미널 일정 화면, 입항 모선 |
+| 실제 | 기상청 해양 관측·특보 | 수집 같은 도구, 검증 [kma-response-verification.md](kma-response-verification.md) | 입항 모선 화면의 해상 기상 |
+| 실제(검토 후 미채택) | 한국도로공사 교통, AISstream 선박 위치, openrouteservice | [road-api-verification.md](road-api-verification.md), [aisstream-synthetic-demo.md](aisstream-synthetic-demo.md), [ors-matrix-verification.md](ors-matrix-verification.md) | 채택하지 않은 이유 기록 |
+| 실제 | 도로 경로(OpenStreetMap·OSRM) | [`frontend/src/fixtures/road-routes.osm.json`](../../frontend/src/fixtures/road-routes.osm.json) | 이동 시간, 지도 경로 |
+| 모의 | 시연 공지 5종 배차 입력(작업 20건·차량 8대) | [`frontend/src/fixtures/demo-02-*.synthetic.json`](../../frontend/src/fixtures) | 운영 서비스 시연, 보고서 5.1 |
+| 모의 | 고정 평가 입력 10종·결과 80회 | [evaluation-data.md](evaluation-data.md), [`docs/experiments/engine-evaluation-2026-11-08`](../experiments/engine-evaluation-2026-11-08) | 보고서 5.2 |
+| 모의 | 공급자 형식 합성 응답 21종 | [provider-fixtures-2026-11-10](provider-fixtures-2026-11-10/README.md) | 오류·부분 응답 처리 시험 |
+
+실제 운송사 배차표·기사 정보는 쓰지 않았다. 모의 자료의 회사명·선박명은 가상이다. 아래는 담당자(심민준)의 작업 기록이다.
+
+## 작업 기록
 
 **담당자 대응 #56:** [계산/미해결 9사례·조건 보완 4쌍·전달/응답 15종](response-acceptance-2026-11-11/README.md). 모의 입력과 실제 코드 실행을 보존하며 실제 휴대폰 수신/현장 효과와 구분한다.
 

@@ -100,7 +100,7 @@ function Lane({ name, bars, incomplete }: { name: string; bars: Bar[]; model?: T
           <span
             key={b.jobId}
             className={`job-bar${b.locked ? ' locked' : ''}${b.late ? ' late' : ''}${b.changed ? ' changed' : ''}`}
-            style={{ left: `${b.left}%`, width: `${b.width}%` }}
+            style={{ left: `${b.left}%`, width: `${b.width}%`, ['--arr' as string]: `${Math.max(0, Math.min(100, ((b.arrival - b.left) / b.width) * 100))}%` }}
             aria-label={b.label}
           >
             {b.locked && <Icon name="lock" size={11} />}
@@ -121,8 +121,7 @@ export function VehicleTimeline({ rows, baseLabel, candLabel, buffer = 0 }: { ro
     <div className="timeline">
       {/* 범례는 실제 막대와 같은 모양의 견본으로 보여준다 */}
       <ul className="timeline-legend small muted">
-        <li><i className="sw sw-bar" />출발~복귀</li>
-        <li><i className="sw sw-dot" />게이트 도착</li>
+        <li><i className="sw sw-bar" />상차지 출발~게이트 도착(진하게)·복귀(연하게)</li>
         <li><i className="sw sw-deadline" />그 작업의 반입 마감</li>
         <li><i className="sw sw-late" />마감 넘김(여유 {buffer}분 포함)</li>
         <li><i className="sw sw-changed" />조정안 변경</li>
