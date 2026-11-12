@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { RecipientClient, RecipientNotification, RecipientSession } from '../api/recipient'
 import { RESPONSE_LABEL } from '../lib/dispatch'
-import { base64UrlToBytes, claimKey, inviteFromPaste, mustInstallFirst, platform, type Fragment, type PlatformInfo } from '../lib/recipient'
+import { base64UrlToBytes, claimKey, inviteFromPaste, inviteUrl, kakaoExternal, mustInstallFirst, platform, takeFragment, type Fragment, type PlatformInfo } from '../lib/recipient'
 import { kstDateTime, kstTime } from '../lib/time'
 import { formatContainer } from '../lib/labels'
 import { BoxNo, Plate } from './Ids'
@@ -24,6 +24,28 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
   useEffect(() => {
     client.restore().then(setSession, () => setSession(null))
   }, [client])
+  // 이 화면이 열린 채로 새 초대 링크를 열면(같은 주소에 # 뒤만 바뀜) 새로고침 없이 초대를 받고 주소에서 지운다.
+  useEffect(() => {
+    const onHash = () => { const f = takeFragment(); if (f.invite) setInvite(f.invite) }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
+  // 카카오톡으로 받은 링크를 누르면 카톡 안 브라우저로 열린다. 거기서는 알림을 못 받으므로 기본 브라우저로 바로 넘긴다.
+  const external = env.inApp === 'kakao' && !demo ? kakaoExternal(inviteUrl(location.origin, invite)) : null
+  useEffect(() => { if (external) location.href = external }, [external])
+  if (env.inApp && !demo)
+    return (
+      <Shell demo={demo}>
+        <section className="card">
+          <h2>기본 브라우저에서 열어 주세요</h2>
+          <p>{env.inApp === 'kakao' ? '카카오톡 안에서는' : '이 앱 안에서는'} 배차 알림을 받을 수 없습니다.</p>
+          {external
+            ? <a className="btn-primary" href={external}>{env.ios ? 'Safari로 열기' : 'Chrome으로 열기'}</a>
+            : <p className="small muted">오른쪽 위(또는 아래) 메뉴에서 <b>다른 브라우저로 열기</b>를 누르세요.</p>}
+        </section>
+      </Shell>
+    )
 
   async function accept(token: string) {
     setBusy(true)
@@ -39,6 +61,32 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
   }
 
   if (session === undefined) return <Shell demo={demo}><p className="muted" role="status">연결 확인 중…</p></Shell>
+  // 이미 연결된 휴대폰으로 새 초대를 열면(다음 배차 등) 예전 연결 대신 새 초대를 받을지 묻는다.
+  async function switchTo(token: string) {
+    setBusy(true)
+    setError(null)
+    try {
+      await client.leave().catch(() => {})
+      setSession(await client.claim(token, await claimKey(token)))
+      setInvite(null)
+    } catch (e) {
+      setError(e)
+      setSession(null)
+    } finally {
+      setBusy(false)
+    }
+  }
+  if (session && invite && !mustInstallFirst(env))
+    return (
+      <Shell demo={demo}>
+        <section className="card">
+          <h2>새 배차 초대</h2>
+          <p>이 휴대폰을 새 배차 알림에 연결합니다. 예전 연결은 끊깁니다.</p>
+          <button type="button" disabled={busy} onClick={() => switchTo(invite)}>{busy ? '연결 중…' : '새 초대 수락'}</button>
+          <button type="button" className="secondary" disabled={busy} onClick={() => setInvite(null)}>예전 연결 유지</button>
+        </section>
+      </Shell>
+    )
   if (session) return <Shell demo={demo}><Connected client={client} session={session} env={env} demo={demo} focus={boot.notification} onLeave={() => setSession(null)} /></Shell>
 
   const install = mustInstallFirst(env)
@@ -48,7 +96,7 @@ export function RecipientApp({ client, boot, env = platform(navigator, window), 
         <h2>배차 알림 연결</h2>
         <p className="small muted">확정된 배차 변경을 이 휴대폰으로 받고 바로 응답합니다.</p>
         {install ? (
-          <InstallGuide hasInvite={!!invite} />
+          <InstallGuide invite={invite} />
         ) : invite ? (
           <>
             <p>연결하면 이 휴대폰으로 배차 알림을 받습니다. 이름·전화번호는 저장하지 않습니다.</p>
@@ -82,17 +130,20 @@ function Shell({ children }: { children: React.ReactNode; demo?: boolean }) {
   )
 }
 
-function InstallGuide({ hasInvite }: { hasInvite: boolean }) {
+function InstallGuide({ invite }: { invite: string | null }) {
+  const [copied, setCopied] = useState(false)
+  async function copy() {
+    try { await navigator.clipboard.writeText(inviteUrl(location.origin, invite)); setCopied(true) } catch { setCopied(false) }
+  }
   return (
     <div className="install-guide">
-      <p><b>iPhone은 홈 화면 앱에서만 알림을 받을 수 있습니다.</b> 여기(Safari)에서는 수락하지 마세요. Safari와 홈 화면 앱은 연결 정보가 따로 저장됩니다.</p>
+      <p><b>iPhone은 홈 화면 앱에서 알림을 받습니다.</b></p>
       <ol>
+        {invite && <li><button type="button" className="btn-line" onClick={copy}>{copied ? '복사했습니다' : '초대 링크 복사'}</button></li>}
         <li>아래 공유 버튼 <span aria-hidden="true">⬆︎</span> → <b>홈 화면에 추가</b></li>
-        <li>홈 화면의 <b>반입맞춤</b> 아이콘으로 실행</li>
-        <li>받은 초대 링크를 다시 복사해 앱 안에 붙여넣기(30분 안)</li>
+        <li>홈 화면의 <b>반입맞춤</b>을 열고 <b>붙여넣고 연결</b></li>
       </ol>
-      {hasInvite && <p className="small muted">초대 링크는 이 화면에 저장하지 않았습니다. 처음 받은 메시지에서 다시 복사하세요.</p>}
-      <p className="small muted">iOS 16.4 이상에서 지원됩니다. 이전 버전은 알림을 받을 수 없습니다.</p>
+      <p className="small muted">iOS 16.4 이상, 초대는 받은 뒤 30분 안에 연결해 주세요.</p>
     </div>
   )
 }
@@ -100,8 +151,21 @@ function InstallGuide({ hasInvite }: { hasInvite: boolean }) {
 function PasteInvite({ busy, onInvite }: { busy: boolean; onInvite: (token: string) => void }) {
   const [text, setText] = useState('')
   const token = inviteFromPaste(text)
+  const [pasteNote, setPasteNote] = useState<string | null>(null)
+  // 복사해 둔 초대 링크를 한 번에 붙여 넣고 바로 연결한다(붙여넣기 허용은 휴대폰이 묻는다).
+  async function pasteAndConnect() {
+    setPasteNote(null)
+    try {
+      const t = inviteFromPaste(await navigator.clipboard.readText())
+      if (t) { setText(''); onInvite(t) } else setPasteNote('복사한 내용이 초대 링크가 아닙니다. 받은 메시지에서 링크를 다시 복사해 주세요.')
+    } catch { setPasteNote('붙여넣기를 허용하지 않았습니다. 아래 칸에 직접 붙여 넣어 주세요.') }
+  }
   return (
     <div className="paste-invite">
+      {typeof navigator !== 'undefined' && !!navigator.clipboard && (
+        <button type="button" disabled={busy} onClick={pasteAndConnect}>{busy ? '연결 중…' : '붙여넣고 연결'}</button>
+      )}
+      {pasteNote && <p className="small warn" role="status">{pasteNote}</p>}
       <label>
         받은 초대 링크 붙여넣기
         <input value={text} autoComplete="off" spellCheck={false} placeholder="https://…/recipient#invite=…" onChange={(e) => setText(e.target.value)} />

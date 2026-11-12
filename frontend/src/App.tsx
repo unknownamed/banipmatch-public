@@ -85,11 +85,11 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {run && run.status !== 'completed' && <RunStatusPanel run={run} results={results} />}
       {assumed && (
         <div className="banner fixture" role="alert">
-          확인 전인 값을 가정해 계산한 결과입니다. 비교만 할 수 있고 확정·기사 전달은 할 수 없습니다.
+          화주·기사에게 확인하기 전 값으로 미리 계산해 본 결과입니다. 확인되면 '확인한 값'으로 다시 계산해야 확정할 수 있습니다.
         </div>
       )}
       {v2 && revisionId && run && cand && view.results.state === 'ready' && (
-        <RevisionComparison client={v2} revisionId={revisionId} beforeRunId={beforeRunId} afterRunId={run.run_id} method={cand.method} />
+        <RevisionComparison client={v2} revisionId={revisionId} beforeRunId={beforeRunId} afterRunId={run.run_id} method={cand.method} snapshot={snapshot} />
       )}
 
       {/* 넓은 화면: 왼쪽 비교, 오른쪽 미해결·승인. 좁으면 위아래로 쌓인다. */}
@@ -122,7 +122,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
             <UnresolvedPanel rows={rows} cand={cand} />
             <ApprovalPanel
               key={`${scenarioId}:${runId}:${run?.base_plan_version}:${cand.method}:${approvalKey}`}
-              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? '그사이 배차가 이미 확정·변경되어 이 결과로는 승인할 수 없습니다. 이미 승인한 것이면 그대로 두고, 아니면 최신 배차로 다시 계산하세요.' : null), assumed ? '가정한 값으로 계산한 결과라 확정할 수 없습니다. 확인된 값으로 다시 계산하세요.' : null)}
+              gate={withPlanCheck(withPlanCheck(approvalGate(run, cand, scenarioId, view.results.state === 'ready' ? { snapshot, results: view.results.data, runId } : undefined), planMoved ? '그사이 배차가 이미 확정·변경되어 이 결과로는 승인할 수 없습니다. 이미 승인한 것이면 그대로 두고, 아니면 최신 배차로 다시 계산하세요.' : null), assumed ? '확인 전 값으로 미리 계산한 결과라 확정할 수 없습니다. 확인한 값으로 다시 계산하세요.' : null)}
               client={client} run={run} result={cand} idempotencyKey={approvalKey}
               shared={approval.key === approvalScope ? approval.value : null}
               onShared={(value) => setApproval({ key: approvalScope, value })}

@@ -45,6 +45,18 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
     setEdits((e) => ({ ...e, [key]: value }))
     if (status.state === 'error') setStatus({ state: 'idle' })
   }
+  const unset = (key: string) => setEdits((e) => { const n = { ...e }; delete n[key]; return n })
+  // '오늘 운행 불가': 고장·기사 사정으로 이 차량을 빼고 다시 계산한다. 근무 종료를 운행 시작(또는 기준 시각)으로 당겨
+  // 남은 작업을 맡을 수 없게 한다. 이미 출발한 작업이 있는 차량은 뺄 수 없다(출발 작업은 그대로 둔다).
+  const offAt = (v: NonNullable<Snapshot['vehicles']>[number]) => {
+    const start = Math.max(Date.parse(snapshot.as_of), v.available_at ? Date.parse(v.available_at) : 0)
+    return toKstInput(new Date(Math.ceil(start / 60000) * 60000).toISOString())
+  }
+  const departedOn = (vehicleId: string) => snapshot.baseline_assignments.some((a) => a.vehicle_id === vehicleId && snapshot.jobs.find((j) => j.job_id === a.job_id)?.frozen)
+  const isOff = (vehicleId: string) => {
+    const v = snapshot.vehicles?.find((x) => x.vehicle_id === vehicleId)
+    return !!v && edits[`vehicle:${vehicleId}:shift_end_at`] === offAt(v)
+  }
 
   async function submit() {
     const sig = JSON.stringify([snapshot, changes, added, reason.trim(), confirmation, rerun])
@@ -80,21 +92,26 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
   const jobRow = (j: (typeof movable)[number]) => <div key={j.job_id} className="rev-row"><b>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>
   const frozen = snapshot.jobs.filter((j) => j.frozen)
   // 브라우저 기본 시각 입력은 기기 설정에 따라 오전/오후로 보인다. 화면 표기와 같은 24시간제로 받기 위해 날짜+시각(HH:MM)으로 나눈다.
+  // 비어 있던 값은 날짜 칸도 비어 있다. 시각만 넣으면 기준 시각의 날짜(오늘)로 채운다.
+  const today = toKstInput(snapshot.as_of).slice(0, 10)
   const timeInput = (value: string, onChange: (v: string) => void, label: string, hint: string) => {
     const [date, time = ''] = value.split('T')
     const invalid = !!value && !isCompleteInput(value)
+    // 어느 칸이 문제인지 알려 준다: 시각 형식이 틀렸는지, 날짜가 빠졌는지.
+    const timeBad = !!time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+    const problem = !invalid ? null : timeBad || !time ? '시각은 00:00~23:59 형식으로 입력하세요.' : !date ? '날짜를 고르세요.' : '날짜와 시각을 확인하세요.'
     return (
       <div className="rev-field" role="group" aria-label={`${label} (KST)`}>
         <span className="small muted">{label}<span className="rev-now">{hint}</span></span>
         <span className="rev-inputs">
-          <input type="date" aria-label="날짜" value={date} disabled={sending} onChange={(e) => onChange(`${e.target.value}T${time}`)} />
+          <input type="date" aria-label="날짜" value={date} disabled={sending} aria-invalid={invalid && !date} onChange={(e) => onChange(`${e.target.value}T${time}`)} />
           <input
             type="text" inputMode="numeric" aria-label="시각(24시간제)" placeholder="13:40" maxLength={5} size={5}
-            value={time} aria-invalid={invalid} disabled={sending}
-            onChange={(e) => onChange(`${date}T${e.target.value}`)}
+            value={time} aria-invalid={invalid && (timeBad || !time)} disabled={sending}
+            onChange={(e) => onChange(`${date || today}T${e.target.value}`)}
           />
         </span>
-        {invalid && <span className="small warn">시각은 00:00~23:59 형식으로 입력하세요.</span>}
+        {problem && <span className="small warn">{problem}</span>}
       </div>
     )
   }
@@ -121,15 +138,30 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
       {!!snapshot.vehicles?.length && (
         <fieldset disabled={sending}>
           <legend>차량 근무 시간</legend>
-          <details className="rev-more">
-          <summary>차량 {snapshot.vehicles.length}대</summary>
-          {snapshot.vehicles.map((v) => (
-            <div key={v.vehicle_id} className="rev-row">
-              <b>{vehicleName(v.vehicle_id)}</b>
-              {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
-              {field(`vehicle:${v.vehicle_id}:shift_end_at`, v.shift_end_at, FIELD_LABEL.shift_end_at)}
-            </div>
-          ))}
+          <details className="rev-more" open={snapshot.vehicles.some((v) => isOff(v.vehicle_id)) || undefined}>
+          <summary>차량 {snapshot.vehicles.length}대, 근무 시간 또는 운행 불가</summary>
+          {snapshot.vehicles.map((v) => {
+            const key = `vehicle:${v.vehicle_id}:shift_end_at`
+            const off = isOff(v.vehicle_id)
+            const departed = departedOn(v.vehicle_id)
+            return (
+              <div key={v.vehicle_id} className={`rev-row${off ? ' rev-off' : ''}`}>
+                <b>{vehicleName(v.vehicle_id)}</b>
+                {off ? <span className="small">남은 작업을 다른 차량으로 다시 배정합니다.</span> : (
+                  <>
+                    {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
+                    {field(key, v.shift_end_at, FIELD_LABEL.shift_end_at)}
+                  </>
+                )}
+                {departed
+                  ? <span className="small muted">출발한 작업이 있어 뺄 수 없음</span>
+                  : <button type="button" className="chip-toggle" aria-pressed={off} onClick={() => {
+                      if (off) unset(key)
+                      else { set(key, offAt(v)); unset(`vehicle:${v.vehicle_id}:available_at`) }
+                    }}>오늘 운행 불가</button>}
+              </div>
+            )
+          })}
           </details>
         </fieldset>
       )}
@@ -170,12 +202,12 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
       </fieldset>
 
       <div className="rev-confirm">
-        <span className="small muted">입력한 값</span>
-        <div className="seg" role="group" aria-label="입력한 값">
+        <span className="small muted">값 확인</span>
+        <div className="seg" role="group" aria-label="값 확인">
           <button type="button" disabled={sending} aria-pressed={confirmation === 'confirmed_simulation'} onClick={() => setConfirmation('confirmed_simulation')}>확인한 값</button>
-          <button type="button" disabled={sending} aria-pressed={confirmation === 'assumed'} onClick={() => setConfirmation('assumed')}>가정한 값</button>
+          <button type="button" disabled={sending} aria-pressed={confirmation === 'assumed'} onClick={() => setConfirmation('assumed')}>확인 전(미리 계산)</button>
         </div>
-        {confirmation === 'assumed' && <span className="small warn">가정한 값은 비교만 하고 확정할 수 없습니다.</span>}
+        {confirmation === 'assumed' && <span className="small warn">결과만 미리 보고 확정은 할 수 없습니다.</span>}
       </div>
 
       <label className="rev-reason">
@@ -186,7 +218,9 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
       {(changes.length > 0 || added.length > 0) && (
         <ul className="rev-diff" aria-label="바뀌는 조건">
           {changes.map((c) => (
-            <li key={c.key}>{c.field === 'ready_at' ? jobName(c.id) : vehicleName(c.id)} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
+            c.field === 'shift_end_at' && isOff(c.id)
+              ? <li key={c.key}>{vehicleName(c.id)}: <b>오늘 운행 불가</b></li>
+              : <li key={c.key}>{c.field === 'ready_at' ? jobName(c.id) : vehicleName(c.id)} {FIELD_LABEL[c.field]}: {c.before ? kstDateTime(c.before) : '미확인'} → <b>{kstDateTime(c.after)}</b></li>
           ))}
           {added.map((d) => (
             <li key={d.vehicle_id || d.plate}>차량 추가: <b>{d.plate?.trim() || d.vehicle_id.trim()}</b>, {snapshot.locations?.find((l) => l.location_id === d.start_location_id)?.name.replace('(모의)', '').trim() ?? d.start_location_id}에서 {d.available_at.slice(11)}부터 {d.shift_end_at.slice(11)}까지, {d.equipment_types.map((t) => EQUIP_LABEL[t] ?? t).join('/')}</li>
@@ -261,7 +295,7 @@ const TRANSITIONS = [
   ['became_assigned', '새로 배정됨'],
   ['became_unassigned', '새로 미처리됨'],
   ['remained_unassigned', '계속 미처리'],
-  ['changed_assignments', '배정 바뀜'],
+  ['changed_assignments', '이전 계산과 배정이 다른 작업'],
   ['fixed_risks_added', '출발 차량 위험 생김'],
   ['fixed_risks_removed', '출발 차량 위험 없어짐'],
   ['fixed_risks_remaining', '출발 차량 위험 남음'],
@@ -276,7 +310,12 @@ const DELTAS = [
 ] as const
 
 /** 조건 보완 전후 비교(대겸 비교 로직의 서버 결과). 개선율로 해석하지 못하는 경우는 서버가 준 한계를 그대로 보여준다. */
-export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId, method }: { client: V2Client; revisionId: string; beforeRunId: string | null; afterRunId: string; method: string }) {
+export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId, method, snapshot }: { client: V2Client; revisionId: string; beforeRunId: string | null; afterRunId: string; method: string; snapshot?: Snapshot | null }) {
+  // 근무 종료를 운행 시작(또는 기준 시각) 이전으로 당긴 차량은 '오늘 운행 불가'로 뺀 차량이다.
+  const offVehicle = (id: string, after: string | null) => {
+    const v = snapshot?.vehicles?.find((x) => x.vehicle_id === id)
+    return !!(v && after && Date.parse(after) <= Math.max(Date.parse(snapshot!.as_of), v.available_at ? Date.parse(v.available_at) : 0))
+  }
   const [state, setState] = useState<{ data?: { confirmation: Confirmation; comparison: Comparison }; error?: unknown }>({})
   useEffect(() => {
     let live = true
@@ -296,15 +335,17 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
     <section className="card revision-compare" aria-labelledby="revcmp-title">
       <h2 id="revcmp-title">
         조건 보완 결과{' '}
-        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '가정한 값(확정 불가)' : '확인한 값'}</span>
+        <span className={`badge ${confirmation === 'assumed' ? 'fixture' : 'lock'}`}>{confirmation === 'assumed' ? '확인 전 값(확정 불가)' : '확인한 값'}</span>
       </h2>
       <p className="small">수정 이유: {c.revision.reason}</p>
       <ul className="rev-diff">
         {c.revision.changes.map((x) => (
-          <li key={`${x.entity_id}:${x.field}`}>{x.field.startsWith('vehicle') || x.field === 'available_at' || x.field === 'shift_end_at' ? vehicleName(x.entity_id) : jobName(x.entity_id)} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
+          x.field === 'shift_end_at' && offVehicle(x.entity_id, x.after)
+            ? <li key={`${x.entity_id}:${x.field}`}>{vehicleName(x.entity_id)}: <b>오늘 운행 불가</b></li>
+            : <li key={`${x.entity_id}:${x.field}`}>{x.field.startsWith('vehicle') || x.field === 'available_at' || x.field === 'shift_end_at' ? vehicleName(x.entity_id) : jobName(x.entity_id)} {FIELD_LABEL[x.field] ?? x.field}: {x.before ? kstDateTime(x.before) : '미확인'} → <b>{x.after ? kstDateTime(x.after) : '미확인'}</b></li>
         ))}
         {c.revision.added_vehicles.map((v) => (
-          <li key={v.vehicle_id}>차량 추가: <b>{v.vehicle_id}</b> (확보 여부는 담당자가 직접 확인)</li>
+          <li key={v.vehicle_id}>차량 추가: <b>{vehicleName(v.vehicle_id)}</b></li>
         ))}
       </ul>
       {c.before.status === 'input_blocked' && (
@@ -313,18 +354,20 @@ export function RevisionComparison({ client, revisionId, beforeRunId, afterRunId
       {c.job_transitions && (
         <dl className="rev-transitions">
           {TRANSITIONS.filter(([k]) => c.job_transitions![k].length).map(([k, label]) => (
-            <div key={k}><dt>{label}</dt><dd>{c.job_transitions![k].join(', ')}</dd></div>
+            <div key={k}><dt>{label}</dt><dd>{c.job_transitions![k].map(jobName).join(', ')}</dd></div>
           ))}
         </dl>
       )}
-      {c.metric_deltas && (
+      {c.metric_deltas && (DELTAS.some(([k]) => c.metric_deltas![k]) ? (
         <table className="grid small rev-deltas">
+          <caption className="small muted">이전 계산보다</caption>
           <thead><tr>{DELTAS.map(([, l]) => <th key={l} scope="col">{l}</th>)}</tr></thead>
           <tbody><tr>{DELTAS.map(([k]) => <td key={k}>{signed(c.metric_deltas![k])}</td>)}</tr></tbody>
         </table>
-      )}
-      {c.before.status !== 'input_blocked' && c.comparison_limits.length > 0 && (
-        <ul className="small rev-limits">{c.comparison_limits.map((l) => <li key={l}>{l}</li>)}</ul>
+      ) : <p className="small">이전 계산과 비교해 미처리·위반·변경 작업 수와 이동 시간이 같습니다.</p>)}
+      {/* 두 계산 사이에 기준 시각이 바뀌었으면 결과 차이가 보완 때문만은 아닐 수 있다는 점만 짧게 알린다. */}
+      {c.before.status !== 'input_blocked' && c.comparison_limits.some((l) => l.includes('기준시각')) && (
+        <p className="small muted">그사이 시간이 지나 결과 차이에는 시간 경과도 섞여 있습니다.</p>
       )}
 
     </section>

@@ -225,6 +225,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         <div className="vm-head">
           <div>
             <h2>입항 모선</h2>
+            {/* 실제 기상(기상청 관측)과 모의 선박이 한 화면에 있으므로 출처를 구분해 둔다. */}
+            <p className="small muted vm-source"><span className="badge fixture">모의 운항</span> 선박 위치·이름은 가상, 해상 기상은 기상청 관측</p>
           </div>
         </div>
         {nextCut && (
@@ -298,6 +300,7 @@ function InfoCard({ v, t, base, cut, link }: { v: VesselView; t: number; base: D
     ['선박', `컨테이너선, ${v.vessel.teu.toLocaleString()}TEU`],
     [v.vessel.outbound ? '다음 기항' : '출발항', v.vessel.port],
     ['터미널', v.vessel.terminal], ['항차', v.vessel.voyage],
+    ['위치', '모의 운항(실제 선박 위치 아님)'],
   ]
   if (v.status === 'underway' && !v.vessel.outbound && v.etaMin !== null) {
     rows.push(['도착 추정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후)</>])
