@@ -409,4 +409,12 @@ button:not(.secondary):not(.chip-toggle):not([role='tab']):not([role='radio']):n
 .all-clear p { margin: 6px 0 14px; }
 .all-clear .button { display: inline-flex; align-items: center; min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font-weight: 600; text-decoration: none; }
 .all-clear .button:hover { border-color: #2457E6; color: #2457E6; }
-.appbar .brand { color: #1D46C4 !important; font-weight: 800 !important; letter-spacing: -0.03em !important; }
+.appbar .brand { color: #16294D !important; font-weight: 800 !important; letter-spacing: -0.03em !important; }
+/* 결과 구역 이동 줄: 지금 보는 구역만 표시(마우스·포커스 밑줄로 헷갈리지 않게) */
+.rn-link { border-bottom: 1px solid transparent !important; box-shadow: none !important; text-decoration: none !important; }
+.rn-link:focus:not(:focus-visible) { outline: none; }
+.rn-link[aria-current='true'] { background: #fff !important; border-color: var(--line) !important; color: #2457E6 !important; }
+/* 일정표의 작업별 반입 마감선: 문제없으면 회색, 마감을 넘긴 작업만 빨강 */
+.cut-mark { border-left: 2px dashed #9aa3b2 !important; opacity: .7 !important; }
+.cut-mark.late { border-left-color: #c0262d !important; opacity: 1 !important; }
+.sw-deadline { border-left-color: #9aa3b2 !important; }
