@@ -73,6 +73,10 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
   const legLines = useRef<any[]>([])
   const allBounds = useRef<any>(null)
   const focusBounds = useRef<any>(null)
+  // 차고지·상차지 이름표. 차량 묶음이 그 자리에 있으면 이름표를 숨기고 묶음에 장소 이름을 붙인다(겹침 방지).
+  const placeEls = useRef(new Map<string, { el: HTMLDivElement; pos: Pt; name: string }>())
+  // 게이트 이름표(점 왼쪽·오른쪽에 붙음). 게이트에 차량 묶음이 있으면 원 바깥으로 비켜 놓는다.
+  const gateEls = useRef(new Map<string, { el: HTMLDivElement; pos: Pt; west: boolean }>())
   // 기본 보기: 지금 차량이 있는 곳 + 게이트. 상차지 전체는 '전체', 게이트 앞은 '게이트'.
   const [mapView, setMapView] = useState<'fleet' | 'gate' | 'all'>('fleet')
 
@@ -107,6 +111,8 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
         const midLon = terms.reduce((sum, l) => sum + (l.longitude ?? 0), 0) / Math.max(1, terms.length)
         const side = loc.kind === 'terminal' && terms.length > 1 ? (p.lon < midLon ? { xAnchor: 1.08, yAnchor: 0.5 } : { xAnchor: -0.08, yAnchor: 0.5 }) : { yAnchor: 1.3 }
         new maps.CustomOverlay({ map: m, position: ll(p), content: el, ...side, zIndex: loc.kind === 'terminal' ? 4 : 2 })
+        if (loc.kind !== 'terminal') placeEls.current.set(loc.location_id, { el, pos: p, name: el.textContent ?? '' })
+        else gateEls.current.set(loc.location_id, { el, pos: p, west: terms.length > 1 && p.lon < midLon })
         const dot = document.createElement('div')
         dot.className = `dm-dot ${loc.kind}`
         new maps.CustomOverlay({ map: m, position: ll(p), content: dot, zIndex: 1 })
@@ -162,7 +168,22 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       else clusters.push({ x: pt.x, y: pt.y, list: [v] })
     }
     const zoomedIn = kmap.current.getLevel() <= 6
+    // 묶음·차량이 차고지·상차지 이름표 위에 있으면 이름표를 숨기고 그 장소 이름을 묶음 아래에 붙인다.
+    const placeAt = new Map<(typeof clusters)[number], string>()
+    for (const place of placeEls.current.values()) {
+      const pp = proj.containerPointFromCoords(ll(place.pos))
+      const hit = clusters.find(c => Math.hypot(c.x - pp.x, c.y - pp.y) < 44)
+      place.el.style.visibility = hit ? 'hidden' : ''
+      if (hit && !placeAt.has(hit)) placeAt.set(hit, place.name)
+    }
+    for (const gate of gateEls.current.values()) {
+      const gp = proj.containerPointFromCoords(ll(gate.pos))
+      const hit = clusters.some(c => Math.hypot(c.x - gp.x, c.y - gp.y) < 30)
+      gate.el.style.marginRight = hit && gate.west ? '20px' : ''
+      gate.el.style.marginLeft = hit && !gate.west ? '20px' : ''
+    }
     for (const c of clusters) {
+      const at = placeAt.get(c)
       const list = c.list
       const v = list[0]
       const el = document.createElement('div')
@@ -172,7 +193,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
         const key = list.map(x => x.vehicleId).sort().join(',')
         el.className = `dm-cluster ${worst}${picked ? ' picked' : ''}${openCluster === key ? ' open' : ''}`
         el.title = list.map(x => vehicleName(x.vehicleId)).join(', ')
-        el.innerHTML = `<b>${list.length}</b><span>대</span>`
+        el.innerHTML = `<b>${list.length}</b><span>대</span>${at ? `<em class="cl-place">${at}</em>` : ''}`
         // 같은 자리(차고지 대기 등)에 모인 차량은 확대해도 갈라지지 않으므로 목록을 펼친다. 흩어져 있으면 확대한다.
         const spread = Math.max(...list.map(x => Math.hypot((x.pos!.lat - v.pos!.lat) * 111000, (x.pos!.lon - v.pos!.lon) * 91000)))
         const pop = document.createElement('div')
@@ -201,7 +222,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
         : v.phase === 'returning' ? '→ 차고지'
         : PHASE_LABEL[v.phase]
       // 이름표는 짧게(번호판 뒤 4자리). 목적지·도착 시각은 고른 차량이거나 충분히 확대했을 때만.
-      el.innerHTML = `${truckSvg(heading)}<b>${vehicleShort(v.vehicleId)}</b>${picked || zoomedIn ? `<span>${what}</span>` : ''}`
+      el.innerHTML = `${truckSvg(heading)}<b>${vehicleShort(v.vehicleId)}</b>${picked || zoomedIn ? `<span>${what}</span>` : at ? `<span>${at}</span>` : ''}`
       el.title = `${vehicleName(v.vehicleId)} · ${PHASE_LABEL[v.phase]}`
       el.onclick = () => { setPickedVehicle(v.vehicleId); onSelectJob(v.jobId) }
       pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos!), content: el, yAnchor: 1.25, zIndex: picked ? 9 : 6, clickable: true }))

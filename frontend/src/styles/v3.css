@@ -418,3 +418,5 @@ button:not(.secondary):not(.chip-toggle):not([role='tab']):not([role='radio']):n
 .cut-mark { border-left: 2px dashed #9aa3b2 !important; opacity: .7 !important; }
 .cut-mark.late { border-left-color: #c0262d !important; opacity: 1 !important; }
 .sw-deadline { border-left-color: #9aa3b2 !important; }
+/* 묶음 원 아래에 붙는 장소 이름(차고지·상차지 이름표 대신) */
+.dm-cluster .cl-place { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 11.5px; font-weight: 700; line-height: 1; color: #1f2937; background: rgba(255,255,255,.95); border-radius: 999px; padding: 4px 8px; box-shadow: 0 1px 4px rgba(15,23,42,.25); pointer-events: none; }
