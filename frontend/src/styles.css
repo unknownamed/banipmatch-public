@@ -404,3 +404,7 @@ button.secondary:hover { background: var(--color-hover); }
 .vm-live { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); align-self: center; box-shadow: 0 0 0 3px #e8f4ed; }
 .vm-speed { display: inline-flex; align-items: center; gap: 6px; color: var(--color-muted); }
 .vm-speed select { font: inherit; padding: 4px 6px; border: var(--border); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text); }
+.vm-go { display: inline-block; margin: 6px 0 2px 14px; font-size: var(--fs-caption); font-weight: var(--fw-bold); color: var(--color-accent-strong); }
+.vm-changed { color: var(--color-danger); font-weight: var(--fw-medium); }
+.vm-linked { margin: 0; }
+.vm-linked a { color: var(--color-accent-strong); font-weight: var(--fw-bold); }

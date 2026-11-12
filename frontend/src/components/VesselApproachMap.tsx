@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BUOYS, SOURCES, TERMINALS, VESSELS, fleetAt, formatDuration, routeLengthNm, type LatLon, type VesselView } from '../lib/vesselApproach'
 import { MAP_TYPES, loadKakaoMaps, type MapType } from '../lib/kakaoMaps'
+import type { Snapshot } from '../api/types'
+
+export type ScenarioLink = { snapshot: Snapshot; reviewHref: string }
+type Cutoff = { min: number | null; prevMin: number | null; linked: boolean; confirmed: boolean }
 
 const MAX_MIN = 240
 const STATUS_LABEL = { underway: '입항 중', anchored: '묘박 대기', berthed: '접안', stale: '위치 끊김' } as const
@@ -18,7 +22,7 @@ function shipSvg(heading: number) {
     + rows + `<rect x="4.2" y="31" width="7.6" height="5" rx="1" class="bridge"/></svg>`
 }
 
-export function VesselApproachMap() {
+export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null }) {
   // 화면을 연 시각이 모의 상황의 시작점이다. 기본은 실제 시간과 같은 속도로 흐른다(상황판).
   const base = useMemo(() => new Date(), [])
   const [t, setT] = useState(0)
@@ -28,6 +32,15 @@ export function VesselApproachMap() {
   const [mapState, setMapState] = useState<{ ok: boolean; msg: string }>({ ok: false, msg: '지도 불러오는 중…' })
   const fleet = useMemo(() => fleetAt(t), [t])
   const sel = fleet.find(v => v.vessel.id === picked) ?? fleet[0]
+  // 계산한 시나리오에 같은 항차·터미널 반입 시간창이 있으면 그 값을 쓴다(지도 전용 모의 값보다 우선).
+  const cutoffOf = (voyage: string, terminal: string, fallback: number): Cutoff => {
+    const toMin = (iso: string | null) => (iso ? (Date.parse(iso) - base.getTime()) / 60000 : null)
+    const w = link?.snapshot.windows.find(x => x.voyage_id === voyage && x.terminal_id === terminal)
+    if (!w) return { min: fallback, prevMin: null, linked: false, confirmed: false }
+    const ch = link!.snapshot.change
+    const changed = ch && ch.voyage_id === voyage && ch.terminal_id === terminal
+    return { min: toMin(w.closes_at), prevMin: changed ? toMin(ch.previous_closes_at) : null, linked: true, confirmed: w.verification === 'confirmed' }
+  }
 
   const box = useRef<HTMLDivElement>(null)
   const kmap = useRef<any>(null)
@@ -131,6 +144,11 @@ export function VesselApproachMap() {
           <span className="badge fixture">모의 자료</span>
         </div>
         <div className="banner fixture">선박·항차·속력·반입 마감은 모두 모의입니다. 도착 시각은 추정이며 반입 마감을 바꾸지 않습니다.</div>
+        {link ? (
+          <p className="vm-linked small">계산 중인 시나리오 <b>{link.snapshot.scenario_id}</b>의 항차별 반입 마감을 함께 표시합니다. <a href={link.reviewHref}>배차 점검으로 돌아가기</a></p>
+        ) : (
+          <p className="vm-linked small muted">예제를 계산하면 같은 항차(V1·V2 · HJNC)의 반입 마감이 이 지도에도 연결됩니다. <a href="?">계산 요청</a></p>
+        )}
 
         <div className="vm-toolbar">
           <div className="vm-seg" role="radiogroup" aria-label="지도 종류">
@@ -162,7 +180,8 @@ export function VesselApproachMap() {
             {fleet.map(v => {
               const total = routeLengthNm(v.vessel.route)
               const progress = total > 0 && v.remainingNm !== null ? 1 - v.remainingNm / total : v.status === 'berthed' ? 1 : 0
-              const cutLeft = v.vessel.cutoffMin - t
+              const cut = cutoffOf(v.vessel.voyage, v.vessel.terminal, v.vessel.cutoffMin)
+              const cutLeft = cut.min === null ? null : cut.min - t
               return (
                 <li key={v.vessel.id}>
                   <button type="button" className={`vm-item${v.vessel.id === sel.vessel.id ? ' picked' : ''}`} aria-pressed={v.vessel.id === sel.vessel.id} onClick={() => focus(v)}>
@@ -182,11 +201,13 @@ export function VesselApproachMap() {
                       {v.status === 'underway' && <span>{v.vessel.speedKn}노트</span>}
                       {v.status === 'stale' && <span className="warn">마지막 위치 {Math.round(v.positionAgeMin)}분 전</span>}
                     </span>
-                    <span className={`vm-cutoff small${cutLeft < 0 ? ' past' : cutLeft <= 60 ? ' soon' : ''}`}>
-                      반입 마감 {kst(at(base, v.vessel.cutoffMin))} · {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}
-                      <span className="muted"> (터미널 공지·모의)</span>
+                    <span className={`vm-cutoff small${cutLeft === null ? '' : cutLeft < 0 ? ' past' : cutLeft <= 60 ? ' soon' : ''}`}>
+                      {cut.min === null || cutLeft === null ? '반입 마감 미확인' : <>반입 마감 <b>{kst(at(base, cut.min))}</b> · {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}</>}
+                      {cut.prevMin !== null && <span className="vm-changed"> · 변경 전 {kst(at(base, cut.prevMin))}{cut.confirmed ? ' (확정 변경)' : ' (미확정)'}</span>}
+                      <span className="muted"> ({cut.linked ? '계산 시나리오의 터미널 공지·모의' : '지도 전용 모의 값'})</span>
                     </span>
                   </button>
+                  {cut.linked && link && <a className="vm-go" href={link.reviewHref}>{v.vessel.voyage} 항차 배차 점검 보기 →</a>}
                 </li>
               )
             })}
