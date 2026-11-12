@@ -7,6 +7,8 @@ import { humanizeTimes } from './time'
 const READY_LATE = /^준비 (\S+) \+ 터미널까지 운송 (\d+)분 \+ 여유 (\d+)분 = (\S+) > 마감 (\S+?)\.\s/
 
 export function issueText(code: string, explanation: string): string {
+  // 탐색에서 남은 작업: 엔진 원문은 증명 범위를 설명하는 기술 문장이라 담당자 말로 바꾼다(찾지 못함 = 불가능 단정 아님).
+  if (code === 'SEARCH_LIMIT') return '지금 차량과 근무 시간 안에서는 다른 화물을 마감 안에 넣으면서 이 작업까지 넣는 배차를 찾지 못했습니다.'
   const m = code === 'READY_TOO_LATE' ? READY_LATE.exec(explanation) : null
   if (!m) return humanizeTimes(explanation)
   const [, ready, travel, buffer, earliest, closes] = m

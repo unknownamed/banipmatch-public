@@ -151,6 +151,15 @@ def _settings(result: dict) -> dict | None:
     return {"engine_version": result["engine_version"], "solver_version": result["solver_version"], **settings}
 
 
+def _moved(old: dict, new: dict) -> bool:
+    """차량·순서가 바뀌었거나 출발이 허용 폭(5분)을 넘게 움직인 작업. 기준 시각이 몇 분 지난 것만으로 바뀐 작업으로 세지 않는다."""
+    if (old["vehicle_id"], old["sequence"]) != (new["vehicle_id"], new["sequence"]):
+        return True
+    shift = abs(datetime.fromisoformat(new["pickup_departure_at"].replace("Z", "+00:00"))
+                - datetime.fromisoformat(old["pickup_departure_at"].replace("Z", "+00:00")))
+    return shift.total_seconds() > 5 * 60
+
+
 def compare_recalculation(before: dict, before_results: dict | None, after: dict,
                           after_results: dict, *, method: str, reason: str) -> dict:
     """Return R4 before/after changes without a live approval or send decision.
@@ -215,7 +224,7 @@ def compare_recalculation(before: dict, before_results: dict | None, after: dict
             "job_transitions": {"became_assigned": sorted(old_unassigned - new_unassigned),
                                 "became_unassigned": sorted(new_unassigned - old_unassigned),
                                 "remained_unassigned": sorted(old_unassigned & new_unassigned),
-                                "changed_assignments": sorted(j for j in old.keys() & new.keys() if old[j] != new[j]),
+                                "changed_assignments": sorted(j for j in old.keys() & new.keys() if _moved(old[j], new[j])),
                                 "fixed_risks_added": sorted(new_risks - old_risks),
                                 "fixed_risks_removed": sorted(old_risks - new_risks),
                                 "fixed_risks_remaining": sorted(old_risks & new_risks)},

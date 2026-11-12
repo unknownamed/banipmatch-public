@@ -12,6 +12,7 @@ describe('issueText', () => {
   })
   it('형식이 다르거나 다른 이유면 원문 시각만 바꿔 그대로 둔다', () => {
     expect(issueText('READY_TOO_LATE', '알 수 없는 형식')).toBe('알 수 없는 형식')
+    expect(issueText('SEARCH_LIMIT', '최적화 결과에서 미처리로 남았습니다. 전체 미처리 목적의 증명과…')).toContain('찾지 못했습니다')
     expect(issueText('SHIFT_EXCEEDED', '근무 종료 2026-11-12T18:00:00Z 초과')).toBe('근무 종료 03:00 초과')
   })
 })
