@@ -70,28 +70,27 @@ describe('변경 전달 화면', () => {
     expect([...container.querySelectorAll('button')].some((b) => b.textContent === '기사에게 보내기')).toBe(false)
   })
 
-  it('동의 체크 후 초대를 만들고 비밀은 fragment 링크로만 보여준다', async () => {
+  it('차량 줄의 휴대폰 연결로 초대를 만들고 비밀은 fragment 링크·QR로만 보여준다', async () => {
     const { client, post } = fakeClient(true)
     await act(async () => root.render(<DispatchPanel client={client} planId="P1" />))
     await flush()
-    await clickText('T1')
-    expect(container.querySelector<HTMLButtonElement>('fieldset.invite button')!.disabled).toBe(true)
-    await clickText('이 차량 기사에게만 연결 링크')
-    await clickText('연결 링크 만들기')
+    const row = [...container.querySelectorAll('.link-list li')].find((li) => li.textContent?.includes('T1'))!
+    const connect = [...row.querySelectorAll('button')].find((b) => b.textContent === '휴대폰 연결')!
+    await act(async () => connect.click())
     await flush()
     expect(post).toHaveBeenCalledWith('/v2/invitations', { plan_id: 'P1', vehicle_ids: ['T1'], consent_acknowledged: true }, expect.stringMatching(/^invite-/))
     const link = container.querySelector<HTMLInputElement>('.invite-link input')!.value
     expect(link).toMatch(/\/recipient#invite=tok\.en$/)
     expect(location.search).not.toContain('tok')
+    expect(container.querySelector<HTMLImageElement>('.invite-qr')!.src).toMatch(/^data:image\//)
   })
 
-  it('확인 후에만 전달하고, 같은 승인은 같은 멱등키, 접수는 읽음이 아니며 실패만 다시 보낼 수 있다', async () => {
+  it('한 번 눌러 전달하고, 같은 승인은 같은 멱등키, 접수는 읽음이 아니며 실패만 다시 보낼 수 있다', async () => {
     const { client, post } = fakeClient(true)
     await act(async () => root.render(<DispatchPanel client={client} planId="P1" />))
     await flush()
-    const sendButton = () => [...container.querySelectorAll('button')].find((b) => b.textContent === '기사에게 보내기')!
-    expect(sendButton().disabled).toBe(true)
-    await clickText('기사 휴대폰으로 보냅니다')
+    const sendButton = () => [...container.querySelectorAll('button')].find((b) => b.textContent === '연결된 기사에게 보내기')!
+    expect(sendButton().disabled).toBe(false)
     await act(async () => sendButton().click())
     await flush()
     expect(post).toHaveBeenCalledWith('/v2/plans/P1/dispatches', { approval_id: 'A1', expected_version: 2, confirm_test_send: true }, 'dispatch-A1')

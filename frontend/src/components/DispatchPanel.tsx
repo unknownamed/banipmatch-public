@@ -1,3 +1,4 @@
+import qrcode from 'qrcode-generator'
 import { useCallback, useEffect, useState } from 'react'
 import { ApiRequestError } from '../api/client'
 import type { SessionState, V2Client } from '../api/v2'
@@ -55,12 +56,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
 
   return (
     <section className="card dispatch" aria-labelledby="dispatch-title">
-      <h2 id="dispatch-title">
-        기사 전달 · 응답
-      </h2>
-      <p className="muted small">
-        확정한 배차에서 바뀌는 차량입니다. 기사 앱으로 알림을 보내거나, 안내문을 복사해 문자·카톡으로 보낼 수 있습니다.
-      </p>
+      <h2 id="dispatch-title">기사 전달</h2>
 
       <h3>차량별 변경 내용</h3>
       <div className="vehicle-changes">
@@ -120,29 +116,36 @@ function Followups({ items, title }: { items: Followup[]; title: string }) {
   )
 }
 
+/** 초대 링크를 휴대폰 카메라로 바로 열 수 있게 QR 그림(데이터 주소)으로 만든다. 링크는 이 화면 메모리에만 둔다. */
+function qrDataUrl(text: string): string {
+  const qr = qrcode(0, 'M')
+  qr.addData(text)
+  qr.make()
+  return qr.createDataURL(5, 2)
+}
+
 function Invitations({ client, planId, vehicles, authorized, recipients, onChange }: {
   client: V2Client; planId: string; vehicles: string[]; authorized: boolean; recipients: RecipientSummary[]; onChange: () => void
 }) {
-  const [picked, setPicked] = useState<string[]>([])
-  const [consent, setConsent] = useState(false)
-  const [invite, setInvite] = useState<{ link: string; expires_at: string } | null>(null)
-  const [busy, setBusy] = useState(false)
+  const [invite, setInvite] = useState<{ vehicle: string; link: string; expires_at: string } | null>(null)
+  const [busy, setBusy] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
   const [error, setError] = useState<unknown>(null)
-  const taken = new Set(recipients.filter((r) => !r.revoked).flatMap((r) => r.vehicle_ids))
+  const linkedBy = new Map(recipients.filter((r) => !r.revoked).flatMap((r) => r.vehicle_ids.map((v) => [v, r] as const)))
 
-  async function create() {
-    setBusy(true)
+  // 차량 줄의 '휴대폰 연결'을 누르면 바로 그 차량용 1회용 링크를 만든다(선택 기사에게만 보내고 이름·번호는 저장하지 않음).
+  async function create(vehicle: string) {
+    setBusy(vehicle)
     setError(null)
+    setCopied(false)
     try {
-      const r = await client.post<{ invitation_token: string; expires_at: string }>('/v2/invitations', { plan_id: planId, vehicle_ids: picked, consent_acknowledged: true }, `invite-${crypto.randomUUID()}`)
+      const r = await client.post<{ invitation_token: string; expires_at: string }>('/v2/invitations', { plan_id: planId, vehicle_ids: [vehicle], consent_acknowledged: true }, `invite-${crypto.randomUUID()}`)
       // 초대 비밀은 이 화면 메모리에만 둔다. 저장소·로그·주소 query에 남기지 않는다.
-      setInvite({ link: invitationLink(location.origin, r.invitation_token), expires_at: r.expires_at })
-      setPicked([])
-      setConsent(false)
+      setInvite({ vehicle, link: invitationLink(location.origin, r.invitation_token), expires_at: r.expires_at })
     } catch (e) {
       setError(e)
     } finally {
-      setBusy(false)
+      setBusy(null)
     }
   }
 
@@ -155,49 +158,44 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
     onChange()
   }
 
+  if (!authorized && recipients.length === 0) return null
   return (
     <>
-      {authorized && <h3>기사 앱 연결</h3>}
-      {recipients.length > 0 && (
-        <table className="grid small">
-          <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>
-          <tbody>
-            {recipients.map((r) => (
-              <tr key={r.recipient_id}>
-                <td className="muted">기기 {r.recipient_id.slice(-4)}</td>
-                <td>{r.vehicle_ids.map(vehicleName).join(', ')}</td>
-                <td>{r.revoked ? '해제됨' : SUBSCRIPTION_LABEL[r.subscription_status]}</td>
-                <td>{kstDateTime(r.expires_at)}</td>
-                <td>{!r.revoked && <button type="button" className="secondary" onClick={() => revoke(r.recipient_id)}>연결 해제</button>}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      {authorized && (
-        <fieldset disabled={busy} className="invite">
-          <legend className="small">연결할 차량 (이미 연결된 차량은 해제 후 다시 연결)</legend>
-          {vehicles.map((v) => (
-            <label key={v} className="rev-choice">
-              <input type="checkbox" disabled={taken.has(v)} checked={picked.includes(v)} onChange={(e) => setPicked((x) => (e.target.checked ? [...x, v] : x.filter((y) => y !== v)))} />
-              {' '}{vehicleName(v)}{taken.has(v) && <span className="small muted"> · 연결됨</span>}
-            </label>
-          ))}
-          <label className="rev-choice">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />{' '}
-            이 차량 기사에게만 연결 링크를 보냅니다. 기사가 휴대폰에서 열고 알림을 허용하면 연결됩니다. 이름·전화번호는 저장하지 않습니다.
-          </label>
-          <button type="button" disabled={!picked.length || !consent} onClick={create}>연결 링크 만들기</button>
-        </fieldset>
-      )}
+      <h3>기사 휴대폰 연결</h3>
+      <p className="small muted">링크는 그 차량 기사에게만 보내세요. 이름과 전화번호는 저장하지 않습니다.</p>
+      <ul className="link-list">
+        {vehicles.map((v) => {
+          const r = linkedBy.get(v)
+          return (
+            <li key={v}>
+              <Plate id={v} />
+              {r ? (
+                <>
+                  <span className={`st ${r.subscription_status === 'active' ? 'ok' : 'warn'}`}>{SUBSCRIPTION_LABEL[r.subscription_status]}</span>
+                  <button type="button" className="secondary" onClick={() => revoke(r.recipient_id)}>연결 해제</button>
+                </>
+              ) : (
+                <>
+                  <span className="st wait">연결 안 됨</span>
+                  {authorized && <button type="button" className="secondary" disabled={busy !== null} onClick={() => create(v)}>{busy === v ? '만드는 중…' : '휴대폰 연결'}</button>}
+                </>
+              )}
+            </li>
+          )
+        })}
+      </ul>
       {invite && (
         <div className="invite-link" role="status">
-          <p className="small">연결 링크(1회용 · {kstDateTime(invite.expires_at)}까지). 기사에게 이 링크를 보내 주세요.</p>
-          <input readOnly value={invite.link} aria-label="초대 링크" onFocus={(e) => e.currentTarget.select()} />
-          <button type="button" className="secondary" onClick={() => navigator.clipboard?.writeText(invite.link)}>복사</button>
-          <p className="small muted">
-            iPhone은 Safari에서 바로 열지 말고, 먼저 반입맞춤을 홈 화면에 추가한 뒤 홈 화면 앱 안에 이 링크를 붙여넣어야 알림을 받을 수 있습니다.
-          </p>
+          <img className="invite-qr" src={qrDataUrl(invite.link)} alt="연결 링크 QR 코드" width={164} height={164} />
+          <div className="invite-body">
+            <p><b>{vehicleName(invite.vehicle)}</b> 기사 휴대폰으로 QR을 찍거나 링크를 보내세요.</p>
+            <p className="small muted">한 번만 쓸 수 있고 {kstDateTime(invite.expires_at)}까지 유효합니다.</p>
+            <div className="invite-copy">
+              <input readOnly value={invite.link} aria-label="연결 링크" onFocus={(e) => e.currentTarget.select()} />
+              <button type="button" className="secondary" onClick={() => { navigator.clipboard?.writeText(invite.link); setCopied(true) }}>{copied ? '복사됨' : '링크 복사'}</button>
+            </div>
+            <p className="small muted">아이폰은 Safari에서 공유 › 홈 화면에 추가한 뒤, 그 아이콘으로 열어 링크를 붙여넣어야 알림이 옵니다.</p>
+          </div>
         </div>
       )}
       {error !== null && <p className="warn small" role="alert">{errText(error)}</p>}
@@ -208,7 +206,6 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
 function Send({ client, preview, authorized, dispatchId, onSent }: {
   client: V2Client; preview: DispatchPreview; authorized: boolean; dispatchId: string | null; onSent: (id: string) => void
 }) {
-  const [confirm, setConfirm] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<unknown>(null)
   if (!authorized && !dispatchId) return null
@@ -231,17 +228,14 @@ function Send({ client, preview, authorized, dispatchId, onSent }: {
 
   return (
     <>
-      <h3>앱 알림 보내기</h3>
+      <h3>알림 보내기</h3>
       {dispatchId ? (
         <p className="small muted">이 배차의 변경을 이미 보냈습니다. 아래에서 기사 응답을 확인하세요.</p>
       ) : (
-        <fieldset disabled={busy}>
-          <label className="rev-choice">
-            <input type="checkbox" checked={confirm} onChange={(e) => setConfirm(e.target.checked)} />{' '}
-            확정한 배차의 변경 내용을 연결된 기사 휴대폰으로 보냅니다. 잠금 화면에는 ‘배차 변경 확인 요청’만 표시됩니다.
-          </label>
-          <button type="button" disabled={!confirm} onClick={send}>{busy ? '보내는 중…' : '기사에게 보내기'}</button>
-        </fieldset>
+        <div className="send-row">
+          <button type="button" disabled={busy} onClick={send}>{busy ? '보내는 중…' : '연결된 기사에게 보내기'}</button>
+          <span className="small muted">잠금 화면에는 ‘배차 변경 확인 요청’만 보입니다.</span>
+        </div>
       )}
       {error !== null && <p className="warn small" role="alert">전달 실패: {errText(error)}</p>}
     </>
@@ -339,9 +333,9 @@ function CopyNotice({ text }: { text: string }) {
 function PushGuide({ authorized, linked }: { authorized: boolean; linked: boolean }) {
   const steps: [string, boolean][] = [
     ['알림 사용 코드로 알림 기능 켜기', authorized],
-    ['차량을 골라 연결 링크를 만들고 기사 휴대폰으로 보내기', linked],
-    ['기사 휴대폰에서 링크를 열고 알림 허용하기(아이폰은 공유 › 홈 화면에 추가 후 그 아이콘으로 열기)', linked],
-    ['아래 ‘기사에게 보내기’를 누르면 기사 응답이 이 화면에 표시됨', false],
+    ['차량의 ‘휴대폰 연결’을 누르고 나온 QR을 기사 휴대폰으로 찍기', linked],
+    ['휴대폰에서 연결하고 알림 허용하기', linked],
+    ['‘연결된 기사에게 보내기’를 누르면 응답이 이 화면에 표시됨', false],
   ]
   return (
     <ol className="push-guide small" aria-label="앱 알림 받는 방법">

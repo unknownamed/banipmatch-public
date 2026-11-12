@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 from copy import deepcopy
+from datetime import datetime
 import json
 from pathlib import Path
 
@@ -63,11 +64,28 @@ def job_display(snapshot: dict, job_id: str) -> dict:
             "voyage_id": job["voyage_id"], "size": size}
 
 
+def within_tolerance(old: dict | None, new: dict | None, tolerance: int) -> bool:
+    """Same vehicle and order, and every time moved by at most the policy tolerance (minutes)."""
+    if old is None or new is None or old["vehicle_id"] != new["vehicle_id"] or old.get("sequence") != new.get("sequence"):
+        return False
+    for key in ("pickup_departure_at", "gate_arrival_at", "return_at"):
+        a, b = old.get(key), new.get(key)
+        if a == b:
+            continue
+        if a is None or b is None:
+            return False
+        delta = abs((datetime.fromisoformat(a.replace("Z", "+00:00")) - datetime.fromisoformat(b.replace("Z", "+00:00"))).total_seconds())
+        if delta > tolerance * 60:
+            return False
+    return True
+
+
 def build_response_preview(snapshot: dict, result: dict) -> dict:
     """Recheck a computed candidate, preserving issues and exact schedule differences.
 
     This is a review artifact, not current DB authority or an approval/dispatch API.
-    Unlike optimizer KPI tolerance, communication diffs include any changed time.
+    Time-only shifts within the policy tolerance (same vehicle, same order) are not sent to drivers:
+    the engine does not count them as changes either, and a 1-minute notice only adds noise.
     """
     validate("Snapshot", snapshot)
     validate("MethodResult", result)
@@ -77,13 +95,14 @@ def build_response_preview(snapshot: dict, result: dict) -> dict:
         raise ValueError("독립 검사 통과 상태의 실계산 조정 결과가 필요함")
     if not verify_schedule(snapshot, result):
         raise ValueError("일정 재검사 실패")
+    tolerance = int(snapshot["policy"]["time_change_tolerance_minutes"])
     before = ranked(snapshot["baseline_assignments"])
     after = ranked(result["assignments"])
     changed = []
     by_vehicle: dict[str, list[dict]] = {}
     for job_id in sorted(before.keys() | after.keys()):
         old, new = before.get(job_id), after.get(job_id)
-        if old == new:
+        if old == new or within_tolerance(old, new, tolerance):
             continue
         kind = "removed_from_plan" if new is None else "newly_assigned" if old is None else "reassigned" if old["vehicle_id"] != new["vehicle_id"] else "schedule_changed"
         fields = sorted(k for k in set(old or {}) | set(new or {}) if k != "job_id" and (old or {}).get(k) != (new or {}).get(k))

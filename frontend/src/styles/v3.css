@@ -512,3 +512,14 @@ a { color: #22396A; }
 input:not([type='checkbox']):not([type='radio']):not([type='range']):focus-visible, textarea:focus-visible, select:focus-visible { outline: none !important; border-color: #16294D !important; box-shadow: 0 0 0 3px rgba(22,41,77,.12) !important; }
 button:focus-visible, a:focus-visible { outline: 2px solid #16294D; outline-offset: 2px; }
 .vm-count { position: absolute; left: 6px; top: -22px; z-index: 2; min-width: 18px; padding: 1px 5px; border-radius: 999px; background: #fff; color: #16294D; font-style: normal; font-size: 11px; font-weight: 800; line-height: 15px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+/* 기사 휴대폰 연결: 차량별 한 줄 + QR */
+.link-list { list-style: none; margin: 8px 0 12px; padding: 0; display: grid; gap: 6px; }
+.link-list li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.link-list li .st { margin-right: auto; }
+.invite-link { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; padding: 14px; border: 1px solid #cfd8e8; border-radius: 10px; background: #f4f6fb; }
+.invite-qr { border-radius: 8px; background: #fff; padding: 6px; image-rendering: pixelated; }
+.invite-body { flex: 1 1 260px; display: grid; gap: 6px; }
+.invite-body p { margin: 0; }
+.invite-copy { display: flex; gap: 8px; }
+.invite-copy input { flex: 1; min-width: 0; font-size: 12.5px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; }
+.send-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

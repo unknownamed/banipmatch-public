@@ -5,7 +5,7 @@
   "source": "docs/development/v0.1/예제 데이터/01_snapshot.json",
   "source_sha256": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e",
   "tool": "tools/dispatch_response.py",
-  "tool_sha256": "bcb7a2ceb456993d43e7581ba2dc4d73b8e17ea4393f0049b326d521b488b681",
+  "tool_sha256": "10c740753685d22684ec65b0874d12b0dae7727a549df5afcde06a7310aad87c",
   "python": "3.12.14",
   "method": "B1",
   "seed": 42,
@@ -30,6 +30,10 @@
     {
       "date": "2026-11-12",
       "reason": "후속 확인 안내 문구에서 필드명(ready_at)을 '상차 준비 시각'으로 바꾼 뒤 같은 입력·결과로 재생성"
+    },
+    {
+      "date": "2026-11-13",
+      "reason": "정책 허용폭(5분) 안의 같은 차량·같은 순서 시각 이동은 기사 변경 명세에서 제외(엔진 변경 판정과 같은 기준). 같은 입력·결과로 재생성"
     }
   ]
 }
