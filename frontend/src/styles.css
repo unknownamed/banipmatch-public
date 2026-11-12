@@ -408,3 +408,17 @@ button.secondary:hover { background: var(--color-hover); }
 .vm-changed { color: var(--color-danger); font-weight: var(--fw-medium); }
 .vm-linked { margin: 0; }
 .vm-linked a { color: var(--color-accent-strong); font-weight: var(--fw-bold); }
+/* 완성형 문구 정리(2026-11-12) */
+.tech-info { margin-top: 4px; font-size: var(--fs-caption); color: var(--color-muted); }
+.tech-info summary { cursor: pointer; display: inline; list-style: none; }
+.tech-info summary::-webkit-details-marker { display: none; }
+.tech-info summary::after { content: ' ▾'; }
+.tech-info[open] summary { margin-right: 6px; }
+.change-lead { margin: 0 0 6px; font-size: var(--fs-h3); line-height: 1.5; }
+.change-lead s { color: var(--color-muted); text-decoration-thickness: 1px; }
+.change-new { color: var(--color-danger); }
+.change-delta { margin-left: 8px; padding: 2px 8px; border-radius: var(--radius-pill); background: #fdecef; color: var(--color-danger); font-size: var(--fs-caption); font-weight: var(--fw-bold); vertical-align: 2px; }
+.method-cell .muted { display: block; }
+.job-bar { gap: 3px; }
+.job-bar svg { flex: 0 0 auto; }
+.job-bar .arrival { top: auto; bottom: 1px; width: 2px; height: 6px; margin: 0 0 0 -1px; border-radius: 1px; opacity: .8; }

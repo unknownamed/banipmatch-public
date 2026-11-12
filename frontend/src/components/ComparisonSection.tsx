@@ -25,7 +25,9 @@ interface Props {
 export function ComparisonSection({ snapshot, results, base, cand, candidates, rows, onPick, initialLayout = 'vehicle' }: Props) {
   const list = results.state === 'ready' ? results.data.results : null
   const broken = lockedViolations(rows)
-  const [layout, setLayout] = useState(initialLayout)
+  // 휴대폰 폭에서는 가로 스크롤이 필요한 타임라인 대신 작업별 카드부터 보여 준다.
+  const narrow = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches
+  const [layout, setLayout] = useState(narrow ? 'job' : initialLayout)
   const candLabel = cand ? `${cand.method} 조정안` : null
   const baseLabel = base ? 'B0 원안' : '원안(입력)'
   return (

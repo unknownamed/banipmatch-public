@@ -14,72 +14,92 @@ const EVIDENCE: Record<string, string> = {
 }
 
 export function Header({ s }: { s: Snapshot }) {
+  const c = s.change
   return (
     <header className="top">
       <div>
         <h1>반입시간 변경 배차 점검</h1>
         <p className="muted">
-          시나리오 <b>{s.scenario_id}</b> · 계획 <b>{s.plan_id}</b> v{s.base_plan_version} · 기준시각 {kstDateTime(s.as_of)}
+          {c.voyage_id} · {c.terminal_id} 반입 마감 변경에 따른 남은 배차 점검 · {kstDateTime(s.as_of)} 기준
         </p>
+        <details className="tech-info">
+          <summary>세부 정보</summary>
+          시나리오 {s.scenario_id} · 계획 {s.plan_id} v{s.base_plan_version}
+        </details>
       </div>
-      <span className={`badge mode-${s.data_mode}`} title="입력 자료 묶음의 data_mode">
-        자료: {DATA_MODE[s.data_mode]}
+      <span className={`badge mode-${s.data_mode}`} title="입력 자료 구분">
+        {DATA_MODE[s.data_mode]} 자료
       </span>
     </header>
   )
 }
 
+const sourceLabel = (ref: string) => (ref.startsWith('fixture:') ? '시연용 모의 시나리오' : ref)
+function shiftText(prev: string | null, next: string | null | undefined) {
+  if (!prev || !next) return null
+  const m = Math.round((Date.parse(next) - Date.parse(prev)) / 60000)
+  if (m === 0) return '변동 없음'
+  const a = Math.abs(m), t = a >= 60 ? `${Math.floor(a / 60)}시간${a % 60 ? ` ${a % 60}분` : ''}` : `${a}분`
+  return m < 0 ? `${t} 앞당겨짐` : `${t} 늦춰짐`
+}
+
 export function ChangeEvidence({ s }: { s: Snapshot }) {
   const c = s.change
   const w = s.windows.find((x) => x.window_id === c.new_window_id)
+  const moved = shiftText(c.previous_closes_at, w?.closes_at)
   return (
     <section className="card evidence">
-      <h2>변경 근거 · 터미널 반입 허용시간(항차)</h2>
+      <h2>반입 마감 변경</h2>
+      {w && (
+        <p className="change-lead">
+          <b>{c.voyage_id} · {c.terminal_id}</b> 반입 마감이 <s>{kstTime(c.previous_closes_at)}</s> → <b className="change-new">{kstTime(w.closes_at)}</b>
+          {moved && <span className="change-delta">{moved}</span>}
+        </p>
+      )}
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}
-      <p className="muted small">선박 접안예정(ETA)이나 트럭 방문예약 시간이 아니라, 항차별 컨테이너 반입 시작·마감입니다.</p>
+      <p className="muted small">선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다.</p>
       <dl className="evidence-strip">
         <div>
-          <dt>적용 항차 · 터미널</dt>
+          <dt>항차 · 터미널</dt>
           <dd>
             {c.voyage_id} · {c.terminal_id}
           </dd>
         </div>
         <div>
-          <dt>이전 반입 허용시간</dt>
+          <dt>변경 전 반입 시간</dt>
           <dd>
             {kstTime(c.previous_opens_at)} ~ {kstTime(c.previous_closes_at)}
           </dd>
         </div>
         <div className="evidence-new">
-          <dt>새 반입 허용시간</dt>
+          <dt>변경 후 반입 시간</dt>
           <dd>
             {w ? (
               <>
                 {kstTime(w.opens_at)} ~ <b>{kstTime(w.closes_at)}</b>
               </>
             ) : (
-              <span className="warn">새 시간창 {c.new_window_id}을(를) 입력에서 찾지 못함</span>
+              <span className="warn">새 반입 시간({c.new_window_id})을 입력에서 찾지 못했습니다</span>
             )}
           </dd>
         </div>
         <div>
-          <dt>확정 여부</dt>
+          <dt>상태</dt>
           <dd>
             <span className={c.verification === 'confirmed' ? 'ok' : 'warn'}>{VERIFY[c.verification] ?? c.verification}</span>
-            {c.confirmed_by && ` · ${c.confirmed_by}`}
-            <div className="muted small">확인 {kstDateTime(c.confirmed_at)}</div>
+            <div className="muted small">{kstDateTime(c.confirmed_at)} 확인</div>
           </dd>
         </div>
         <div>
-          <dt>출처</dt>
-          <dd>
-            {EVIDENCE[c.evidence.kind] ?? c.evidence.kind} · <code>{c.evidence.source_ref}</code>
-            <div className="muted small">수신 {kstDateTime(c.evidence.received_at)}</div>
+          <dt>근거</dt>
+          <dd title={c.evidence.source_ref}>
+            {sourceLabel(c.evidence.source_ref)}
+            <div className="muted small">{EVIDENCE[c.evidence.kind] ?? c.evidence.kind} · {kstDateTime(c.evidence.received_at)} 수신</div>
           </dd>
         </div>
       </dl>
       {c.verification !== 'confirmed' && (
-        <p className="warn">확정되지 않은 변경입니다. 새 시간창 적용 계산과 승인은 막아야 합니다.</p>
+        <p className="warn">확정되지 않은 변경입니다. 새 반입 시간으로 계산하거나 승인할 수 없습니다.</p>
       )}
     </section>
   )
@@ -96,7 +116,7 @@ const RUN_LABEL: Record<Run['status'], string> = {
 // HEURISTIC·FEASIBLE을 최적해로 보이지 않게 한다(엔진 인계 2026-11-07 요청).
 const SOLUTION_LABEL: Record<string, string> = {
   BASELINE: '원안 진단',
-  HEURISTIC: '휴리스틱 결과 · 최적 아님',
+  HEURISTIC: '빠른 탐색 · 최적 아님',
   FEASIBLE: '실행 가능 · 최적 미증명',
   OPTIMAL: '최적',
   INFEASIBLE: '해 없음',
@@ -107,17 +127,29 @@ const SOLUTION_LABEL: Record<string, string> = {
 
 export function solutionLabel(r: MethodResult): string {
   const s = r.solution_status === 'OPTIMAL' && !r.objective_proven ? '최적 표시 · 증명 없음' : SOLUTION_LABEL[r.solution_status]
-  return `${r.solution_status} (${s ?? '알 수 없음'})`
+  return s ?? `알 수 없음(${r.solution_status})`
 }
+
+const METHOD_LABEL: Record<string, string> = {
+  B0: '원래 배차 그대로 점검',
+  B1: '마감 빠른 순 재배치',
+  B2: '전체 재최적화',
+  B3: '최소 변경 최적화',
+}
+const CHECK_LABEL: Record<string, string> = { passed: '통과', failed: '실패', not_run: '해당 없음' }
 
 export function RunStatusPanel({ run, results }: { run: Run; results: MethodResult[] | null }) {
   return (
     <section className="card">
-      <h2>계산 상태</h2>
+      <h2>계산 결과</h2>
       <p>
-        실행 <b>{run.run_id}</b> · <span className={`badge run-${run.status}`}>{RUN_LABEL[run.status]}</span> · 방법{' '}
-        {run.methods.join(', ')} · 제한 {run.config.time_limit_seconds}초 · seed {run.config.seed}
+        <span className={`badge run-${run.status}`}>{RUN_LABEL[run.status]}</span> 같은 입력·조건으로 {run.methods.length}가지 방법을 비교했습니다
+        <span className="muted"> · 방법별 {run.config.time_limit_seconds}초 이내</span>
       </p>
+      <details className="tech-info">
+        <summary>기술 정보(재현용)</summary>
+        실행 {run.run_id} · 방법 {run.methods.join(', ')} · seed {run.config.seed}
+      </details>
       {run.status === 'failed' && (
         <div className="warn" role="alert">
           <p>실패 이유: {run.error ? `${run.error.code} — ${run.error.message}` : '사유 미제공'}</p>
@@ -138,7 +170,7 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
               <tr>
                 <th className="nowrap">방법</th>
                 <th>결과 출처</th>
-                <th>해 상태</th>
+                <th>결과</th>
                 <th className="col-tech">엔진</th>
                 <th className="col-tech">목표 단계</th>
                 <th>독립 검사</th>
@@ -147,20 +179,20 @@ export function RunStatusPanel({ run, results }: { run: Run; results: MethodResu
             <tbody>
               {results.map((r) => (
                 <tr key={r.method}>
-                  <td className="nowrap method-cell"><b>{r.method}</b></td>
+                  <td className="method-cell"><b>{r.method}</b> <span className="muted small">{METHOD_LABEL[r.method] ?? ''}</span></td>
                   <td data-label="결과 출처">
                     {r.result_origin === 'illustrative_fixture' ? (
                       <span className="badge fixture">설명용 예시</span>
                     ) : (
-                      <span className="badge">계산</span>
+                      <span className="badge">엔진 계산</span>
                     )}
                   </td>
-                  <td data-label="해 상태">{solutionLabel(r)}</td>
+                  <td data-label="결과">{solutionLabel(r)}</td>
                   <td className="col-tech" data-label="엔진">
                     <code>{r.engine_version}</code>
                   </td>
                   <td className="col-tech" data-label="목표 단계">{r.objective_stages.length ? r.objective_stages.map((o) => `${o.objective}:${o.status}`).join(', ') : '없음(계산 안 함)'}</td>
-                  <td data-label="독립 검사">{r.validation_status === 'not_run' ? '실행 안 함' : r.validation_status}</td>
+                  <td data-label="독립 검사">{CHECK_LABEL[r.validation_status] ?? r.validation_status}</td>
                 </tr>
               ))}
             </tbody>
