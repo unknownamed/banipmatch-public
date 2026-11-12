@@ -80,8 +80,9 @@ export interface Snapshot {
   /** 조건 보완(R4)에서 가용·근무 시각만 쓴다. 나머지 필드는 원본 그대로 보존한다. */
   vehicles?: Vehicle[]
   /** 차량 추가 시 시작 위치를 고르는 데만 쓴다. */
-  locations?: { location_id: string; name: string; kind: string }[]
-  // travel_times 는 이번 화면에서 쓰지 않아 생략.
+  locations?: { location_id: string; name: string; kind: string; latitude?: number | null; longitude?: number | null }[]
+  /** 차량 지도에서 위치 추정(이동 구간)에만 쓴다. */
+  travel_times?: { from_location_id: string; to_location_id: string; minutes: number | null }[]
 }
 
 export interface Vehicle {

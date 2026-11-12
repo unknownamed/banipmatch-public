@@ -173,7 +173,6 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
           <div className="vm-map-wrap">
             <div ref={box} className="vm-map" aria-label="부산신항 입항 선박 지도" />
             {!mapState.ok && <p className="vm-map-msg muted small" role="status">{mapState.msg}</p>}
-            {mapType !== 'ROADMAP' && mapState.ok && <p className="vm-map-note">위성 사진은 촬영 시점 배경입니다(실시간 아님)</p>}
           </div>
 
           <ol className="vm-list" aria-label="도착 추정 순 선박">
@@ -222,6 +221,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
             <li>반입 마감은 터미널이 정하는 항차별 시간입니다. 선박 도착 추정이 바뀌어도 자동으로 바뀌지 않습니다.</li>
             <li>항로선은 부표 위치를 참고해 그린 설명용 선이며 공식 항로·도선 경로가 아닙니다. 부표: {SOURCES.seamark}</li>
             <li>터미널 표시는 대표 좌표이며 선석 위치가 아닙니다: {SOURCES.places}</li>
+            <li>위성 사진은 촬영 시점의 배경이며 실시간 영상이 아닙니다.</li>
           </ul>
           <p className="vm-legend"><span className="vm-buoy port" /> 좌현 표지 <span className="vm-buoy starboard" /> 우현 표지 <span className="vm-buoy safe" /> 안전수역 표지</p>
         </details>

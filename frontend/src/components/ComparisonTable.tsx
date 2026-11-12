@@ -40,11 +40,15 @@ export function ComparisonTable({
   asOf,
   baseLabel,
   candLabel,
+  selectedJob = null,
+  onSelectJob,
 }: {
   rows: JobRow[]
   asOf: string
   baseLabel: string
   candLabel: string | null
+  selectedJob?: string | null
+  onSelectJob?: (jobId: string) => void
 }) {
   const hasCand = candLabel !== null
   return (
@@ -63,7 +67,12 @@ export function ComparisonTable({
           {rows.map((r) => {
             const preserved = lockedPreserved(r, hasCand)
             return (
-              <tr key={r.job.job_id} className={r.candidateUnassigned ? 'row-unassigned' : r.locked ? 'row-locked' : ''}>
+              <tr
+                key={r.job.job_id}
+                className={`${r.candidateUnassigned ? 'row-unassigned' : r.locked ? 'row-locked' : ''}${selectedJob === r.job.job_id ? ' row-picked' : ''}${onSelectJob ? ' row-click' : ''}`}
+                onClick={onSelectJob ? () => onSelectJob(r.job.job_id) : undefined}
+                aria-selected={onSelectJob ? selectedJob === r.job.job_id : undefined}
+              >
                 <td className="job-cell">
                   <b>{r.job.job_id}</b>
                   <div className="muted small">

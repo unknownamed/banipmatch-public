@@ -5,6 +5,7 @@ import { lockedViolations, type JobRow } from '../lib/compare'
 import { ComparisonTable } from './ComparisonTable'
 import { MetricsRow } from './Panels'
 import { VehicleTimeline } from './VehicleTimeline'
+import { DispatchMap } from './DispatchMap'
 
 interface Props {
   snapshot: Snapshot
@@ -28,6 +29,7 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
   // 휴대폰 폭에서는 가로 스크롤이 필요한 타임라인 대신 작업별 카드부터 보여 준다.
   const narrow = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 640px)').matches
   const [layout, setLayout] = useState(narrow ? 'job' : initialLayout)
+  const [selectedJob, setSelectedJob] = useState<string | null>(null)
   const candLabel = cand ? `${cand.method} 조정안` : null
   const baseLabel = base ? 'B0 원안' : '원안(입력)'
   return (
@@ -69,8 +71,9 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
       {layout === 'vehicle' ? (
         <VehicleTimeline rows={rows} baseLabel={baseLabel} candLabel={candLabel} />
       ) : (
-        <ComparisonTable rows={rows} asOf={snapshot.as_of} baseLabel={baseLabel} candLabel={candLabel} />
+        <ComparisonTable rows={rows} asOf={snapshot.as_of} baseLabel={baseLabel} candLabel={candLabel} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
       )}
+      <DispatchMap key={cand?.method ?? 'base'} snapshot={snapshot} base={base} cand={cand} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
     </section>
   )
 }
