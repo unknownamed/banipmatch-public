@@ -50,3 +50,41 @@ def test_busans_synthetic_fleet_wire_replay_is_reproducible_and_stale_stops():
         if s['position_status']=='stale':
             at_loss=next(x for x in view['frames'][24]['ships'] if x['mmsi']==s['mmsi'])
             assert s['position']==at_loss['position']
+
+
+def test_failed_collection_keeps_last_good_reference_for_demo(tmp_path):
+    good = collect(None, lambda _: (503, b''))
+    # 직전 수집이 성공했다고 가정한 자료(HJNC 표본 1건, 해상 관측 정상)를 만든다.
+    raw = json.dumps({"stringContent": json.dumps([{"VOY_NO": "TEST-2026-0001", "YARD_OPEN": "2026-11-10 00:00",
+                      "YARD_CLOSE": "2026-11-13 01:00", "ETB": "2026-11-13 11:00"}]), "totalElements": 1, "hasNext": False}).encode()
+    previous = collect(None, lambda url: (200, raw) if 'hjnc' in url else (503, b''))
+    assert previous['hjnc']['last_attempt']['status'] == 'received'
+    previous['weather'] = [{'source': '기상청 API허브', 'kind': 'sea', 'source_ref': 'x', 'status': 'sample_received',
+                            'received_at': '2026-11-12T15:26:41Z', 'http_status': 200, 'report': None}]
+    calls = []
+    def down(url):
+        calls.append(url)
+        return 0, b''  # 연결 실패
+    after = collect('test-key-not-real', down, previous=previous)
+    assert after['hjnc']['current'] == previous['hjnc']['current']       # 일정 유지
+    assert after['hjnc']['last_attempt']['status'] == 'failed'           # 실패 시도는 기록
+    sea = next(w for w in after['weather'] if w['kind'] == 'sea')
+    assert sea['status'] == 'sample_received' and sea['failure'] == 'network'
+    warning = next(w for w in after['weather'] if w['kind'] == 'warning')
+    assert warning['failure'] == 'network' and warning['http_status'] is None
+    p = tmp_path / 'snapshot.json'
+    p.write_text(json.dumps(after), encoding='utf-8')
+    assert read_display(p).hjnc.current is not None
+
+
+def test_only_kma_does_not_call_hjnc_and_keeps_schedule():
+    raw = json.dumps({"stringContent": json.dumps([{"VOY_NO": "TEST-2026-0001", "YARD_OPEN": "2026-11-10 00:00",
+                      "YARD_CLOSE": "2026-11-13 01:00", "ETB": "2026-11-13 11:00"}]), "totalElements": 1, "hasNext": False}).encode()
+    previous = collect(None, lambda url: (200, raw) if 'hjnc' in url else (503, b''))
+    calls = []
+    def transport(url):
+        calls.append(url)
+        return 503, b''
+    after = collect('test-key-not-real', transport, only='kma', previous=previous)
+    assert not any('hjnc' in u for u in calls) and len(calls) == 2
+    assert after['hjnc'] == previous['hjnc']
