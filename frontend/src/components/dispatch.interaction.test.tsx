@@ -65,8 +65,8 @@ describe('변경 전달 화면', () => {
     await flush()
     expect(container.textContent).toContain('J1 · 차량 변경')
     expect(container.textContent).toContain('상차 준비 완료 시각을 확인하세요.')
-    expect(container.textContent).toContain('앱 알림 발송 권한이 없습니다')
-    expect(container.textContent).not.toContain('연결 링크 만들기')
+    expect(container.textContent).toContain('팀 시연 코드')
+    expect([...container.querySelectorAll('button')].some((b) => b.textContent === '연결 링크 만들기')).toBe(false)
     expect([...container.querySelectorAll('button')].some((b) => b.textContent === '기사에게 보내기')).toBe(false)
   })
 

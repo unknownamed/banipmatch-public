@@ -102,7 +102,6 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       </section>
       <section className="card">
         <h2>어떤 상황인가요?</h2>
-        <p className="muted small">상황을 고르면 지금 시각 기준으로 배차를 불러와 계산합니다.</p>
         <div className="scenario-cards" role="radiogroup" aria-label="상황 선택">
           {EXAMPLES.map((e) => (
             <button
@@ -175,7 +174,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
             {err instanceof ApiRequestError && isMethodRejection(err.body?.code) ? (
               <p>서버가 이 방법을 계산하지 않습니다. 설명용 모드는 B0·B3만 제공합니다. 방법 선택을 바꾼 뒤 다시 요청하세요.</p>
             ) : (
-              <p className="muted small">다시 시도하면 같은 요청·같은 멱등키로 보내 중복 등록·중복 실행이 생기지 않습니다.</p>
+              <p className="muted small">다시 시도해도 중복으로 등록되지 않습니다.</p>
             )}
           </div>
         )}

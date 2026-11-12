@@ -230,6 +230,22 @@ class Hub:
         if not self.session(sid)["push_authorized"]:
             raise ApiError(403, "PUSH_TEST_NOT_AUTHORIZED", "운영자가 허용한 팀원 시험 세션만 전달 가능")
 
+    def authorize_with_team_code(self, sid: str, code: str):
+        """팀 시연 코드가 맞으면 이 세션만 앱 알림 시험 권한을 연다. 코드 값은 응답·로그에 남기지 않는다."""
+        import hmac
+        path = self.settings.push_team_code_file
+        if not path or not path.is_file():
+            raise ApiError(503, "TEAM_CODE_NOT_CONFIGURED", "이 서버는 팀 시연 코드를 쓰지 않음")
+        self.rate("team-code:" + sid, limit=5, seconds=600)
+        self.rate("team-code:all", limit=60, seconds=600)
+        expected = path.read_text(encoding="utf-8").strip().upper()
+        given = (code or "").strip().upper()
+        if not expected or not hmac.compare_digest(given.encode(), expected.encode()):
+            raise ApiError(403, "TEAM_CODE_INVALID", "팀 시연 코드가 맞지 않음")
+        with self.registry.transaction() as conn:
+            conn.execute("UPDATE sessions SET push_authorized=1, consent_note=? WHERE session_id=? AND revoked=0",
+                         ("팀 시연 코드로 허용(동의한 팀원 기기 시험)", sid))
+
     def enqueue_run(self, domain, request: dict, key: str):
         from backend.api.input_preflight import check_input
         with self.lock:

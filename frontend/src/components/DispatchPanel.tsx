@@ -86,6 +86,8 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
 
       {p.followups.length > 0 && <Followups items={p.followups} title="담당자가 확인할 사항" />}
 
+      <PushGuide authorized={authorized} linked={recipients.some((r) => !r.revoked && r.subscription_status === 'active')} />
+      {!authorized && <TeamCodeUnlock client={client} onUnlocked={setSession} />}
       <Invitations client={client} planId={planId} vehicles={p.vehicle_changes.map((v) => v.vehicle_id)} authorized={authorized} recipients={recipients} onChange={loadRecipients} />
 
       <Send client={client} preview={p} authorized={authorized} dispatchId={dispatchId} onSent={(id) => {
@@ -157,11 +159,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
   return (
     <>
       <h3>기사 앱 연결</h3>
-      {!authorized && (
-        <p className="small warn">
-          이 계정은 앱 알림 발송 권한이 없습니다. 위의 안내문 복사로 전달할 수 있습니다. (시연에서는 동의한 팀원 휴대폰에만 관리자가 권한을 엽니다.)
-        </p>
-      )}
+      {!authorized && <p className="small muted">팀 시연 코드를 입력하면 연결 링크를 만들 수 있습니다. 코드가 없으면 위의 안내문 복사로 전달하세요.</p>}
       {recipients.length > 0 && (
         <table className="grid small">
           <thead><tr><th scope="col">기사 휴대폰</th><th scope="col">차량</th><th scope="col">상태</th><th scope="col">연결 만료</th><th /></tr></thead>
@@ -336,5 +334,42 @@ function CopyNotice({ text }: { text: string }) {
         <pre className="notice-text">{text}</pre>
       </details>
     </div>
+  )
+}
+
+/** 앱 알림이 실제로 오기까지의 순서. 지금 어디까지 됐는지 표시한다. */
+function PushGuide({ authorized, linked }: { authorized: boolean; linked: boolean }) {
+  const steps: [string, boolean][] = [
+    ['팀 시연 코드로 알림 권한 열기', authorized],
+    ['차량을 골라 연결 링크를 만들고 기사 휴대폰으로 보내기', linked],
+    ['기사 휴대폰에서 링크 열기 → 알림 허용 (아이폰은 공유 → 홈 화면에 추가 후 그 아이콘으로 열기)', linked],
+    ['아래 ‘기사에게 보내기’ → 기사가 확인·곤란으로 응답하면 이 화면에 표시', false],
+  ]
+  return (
+    <ol className="push-guide small" aria-label="앱 알림 받는 방법">
+      {steps.map(([text, done], i) => <li key={i} className={done ? 'done' : ''}><b>{done ? '✓' : i + 1}</b>{text}</li>)}
+    </ol>
+  )
+}
+
+function TeamCodeUnlock({ client, onUnlocked }: { client: V2Client; onUnlocked: (s: SessionState) => void }) {
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  async function submit() {
+    setBusy(true); setError(null)
+    try {
+      onUnlocked(await client.post<SessionState>('/v2/session/push-authorization', { team_code: code }, `team-code-${crypto.randomUUID()}`))
+    } catch (e) {
+      const c = e instanceof ApiRequestError ? e.body?.code : null
+      setError(c === 'TEAM_CODE_INVALID' ? '코드가 맞지 않습니다.' : c === 'RATE_LIMITED' ? '시도가 많습니다. 10분 뒤 다시 해 주세요.' : c === 'TEAM_CODE_NOT_CONFIGURED' ? '이 서버는 팀 시연 코드를 쓰지 않습니다.' : errText(e))
+    } finally { setBusy(false) }
+  }
+  return (
+    <form className="team-code" onSubmit={(e) => { e.preventDefault(); void submit() }}>
+      <label className="small">팀 시연 코드 <input value={code} onChange={(e) => setCode(e.target.value)} maxLength={32} autoComplete="off" spellCheck={false} /></label>
+      <button type="submit" disabled={busy || !code.trim()}>{busy ? '확인 중…' : '알림 권한 열기'}</button>
+      {error && <span className="warn small" role="alert">{error}</span>}
+    </form>
   )
 }

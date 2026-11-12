@@ -3,6 +3,7 @@ import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
 import { humanizeTimes, kstDateTime, kstTime } from '../lib/time'
 import { jobName } from '../lib/labels'
+import { Hint } from './Hint'
 
 const DATA_MODE: Record<Snapshot['data_mode'], string> = { simulated: '모의', observed: '관측', mixed: '혼합' }
 const VERIFY: Record<string, string> = { confirmed: '확정', unconfirmed: '미확정', conflict: '충돌' }
@@ -50,7 +51,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
   const moved = shiftText(c.previous_closes_at, w?.closes_at)
   return (
     <section className="card evidence">
-      <h2>반입 마감 변경</h2>
+      <h2>반입 마감 변경 <Hint text="선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다. 선박이 늦어도 터미널이 바꾸기 전에는 마감이 그대로입니다." /></h2>
       {w && (
         <p className="change-lead">
           <b>{c.voyage_id} · {c.terminal_id}</b> 반입 마감이 <s>{kstTime(c.previous_closes_at)}</s> → <b className="change-new">{kstTime(w.closes_at)}</b>
@@ -58,7 +59,6 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
         </p>
       )}
       {/* service-comparison.md: 접안예정·반입시간·방문예약·내부계획을 구분해 표시 */}
-      <p className="muted small">선박 도착 예정(ETA)이나 차량 방문 예약이 아니라, 터미널이 공지한 항차별 컨테이너 반입 시간입니다.</p>
       <dl className="evidence-strip">
         <div className="dup">
           <dt>항차 · 터미널</dt>

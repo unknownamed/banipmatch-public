@@ -5,6 +5,7 @@ import type { V2Client } from '../api/v2'
 import { EMPTY_DRAFT, draftProblems, freezeLabel, isBlankDraft, isCompleteInput, listChanges, revisedSnapshot, toKstInput, type Confirmation, type Edits, type VehicleDraft } from '../lib/revision'
 import { kstDateTime } from '../lib/time'
 import { jobName, vehicleName } from '../lib/labels'
+import { Hint } from './Hint'
 
 const FIELD_LABEL = { ready_at: '상차 준비시각', available_at: '차량 가용 시작', shift_end_at: '근무 종료' } as const
 
@@ -98,11 +99,8 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
 
   return (
     <section className="card revision" aria-labelledby="rev-title">
-      <h2 id="rev-title">조건 보완 · 재계산</h2>
-      <p className="muted small">
-        담당자가 확인한 상차 준비·차량 가용·근무 시각만 바꿔 <b>새 입력</b>으로 다시 계산합니다. 원래 입력과 이전 결과는 그대로 남습니다.
-        고정·출발 작업, 반입 마감, 이동시간은 바꿀 수 없습니다. 실제 차량을 확보하거나 준비를 완료시키는 기능이 아닙니다.
-      </p>
+      <h2 id="rev-title">조건 보완 · 재계산 <Hint text="화주·기사에게 확인한 상차 준비·차량 가용·근무 시각만 바꿔 새 입력으로 다시 계산합니다. 원래 입력과 결과는 그대로 남습니다. 출발한 작업·반입 마감·이동시간은 바꿀 수 없습니다." /></h2>
+      <p className="small">보류된 작업을 살릴 수 있는지, 확인한 값으로 다시 계산해 봅니다.</p>
 
       <fieldset disabled={sending}>
         <legend>작업 준비시각</legend>
@@ -160,11 +158,11 @@ export function ConditionRevisionPanel({ client, snapshot, rerun }: { client: V2
         <legend>조건 구분</legend>
         <label className="rev-choice">
           <input type="radio" name="confirmation" checked={confirmation === 'confirmed_simulation'} onChange={() => setConfirmation('confirmed_simulation')} />
-          확인된 조건 <span className="small muted">— 모의 배차에서 담당자가 확인한 값. 실제 현장 확인과는 다릅니다.</span>
+          확인된 조건 <span className="small muted">— 화주·기사에게 확인한 값</span>
         </label>
         <label className="rev-choice">
           <input type="radio" name="confirmation" checked={confirmation === 'assumed'} onChange={() => setConfirmation('assumed')} />
-          가정 시험 <span className="small muted">— &lsquo;이렇게 되면?&rsquo; 비교만. 승인·전달할 수 없습니다.</span>
+          가정 시험 <span className="small muted">— 비교만 가능, 확정 불가</span>
         </label>
       </fieldset>
 
@@ -218,9 +216,8 @@ export function NextPlanPanel({ client, planId, rerun }: { client: V2Client; pla
     } catch (error) { setStatus({ busy: false, step, error }) }
   }
   return <section className="card">
-    <h2>확정된 계획에서 이어서 점검</h2>
-    <p>승인 전 입력은 그대로 보존됩니다. 다음 점검은 확정된 차량별 배정과 미처리 작업을 새 원안으로 가져옵니다.</p>
-    <p className="small muted">새 점검을 시작하면 이전 변경 알림은 지난 지시로 표시됩니다. 필요한 전달·응답 확인을 마친 뒤 진행하세요.</p>
+    <h2>확정된 계획에서 이어서 점검 <Hint text="확정한 배정과 보류 작업을 새 원안으로 가져옵니다. 새 점검을 시작하면 이전 변경 알림은 지난 지시로 표시되니, 기사 응답 확인을 마친 뒤 진행하세요." /></h2>
+    <p className="small">추가 변경이 생기면 지금 확정한 계획을 기준으로 다시 점검합니다.</p>
     <button type="button" disabled={status.busy} onClick={start}>{status.busy ? `${status.step} 중…` : status.error ? '다시 시도' : '확정 계획으로 새 점검 시작'}</button>
     {status.error != null && <ErrorNote step={status.step} error={status.error} />}
   </section>

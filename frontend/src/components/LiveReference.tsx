@@ -5,6 +5,7 @@ import { createV2Client } from '../api/v2'
 import { display, type ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
 import { RoadReference, type RoadData } from './RoadReference'
+import { Hint } from './Hint'
 
 interface Weather {
   kind: 'sea' | 'warning'; status: string; received_at: string | null; http_status: number | null
@@ -52,7 +53,7 @@ export function LiveReference() {
     <section className="card tl-card" aria-labelledby="tl-hjnc">
       <div className="tl-head">
         <div>
-          <h3 id="tl-hjnc">HJNC 항차별 반입 일정</h3>
+          <h3 id="tl-hjnc">HJNC 항차별 반입 일정 <Hint text="공개 화면의 시각을 그대로 옮겼습니다. 배차 계산에는 담당자가 확정한 반입 마감만 쓰고, 이 표는 확인용입니다." /></h3>
           <p className="small muted">
             <a href="https://www.hjnc.co.kr/esvc/vessel/berthScheduleT" target="_blank" rel="noreferrer">HJNC 공개 선석배정현황</a> 기준
             {received && <> · 마지막 수신 {kstDateTime(received)} <span className={`tl-age${(Date.now() - Date.parse(received)) > 6 * 3600000 ? ' stale' : ''}`}>{age(received)}</span></>}
@@ -77,12 +78,11 @@ export function LiveReference() {
           </table>
         </div>
       ) : <p className="muted">{d.headline}</p>}
-      <p className="small muted tl-note">공개 화면의 시각을 그대로 옮겼습니다. 배차 계산에는 담당자가 확정한 반입 마감만 쓰고, 이 표는 확인용입니다.</p>
     </section>
 
     <div className="tl-grid">
       <section className="card tl-card" aria-labelledby="tl-sea">
-        <h3 id="tl-sea">해상 기상 · 거제도 부이</h3>
+        <h3 id="tl-sea">해상 기상 · 거제도 부이 <Hint text="기상청 API허브 관측입니다. 터미널 내부 관측이 아니며, 기상과 지연이 겹쳐도 지연 원인으로 단정하지 않습니다." /></h3>
         {obs ? (
           <>
             <div className="tl-kpis">
@@ -97,7 +97,6 @@ export function LiveReference() {
           기상특보: {warn?.status === 'empty_framed_response' ? '해당 지역 발효 기록 없음' : warn?.report?.selected_records.length
             ? warn.report.selected_records.map(r => `${r.region_name} ${r.kind} ${r.level}`).join(', ') : '확인 필요'}
         </p>
-        <p className="small muted">기상청 API허브 · 기상과 지연이 겹쳐도 지연 원인으로 단정하지 않습니다.</p>
       </section>
       <RoadReference road={data.road} />
     </div>

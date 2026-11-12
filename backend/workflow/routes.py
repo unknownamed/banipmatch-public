@@ -138,6 +138,15 @@ def install(app, settings, *, replay=None, sender=None, clock=None):
         _, row = manager(request)
         return hub.session_response(request.cookies[MANAGER_COOKIE], row)
 
+    @app.post("/v2/session/push-authorization", response_model=SessionState)
+    def push_authorization(request: Request, body: dict = Body(...)):
+        _, row = manager(request, write=True)
+        code = body.get("team_code") if isinstance(body, dict) else None
+        if not isinstance(code, str) or not 1 <= len(code) <= 32:
+            raise ApiError(422, "REQUEST_VALIDATION_FAILED", "팀 시연 코드 형식 확인 필요")
+        hub.authorize_with_team_code(row["session_id"], code)
+        return hub.session_response(request.cookies[MANAGER_COOKIE], hub.authenticate(request.cookies[MANAGER_COOKIE]))
+
     @app.delete("/v2/session")
     def delete_session(request: Request):
         _, row = manager(request, write=True)

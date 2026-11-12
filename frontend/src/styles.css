@@ -590,3 +590,18 @@ button.secondary:hover { background: var(--color-hover); }
 .tl-status table { margin-top: 8px; }
 @media (max-width: 960px) { .tl-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .tl-table th:nth-child(2), .tl-table td:nth-child(2) { display: none; } }
+/* 앱 알림 안내·팀 코드 */
+.push-guide { list-style: none; margin: var(--space-3) 0; padding: 12px 14px; display: grid; gap: 6px; border-radius: var(--radius-md); background: var(--color-canvas); }
+.push-guide li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; align-items: start; }
+.push-guide b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1px solid var(--color-line-strong); font-size: 11px; }
+.push-guide li.done { color: var(--color-muted); }
+.push-guide li.done b { background: var(--color-success); border-color: var(--color-success); color: #fff; }
+.team-code { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 var(--space-2); }
+.team-code input { font: inherit; padding: 7px 10px; border: var(--border); border-radius: var(--radius-sm); width: 140px; text-transform: uppercase; letter-spacing: .08em; }
+.team-code button { padding: 8px 14px; border-radius: var(--radius-md); border: 0; background: var(--color-accent-strong); color: #fff; font-weight: 600; cursor: pointer; }
+.team-code button:disabled { background: var(--color-hover); color: var(--color-muted); }
+/* ⓘ 설명 */
+.hint { position: relative; display: inline-flex; margin-left: 4px; color: var(--color-muted); font-size: 0.8em; font-weight: 400; cursor: help; vertical-align: 1px; outline: none; }
+.hint-pop { display: none; position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); z-index: 30; width: max-content; max-width: min(320px, 80vw); padding: 10px 12px; border-radius: var(--radius-md); background: #1d1d1d; color: #fff; font-size: 12px; line-height: 1.55; font-weight: 400; letter-spacing: 0; text-align: left; white-space: normal; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+.hint:hover .hint-pop, .hint:focus .hint-pop, .hint:focus-within .hint-pop { display: block; }
+@media (max-width: 640px) { .hint-pop { left: auto; right: -8px; transform: none; } }

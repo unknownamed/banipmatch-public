@@ -186,6 +186,85 @@
         ]
       }
     },
+    "/v2/session/push-authorization": {
+      "post": {
+        "summary": "Push Authorization",
+        "operationId": "push_authorization_v2_session_push_authorization_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "DispatcherCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
     "/v2/examples/default": {
       "get": {
         "summary": "Example",
