@@ -77,7 +77,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
 
   const movable = snapshot.jobs.filter((j) => !j.frozen)
   const isFocus = (j: (typeof movable)[number]) => j.ready_at === null || focus.includes(j.job_id) || !!edits[`job:${j.job_id}:ready_at`]
-  const jobRow = (j: (typeof movable)[number]) => <div key={j.job_id} className="rev-row"><b title={j.job_id}>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>
+  const jobRow = (j: (typeof movable)[number]) => <div key={j.job_id} className="rev-row"><b>{jobName(j.job_id)}</b>{field(`job:${j.job_id}:ready_at`, j.ready_at, FIELD_LABEL.ready_at)}</div>
   const frozen = snapshot.jobs.filter((j) => j.frozen)
   // 브라우저 기본 시각 입력은 기기 설정에 따라 오전/오후로 보인다. 화면 표기와 같은 24시간제로 받기 위해 날짜+시각(HH:MM)으로 나눈다.
   const timeInput = (value: string, onChange: (v: string) => void, label: string, hint: string) => {
@@ -113,7 +113,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
           <details className="rev-more" open={!movable.some(isFocus)}>
             <summary>다른 작업 {movable.filter((j) => !isFocus(j)).length + frozen.length}건</summary>
             {movable.filter((j) => !isFocus(j)).map(jobRow)}
-            {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b title={j.job_id}>{jobName(j.job_id)}</b><span className="small">{freezeLabel(j.freeze_reason)}, 수정할 수 없음</span></div>)}
+            {frozen.map((j) => <div key={j.job_id} className="rev-row muted"><b>{jobName(j.job_id)}</b><span className="small">{freezeLabel(j.freeze_reason)}, 수정할 수 없음</span></div>)}
           </details>
         )}
       </fieldset>
@@ -125,7 +125,7 @@ export function ConditionRevisionPanel({ client, snapshot, rerun, focus = [] }: 
           <summary>차량 {snapshot.vehicles.length}대</summary>
           {snapshot.vehicles.map((v) => (
             <div key={v.vehicle_id} className="rev-row">
-              <b title={v.vehicle_id}>{vehicleName(v.vehicle_id)}</b>
+              <b>{vehicleName(v.vehicle_id)}</b>
               {field(`vehicle:${v.vehicle_id}:available_at`, v.available_at, FIELD_LABEL.available_at)}
               {field(`vehicle:${v.vehicle_id}:shift_end_at`, v.shift_end_at, FIELD_LABEL.shift_end_at)}
             </div>

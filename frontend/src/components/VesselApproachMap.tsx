@@ -104,7 +104,6 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         const el = document.createElement('div')
         el.className = `vm-term${term.target ? ' target' : ''}`
         el.textContent = term.id
-        el.title = `${term.name} (대표 좌표, 선석 위치 아님)`
         new maps.CustomOverlay({ map: m, position: ll(term), content: el, yAnchor: 1.2, zIndex: 2 })
       }
       paths.current = {

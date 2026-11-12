@@ -9,7 +9,7 @@ export function TripStepper({ phase, late = false, compact = false }: { phase: P
   if (compact)
     return (
       <span className={`trip-bar${late ? ' late' : ''}`} aria-label={`진행 단계: ${at < 0 ? '대기' : at > 3 ? '완료' : STEPS[at]}`}>
-        {STEPS.map((s, i) => <i key={s} className={i < at ? 'done' : i === at ? 'now' : ''} title={s} />)}
+        {STEPS.map((s, i) => <i key={s} className={i < at ? 'done' : i === at ? 'now' : ''} />)}
       </span>
     )
   return (

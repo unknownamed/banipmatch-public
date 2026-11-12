@@ -89,11 +89,11 @@ export function timelineModel(rows: JobRow[], hasCand: boolean, buffer = 0): Tim
 function Lane({ name, bars, incomplete }: { name: string; bars: Bar[]; model?: TimelineModel; incomplete: boolean }) {
   return (
     <div className="lane">
-      <span className="lane-name" title={name}>{hasVehicleName(name) ? <><b>{vehicleShort(name)}</b><small>{vehicleName(name)}</small></> : name}</span>
+      <span className="lane-name">{hasVehicleName(name) ? <><b>{vehicleShort(name)}</b><small>{vehicleName(name)}</small></> : name}</span>
       <div className="lane-track">
         {/* 마감선은 차량 전체가 아니라 그 막대 작업의 항차 마감에만 긋는다(다른 항차 작업이 넘긴 것처럼 보이지 않게) */}
         {bars.filter((b) => b.cut !== null).map((b) => (
-          <span key={`cut-${b.jobId}`} className={`cut-mark${b.late ? ' late' : ''}`} style={{ left: `${b.cut}%` }} title={`${jobShort(b.jobId)} 반입 마감`} />
+          <span key={`cut-${b.jobId}`} className={`cut-mark${b.late ? ' late' : ''}`} style={{ left: `${b.cut}%` }} />
         ))}
         {bars.length === 0 && <span className="muted small lane-empty">{incomplete ? '시각 확인 필요' : '배정 없음'}</span>}
         {bars.map((b) => (
@@ -101,7 +101,7 @@ function Lane({ name, bars, incomplete }: { name: string; bars: Bar[]; model?: T
             key={b.jobId}
             className={`job-bar${b.locked ? ' locked' : ''}${b.late ? ' late' : ''}${b.changed ? ' changed' : ''}`}
             style={{ left: `${b.left}%`, width: `${b.width}%` }}
-            title={b.label}
+            aria-label={b.label}
           >
             {b.locked && <Icon name="lock" size={11} />}
             {jobShort(b.jobId)}

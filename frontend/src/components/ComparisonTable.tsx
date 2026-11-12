@@ -120,7 +120,7 @@ export function ComparisonTable({
                   {r.job.ready_at === null && <div className="warn small">준비시각 미확인</div>}
                   {r.locked && (
                     <div>
-                      <span className="badge lock" title={r.job.freeze_reason ?? undefined}>
+                      <span className="badge lock">
                         <Icon name="lock" /> {r.job.state === 'departed' ? '이미 출발' : '고정'}
                       </span>
                     </div>

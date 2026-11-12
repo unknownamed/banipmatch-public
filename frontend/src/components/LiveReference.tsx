@@ -125,7 +125,7 @@ export function SeaWeatherLine() {
     : warn?.failure === 'network' ? '특보 확인 안 됨(연결 실패)' : ''
   const hm = new Date(obs.observed_at_utc).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
   return (
-    <span className="sea-line" title={`거제도 해양기상부이, ${hm} 관측`}>
+    <span className="sea-line">
       <span className="sea-item"><Icon name="waves" size={15} />파고 <b>{obs.wh_m_original}m</b></span>
       <span className="sea-item"><Icon name="wind" size={15} />풍속 <b>{obs.ws_m_s_original}m/s</b></span>
       {warnText && <span className={`sea-item${warnText === '특보 없음' ? '' : warnText.startsWith('특보 확인 안 됨') ? ' sea-muted' : ' sea-warn'}`}><Icon name="weather" size={15} />{warnText}</span>}

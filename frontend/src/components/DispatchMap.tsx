@@ -191,7 +191,6 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
       if (list.length > 1) {
         const key = list.map(x => x.vehicleId).sort().join(',')
         el.className = `dm-cluster ${worst}${picked ? ' picked' : ''}${openCluster === key ? ' open' : ''}`
-        el.title = list.map(x => vehicleName(x.vehicleId)).join(', ')
         el.innerHTML = `<b>${list.length}</b><span>대</span>${at ? `<em class="cl-place">${at}</em>` : ''}`
         // 같은 자리(차고지 대기 등)에 모인 차량은 확대해도 갈라지지 않으므로 목록을 펼친다. 흩어져 있으면 확대한다.
         const spread = Math.max(...list.map(x => Math.hypot((x.pos!.lat - v.pos!.lat) * 111000, (x.pos!.lon - v.pos!.lon) * 91000)))
@@ -222,7 +221,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
         : PHASE_LABEL[v.phase]
       // 이름표는 짧게(번호판 뒤 4자리). 목적지·도착 시각은 고른 차량이거나 충분히 확대했을 때만.
       el.innerHTML = `${truckSvg(heading)}<b>${vehicleShort(v.vehicleId)}</b>${picked || zoomedIn ? `<span>${what}</span>` : at ? `<span>${at}</span>` : ''}`
-      el.title = `${vehicleName(v.vehicleId)} · ${PHASE_LABEL[v.phase]}`
+      el.setAttribute('aria-label', `${vehicleName(v.vehicleId)} ${PHASE_LABEL[v.phase]}`)
       el.onclick = () => { setPickedVehicle(v.vehicleId); onSelectJob(v.jobId) }
       pins.current.push(new maps.CustomOverlay({ map: kmap.current, position: ll(v.pos!), content: el, yAnchor: 1.25, zIndex: picked ? 9 : 6, clickable: true }))
     }

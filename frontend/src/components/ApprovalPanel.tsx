@@ -95,7 +95,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
           </label>
         </p>
       )}
-      <button type="button" disabled={!canSend} title={gate.reasons.join('\n')} onClick={send}>
+      <button type="button" disabled={!canSend} onClick={send}>
         {status.state === 'sending' ? '승인 요청 중…' : status.state === 'error' && status.retryable ? '다시 시도' : `${planName(result.method)} 승인`}
       </button>
       {!gate.allowed && (

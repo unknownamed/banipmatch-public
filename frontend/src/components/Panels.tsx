@@ -75,7 +75,7 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
         </div>
         <div>
           <dt>근거</dt>
-          <dd title={c.evidence.source_ref}>
+          <dd>
             {c.evidence.source_ref.startsWith('fixture:') ? `${c.terminal_id} 반입 마감 변경 공지` : sourceLabel(c.evidence.source_ref)}
           </dd>
         </div>
