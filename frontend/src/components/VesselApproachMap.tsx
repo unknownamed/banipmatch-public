@@ -172,7 +172,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         {link ? (
           <p className="vm-linked small">지금 점검 중인 배차의 항차별 반입 마감을 함께 표시합니다. <a href={link.reviewHref}>배차 점검으로 돌아가기</a></p>
         ) : (
-          <p className="vm-linked small muted">배차 점검을 시작하면 같은 항차의 반입 마감이 이 지도에 연결됩니다. <a href="?">새 점검</a></p>
+          <p className="vm-linked small muted">받은 변경을 점검하면 같은 항차의 반입 마감이 이 지도에 함께 표시됩니다. <a href="?">받은 변경 보기</a></p>
         )}
 
         <div className="vm-toolbar">
