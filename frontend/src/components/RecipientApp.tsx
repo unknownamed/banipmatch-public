@@ -437,11 +437,10 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
       ))}
 
       <h3 className="rc-answer">응답 <span className={`st ${d.response === 'none' ? 'wait' : d.response === 'cannot_perform' ? 'bad' : 'ok'}`}>{d.response === 'none' ? '아직 응답 안 함' : `${RESPONSE_LABEL[d.response]}${d.responded_at ? `, ${kstTime(d.responded_at)}` : ''}`}</span></h3>
-      <textarea className="rc-memo" rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} placeholder="메모 (선택)" aria-label="메모" />
+      <textarea className="rc-memo" rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} placeholder="수행이 어려우면 이유를 적어 주세요 (선택)" aria-label="메모" />
       <div className="respond-buttons">
         <button type="button" disabled={busy} className="rb-primary" onClick={() => respond('can_perform')}>수행 가능</button>
         <button type="button" disabled={busy} className="danger" onClick={() => respond('cannot_perform')}>수행 곤란</button>
-        <button type="button" disabled={busy} className="rb-ghost" onClick={() => respond('acknowledged')}>내용만 확인함</button>
       </div>
       {sendError !== null && (
         <p className="warn small" role="alert">
