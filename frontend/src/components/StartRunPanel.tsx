@@ -104,7 +104,6 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
         <div>
           <h1>받은 변경</h1>
         </div>
-        <span className="updated"><span className="live" aria-hidden="true" />실시간 수신</span>
       </header>
       <div className="start-grid">
       <div className="start-left">

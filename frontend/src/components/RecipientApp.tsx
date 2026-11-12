@@ -282,7 +282,8 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
         <div key={v.vehicle_id}>
           <h3><Plate plate={v.plate_no} id={v.vehicle_id} /></h3>
           <ul className="rc-list">
-            {v.changes.map((c) => {
+            {/* 기사가 할 일(새로 맡음·시각 변경)을 먼저, 빠진 작업은 맨 아래 */}
+            {[...v.changes].sort((x, y) => Number(!!x.before && x.before.vehicle_id === v.vehicle_id && (!x.after || x.after.vehicle_id !== v.vehicle_id)) - Number(!!y.before && y.before.vehicle_id === v.vehicle_id && (!y.after || y.after.vehicle_id !== v.vehicle_id))).map((c) => {
               const d = c.display
               const name = d?.container_no ? formatContainer(d.container_no) : c.job_id
               const mine = (vid?: string) => vid === v.vehicle_id

@@ -10,6 +10,7 @@ import { kstDateTime, kstTime } from '../lib/time'
 import { jobName, vehicleName, vehicleShort } from '../lib/labels'
 import { driverMessage } from '../lib/driverMessage'
 import { BoxNo, Plate } from './Ids'
+import { Icon } from './Icon'
 import { ISSUE_LABEL } from '../lib/compare'
 
 const enc = encodeURIComponent
@@ -87,7 +88,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
       </div>
       <Invitations client={client} planId={planId} vehicles={p.vehicle_changes.map((v) => v.vehicle_id)} authorized={authorized} recipients={recipients} onChange={loadRecipients} />
 
-      <Send client={client} preview={p} authorized={authorized} dispatchId={dispatchId} onSent={(id) => {
+      <Send client={client} preview={p} authorized={authorized} linked={new Set(recipients.filter((r) => !r.revoked).flatMap((r) => r.vehicle_ids)).size} dispatchId={dispatchId} onSent={(id) => {
         setDispatchId(id)
         const q = new URLSearchParams(location.search)
         q.set('dispatch', id)
@@ -176,7 +177,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
                 </>
               ) : (
                 <>
-                  <span className="st wait">연결 안 됨</span>
+                  <span className={`st ${invite?.vehicle === v ? 'run' : 'wait'}`}>{invite?.vehicle === v ? 'QR 연결 기다리는 중' : '연결 안 됨'}</span>
                   {authorized && <button type="button" className="btn-line" disabled={busy !== null} onClick={() => create(v)}>{busy === v ? '만드는 중…' : '휴대폰 연결'}</button>}
                 </>
               )}
@@ -191,8 +192,10 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
             <p><b>{vehicleName(invite.vehicle)}</b> 기사 휴대폰으로 QR을 찍거나 링크를 보내세요.</p>
             <p className="small muted">한 번만 쓸 수 있고 {kstDateTime(invite.expires_at)}까지 유효합니다.</p>
             <div className="invite-copy">
-              <input readOnly value={invite.link} aria-label="연결 링크" onFocus={(e) => e.currentTarget.select()} />
-              <button type="button" className="btn-line" onClick={() => { navigator.clipboard?.writeText(invite.link); setCopied(true) }}>{copied ? '복사됨' : '링크 복사'}</button>
+              <button type="button" className="btn-line" onClick={() => { navigator.clipboard?.writeText(invite.link); setCopied(true) }}>
+                <Icon name="link" size={14} />{copied ? '복사했습니다' : '링크 복사'}
+              </button>
+              {copied && <span className="small muted">카톡·문자로 기사에게 붙여넣으세요.</span>}
             </div>
             <p className="small muted">아이폰은 Safari에서 공유 › 홈 화면에 추가한 뒤, 그 아이콘으로 열어 링크를 붙여넣어야 알림이 옵니다.</p>
           </div>
@@ -203,8 +206,8 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
   )
 }
 
-function Send({ client, preview, authorized, dispatchId, onSent }: {
-  client: V2Client; preview: DispatchPreview; authorized: boolean; dispatchId: string | null; onSent: (id: string) => void
+function Send({ client, preview, authorized, dispatchId, onSent, linked }: {
+  client: V2Client; preview: DispatchPreview; authorized: boolean; dispatchId: string | null; onSent: (id: string) => void; linked: number
 }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<unknown>(null)
@@ -233,8 +236,8 @@ function Send({ client, preview, authorized, dispatchId, onSent }: {
         <p className="small muted">이 배차의 변경을 이미 보냈습니다. 아래에서 기사 응답을 확인하세요.</p>
       ) : (
         <div className="send-row">
-          <button type="button" className="btn-primary" disabled={busy} onClick={send}>{busy ? '보내는 중…' : '연결된 기사에게 보내기'}</button>
-          <span className="small muted">잠금 화면에는 ‘배차 변경 확인 요청’만 보입니다.</span>
+          <button type="button" className="btn-primary" disabled={busy || linked === 0} onClick={send}>{busy ? '보내는 중…' : `연결된 기사에게 보내기${linked ? ` (${linked}대)` : ''}`}</button>
+          <span className="small muted">{linked === 0 ? '먼저 위에서 기사 휴대폰을 연결하세요.' : '잠금 화면에는 ‘배차 변경 확인 요청’만 보입니다.'}</span>
         </div>
       )}
       {error !== null && <p className="warn small" role="alert">전달 실패: {errText(error)}</p>}
@@ -271,12 +274,10 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
   return (
     <>
       <h3>전달 결과와 응답 {!d.is_current && <span className="badge fixture">이전 계획</span>}</h3>
-      <p className="small muted">
-        ‘전달됨’은 휴대폰까지 보냈다는 뜻이고, 기사가 읽었는지는 ‘열람’에서 봅니다. 응답이 없으면 기사에게 직접 연락해 확인하세요. 갱신 {state.at ? kstTime(new Date(state.at).toISOString()) : ''}
-      </p>
+      <p className="small muted">{state.at ? `${kstTime(new Date(state.at).toISOString())} 기준, 자동으로 새로 고침` : ''}</p>
       <table className="grid small dispatch-status">
         <thead>
-          <tr><th scope="col">차량</th><th scope="col">전달</th><th scope="col">시도</th><th scope="col">열람</th><th scope="col">응답</th><th scope="col">후속</th><th /></tr>
+          <tr><th scope="col">차량</th><th scope="col">전달</th><th scope="col">열람</th><th scope="col">응답</th><th /></tr>
         </thead>
         <tbody>
           {d.notifications.map((n) => {
@@ -285,29 +286,28 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
             return (
               <tr key={n.notification_id}>
                 <td>{n.vehicle_ids.map(vehicleName).join(', ')}</td>
-                <td>{DELIVERY_LABEL[n.delivery_status] ?? n.delivery_status}{n.error_code && <span className="small muted"> ({n.error_code})</span>}</td>
-                <td>{n.attempts}</td>
+                <td>{DELIVERY_LABEL[n.delivery_status] ?? n.delivery_status}</td>
                 <td>{n.opened_at ? kstTime(n.opened_at) : '—'}</td>
                 <td>
                   {RESPONSE_LABEL[n.response] ?? n.response}
                   {n.responded_at && <span className="small muted"> · {kstTime(n.responded_at)}</span>}
                   {n.response_history.at(-1)?.note && <span className="small muted"> · “{n.response_history.at(-1)!.note}”</span>}
                 </td>
-                <td>{n.needs_followup ? <span className="badge unassigned">확인 필요</span> : '—'}</td>
                 <td>
-                  {blocker === '' && (n.delivery_status !== 'unlinked' || target) && (
-                    <button type="button" className="secondary" onClick={() => retry(n.notification_id, target)}>다시 보내기</button>
-                  )}
-                  {blocker === '' && n.delivery_status === 'unlinked' && !target && <span className="small muted">수신자 연결 후 재시도</span>}
-                  {blocker && <span className="small muted">{blocker}</span>}
+                  {n.response !== 'none' ? null : <>
+                    {blocker === '' && (n.delivery_status !== 'unlinked' || target) && (
+                      <button type="button" className="btn-line" onClick={() => retry(n.notification_id, target)}>다시 보내기</button>
+                    )}
+                    {blocker === '' && n.delivery_status === 'unlinked' && !target && <span className="small muted">휴대폰을 연결하면 보낼 수 있음</span>}
+                    {blocker && <span className="small muted">{blocker}</span>}
+                  </>}
                 </td>
               </tr>
             )
           })}
         </tbody>
       </table>
-      {retryError !== null && <p className="warn small" role="alert">재시도 실패: {errText(retryError)}</p>}
-      {d.followups.length > 0 && <Followups items={d.followups} title="후속 확인 목록" />}
+      {retryError !== null && <p className="warn small" role="alert">다시 보내지 못했습니다: {errText(retryError)}</p>}
     </>
   )
 }

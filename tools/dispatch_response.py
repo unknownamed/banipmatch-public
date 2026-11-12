@@ -57,7 +57,8 @@ def ranked(rows: list[dict]) -> dict[str, dict]:
 def job_display(snapshot: dict, job_id: str) -> dict:
     """기사·담당자 화면용 현장 식별 정보(입력에 있을 때만). 내부 job_id는 연결 키로 남는다."""
     job = next(j for j in snapshot["jobs"] if j["job_id"] == job_id)
-    place = {loc["location_id"]: loc["name"] for loc in snapshot.get("locations", [])}
+    # 화면·기사 알림에는 장소 이름만(예제 자료의 "(모의)" 표기는 떼고 보여 준다).
+    place = {loc["location_id"]: loc["name"].replace("(모의)", "").strip() for loc in snapshot.get("locations", [])}
     size = {"DRY40": "40ft", "DRY20": "20ft"}.get(job["equipment_type"], job["equipment_type"])
     return {"container_no": job.get("container_no"), "booking_no": job.get("booking_no"), "cargo_owner": job.get("cargo_owner"),
             "origin_name": place.get(job["origin_id"], job["origin_id"]), "terminal_id": job["terminal_id"],

@@ -5,7 +5,7 @@
   "source": "docs/development/v0.1/예제 데이터/01_snapshot.json",
   "source_sha256": "b91651e623371a595615bc2bc89eb7236e0693737c3f7e3024038b6a0b9d377e",
   "tool": "tools/dispatch_response.py",
-  "tool_sha256": "10c740753685d22684ec65b0874d12b0dae7727a549df5afcde06a7310aad87c",
+  "tool_sha256": "e3f20a3d3d5d2568997a39224b9cf9ab3bb6dbd47950332552a4ecd89e64eddb",
   "python": "3.12.14",
   "method": "B1",
   "seed": 42,
@@ -34,6 +34,10 @@
     {
       "date": "2026-11-13",
       "reason": "정책 허용폭(5분) 안의 같은 차량·같은 순서 시각 이동은 기사 변경 명세에서 제외(엔진 변경 판정과 같은 기준). 같은 입력·결과로 재생성"
+    },
+    {
+      "date": "2026-11-13",
+      "reason": "장소 이름에서 예제 표기 \"(모의)\"를 떼고 표시. 같은 입력·결과로 재생성"
     }
   ]
 }

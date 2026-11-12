@@ -2,7 +2,7 @@
 // 뜻은 옆 글자가 전하므로 화면 낭독기에서는 숨긴다.
 import {
   Anchor, ArrowDown, ArrowLeftRight, ArrowRight, ArrowUp, Bell, CalendarClock, Check, CircleCheck, Clock, Container,
-  Inbox, Info, LayoutGrid, Lock, Map, OctagonAlert, Package, PencilLine, Plus, Route, Search, Ship, TriangleAlert, Truck, Waves, Wind, CloudSun,
+  Inbox, Info, LayoutGrid, Lock, Map, OctagonAlert, Package, PencilLine, Plus, Route, Search, Ship, TriangleAlert, Truck, Waves, Wind, CloudSun, Link2,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -35,6 +35,7 @@ const ICONS = {
   waves: Waves,
   wind: Wind,
   weather: CloudSun,
+  link: Link2,
 } satisfies Record<string, LucideIcon>
 
 export type IconName = keyof typeof ICONS
