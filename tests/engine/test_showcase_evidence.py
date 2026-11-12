@@ -9,6 +9,12 @@ import pytest
 from tools import build_showcase_evidence as showcase
 from tools import evaluate_engine
 
+# 공개 저장소는 개인 이메일을 지우려고 커밋 이력을 다시 쓴 사본이라 평가 실행 커밋(SOURCE_COMMIT)이 없다.
+# 이 검사는 그 커밋의 원본 파일을 읽으므로, 커밋이 없으면 건너뛴다(원 저장소와 제출 ZIP의 검사로 확인).
+_HAS_SOURCE = subprocess.run(["git", "cat-file", "-e", f"{showcase.SOURCE_COMMIT}^{{commit}}"],
+                             cwd=showcase.ROOT, capture_output=True).returncode == 0
+pytestmark = pytest.mark.skipif(not _HAS_SOURCE, reason="평가 실행 커밋이 없는 재작성 이력(공개 저장소 사본)")
+
 
 @pytest.fixture(scope="module")
 def bundle():
