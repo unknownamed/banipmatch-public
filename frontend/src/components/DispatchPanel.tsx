@@ -292,7 +292,7 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
             const target = n.delivery_status === 'unlinked' ? linkedRecipientFor(n.vehicle_ids, recipients) : null
             return (
               <tr key={n.notification_id}>
-                <td>{n.vehicle_ids.join(', ')}</td>
+                <td>{n.vehicle_ids.map(vehicleName).join(', ')}</td>
                 <td>{DELIVERY_LABEL[n.delivery_status] ?? n.delivery_status}{n.error_code && <span className="small muted"> ({n.error_code})</span>}</td>
                 <td>{n.attempts}</td>
                 <td>{n.opened_at ? kstTime(n.opened_at) : '—'}</td>

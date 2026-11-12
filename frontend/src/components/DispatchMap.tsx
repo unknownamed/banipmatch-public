@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MethodResult, Snapshot } from '../api/types'
 import { PHASE_LABEL, locationPoints, vehiclesAt, type Pt, type VehicleNow } from '../lib/fleetPosition'
-import { loadKakaoMaps } from '../lib/kakaoMaps'
+import { keepLaidOut, loadKakaoMaps } from '../lib/kakaoMaps'
 import { kstTime } from '../lib/time'
 import { jobName, jobInfo, vehicleName, vehicleShort } from '../lib/labels'
+import { TripStepper } from './TripStepper'
 
 const GATE_LABEL = { ok: '여유', tight: '빠듯', late: '마감 초과' } as const
 
@@ -60,11 +61,13 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
   useEffect(() => {
     if (pts.size === 0) return
     let alive = true
+    let unobserve = () => {}
     loadKakaoMaps().then(maps => {
       if (!alive || !box.current) return
       const ll = (p: Pt) => new maps.LatLng(p.lat, p.lon)
       const m = new maps.Map(box.current, { center: ll([...pts.values()][0]), level: 8 })
       kmap.current = m
+      unobserve = keepLaidOut(m, box.current)
       const bounds = new maps.LatLngBounds()
       for (const loc of snapshot.locations ?? []) {
         const p = pts.get(loc.location_id)
@@ -87,7 +90,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
       jobLine.current = new maps.Polyline({ map: m, path: [], strokeWeight: 4, strokeColor: '#ff3c00', strokeOpacity: 0.85, strokeStyle: 'dash' })
       setMapState({ ok: true, msg: '' })
     }).catch((e: Error) => alive && setMapState({ ok: false, msg: `${e.message} 아래 차량별 목록으로 확인할 수 있습니다.` }))
-    return () => { alive = false; pins.current = []; kmap.current = null }
+    return () => { alive = false; unobserve(); pins.current = []; kmap.current = null }
   }, [pts, snapshot])
 
   useEffect(() => {
@@ -197,6 +200,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
         {sel ? (
           <div className="vm-info" aria-live="polite">
             <div className="vm-info-head"><b>{vehicleName(sel.vehicleId)}</b><span className={`dm-gate ${sel.gate ?? 'none'}`}>{PHASE_LABEL[sel.phase]}</span></div>
+            {sel.jobId && <TripStepper phase={sel.phase} late={sel.gate === 'late'} />}
             <dl>
               {cur && curJob ? (
                 <>
@@ -219,6 +223,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
                 <span className="dm-item-top"><b>{vehicleName(v.vehicleId)}</b> <span className="muted">{PHASE_LABEL[v.phase]}</span>
                   {v.gate && <span className={`dm-gate ${v.gate}`}>{GATE_LABEL[v.gate]}{v.marginMin !== null && v.gate !== 'late' ? ` ${v.marginMin}분` : ''}</span>}
                 </span>
+                {v.jobId && <TripStepper phase={v.phase} late={v.gate === 'late'} />}
                 {v.jobId && v.gateEta ? (
                   <span className="small">{jobName(v.jobId)} · 게이트 <b>{kstTime(v.gateEta)}</b> · 마감 {kstTime(v.cutoff)}</span>
                 ) : <span className="small muted">남은 작업 없음</span>}

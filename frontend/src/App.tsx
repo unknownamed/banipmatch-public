@@ -1,3 +1,4 @@
+import { ResultNav } from './components/ResultNav'
 import { useEffect, useMemo, useState } from 'react'
 import type { ApiClient } from './api/client'
 import type { MethodResult } from './api/types'
@@ -77,6 +78,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
       {snapshot && (
         <>
           <Header s={snapshot} />
+          {view.results.state === 'ready' && <ResultNav />}
           {view.results.state === 'ready' && (
             <ActionSummary base={base} cand={cand} recommended={recommended?.method} rows={rows}
               approved={!!run && (approval.value?.status.state === 'done' || (planNow?.planId === run.plan_id && planNow.version > run.base_plan_version))} />
@@ -133,7 +135,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
 
       {v2 && snapshot && run && view.results.state === 'ready' && (approvedPlan
         ? <NextPlanPanel key={`next:${run.plan_id}:${planNow?.version}`} client={v2} planId={run.plan_id} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: null }} />
-        : <ConditionRevisionPanel key={snapshot.scenario_id} client={v2} snapshot={snapshot} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />)}
+        : <ConditionRevisionPanel key={snapshot.scenario_id} client={v2} snapshot={snapshot} focus={[...(cand?.unassigned_job_ids ?? []), ...(cand?.issues ?? []).flatMap((i) => i.job_id ? [i.job_id] : [])]} rerun={{ methods: run.methods, time_limit_seconds: run.config.time_limit_seconds, seed: run.config.seed, beforeRunId: run.run_id }} />)}
 
       {/* 계산 방법별 상태·독립 검사는 검증용 정보라 아래에 둔다(실패하면 위에 바로 보인다). */}
       {run && run.status === 'completed' && <RunStatusPanel run={run} results={results} />}

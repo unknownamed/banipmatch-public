@@ -35,3 +35,16 @@ export const MAP_TYPES = [
   ['HYBRID', '위성+지명'],
 ] as const
 export type MapType = (typeof MAP_TYPES)[number][0]
+
+/** 지도 상자의 크기가 바뀌면(화면 회전·창 크기·레이아웃 변화) 타일을 다시 깔아 빈 회색 영역이 남지 않게 한다. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function keepLaidOut(map: any, el: HTMLElement): () => void {
+  if (typeof ResizeObserver === 'undefined') return () => {}
+  const ro = new ResizeObserver(() => {
+    const c = map.getCenter()
+    map.relayout()
+    map.setCenter(c)
+  })
+  ro.observe(el)
+  return () => ro.disconnect()
+}

@@ -6,6 +6,7 @@ import { ComparisonTable } from './ComparisonTable'
 import { MetricsRow } from './Panels'
 import { VehicleTimeline } from './VehicleTimeline'
 import { DispatchMap } from './DispatchMap'
+import { jobName } from '../lib/labels'
 
 interface Props {
   snapshot: Snapshot
@@ -63,13 +64,13 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
       {base && cand && <MetricsRow base={base} cand={cand} />}
       {base && cand && cand.metrics.unassigned_count > base.metrics.unassigned_count && (
         <p className="warn">
-          {cand.method} 조정안은 {cand.metrics.unassigned_count}건을 배정하지 못했습니다(미배정)
-          {heldWereLate(base, cand) ? '(원래 배차에서도 마감을 넘기던 작업)' : ''}. 위반이 줄어든 데에는 이 미배정이 포함되어 있으니,
-          오른쪽 ‘확인 필요’에서 처리하세요.
+          {cand.method} 조정안은 {cand.metrics.unassigned_count}건을 어느 차량에도 넣지 못했습니다
+          {heldWereLate(base, cand) ? ' — 원래 배차에서도 마감을 넘기던 작업입니다' : ''}. 위반 수가 줄어든 데에는 이 작업이 빠진 것도 포함되니,
+          ‘확인 필요’에서 따로 처리하세요.
         </p>
       )}
       {broken.length > 0 && (
-        <p className="warn">고정 작업 {broken.join(', ')}이(가) 조정안에서 바뀌었거나 빠졌습니다. 엔진·검증 담당 확인이 필요합니다.</p>
+        <p className="warn">고정 작업 {broken.map(jobName).join(', ')}이(가) 조정안에서 바뀌었거나 빠졌습니다. 엔진·검증 담당 확인이 필요합니다.</p>
       )}
       <div className="tabs" role="tablist" aria-label="보기 방식">
         <button role="tab" aria-selected={layout === 'vehicle'} onClick={() => setLayout('vehicle')}>
@@ -82,7 +83,7 @@ export function ComparisonSection({ snapshot, results, base, cand, candidates, r
       {layout === 'vehicle' ? (
         <VehicleTimeline rows={rows} baseLabel={baseLabel} candLabel={candLabel} />
       ) : (
-        <ComparisonTable rows={rows} asOf={snapshot.as_of} baseLabel={baseLabel} candLabel={candLabel} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
+        <ComparisonTable rows={rows} asOf={snapshot.as_of} buffer={snapshot.policy?.buffer_minutes ?? 0} baseLabel={baseLabel} candLabel={candLabel} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
       )}
       <DispatchMap key={cand?.method ?? 'base'} snapshot={snapshot} base={base} cand={cand} selectedJob={selectedJob} onSelectJob={setSelectedJob} />
     </section>

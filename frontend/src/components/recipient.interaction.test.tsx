@@ -70,7 +70,7 @@ describe('수신자 화면', () => {
     await act(async () => root.render(<RecipientApp client={client} boot={takeFragment()} env={android} />))
     await flush()
     await act(async () => button('이 기기 연결 해제')!.click())
-    expect(container.textContent).toContain('내 차량 T1')
+    expect(container.textContent).toContain('내 배차 알림')
     expect(container.textContent).toContain('연결 해제 실패')
   })
 
@@ -94,7 +94,7 @@ describe('수신자 화면', () => {
     await act(async () => button('초대 수락')!.click())
     await flush()
     expect(client.claim).toHaveBeenCalledWith('sec.ret', await claimKey('sec.ret'))
-    expect(container.textContent).toContain('내 차량 T1')
+    expect(container.textContent).toContain('내 배차 알림')
     expect(container.textContent).toContain('알림을 지원하지 않습니다')
   })
 
@@ -188,7 +188,7 @@ describe('수신자 화면', () => {
     await flush()
     await act(async () => button('이 기기 연결 해제')!.click())
     await flush()
-    expect(container.textContent).toContain('내 차량 T1')
+    expect(container.textContent).toContain('내 배차 알림')
     expect(container.textContent).toContain('연결 해제 실패')
   })
 

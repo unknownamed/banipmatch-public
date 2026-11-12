@@ -1,19 +1,13 @@
-import { useState } from 'react'
-import fixture from '../fixtures/reference-preview.synthetic.json'
 import { BLOCKER_LABEL, KIND_LABEL, display, type ReferenceView } from '../lib/reference'
 import { kstDateTime } from '../lib/time'
 import { LiveReference } from './LiveReference'
 
-const cases = fixture.cases as unknown as { id: string; label: string; view: ReferenceView }[]
 
 /**
  * #32 실제·재생·모의 자료 구분 화면. 사용자가 자료 종류를 직접 고르며, 실패해도 다른 종류로 자동 전환하지 않는다.
  * 실제 수신 결과는 인증된 /v2/references/current에서 읽는다. 과거 재생과 모의 예제는 구분한다.
  */
 export function ReferencePanel() {
-  const [caseId, setCaseId] = useState(cases[0].id)
-  const picked = cases.find((c) => c.id === caseId)!
-
   return (
     <main className="timeline-view">
       <header className="top">
@@ -23,16 +17,6 @@ export function ReferencePanel() {
         </div>
       </header>
       <LiveReference />
-      <details className="tech-info">
-        <summary>수신 실패·부분 응답일 때 화면 예시</summary>
-        <label className="small">
-          상황{' '}
-          <select value={caseId} onChange={(e) => setCaseId(e.target.value)}>
-            {cases.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-          </select>
-        </label>
-        <ReferenceStatus view={picked.view} />
-      </details>
     </main>
   )
 }

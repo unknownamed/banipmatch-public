@@ -54,10 +54,26 @@ def travel(a: str, b: str) -> int:
     return 0 if a == b else PAIRS.get((a, b)) or PAIRS[(b, a)]
 
 
-# 항차별 반입 시간창(분, T0 기준). V1은 변경 전 마감 +240 → 변경 후 +120.
-WINDOWS = {"V1": (-360, 90), "V2": (-120, 330), "V4": (60, 480), "V7": (-240, 300)}
-TERMINAL = {"V1": "HJNC", "V2": "HJNC", "V4": "HJNC", "V7": "PNIT"}
+# 항차별 반입 마감(분, T0 기준). V1(BHMN-2026-0045)은 변경 전 +240 → 변경 후 +90(2시간 30분 앞당김).
+# 반입 시간은 HJNC 공개 선석배정현황(2026-11-11 수신 31개 항차)의 실제 간격을 따른다.
+#  - 반입 마감 = 접안 예정 10시간 전 (31개 항차 모두 같은 간격)
+#  - 반입 시작 = 접안 예정일 3일 전 00:00 KST
+# 시연 화면은 모든 시각을 현재 시각 기준으로 옮기므로 00:00이 다른 분 단위로 보일 수 있다.
+CLOSES = {"V1": 90, "V2": 330, "V4": 480, "V7": 300}
 V1_PREVIOUS_CLOSE = 240
+BERTH_AFTER_CLOSE = 600
+KST = timezone(timedelta(hours=9))
+
+
+def _opens(close_min: int) -> int:
+    berth = T0 + timedelta(minutes=close_min + BERTH_AFTER_CLOSE)
+    day = berth.astimezone(KST).date() - timedelta(days=3)
+    start = datetime(day.year, day.month, day.day, tzinfo=KST)
+    return int((start - T0).total_seconds() // 60)
+
+
+WINDOWS = {v: (_opens(V1_PREVIOUS_CLOSE if v == "V1" else c), c) for v, c in CLOSES.items()}
+TERMINAL = {"V1": "HJNC", "V2": "HJNC", "V4": "HJNC", "V7": "PNIT"}
 
 VEHICLES = [  # id, 가용 시작, 장비
     ("T1", -60, ["DRY20", "DRY40"]),
@@ -95,10 +111,11 @@ JOBS = [
     ("J19", "V7", "O2", 60, 23000, "DRY40", "planned"),
     ("J20", "V7", "O5", 80, 14000, "DRY20", "planned"),
 ]
-SERVICE = 20
+# 터미널 체류(게이트 진입·하차·출문) 가정값. 부산신항 체류시간은 혼잡도에 따라 크게 달라 실측 대신 30분으로 둔다.
+SERVICE = 30
 
 # 현장에서 쓰는 식별 정보(모두 가상). 항차는 '선박 약어+항차 번호+방향' 형식, 선박은 서비스 이름을 딴 가상 선단.
-VOYAGE_CODE = {"V1": "BH045E", "V2": "BO112W", "V4": "BP007E", "V7": "BE221E"}
+VOYAGE_CODE = {"V1": "BHMN-2026-0045", "V2": "BORT-2026-0112", "V4": "BPNR-2026-0007", "V7": "BE221E"}
 SHIPPER = {"O1": "가람정밀(주)", "O2": "다온물산(주)", "O3": "한결산업(주)", "O4": "누리화학(주)", "O5": "새벽식품(주)"}
 PLATE = {"T1": "부산 90바 1201", "T2": "부산 90바 1207", "T3": "부산 91사 3315", "T4": "경남 87아 2044", "T5": "부산 92바 5520", "T6": "경남 88자 7136", "T7": "부산 93바 4408", "T8": "경남 86사 6620"}
 
@@ -166,7 +183,7 @@ def build():
         jobs=[dict(job_id=j, voyage_id=VOYAGE_CODE[voy], origin_id=o, terminal_id=TERMINAL[voy], return_location_id="D", ready_at=at(r),
                    gross_weight_kg=w, equipment_type=e, service_minutes=SERVICE, state=st, frozen=st == "departed",
                    freeze_reason="ALREADY_DEPARTED" if st == "departed" else None, evidence=ev(),
-                   container_no=iso6346("BNJU", 100200 + int(j[1:])), booking_no=f"BKG{VOYAGE_CODE[voy]}{int(j[1:]):03d}",
+                   container_no=iso6346("BNJU", 100200 + int(j[1:])), booking_no=f"BKG{VOYAGE_CODE[voy][:4]}{int(j[1:]):05d}",
                    cargo_owner=SHIPPER[o]) for j, voy, o, r, w, e, st in JOBS],
         windows=[dict(window_id=f"W-{VOYAGE_CODE[voy]}", voyage_id=VOYAGE_CODE[voy], terminal_id=TERMINAL[voy], opens_at=at(o), closes_at=at(c), verification="confirmed",
                       confirmed_by="demo-dispatcher", confirmed_at=at(-5), evidence=ev()) for voy, (o, c) in WINDOWS.items()],

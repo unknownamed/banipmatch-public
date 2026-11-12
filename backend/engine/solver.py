@@ -227,7 +227,7 @@ def _unassigned_issue(c: Context, jid: str, timed_out: bool, missing_paths: set[
     # A vehicle-independent lower bound; does not diagnose the cause from a heuristic miss.
     earliest = minute(j["ready_at"]) + loaded + c.buffer
     if earliest > minute(w["closes_at"]):
-        return [issue(jid, "READY_TOO_LATE", f"준비 {j['ready_at']} + 적재 {loaded}분 + 여유 {c.buffer}분 = {stamp(earliest)} > 마감 {w['closes_at']}. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.", "constraint_check", c.refs(jid))]
+        return [issue(jid, "READY_TOO_LATE", f"준비 {j['ready_at']} + 터미널까지 운송 {loaded}분 + 여유 {c.buffer}분 = {stamp(earliest)} > 마감 {w['closes_at']}. 다른 작업이 없어도 이 입력 조건에서 마감을 넘습니다.", "constraint_check", c.refs(jid))]
     compatible = [v for v in c.vehicles.values() if j["equipment_type"] in v["equipment_types"]]
     if not compatible:
         return [issue(jid, "INCOMPATIBLE_EQUIPMENT", f"{j['equipment_type']} 호환 차량이 없습니다.", "constraint_check", c.refs(jid))]

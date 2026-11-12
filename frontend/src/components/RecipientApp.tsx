@@ -149,7 +149,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
   return (
     <>
       <section className="card">
-        <h2>내 차량 {session.vehicle_ids.join(', ')}</h2>
+        <h2>내 배차 알림</h2>
         <p className="small muted">연결 만료 {kstDateTime(session.expires_at)}</p>
         {demo ? <p className="small muted">모의 화면에서는 알림 권한을 묻거나 구독하지 않습니다.</p> : <PushControl client={client} session={session} env={env} />}
       </section>

@@ -115,7 +115,7 @@
     {
       "vehicle_id": "T1",
       "start_location_id": "D",
-      "available_at": "2026-11-07T10:48:00Z",
+      "available_at": "2026-11-07T10:58:00Z",
       "shift_end_at": "2026-11-07T19:00:00Z",
       "capacity_kg": 30000,
       "equipment_types": [
@@ -133,7 +133,7 @@
     {
       "vehicle_id": "T2",
       "start_location_id": "D",
-      "available_at": "2026-11-07T10:53:00Z",
+      "available_at": "2026-11-07T11:03:00Z",
       "shift_end_at": "2026-11-07T19:00:00Z",
       "capacity_kg": 30000,
       "equipment_types": [
@@ -259,14 +259,14 @@
   "jobs": [
     {
       "job_id": "J01",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T09:20:00Z",
       "gross_weight_kg": 24000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "departed",
       "frozen": true,
       "freeze_reason": "ALREADY_DEPARTED",
@@ -277,19 +277,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002015",
-      "booking_no": "BKGBH045E001",
+      "booking_no": "BKGBHMN00001",
       "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J02",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O3",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T09:30:00Z",
       "gross_weight_kg": 18000,
       "equipment_type": "DRY20",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "departed",
       "frozen": true,
       "freeze_reason": "ALREADY_DEPARTED",
@@ -300,19 +300,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002020",
-      "booking_no": "BKGBH045E002",
+      "booking_no": "BKGBHMN00002",
       "cargo_owner": "한결산업(주)"
     },
     {
       "job_id": "J03",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:10:00Z",
       "gross_weight_kg": 22000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -323,19 +323,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002036",
-      "booking_no": "BKGBH045E003",
+      "booking_no": "BKGBHMN00003",
       "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J04",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:00:00Z",
       "gross_weight_kg": 26000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -346,19 +346,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002041",
-      "booking_no": "BKGBH045E004",
+      "booking_no": "BKGBHMN00004",
       "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J05",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O3",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:20:00Z",
       "gross_weight_kg": 14000,
       "equipment_type": "DRY20",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -369,19 +369,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002057",
-      "booking_no": "BKGBH045E005",
+      "booking_no": "BKGBHMN00005",
       "cargo_owner": "한결산업(주)"
     },
     {
       "job_id": "J06",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O5",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:15:00Z",
       "gross_weight_kg": 23000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -392,19 +392,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002062",
-      "booking_no": "BKGBH045E006",
+      "booking_no": "BKGBHMN00006",
       "cargo_owner": "새벽식품(주)"
     },
     {
       "job_id": "J07",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:40:00Z",
       "gross_weight_kg": 12000,
       "equipment_type": "DRY20",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -415,19 +415,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002078",
-      "booking_no": "BKGBH045E007",
+      "booking_no": "BKGBHMN00007",
       "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J08",
-      "voyage_id": "BH045E",
+      "voyage_id": "BHMN-2026-0045",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T11:00:00Z",
       "gross_weight_kg": 25000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -438,19 +438,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002083",
-      "booking_no": "BKGBH045E008",
+      "booking_no": "BKGBHMN00008",
       "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J09",
-      "voyage_id": "BO112W",
+      "voyage_id": "BORT-2026-0112",
       "origin_id": "O4",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:00:00Z",
       "gross_weight_kg": 21000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -461,19 +461,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002099",
-      "booking_no": "BKGBO112W009",
+      "booking_no": "BKGBORT00009",
       "cargo_owner": "누리화학(주)"
     },
     {
       "job_id": "J10",
-      "voyage_id": "BO112W",
+      "voyage_id": "BORT-2026-0112",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:30:00Z",
       "gross_weight_kg": 24000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -484,19 +484,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002102",
-      "booking_no": "BKGBO112W010",
+      "booking_no": "BKGBORT00010",
       "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J11",
-      "voyage_id": "BO112W",
+      "voyage_id": "BORT-2026-0112",
       "origin_id": "O5",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T11:00:00Z",
       "gross_weight_kg": 15000,
       "equipment_type": "DRY20",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -507,19 +507,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002118",
-      "booking_no": "BKGBO112W011",
+      "booking_no": "BKGBORT00011",
       "cargo_owner": "새벽식품(주)"
     },
     {
       "job_id": "J12",
-      "voyage_id": "BO112W",
+      "voyage_id": "BORT-2026-0112",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T10:20:00Z",
       "gross_weight_kg": 20000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -530,19 +530,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002123",
-      "booking_no": "BKGBO112W012",
+      "booking_no": "BKGBORT00012",
       "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J13",
-      "voyage_id": "BO112W",
+      "voyage_id": "BORT-2026-0112",
       "origin_id": "O3",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T11:30:00Z",
       "gross_weight_kg": 13000,
       "equipment_type": "DRY20",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -553,19 +553,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002139",
-      "booking_no": "BKGBO112W013",
+      "booking_no": "BKGBORT00013",
       "cargo_owner": "한결산업(주)"
     },
     {
       "job_id": "J14",
-      "voyage_id": "BP007E",
+      "voyage_id": "BPNR-2026-0007",
       "origin_id": "O4",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T12:00:00Z",
       "gross_weight_kg": 22000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -576,19 +576,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002144",
-      "booking_no": "BKGBP007E014",
+      "booking_no": "BKGBPNR00014",
       "cargo_owner": "누리화학(주)"
     },
     {
       "job_id": "J15",
-      "voyage_id": "BP007E",
+      "voyage_id": "BPNR-2026-0007",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T12:30:00Z",
       "gross_weight_kg": 26000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -599,19 +599,19 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002150",
-      "booking_no": "BKGBP007E015",
+      "booking_no": "BKGBPNR00015",
       "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J16",
-      "voyage_id": "BP007E",
+      "voyage_id": "BPNR-2026-0007",
       "origin_id": "O5",
       "terminal_id": "HJNC",
       "return_location_id": "D",
       "ready_at": "2026-11-07T11:40:00Z",
       "gross_weight_kg": 16000,
       "equipment_type": "DRY20",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -622,7 +622,7 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002165",
-      "booking_no": "BKGBP007E016",
+      "booking_no": "BKGBPNR00016",
       "cargo_owner": "새벽식품(주)"
     },
     {
@@ -634,7 +634,7 @@
       "ready_at": "2026-11-07T10:10:00Z",
       "gross_weight_kg": 21000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -645,7 +645,7 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002170",
-      "booking_no": "BKGBE221E017",
+      "booking_no": "BKGBE2200017",
       "cargo_owner": "가람정밀(주)"
     },
     {
@@ -657,7 +657,7 @@
       "ready_at": "2026-11-07T10:30:00Z",
       "gross_weight_kg": 19000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -668,7 +668,7 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002186",
-      "booking_no": "BKGBE221E018",
+      "booking_no": "BKGBE2200018",
       "cargo_owner": "누리화학(주)"
     },
     {
@@ -680,7 +680,7 @@
       "ready_at": "2026-11-07T11:00:00Z",
       "gross_weight_kg": 23000,
       "equipment_type": "DRY40",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -691,7 +691,7 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002191",
-      "booking_no": "BKGBE221E019",
+      "booking_no": "BKGBE2200019",
       "cargo_owner": "다온물산(주)"
     },
     {
@@ -703,7 +703,7 @@
       "ready_at": "2026-11-07T11:20:00Z",
       "gross_weight_kg": 14000,
       "equipment_type": "DRY20",
-      "service_minutes": 20,
+      "service_minutes": 30,
       "state": "planned",
       "frozen": false,
       "freeze_reason": null,
@@ -714,16 +714,16 @@
         "received_at": "2026-11-07T10:00:00Z"
       },
       "container_no": "BNJU1002205",
-      "booking_no": "BKGBE221E020",
+      "booking_no": "BKGBE2200020",
       "cargo_owner": "새벽식품(주)"
     }
   ],
   "windows": [
     {
-      "window_id": "W-BH045E",
-      "voyage_id": "BH045E",
+      "window_id": "W-BHMN-2026-0045",
+      "voyage_id": "BHMN-2026-0045",
       "terminal_id": "HJNC",
-      "opens_at": "2026-11-07T04:00:00Z",
+      "opens_at": "2026-11-04T15:00:00Z",
       "closes_at": "2026-11-07T11:30:00Z",
       "verification": "confirmed",
       "confirmed_by": "demo-dispatcher",
@@ -736,10 +736,10 @@
       }
     },
     {
-      "window_id": "W-BO112W",
-      "voyage_id": "BO112W",
+      "window_id": "W-BORT-2026-0112",
+      "voyage_id": "BORT-2026-0112",
       "terminal_id": "HJNC",
-      "opens_at": "2026-11-07T08:00:00Z",
+      "opens_at": "2026-11-04T15:00:00Z",
       "closes_at": "2026-11-07T15:30:00Z",
       "verification": "confirmed",
       "confirmed_by": "demo-dispatcher",
@@ -752,10 +752,10 @@
       }
     },
     {
-      "window_id": "W-BP007E",
-      "voyage_id": "BP007E",
+      "window_id": "W-BPNR-2026-0007",
+      "voyage_id": "BPNR-2026-0007",
       "terminal_id": "HJNC",
-      "opens_at": "2026-11-07T11:00:00Z",
+      "opens_at": "2026-11-04T15:00:00Z",
       "closes_at": "2026-11-07T18:00:00Z",
       "verification": "confirmed",
       "confirmed_by": "demo-dispatcher",
@@ -771,7 +771,7 @@
       "window_id": "W-BE221E",
       "voyage_id": "BE221E",
       "terminal_id": "PNIT",
-      "opens_at": "2026-11-07T06:00:00Z",
+      "opens_at": "2026-11-04T15:00:00Z",
       "closes_at": "2026-11-07T15:00:00Z",
       "verification": "confirmed",
       "confirmed_by": "demo-dispatcher",
@@ -1497,23 +1497,23 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T09:45:00Z",
       "gate_arrival_at": "2026-11-07T10:00:00Z",
-      "return_at": "2026-11-07T10:48:00Z"
+      "return_at": "2026-11-07T10:58:00Z"
     },
     {
       "job_id": "J09",
       "vehicle_id": "T1",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T11:23:00Z",
-      "gate_arrival_at": "2026-11-07T12:08:00Z",
-      "return_at": "2026-11-07T12:56:00Z"
+      "pickup_departure_at": "2026-11-07T11:33:00Z",
+      "gate_arrival_at": "2026-11-07T12:18:00Z",
+      "return_at": "2026-11-07T13:16:00Z"
     },
     {
       "job_id": "J14",
       "vehicle_id": "T1",
       "sequence": 3,
-      "pickup_departure_at": "2026-11-07T13:31:00Z",
-      "gate_arrival_at": "2026-11-07T14:16:00Z",
-      "return_at": "2026-11-07T15:04:00Z"
+      "pickup_departure_at": "2026-11-07T13:51:00Z",
+      "gate_arrival_at": "2026-11-07T14:36:00Z",
+      "return_at": "2026-11-07T15:34:00Z"
     },
     {
       "job_id": "J02",
@@ -1521,23 +1521,23 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T09:50:00Z",
       "gate_arrival_at": "2026-11-07T10:05:00Z",
-      "return_at": "2026-11-07T10:53:00Z"
+      "return_at": "2026-11-07T11:03:00Z"
     },
     {
       "job_id": "J12",
       "vehicle_id": "T2",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T11:01:00Z",
-      "gate_arrival_at": "2026-11-07T11:16:00Z",
-      "return_at": "2026-11-07T12:04:00Z"
+      "pickup_departure_at": "2026-11-07T11:11:00Z",
+      "gate_arrival_at": "2026-11-07T11:26:00Z",
+      "return_at": "2026-11-07T12:24:00Z"
     },
     {
       "job_id": "J16",
       "vehicle_id": "T2",
       "sequence": 3,
-      "pickup_departure_at": "2026-11-07T12:29:00Z",
-      "gate_arrival_at": "2026-11-07T12:59:00Z",
-      "return_at": "2026-11-07T13:47:00Z"
+      "pickup_departure_at": "2026-11-07T12:49:00Z",
+      "gate_arrival_at": "2026-11-07T13:19:00Z",
+      "return_at": "2026-11-07T14:17:00Z"
     },
     {
       "job_id": "J04",
@@ -1545,23 +1545,23 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T10:35:00Z",
       "gate_arrival_at": "2026-11-07T11:15:00Z",
-      "return_at": "2026-11-07T12:03:00Z"
+      "return_at": "2026-11-07T12:13:00Z"
     },
     {
       "job_id": "J10",
       "vehicle_id": "T3",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T12:38:00Z",
-      "gate_arrival_at": "2026-11-07T13:18:00Z",
-      "return_at": "2026-11-07T14:06:00Z"
+      "pickup_departure_at": "2026-11-07T12:48:00Z",
+      "gate_arrival_at": "2026-11-07T13:28:00Z",
+      "return_at": "2026-11-07T14:26:00Z"
     },
     {
       "job_id": "J15",
       "vehicle_id": "T3",
       "sequence": 3,
-      "pickup_departure_at": "2026-11-07T14:41:00Z",
-      "gate_arrival_at": "2026-11-07T15:21:00Z",
-      "return_at": "2026-11-07T16:09:00Z"
+      "pickup_departure_at": "2026-11-07T15:01:00Z",
+      "gate_arrival_at": "2026-11-07T15:41:00Z",
+      "return_at": "2026-11-07T16:39:00Z"
     },
     {
       "job_id": "J05",
@@ -1569,23 +1569,23 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T10:20:00Z",
       "gate_arrival_at": "2026-11-07T10:35:00Z",
-      "return_at": "2026-11-07T11:23:00Z"
+      "return_at": "2026-11-07T11:33:00Z"
     },
     {
       "job_id": "J11",
       "vehicle_id": "T4",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T11:48:00Z",
-      "gate_arrival_at": "2026-11-07T12:18:00Z",
-      "return_at": "2026-11-07T13:06:00Z"
+      "pickup_departure_at": "2026-11-07T11:58:00Z",
+      "gate_arrival_at": "2026-11-07T12:28:00Z",
+      "return_at": "2026-11-07T13:26:00Z"
     },
     {
       "job_id": "J13",
       "vehicle_id": "T4",
       "sequence": 3,
-      "pickup_departure_at": "2026-11-07T13:26:00Z",
-      "gate_arrival_at": "2026-11-07T13:41:00Z",
-      "return_at": "2026-11-07T14:29:00Z"
+      "pickup_departure_at": "2026-11-07T13:46:00Z",
+      "gate_arrival_at": "2026-11-07T14:01:00Z",
+      "return_at": "2026-11-07T14:59:00Z"
     },
     {
       "job_id": "J06",
@@ -1593,15 +1593,15 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T10:55:00Z",
       "gate_arrival_at": "2026-11-07T11:25:00Z",
-      "return_at": "2026-11-07T12:13:00Z"
+      "return_at": "2026-11-07T12:23:00Z"
     },
     {
       "job_id": "J07",
       "vehicle_id": "T5",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T12:21:00Z",
-      "gate_arrival_at": "2026-11-07T12:36:00Z",
-      "return_at": "2026-11-07T13:24:00Z"
+      "pickup_departure_at": "2026-11-07T12:31:00Z",
+      "gate_arrival_at": "2026-11-07T12:46:00Z",
+      "return_at": "2026-11-07T13:44:00Z"
     },
     {
       "job_id": "J03",
@@ -1609,15 +1609,15 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T11:08:00Z",
       "gate_arrival_at": "2026-11-07T11:23:00Z",
-      "return_at": "2026-11-07T12:11:00Z"
+      "return_at": "2026-11-07T12:21:00Z"
     },
     {
       "job_id": "J08",
       "vehicle_id": "T6",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T12:46:00Z",
-      "gate_arrival_at": "2026-11-07T13:26:00Z",
-      "return_at": "2026-11-07T14:14:00Z"
+      "pickup_departure_at": "2026-11-07T12:56:00Z",
+      "gate_arrival_at": "2026-11-07T13:36:00Z",
+      "return_at": "2026-11-07T14:34:00Z"
     },
     {
       "job_id": "J17",
@@ -1625,15 +1625,15 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T10:10:00Z",
       "gate_arrival_at": "2026-11-07T10:18:00Z",
-      "return_at": "2026-11-07T10:58:00Z"
+      "return_at": "2026-11-07T11:08:00Z"
     },
     {
       "job_id": "J19",
       "vehicle_id": "T7",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T11:33:00Z",
-      "gate_arrival_at": "2026-11-07T12:06:00Z",
-      "return_at": "2026-11-07T12:46:00Z"
+      "pickup_departure_at": "2026-11-07T11:43:00Z",
+      "gate_arrival_at": "2026-11-07T12:16:00Z",
+      "return_at": "2026-11-07T13:06:00Z"
     },
     {
       "job_id": "J18",
@@ -1641,24 +1641,24 @@
       "sequence": 1,
       "pickup_departure_at": "2026-11-07T10:55:00Z",
       "gate_arrival_at": "2026-11-07T11:35:00Z",
-      "return_at": "2026-11-07T12:15:00Z"
+      "return_at": "2026-11-07T12:25:00Z"
     },
     {
       "job_id": "J20",
       "vehicle_id": "T8",
       "sequence": 2,
-      "pickup_departure_at": "2026-11-07T12:40:00Z",
-      "gate_arrival_at": "2026-11-07T13:12:00Z",
-      "return_at": "2026-11-07T13:52:00Z"
+      "pickup_departure_at": "2026-11-07T12:50:00Z",
+      "gate_arrival_at": "2026-11-07T13:22:00Z",
+      "return_at": "2026-11-07T14:12:00Z"
     }
   ],
   "change": {
     "change_id": "C002",
-    "voyage_id": "BH045E",
+    "voyage_id": "BHMN-2026-0045",
     "terminal_id": "HJNC",
-    "previous_opens_at": "2026-11-07T04:00:00Z",
+    "previous_opens_at": "2026-11-04T15:00:00Z",
     "previous_closes_at": "2026-11-07T14:00:00Z",
-    "new_window_id": "W-BH045E",
+    "new_window_id": "W-BHMN-2026-0045",
     "verification": "confirmed",
     "confirmed_by": "demo-dispatcher",
     "confirmed_at": "2026-11-07T09:55:00Z",
