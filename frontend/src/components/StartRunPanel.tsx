@@ -72,13 +72,18 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
 
   // 기록을 비운 뒤 다시 열렸으면 고르던 변경을 바로 이어서 계산한다(한 번만).
   const startRef = useRef<() => void>(() => {})
+  // 표시는 읽기만 하고(개발 모드의 두 번 실행에도 남도록), 실제로 이어서 시작할 때 지운다.
   const [resume, setResume] = useState<string | null>(() => {
-    try { const id = sessionStorage.getItem(AUTOSTART); sessionStorage.removeItem(AUTOSTART); return id } catch { return null }
+    try { return sessionStorage.getItem(AUTOSTART) } catch { return null }
   })
   useEffect(() => {
     if (!resume) return
     if (exampleId !== resume) { if (EXAMPLES.some((e) => e.id === resume)) setExampleId(resume as typeof exampleId); else setResume(null); return }
-    if (attempt && status.state === 'idle') { setResume(null); startRef.current() }
+    if (attempt && status.state === 'idle') {
+      try { sessionStorage.removeItem(AUTOSTART) } catch { /* 없음 */ }
+      setResume(null)
+      startRef.current()
+    }
   }, [resume, exampleId, attempt, status.state])
 
   if (!attempt)
