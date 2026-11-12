@@ -174,7 +174,9 @@ class Hub:
                 return cookie, self.session_response(cookie, self.authenticate(cookie))
             except ApiError:
                 pass
-        self.rate("new-session:" + client_bucket, limit=5)
+        # A classroom/demo group can share one public IP. Keep admission bounded
+        # while allowing the agreed 20 visitors to open their first session.
+        self.rate("new-session:" + client_bucket, limit=20)
         with self.lock:
             self.cleanup()
             sid = secrets.token_hex(16)
