@@ -53,10 +53,6 @@ function fakeClient(authorized: boolean) {
   return { client: { session: vi.fn().mockResolvedValue(session(authorized)), get, post } as unknown as V2Client, post }
 }
 const flush = () => act(async () => { await new Promise((r) => setTimeout(r, 0)) })
-const clickText = async (text: string) => {
-  const el = [...container.querySelectorAll('button, label')].find((b) => b.textContent?.includes(text)) as HTMLElement
-  await act(async () => (el.tagName === 'LABEL' ? el.querySelector('input')! : el).click())
-}
 
 describe('변경 전달 화면', () => {
   it('허가 없는 세션은 명세·확인할 사항만 보이고 초대·전달 버튼이 없다', async () => {
