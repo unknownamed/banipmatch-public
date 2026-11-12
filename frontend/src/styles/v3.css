@@ -250,3 +250,6 @@ h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
 .rc-when { margin-left: 6px; font-size: 13px; font-weight: 600; color: var(--ink-3); }
 .rc-answer { display: flex; align-items: center; gap: 10px; margin: 16px 0 8px; }
 .rc-memo { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; resize: vertical; }
+.evidence-strip { grid-template-columns: 1.3fr 1fr 1.5fr 1fr 1.3fr !important; }
+.evidence-strip dd { white-space: nowrap; }
+@media (max-width: 900px) { .evidence-strip { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } .evidence-strip dd { white-space: normal; } }

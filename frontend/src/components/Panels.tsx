@@ -68,35 +68,26 @@ export function ChangeEvidence({ s }: { s: Snapshot }) {
           </dd>
         </div>
         <div>
-          <dt>변경 전 반입 시간</dt>
-          <dd>
-            {kstTimeWithDay(c.previous_opens_at, s.as_of)} ~ {kstTimeWithDay(c.previous_closes_at, s.as_of)}
-          </dd>
+          <dt>반입 시작</dt>
+          <dd>{kstTimeWithDay(w?.opens_at ?? c.previous_opens_at, s.as_of)}</dd>
         </div>
-        <div className="evidence-new dup">
-          <dt>변경 후 반입 시간</dt>
+        <div className="evidence-new">
+          <dt>반입 마감</dt>
           <dd>
-            {w ? (
-              <>
-                {kstTimeWithDay(w.opens_at, s.as_of)} ~ <b>{kstTimeWithDay(w.closes_at, s.as_of)}</b>
-              </>
-            ) : (
-              <span className="warn">새 반입 시간({c.new_window_id})을 입력에서 찾지 못했습니다</span>
-            )}
+            {w ? <><s>{kstTimeWithDay(c.previous_closes_at, s.as_of)}</s> → <b>{c.previous_closes_at ? kstTimeWithDay(w.closes_at, c.previous_closes_at) : kstTimeWithDay(w.closes_at, s.as_of)}</b></> : <span className="warn">새 반입 마감을 찾지 못했습니다</span>}
           </dd>
         </div>
         <div>
           <dt>상태</dt>
           <dd>
             <span className={c.verification === 'confirmed' ? 'ok' : 'warn'}>{VERIFY[c.verification] ?? c.verification}</span>
-            <div className="small">{c.confirmed_at ? `${kstDateTime(c.confirmed_at)} 확인` : '터미널 확정 대기'}</div>
+            <div className="small">{c.confirmed_at ? `${kstDateTime(c.confirmed_at)} 확정` : '터미널 확정 대기'}</div>
           </dd>
         </div>
         <div>
           <dt>근거</dt>
           <dd title={c.evidence.source_ref}>
-            {c.evidence.source_ref.startsWith('fixture:') ? `${c.terminal_id} 공지` : sourceLabel(c.evidence.source_ref)}
-            <div className="small">{kstDateTime(c.evidence.received_at)} 수신</div>
+            {c.evidence.source_ref.startsWith('fixture:') ? `${c.terminal_id} 반입 마감 변경 공지` : sourceLabel(c.evidence.source_ref)}
           </dd>
         </div>
       </dl>
