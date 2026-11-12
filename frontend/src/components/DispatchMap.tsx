@@ -26,12 +26,14 @@ function bearing(a: Pt, b: Pt) {
   return (Math.atan2(y, x) / r + 360) % 360
 }
 
-export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: {
+export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, compact = false }: {
   snapshot: Snapshot
   base: MethodResult | undefined
   cand: MethodResult | undefined
   selectedJob: string | null
   onSelectJob: (jobId: string | null) => void
+  /** 홈처럼 아래에 차량 표가 따로 있으면 지도 옆 차량 목록을 숨긴다 */
+  compact?: boolean
 }) {
   const pts = useMemo(() => locationPoints(snapshot), [snapshot])
   const [usePlan, setUsePlan] = useState<'cand' | 'base'>(cand ? 'cand' : 'base')
@@ -210,7 +212,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
             </div>
           )}
         </div>
-        <div className="dm-side">
+        {!compact && <div className="dm-side">
         {sel ? (
           <div className="vm-info" aria-live="polite">
             <div className="vm-info-head"><b>{vehicleName(sel.vehicleId)}</b><span className={`dm-gate ${sel.gate ?? 'none'}`}>{PHASE_LABEL[sel.phase]}</span></div>
@@ -246,7 +248,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob }: 
           ))}
           {unassigned.length > 0 && <li className="dm-unassigned small">미처리 {unassigned.map(jobName).join(', ')} · 배정된 차량 없음</li>}
         </ol>
-        </div>
+        </div>}
       </div>
     </section>
   )

@@ -305,3 +305,10 @@ h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
   .home-map .dm-map { height: 380px !important; }
   .home-map .dm-list, .home-map .dm-side { max-height: none; }
 }
+.home-map .dm-body { grid-template-columns: minmax(0, 1fr) !important; }
+.alt-plans { margin: 4px 0 10px; }
+.alt-plans > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font-size: 13.5px; font-weight: 600; color: var(--ink-2); list-style: none; }
+.alt-plans > summary::-webkit-details-marker { display: none; }
+.alt-plans > summary::after { content: '▾'; font-size: 11px; }
+.alt-plans[open] > summary { margin-bottom: 10px; }
+.home-map { align-self: start; }

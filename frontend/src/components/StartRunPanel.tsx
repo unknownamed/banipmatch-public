@@ -197,7 +197,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       </div>
       {/* 관제 화면처럼 첫 화면 오른쪽에 오늘 저녁 차량 지도를 크게 둔다(현재 배차표 기준 위치) */}
       <div className="card home-map">
-        <DispatchMap snapshot={tonight} base={undefined} cand={undefined} selectedJob={null} onSelectJob={() => {}} />
+        <DispatchMap snapshot={tonight} base={undefined} cand={undefined} selectedJob={null} onSelectJob={() => {}} compact />
       </div>
       </div>
       {status.state !== 'rejected' && <FleetToday snapshot={tonight} />}
