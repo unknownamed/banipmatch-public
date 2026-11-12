@@ -14,7 +14,7 @@ export function driverMessage(vehicleId: string, changes: ChangeLine[], _version
     lines.push('', '■ 수행할 작업')
     mine.forEach((c, i) => {
       const info = jobInfo(c.job_id)
-      lines.push(`${i + 1}) ${jobName(c.job_id)}${info ? ` · ${info.size} · ${info.owner ?? ''}` : ''}`.trimEnd())
+      lines.push(`${i + 1}) ${[jobName(c.job_id), info?.size, info?.owner].filter(Boolean).join(', ')}`)
       lines.push(`   ${info?.origin ?? '상차지'} ${kstTime(c.after!.pickup_departure_at ?? null)} 출발 → ${info?.terminal ?? ''} 게이트 ${kstTime(c.after!.gate_arrival_at ?? null)} 도착${info ? ` (항차 ${info.voyage})` : ''}`)
       if (c.before?.vehicle_id && c.before.vehicle_id !== vehicleId) lines.push(`   ※ ${vehicleShort(c.before.vehicle_id)} 차량에서 넘어온 작업`)
       else if (c.before) lines.push(`   ※ 출발 시각 변경: ${kstTime(c.before.pickup_departure_at ?? null)} → ${kstTime(c.after!.pickup_departure_at ?? null)}`)

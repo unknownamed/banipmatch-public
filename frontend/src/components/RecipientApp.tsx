@@ -148,6 +148,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
         <h2>내 배차 알림</h2>
         <p className="small muted">연결 만료 {kstDateTime(session.expires_at)}</p>
         {!demo && <PushControl client={client} session={session} env={env} />}
+        <LocationShare client={client} session={session} />
       </section>
 
       {inbox.error !== undefined && <p className="card warn small" role="alert">알림 목록 조회 실패: {errText(inbox.error)}</p>}
@@ -156,7 +157,7 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
         <nav className="card recipient-list" aria-label="받은 변경">
           {items.map((n) => (
             <button key={n.notification_id} type="button" className="secondary" aria-current={n.notification_id === current?.notification_id} onClick={() => setSelected(n.notification_id)}>
-              {kstTime(n.created_at)} · {n.is_current ? RESPONSE_LABEL[n.response] : '이전 계획'}
+              {kstTime(n.created_at)}, {n.is_current ? RESPONSE_LABEL[n.response] : '이전 계획'}
             </button>
           ))}
         </nav>
@@ -166,6 +167,63 @@ function Connected({ client, session, env, demo, focus, onLeave }: { client: Rec
       <p className="small"><button type="button" className="secondary" disabled={leaving} onClick={leave}>이 기기 연결 해제</button></p>
       {leaveError !== null && <p className="warn small" role="alert">연결 해제 실패: {errText(leaveError)}. 연결은 유지됩니다. 다시 시도해 주세요.</p>}
     </>
+  )
+}
+
+// 운행 중 내 위치 보내기: 기사가 직접 켜야 하고, 화면이 열려 있는 동안 1분마다 보낸다. 끄면 서버에서 바로 지운다.
+const LOC_PREF = 'banipmatch.shareLocation'
+const LOC_EVERY_MS = 60000
+
+function LocationShare({ client, session }: { client: RecipientClient; session: RecipientSession }) {
+  const supported = typeof navigator !== 'undefined' && 'geolocation' in navigator
+  const [on, setOn] = useState(() => { try { return localStorage.getItem(LOC_PREF) === '1' } catch { return false } })
+  const [last, setLast] = useState<string | null>(session.location_captured_at ?? null)
+  const [note, setNote] = useState<string | null>(null)
+  const save = (v: boolean) => { try { localStorage.setItem(LOC_PREF, v ? '1' : '0') } catch { /* 저장 못 해도 이번 화면에서는 동작 */ } }
+
+  useEffect(() => {
+    if (!on || !supported) return
+    let alive = true
+    const once = () => navigator.geolocation.getCurrentPosition(
+      (p) => {
+        if (!alive) return
+        client.shareLocation({
+          latitude: p.coords.latitude, longitude: p.coords.longitude,
+          accuracy_m: Math.min(5000, Math.round(p.coords.accuracy ?? 0)), captured_at: new Date(p.timestamp).toISOString(),
+        }).then((r) => { if (alive) { setLast(r.captured_at); setNote(null) } },
+          (e) => alive && setNote(`위치를 보내지 못했습니다: ${errText(e)}`))
+      },
+      (err) => {
+        if (!alive) return
+        if (err.code === err.PERMISSION_DENIED) { setOn(false); save(false); setNote('위치 권한이 꺼져 있습니다. 브라우저(또는 iPhone 설정 → 개인정보 보호 → 위치 서비스)에서 허용해 주세요.') }
+        else setNote('지금 위치를 확인하지 못했습니다. 1분 뒤 다시 시도합니다.')
+      },
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 20000 },
+    )
+    once()
+    const t = setInterval(once, LOC_EVERY_MS)
+    return () => { alive = false; clearInterval(t) }
+  }, [on, supported, client])
+
+  async function toggle(next: boolean) {
+    setNote(null)
+    setOn(next)
+    save(next)
+    if (!next) {
+      try { await client.stopLocation(); setLast(null) } catch (e) { setNote(`위치 지우기 실패: ${errText(e)}`) }
+    }
+  }
+
+  if (!supported) return null
+  return (
+    <div className="loc-share">
+      <label className="lp-switch">
+        <span className="lp-name">운행 중 내 위치 보내기<small>{on ? (last ? `${kstTime(last)} 위치 보냄, 이 화면이 열려 있는 동안 1분마다` : '위치 확인 중…') : '배차 담당자 지도에 내 차량 실제 위치가 보입니다. 끄면 바로 지워집니다.'}</small></span>
+        <input type="checkbox" role="switch" checked={on} onChange={(e) => void toggle(e.target.checked)} />
+        <i aria-hidden="true" />
+      </label>
+      {note && <p className="small warn" role="status">{note}</p>}
+    </div>
   )
 }
 
@@ -304,7 +362,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
                     <span>게이트 도착 <b>{t(c.after.gate_arrival_at)}</b></span>
                   </div>
                 )}
-                {(d?.cargo_owner || d?.voyage_id) && <div className="rc-meta">{[d?.cargo_owner && `화주 ${d.cargo_owner}`, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(' · ')}</div>}
+                {(d?.cargo_owner || d?.voyage_id) && <div className="rc-meta">{[d?.cargo_owner && `화주 ${d.cargo_owner}`, d?.voyage_id && `항차 ${d.voyage_id}`].filter(Boolean).join(', ')}</div>}
               </li>
               )
             })}
@@ -312,7 +370,7 @@ function NotificationDetail({ client, summary, onChanged }: { client: RecipientC
         </div>
       ))}
 
-      <h3 className="rc-answer">응답 <span className={`st ${d.response === 'none' ? 'wait' : d.response === 'cannot_perform' ? 'bad' : 'ok'}`}>{d.response === 'none' ? '아직 응답 안 함' : `${RESPONSE_LABEL[d.response]}${d.responded_at ? ` · ${kstTime(d.responded_at)}` : ''}`}</span></h3>
+      <h3 className="rc-answer">응답 <span className={`st ${d.response === 'none' ? 'wait' : d.response === 'cannot_perform' ? 'bad' : 'ok'}`}>{d.response === 'none' ? '아직 응답 안 함' : `${RESPONSE_LABEL[d.response]}${d.responded_at ? `, ${kstTime(d.responded_at)}` : ''}`}</span></h3>
       <textarea className="rc-memo" rows={2} maxLength={300} value={note} disabled={busy} onChange={(e) => setNote(e.target.value)} placeholder="메모 (선택)" aria-label="메모" />
       <div className="respond-buttons">
         <button type="button" disabled={busy} className="rb-primary" onClick={() => respond('can_perform')}>수행 가능</button>

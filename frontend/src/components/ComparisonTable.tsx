@@ -29,13 +29,13 @@ function Cell({ a, refUtc, closesAt, buffer }: { a: Assignment | undefined; refU
     <div className="cell">
       <span className="cell-main"><Plate id={a.vehicle_id} /> <span className="small">{a.sequence}번째</span></span>
       <div className="small cell-times">
-        출발 {kstTimeWithDay(a.pickup_departure_at, refUtc)} · 도착{' '}
+        출발 {kstTimeWithDay(a.pickup_departure_at, refUtc)}, 도착{' '}
         <span className={late ? 'late-time' : undefined}>
           {kstTimeWithDay(a.gate_arrival_at, refUtc)}
           {late && ` (마감 ${late} 초과)`}
-          {short !== null && ` (마감 ${short}분 전 · 여유 ${buffer}분 미달)`}
+          {short !== null && ` (마감 ${short}분 전, 여유 ${buffer}분 미달)`}
         </span>{' '}
-        · 복귀 {kstTimeWithDay(a.return_at, refUtc)}
+       , 복귀 {kstTimeWithDay(a.return_at, refUtc)}
       </div>
     </div>
   )
@@ -99,7 +99,7 @@ export function ComparisonTable({
             <th>마감</th>
             <th>{baseLabel}</th>
             {hasCand && <th>{candLabel}</th>}
-            {hasCand && <th>변경 · 이유</th>}
+            {hasCand && <th>변경 이유</th>}
           </tr>
         </thead>
         <tbody>
@@ -115,7 +115,7 @@ export function ComparisonTable({
                 <td className="job-cell">
                   <BoxNo jobId={r.job.job_id} />
                   <div className="muted small">
-                    {r.job.voyage_id} · {r.job.terminal_id}{r.job.cargo_owner ? ` · ${r.job.cargo_owner}` : ''}
+                    {r.job.voyage_id}, {r.job.terminal_id}{r.job.cargo_owner ? `, ${r.job.cargo_owner}` : ''}
                   </div>
                   {r.job.ready_at === null && <div className="warn small">준비시각 미확인</div>}
                   {r.locked && (
@@ -147,12 +147,12 @@ export function ComparisonTable({
                   </td>
                 )}
                 {hasCand && (
-                  <td data-label="변경 · 이유">
+                  <td data-label="변경 이유">
                     {r.locked ? (
                       preserved ? (
                         <span className="dot dot-muted">원안 유지</span>
                       ) : (
-                        <span className="dot dot-warn">고정 작업 변경됨 · 확인 필요</span>
+                        <span className="dot dot-warn">고정 작업 변경됨, 확인 필요</span>
                       )
                     ) : r.changes.length ? (
                       <span className="dot dot-ok">{r.changes.map((c) => CHANGE_LABEL[c]).join('·')} 변경</span>

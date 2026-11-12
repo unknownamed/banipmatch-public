@@ -32,6 +32,7 @@ class WorkflowStore:
             conn.execute("UPDATE invitations SET revoked=1")
             conn.execute("UPDATE recipients SET revoked=1")
             conn.execute("DELETE FROM recipient_vehicles")
+            conn.execute("DELETE FROM recipient_locations")
             conn.execute("UPDATE push_subscriptions SET encrypted_json=NULL,endpoint_fingerprint=NULL,status='revoked'")
             conn.execute("UPDATE notifications SET delivery_status='superseded',error_code='SESSION_EXPIRED' "
                          "WHERE delivery_status='pending'")
@@ -269,8 +270,10 @@ class WorkflowStore:
         vehicles = [v[0] for v in conn.execute("SELECT vehicle_id FROM recipient_vehicles WHERE recipient_id=? ORDER BY vehicle_id", (identifier,))]
         sub = conn.execute("SELECT status,expires_at FROM push_subscriptions WHERE recipient_id=?", (identifier,)).fetchone()
         status = sub["status"] if sub and moment(sub["expires_at"]) > self.hub.clock() else "expired" if sub else "missing"
+        loc = conn.execute("SELECT captured_at FROM recipient_locations WHERE recipient_id=?", (identifier,)).fetchone()
         return {"recipient_id": identifier, "vehicle_ids": vehicles, "expires_at": row["expires_at"],
-                "subscription_status": status, "data_mode": "simulated"}
+                "subscription_status": status, "data_mode": "simulated",
+                "location_captured_at": loc["captured_at"] if loc else None}
 
     def recipients(self):
         with self.db.connect() as conn:
@@ -280,8 +283,46 @@ class WorkflowStore:
                 values.append({"recipient_id": row["recipient_id"], "plan_id": row["plan_id"], "expires_at": row["expires_at"],
                     "revoked": bool(row["revoked"]), "vehicle_ids": [v[0] for v in conn.execute(
                         "SELECT vehicle_id FROM recipient_vehicles WHERE recipient_id=?", (row["recipient_id"],))],
-                    "subscription_status": sub["status"] if sub and moment(sub["expires_at"]) > self.hub.clock() else "expired" if sub else "missing"})
+                    "subscription_status": sub["status"] if sub and moment(sub["expires_at"]) > self.hub.clock() else "expired" if sub else "missing",
+                    "location": self.location_of(conn, row)})
             return {"recipients": values}
+
+    # 기사 휴대폰 위치: 동의한 기사가 화면을 연 동안 보낸 최신 1건만 두고, 받은 지 60분이 지나면 보여 주지 않는다.
+    LOCATION_TTL = timedelta(minutes=60)
+
+    def location_of(self, conn, row):
+        if row["revoked"]:
+            return None
+        loc = conn.execute("SELECT * FROM recipient_locations WHERE recipient_id=?", (row["recipient_id"],)).fetchone()
+        if not loc or moment(loc["received_at"]) < self.hub.clock() - self.LOCATION_TTL:
+            return None
+        return {"latitude": loc["latitude"], "longitude": loc["longitude"], "accuracy_m": loc["accuracy_m"],
+                "captured_at": loc["captured_at"], "received_at": loc["received_at"]}
+
+    def share_location(self, identifier, body):
+        try:
+            captured = moment(body["captured_at"])
+        except ValueError:
+            raise ApiError(422, "INVALID_LOCATION", "위치 측정 시각 형식이 맞지 않음")
+        if captured.tzinfo is None:
+            raise ApiError(422, "INVALID_LOCATION", "위치 측정 시각에 시간대가 없음")
+        now = self.hub.clock()
+        if captured > now + timedelta(minutes=2) or captured < now - timedelta(minutes=10):
+            raise ApiError(422, "LOCATION_STALE", "10분 안에 측정한 위치만 받음")
+        values = (identifier, float(body["latitude"]), float(body["longitude"]), float(body["accuracy_m"]),
+                  stamp(captured), self.hub.now())
+        with self.db.transaction() as conn:
+            self.recipient(conn, identifier)
+            conn.execute("INSERT INTO recipient_locations VALUES(?,?,?,?,?,?) ON CONFLICT(recipient_id) DO UPDATE SET "
+                         "latitude=excluded.latitude,longitude=excluded.longitude,accuracy_m=excluded.accuracy_m,"
+                         "captured_at=excluded.captured_at,received_at=excluded.received_at", values)
+        return {"location_shared": True, "captured_at": values[4]}
+
+    def stop_location(self, identifier):
+        with self.db.transaction() as conn:
+            self.recipient(conn, identifier)
+            conn.execute("DELETE FROM recipient_locations WHERE recipient_id=?", (identifier,))
+        return {"location_shared": False, "captured_at": None}
 
     def revoke(self, identifier):
         with self.db.transaction() as conn:
@@ -291,6 +332,7 @@ class WorkflowStore:
             conn.execute("UPDATE recipients SET revoked=1 WHERE recipient_id=?", (identifier,))
             conn.execute("UPDATE invitations SET revoked=1 WHERE invitation_id=?", (row[0],))
             conn.execute("DELETE FROM recipient_vehicles WHERE recipient_id=?", (identifier,))
+            conn.execute("DELETE FROM recipient_locations WHERE recipient_id=?", (identifier,))
             conn.execute("UPDATE push_subscriptions SET status='revoked',encrypted_json=NULL,endpoint_fingerprint=NULL WHERE recipient_id=?", (identifier,))
         with self.hub.registry.transaction() as conn:
             conn.execute("DELETE FROM endpoint_owners WHERE session_id=? AND recipient_id=?", (self.sid, identifier))

@@ -58,3 +58,8 @@ CREATE TABLE IF NOT EXISTS recipient_responses (
 CREATE INDEX IF NOT EXISTS notifications_by_recipient ON notifications(recipient_id,created_at);
 PRAGMA user_version=2;
 COMMIT;
+CREATE TABLE IF NOT EXISTS recipient_locations (
+ recipient_id TEXT PRIMARY KEY REFERENCES recipients(recipient_id),
+ latitude REAL NOT NULL, longitude REAL NOT NULL, accuracy_m REAL NOT NULL,
+ captured_at TEXT NOT NULL, received_at TEXT NOT NULL
+) STRICT;

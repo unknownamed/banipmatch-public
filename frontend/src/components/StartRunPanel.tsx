@@ -54,6 +54,8 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
   const [exampleId, setExampleId] = useState<(typeof EXAMPLES)[number]['id']>('02')
   const [filter, setFilter] = useState<'all' | Tone>('all')
   const [query, setQuery] = useState('')
+  // 홈 지도와 아래 차량 표는 같은 차량을 함께 고른다.
+  const [homePick, setHomePick] = useState<string | null>(null)
   // 예제마다 한 시도를 유지한다. 실패 후 "다시 시도"는 같은 본문·같은 멱등키. 새 시도는 새로고침.
   const [attempts] = useState(() => new Map<string, StartAttempt>())
   const [status, setStatus] = useState<Status>({ state: 'idle' })
@@ -72,13 +74,18 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
 
   // 기록을 비운 뒤 다시 열렸으면 고르던 변경을 바로 이어서 계산한다(한 번만).
   const startRef = useRef<() => void>(() => {})
+  // 표시는 읽기만 하고(개발 모드의 두 번 실행에도 남도록), 실제로 이어서 시작할 때 지운다.
   const [resume, setResume] = useState<string | null>(() => {
-    try { const id = sessionStorage.getItem(AUTOSTART); sessionStorage.removeItem(AUTOSTART); return id } catch { return null }
+    try { return sessionStorage.getItem(AUTOSTART) } catch { return null }
   })
   useEffect(() => {
     if (!resume) return
     if (exampleId !== resume) { if (EXAMPLES.some((e) => e.id === resume)) setExampleId(resume as typeof exampleId); else setResume(null); return }
-    if (attempt && status.state === 'idle') { setResume(null); startRef.current() }
+    if (attempt && status.state === 'idle') {
+      try { sessionStorage.removeItem(AUTOSTART) } catch { /* 없음 */ }
+      setResume(null)
+      startRef.current()
+    }
   }, [resume, exampleId, attempt, status.state])
 
   if (!attempt)
@@ -217,7 +224,7 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
                 return <li key={`${d.path}:${k}`}><b>{r.what}</b>: {r.why}</li>
               })}
             </ul>
-            <p className="small">화주·기사에게 확인한 값을 아래 ‘조건 보완’에 넣고 다시 계산하세요.</p>
+            <p className="small">화주나 기사에게 확인한 값을 아래 ‘조건 보완’에 넣고 다시 계산하세요.</p>
           </div>
         )}
       </section>
@@ -225,10 +232,10 @@ export function StartRunPanel({ client }: { client: ApiClient }) {
       </div>
       {/* 관제 화면처럼 첫 화면 오른쪽에 오늘 저녁 차량 지도를 크게 둔다(현재 배차표 기준 위치) */}
       <div className="card home-map">
-        <DispatchMap snapshot={tonight} base={undefined} cand={undefined} selectedJob={null} onSelectJob={() => {}} compact />
+        <DispatchMap snapshot={tonight} base={undefined} cand={undefined} selectedJob={null} onSelectJob={() => {}} compact pickedVehicleId={homePick} onPickVehicle={setHomePick} />
       </div>
       </div>
-      {status.state !== 'rejected' && <FleetToday snapshot={tonight} />}
+      {status.state !== 'rejected' && <FleetToday snapshot={tonight} picked={homePick} onPick={setHomePick} />}
       {status.state === 'rejected' && <RejectedInput snapshot={status.snapshot} reason={status.error.message} />}
       {status.state === 'rejected' && v2 && status.error.body!.code !== 'WINDOW_UNCONFIRMED' && (
         <ConditionRevisionPanel

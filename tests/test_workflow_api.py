@@ -1,6 +1,7 @@
 """Isolated mock dispatches and injected transport only; never send to a phone."""
 import base64
 from copy import deepcopy
+from datetime import timedelta
 from dataclasses import dataclass, replace
 import json
 import time
@@ -758,3 +759,42 @@ def test_dispatch_checks_stored_run_hash_rather_than_inventing_a_matching_hash(w
     assert preview.status_code == 422 and preview.json()["code"] == "APPROVAL_INTEGRITY_FAILED"
     sent = manager.post(f"/v2/plans/{snapshot['plan_id']}/dispatches",body)
     assert sent.status_code == 422 and workflow[1].calls == []
+
+
+def test_driver_location_is_consented_latest_only_bounded_and_removed_on_stop_or_revoke(workflow):
+    client, _, _ = workflow
+    manager = new_manager(client)
+    snapshot = seed(manager)
+    allow(manager)
+    vehicle = snapshot["vehicles"][0]["vehicle_id"]
+    actor, _ = connect_recipient(manager, snapshot, [vehicle])
+    hub = client.app.state.workflow
+    now = hub.clock()
+    at = lambda minutes=0: (now + timedelta(minutes=minutes)).isoformat().replace("+00:00", "Z")
+    body = {"latitude": 35.0712, "longitude": 128.8231, "accuracy_m": 18.0, "captured_at": at(), "consent": True}
+    # 동의 없이, 국외 좌표, 오래된 측정은 받지 않는다.
+    assert actor.post("/v2/recipient/location", body | {"consent": False}).status_code == 422
+    assert actor.post("/v2/recipient/location", body | {"latitude": 51.5}).status_code == 422
+    assert actor.post("/v2/recipient/location", body | {"captured_at": at(-30)}).status_code == 422
+    # 담당자는 기사 위치를 쓸 수 없다.
+    assert manager.post("/v2/recipient/location", body).status_code == 401
+    first = actor.post("/v2/recipient/location", body)
+    assert first.status_code == 200, first.text
+    assert first.json()["location_shared"] is True
+    second = actor.post("/v2/recipient/location", body | {"latitude": 35.0801})
+    assert second.status_code == 200
+    with hub.domain(manager.info["session_id"]).db.connect() as conn:
+        assert conn.execute("SELECT COUNT(*) FROM recipient_locations").fetchone()[0] == 1
+    shown = manager.get("/v2/recipients").json()["recipients"][0]
+    assert shown["vehicle_ids"] == [vehicle]
+    assert shown["location"]["latitude"] == 35.0801
+    assert actor.get("/v2/recipient/session").json()["location_captured_at"] is not None
+    # 공유를 끄면 바로 지운다.
+    stop = actor.request("DELETE", "/v2/recipient/location")
+    assert stop.status_code == 200 and stop.json()["location_shared"] is False
+    assert manager.get("/v2/recipients").json()["recipients"][0]["location"] is None
+    # 연결을 끊어도 지운다.
+    assert actor.post("/v2/recipient/location", body).status_code == 200
+    assert manager.post("/v2/recipients/" + actor.info["recipient_id"] + "/revoke", {}).status_code == 200
+    with hub.domain(manager.info["session_id"]).db.connect() as conn:
+        assert conn.execute("SELECT COUNT(*) FROM recipient_locations").fetchone()[0] == 0

@@ -12,6 +12,7 @@ import { driverMessage } from '../lib/driverMessage'
 import { BoxNo, Plate } from './Ids'
 import { Icon } from './Icon'
 import { ISSUE_LABEL } from '../lib/compare'
+import { publishDriverLocations } from '../lib/driverLocations'
 
 const enc = encodeURIComponent
 const errText = (e: unknown) =>
@@ -28,7 +29,11 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
   const [dispatchId, setDispatchId] = useState(() => new URLSearchParams(location.search).get('dispatch'))
 
   const loadRecipients = useCallback(
-    () => client.get<{ recipients: RecipientSummary[] }>('/v2/recipients').then((r) => setRecipients(r.recipients.filter((x) => x.plan_id === planId)), () => {}),
+    () => client.get<{ recipients: RecipientSummary[] }>('/v2/recipients').then((r) => {
+      const mine = r.recipients.filter((x) => x.plan_id === planId)
+      setRecipients(mine)
+      publishDriverLocations(mine)
+    }, () => {}),
     [client, planId],
   )
   useEffect(() => {
@@ -37,7 +42,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
     client.session().then((s) => live && setSession(s), () => {})
     loadRecipients()
     const timer = setInterval(loadRecipients, 5000)
-    return () => { live = false; clearInterval(timer) }
+    return () => { live = false; clearInterval(timer); publishDriverLocations([]) }
   }, [client, planId, loadRecipients])
 
   if (preview.error) {
@@ -195,7 +200,7 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
               <button type="button" className="btn-line" onClick={() => { navigator.clipboard?.writeText(invite.link); setCopied(true) }}>
                 <Icon name="link" size={14} />{copied ? '복사했습니다' : '링크 복사'}
               </button>
-              {copied && <span className="small muted">카톡·문자로 기사에게 붙여넣으세요.</span>}
+              {copied && <span className="small muted">카톡이나 문자로 기사에게 붙여 넣으세요.</span>}
             </div>
             <p className="small muted">아이폰은 Safari에서 공유 › 홈 화면에 추가한 뒤, 그 아이콘으로 열어 링크를 붙여넣어야 알림이 옵니다.</p>
           </div>
@@ -290,8 +295,8 @@ function DispatchStatus({ client, dispatchId, recipients }: { client: V2Client; 
                 <td>{n.opened_at ? kstTime(n.opened_at) : '—'}</td>
                 <td>
                   {RESPONSE_LABEL[n.response] ?? n.response}
-                  {n.responded_at && <span className="small muted"> · {kstTime(n.responded_at)}</span>}
-                  {n.response_history.at(-1)?.note && <span className="small muted"> · “{n.response_history.at(-1)!.note}”</span>}
+                  {n.responded_at && <span className="small muted">, {kstTime(n.responded_at)}</span>}
+                  {n.response_history.at(-1)?.note && <span className="small muted">, “{n.response_history.at(-1)!.note}”</span>}
                 </td>
                 <td>
                   {n.response !== 'none' ? null : <>
@@ -318,7 +323,7 @@ function CopyNotice({ text }: { text: string }) {
   return (
     <div className="copy-notice">
       <button type="button" className="secondary" onClick={() => navigator.clipboard?.writeText(text).then(() => setState('copied'), () => setState('failed')) ?? setState('failed')}>
-        {state === 'copied' ? '복사됨 · 문자/카톡에 붙여넣기' : '기사 안내문 복사'}
+        {state === 'copied' ? '복사했습니다. 문자나 카톡에 붙여 넣으세요' : '기사 안내문 복사'}
       </button>
       {state === 'failed' && <span className="warn small"> 복사하지 못했습니다. 아래 내용을 직접 선택해 복사하세요.</span>}
       <details>
@@ -372,11 +377,11 @@ function changeText(vehicleId: string, c: { kind: string; before?: Slot; after?:
   const t = (x: string | null | undefined) => kstTime(x ?? null)
   const b = c.before, a = c.after
   if (!a) return '배정 보류(운송 취소 아님, 담당자 확인 중)'
-  const when = `상차지 출발 ${t(a.pickup_departure_at)} · 게이트 도착 ${t(a.gate_arrival_at)}`
-  if (!b) return `새로 배정 · ${when}`
+  const when = `상차지 출발 ${t(a.pickup_departure_at)}, 게이트 도착 ${t(a.gate_arrival_at)}`
+  if (!b) return `새로 배정, ${when}`
   if (b.vehicle_id !== a.vehicle_id)
-    return b.vehicle_id === vehicleId ? `다른 차량(${vehicleShort(a.vehicle_id)})으로 넘어감 · 이 차량은 수행하지 않음` : `${vehicleShort(b.vehicle_id)} 차량에서 넘어옴 · ${when}`
+    return b.vehicle_id === vehicleId ? `다른 차량(${vehicleShort(a.vehicle_id)})으로 넘어감, 이 차량은 수행하지 않음` : `${vehicleShort(b.vehicle_id)} 차량에서 넘어옴, ${when}`
   const moved = b.pickup_departure_at !== a.pickup_departure_at
-  const order = b.sequence !== a.sequence ? ` · 순서 ${b.sequence}번째 → ${a.sequence}번째` : ''
-  return moved ? `상차지 출발 ${t(b.pickup_departure_at)} → ${t(a.pickup_departure_at)} · 게이트 도착 ${t(a.gate_arrival_at)}${order}` : `시각 그대로${order}`
+  const order = b.sequence !== a.sequence ? `, 순서 ${b.sequence}번째 → ${a.sequence}번째` : ''
+  return moved ? `상차지 출발 ${t(b.pickup_departure_at)} → ${t(a.pickup_departure_at)}, 게이트 도착 ${t(a.gate_arrival_at)}${order}` : `시각 그대로${order}`
 }

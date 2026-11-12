@@ -108,7 +108,7 @@ export function ApprovalPanel({ gate, client, run, result, idempotencyKey, share
       {status.state === 'done' && (
         <div role="status">
           <p className="ok">
-            배차를 확정했습니다 · {kstDateTime(status.approval.approved_at)}
+            {kstDateTime(status.approval.approved_at)} 배차를 확정했습니다
           </p>
           {status.planWarning && <p className="warn">{status.planWarning}</p>}
         </div>

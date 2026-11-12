@@ -29,7 +29,7 @@ describe('차량별 일정의 미확인·미배정 보존', () => {
     expect(otherBars.map((a) => a.jobId)).toEqual(['J1', 'J2', 'J3'])
     expect(otherBars.every((b) => [b.left, b.width, b.arrival].every(Number.isFinite))).toBe(true)
     const html = render(s)
-    expect(html).toContain('J0 · 출발')
+    expect(html).toContain('J0, 출발')
     expect(html).toContain('미확인')
     expect(html).toContain('시각 확인 필요')
     expect(html).not.toMatch(/NaN|Infinity/)

@@ -114,7 +114,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         const el = document.createElement('div')
         el.className = 'vm-ship'
         el.setAttribute('role', 'button')
-        el.addEventListener('click', () => setPicked(v.id))
+        // 다른 터미널 배를 누르면 목록에도 보이도록 '신항 전체'로 넓힌다.
+        el.addEventListener('click', () => { setPicked(v.id); if (v.terminal !== 'HJNC') setScope('all') })
         const overlay = new maps.CustomOverlay({ map: m, position: ll(v.route[0]), content: el, zIndex: 5, clickable: true })
         marks.current.set(v.id, { overlay, el })
       }
@@ -180,6 +181,15 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
     }
   }, [fleet, sel, mapState.ok, t, zoomTick, scope])
 
+  // 지도에서 배를 누르면 목록의 같은 배를 강조하고, 화면 밖이면 보이는 곳까지만 굴린다(처음 열 때는 굴리지 않는다).
+  const firstPick = useRef(true)
+  useEffect(() => {
+    if (firstPick.current) { firstPick.current = false; return }
+    // 범위가 '신항 전체'로 바뀌어 목록이 다시 그려진 뒤에 굴린다.
+    const id = requestAnimationFrame(() => document.querySelector<HTMLElement>('.vm-item.picked')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
+    return () => cancelAnimationFrame(id)
+  }, [picked])
+
   const focus = (v: VesselView) => {
     setPicked(v.vessel.id)
     const maps = window.kakao?.maps
@@ -195,12 +205,12 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         <button type="button" className={`vm-item${v.vessel.id === sel.vessel.id ? ' picked' : ''}`} aria-pressed={v.vessel.id === sel.vessel.id} onClick={() => focus(v)}>
           <span className="vm-item-top">
             <b>{v.vessel.name ?? '이름 미수신'}</b>
-            <span className="muted">{v.vessel.voyage} · {v.vessel.terminal}</span>
+            <span className="muted">{v.vessel.voyage}, {v.vessel.terminal}</span>
             <span className={`vm-chip ${v.vessel.outbound ? 'out' : v.status}`}>{label}</span>
           </span>
           <span className="vm-eta">
-            {v.vessel.outbound ? <span className="muted">{v.vessel.port} 향발{v.etaMin !== null ? ` · 외해까지 ${formatDuration(v.etaMin - t)}` : ''}</span>
-              : v.etaMin !== null ? <><b>{formatDuration(v.etaMin - t)}</b> 후 도착 추정 <span className="muted">· {kst(at(base, v.etaMin))}</span></>
+            {v.vessel.outbound ? <span className="muted">{v.vessel.port} 향발{v.etaMin !== null ? `, 외해까지 ${formatDuration(v.etaMin - t)}` : ''}</span>
+              : v.etaMin !== null ? <><b>{formatDuration(v.etaMin - t)}</b> 후 도착 추정 <span className="muted">({kst(at(base, v.etaMin))})</span></>
               : <span className="muted">{v.etaNote}</span>}
           </span>
           {!v.vessel.outbound && <span className="vm-bar" aria-hidden="true"><span style={{ width: `${Math.round(progress * 100)}%` }} /></span>}
@@ -220,7 +230,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
         {nextCut && (
           <div className="vm-brief">
             <span><b>HJNC로 오는 모선 {inboundHjnc}척</b></span>
-            <span>다음 반입 마감 <b>{nextCut.vessel.voyage}</b> {kst(at(base, nextCut.vessel.cutoffMin!))} · <b className="vm-left">{formatDuration(nextCut.vessel.cutoffMin! - t)} 남음</b></span>
+            <span>다음 반입 마감 <b>{nextCut.vessel.voyage}</b> {kst(at(base, nextCut.vessel.cutoffMin!))}, <b className="vm-left">{formatDuration(nextCut.vessel.cutoffMin! - t)} 남음</b></span>
             <SeaWeatherLine />
           </div>
         )}
@@ -260,7 +270,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
             <InfoCard v={sel} t={t} base={base} cut={cutoffOf(sel.vessel.voyage, sel.vessel.terminal, sel.vessel.cutoffMin)} link={link} />
             <div className="toolbar vm-tools">
               <div className="seg" role="group" aria-label="터미널 범위">
-                <button type="button" aria-pressed={scope === 'HJNC'} onClick={() => setScope('HJNC')}>HJNC행<span className="n">{fleet.filter(v => v.vessel.terminal === 'HJNC').length}척</span></button>
+                <button type="button" aria-pressed={scope === 'HJNC'} onClick={() => setScope('HJNC')}>HJNC<span className="n">{fleet.filter(v => v.vessel.terminal === 'HJNC').length}척</span></button>
                 <button type="button" aria-pressed={scope === 'all'} onClick={() => setScope('all')}>신항 전체<span className="n">{fleet.length}척</span></button>
               </div>
               <label className="search">
@@ -291,12 +301,12 @@ function InfoCard({ v, t, base, cut, link }: { v: VesselView; t: number; base: D
   ]
   if (v.status === 'underway' && !v.vessel.outbound && v.etaMin !== null) {
     rows.push(['도착 추정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후)</>])
-    rows.push(['남은 항로', `${v.remainingNm!.toFixed(1)}해리 · ${v.vessel.speedKn}노트`])
-  } else if (v.status === 'offshore' && v.etaMin !== null) rows.push(['접안 예정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후 · 외해 항해 중, 지도 범위 밖)</>])
-  else if (v.vessel.outbound) rows.push(['상태', `출항 중 · ${v.vessel.speedKn}노트`])
+    rows.push(['남은 항로', `${v.remainingNm!.toFixed(1)}해리, ${v.vessel.speedKn}노트`])
+  } else if (v.status === 'offshore' && v.etaMin !== null) rows.push(['접안 예정', <><b>{kst(at(base, v.etaMin))}</b> ({formatDuration(v.etaMin - t)} 후, 외해 항해 중, 지도 범위 밖)</>])
+  else if (v.vessel.outbound) rows.push(['상태', `출항 중, ${v.vessel.speedKn}노트`])
   else rows.push(['상태', v.etaNote])
   if (v.vessel.terminal === 'HJNC' && !v.vessel.outbound && cut.min !== null && cutLeft !== null)
-    rows.push(['반입 마감', <>{kst(at(base, cut.min))} · {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}{cut.prevMin !== null && <span className="vm-changed"> (변경 전 {kst(at(base, cut.prevMin))})</span>}</>])
+    rows.push(['반입 마감', <>{kst(at(base, cut.min))}, {cutLeft < 0 ? `${formatDuration(-cutLeft)} 지남` : `${formatDuration(cutLeft)} 남음`}{cut.prevMin !== null && <span className="vm-changed"> (변경 전 {kst(at(base, cut.prevMin))})</span>}</>])
   return (
     <div className="vm-info" aria-live="polite">
       <div className="vm-info-head"><b>{name}</b>{v.vessel.terminal === 'HJNC' && <span className="vm-chip underway">대상 터미널</span>}</div>

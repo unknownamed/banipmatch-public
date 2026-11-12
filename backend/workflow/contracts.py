@@ -33,6 +33,20 @@ class RecipientState(Output):
     csrf_token: str
     subscription_status: Literal["active", "revoked", "expired", "missing"]
     data_mode: Literal["simulated"]
+    location_captured_at: str | None = Field(default=None, description="기사가 동의해 마지막으로 보낸 위치의 측정 시각")
+
+
+class RecipientLocation(Output):
+    latitude: float
+    longitude: float
+    accuracy_m: float
+    captured_at: str
+    received_at: str
+
+
+class LocationState(Output):
+    location_shared: bool
+    captured_at: str | None
 
 
 class InvitationState(Output):
@@ -136,6 +150,7 @@ class RecipientSummary(Output):
     revoked: bool
     vehicle_ids: list[str]
     subscription_status: Literal["active", "revoked", "expired", "missing"]
+    location: RecipientLocation | None = Field(default=None, description="최근 60분 안에 받은 기사 휴대폰 위치. 없으면 null")
 
 
 class RecipientsState(Output):

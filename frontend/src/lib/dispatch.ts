@@ -69,7 +69,11 @@ export interface RecipientSummary {
   revoked: boolean
   vehicle_ids: string[]
   subscription_status: 'active' | 'revoked' | 'expired' | 'missing'
+  /** 기사가 동의해 보낸 최근 60분 안의 휴대폰 위치 */
+  location?: DriverLocation | null
 }
+
+export interface DriverLocation { latitude: number; longitude: number; accuracy_m: number; captured_at: string; received_at: string }
 
 export const DELIVERY_LABEL: Record<DeliveryStatus, string> = {
   pending: '전송 대기',
@@ -87,12 +91,12 @@ export const RESPONSE_LABEL: Record<HumanResponse, string> = {
   none: '응답 없음',
   acknowledged: '확인함',
   can_perform: '수행 가능',
-  cannot_perform: '수행 곤란 · 후속 확인',
+  cannot_perform: '수행 곤란(후속 확인 필요)',
 }
 
 export const SUBSCRIPTION_LABEL: Record<RecipientSummary['subscription_status'] | 'unlinked', string> = {
   active: '알림 받는 중',
-  missing: '연결됨 · 알림 꺼짐',
+  missing: '연결됨, 알림 꺼짐',
   revoked: '해제됨',
   expired: '만료',
   unlinked: '휴대폰 미연결',
@@ -101,7 +105,7 @@ export const SUBSCRIPTION_LABEL: Record<RecipientSummary['subscription_status'] 
 export const CHANGE_LABEL: Record<string, string> = {
   reassigned: '차량 변경',
   schedule_changed: '시각·순서 변경',
-  removed_from_plan: '배정 보류 · 운송 취소 아님',
+  removed_from_plan: '배정 보류(운송 취소 아님)',
   newly_assigned: '새로 배정',
 }
 

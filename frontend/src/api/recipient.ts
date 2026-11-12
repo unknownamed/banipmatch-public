@@ -9,7 +9,11 @@ export interface RecipientSession {
   csrf_token: string
   subscription_status: 'active' | 'revoked' | 'expired' | 'missing'
   data_mode: string
+  /** 기사가 동의해 마지막으로 보낸 위치의 측정 시각 */
+  location_captured_at?: string | null
 }
+
+export interface LocationState { location_shared: boolean; captured_at: string | null }
 
 export interface RecipientChange extends PlanChange {
   before_outside_scope?: boolean
@@ -62,6 +66,10 @@ export function createRecipientClient(base = '') {
         consent: true,
       }, `subscribe-${crypto.randomUUID()}`),
     unsubscribe: () => write<{ subscription_status: string }>('DELETE', '/v2/recipient/subscription', undefined, `unsubscribe-${crypto.randomUUID()}`),
+    /** 기사가 켠 경우에만, 화면이 열려 있는 동안 보낸다. 서버는 차량별 최신 1건만 둔다. */
+    shareLocation: (p: { latitude: number; longitude: number; accuracy_m: number; captured_at: string }) =>
+      write<LocationState>('POST', '/v2/recipient/location', { ...p, consent: true }, `location-${crypto.randomUUID()}`),
+    stopLocation: () => write<LocationState>('DELETE', '/v2/recipient/location', undefined, `location-stop-${crypto.randomUUID()}`),
     inbox: () => get<{ notifications: RecipientNotification[] }>('/v2/recipient/notifications'),
     notification: (id: string) => get<RecipientNotification>(`/v2/recipient/notifications/${enc(id)}`),
     opened: (id: string) => write<RecipientNotification>('POST', `/v2/recipient/notifications/${enc(id)}/opened`, {}, `opened-${id}`),

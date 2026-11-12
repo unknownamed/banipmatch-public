@@ -2146,6 +2146,148 @@
         ]
       }
     },
+    "/v2/recipient/location": {
+      "post": {
+        "summary": "Share Location",
+        "operationId": "share_location_v2_recipient_location_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocationShare"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationState"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Stop Location",
+        "operationId": "stop_location_v2_recipient_location_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocationState"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "401": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "403": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "404": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "409": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "410": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "413": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "415": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "422": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "429": {
+            "$ref": "#/components/responses/WorkflowError"
+          },
+          "503": {
+            "$ref": "#/components/responses/WorkflowError"
+          }
+        },
+        "security": [
+          {
+            "RecipientCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkflowOrigin"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowKey"
+          },
+          {
+            "$ref": "#/components/parameters/WorkflowCsrf"
+          }
+        ]
+      }
+    },
     "/v2/recipient/notifications": {
       "get": {
         "summary": "Inbox",
@@ -4375,6 +4517,75 @@
         ],
         "title": "LiveDisplay"
       },
+      "LocationShare": {
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "maximum": 38.7,
+            "minimum": 33.0,
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 131.9,
+            "minimum": 124.5,
+            "title": "Longitude"
+          },
+          "accuracy_m": {
+            "type": "number",
+            "maximum": 5000.0,
+            "minimum": 0.0,
+            "title": "Accuracy M"
+          },
+          "captured_at": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 20,
+            "title": "Captured At"
+          },
+          "consent": {
+            "type": "boolean",
+            "const": true,
+            "title": "Consent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude",
+          "accuracy_m",
+          "captured_at",
+          "consent"
+        ],
+        "title": "LocationShare"
+      },
+      "LocationState": {
+        "properties": {
+          "location_shared": {
+            "type": "boolean",
+            "title": "Location Shared"
+          },
+          "captured_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captured At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "location_shared",
+          "captured_at"
+        ],
+        "title": "LocationState"
+      },
       "NotificationInbox": {
         "properties": {
           "notifications": {
@@ -4665,6 +4876,40 @@
         ],
         "title": "PushConfig"
       },
+      "RecipientLocation": {
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "title": "Longitude"
+          },
+          "accuracy_m": {
+            "type": "number",
+            "title": "Accuracy M"
+          },
+          "captured_at": {
+            "type": "string",
+            "title": "Captured At"
+          },
+          "received_at": {
+            "type": "string",
+            "title": "Received At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude",
+          "accuracy_m",
+          "captured_at",
+          "received_at"
+        ],
+        "title": "RecipientLocation"
+      },
       "RecipientPayload": {
         "properties": {
           "data_mode": {
@@ -4792,6 +5037,18 @@
             "type": "string",
             "const": "simulated",
             "title": "Data Mode"
+          },
+          "location_captured_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Captured At",
+            "description": "기사가 동의해 마지막으로 보낸 위치의 측정 시각"
           }
         },
         "additionalProperties": false,
@@ -4840,6 +5097,17 @@
               "missing"
             ],
             "title": "Subscription Status"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecipientLocation"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "최근 60분 안에 받은 기사 휴대폰 위치. 없으면 null"
           }
         },
         "additionalProperties": false,
