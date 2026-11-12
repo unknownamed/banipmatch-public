@@ -86,6 +86,19 @@ JOBS = [
     ("J16", "V4", "O5", 100, 16000, "DRY20", "planned"),
 ]
 SERVICE = 20
+
+# 현장에서 쓰는 식별 정보(모두 가상). 항차는 '선박 약어+항차 번호+방향' 형식, 선박은 서비스 이름을 딴 가상 선단.
+VOYAGE_CODE = {"V1": "BH045E", "V2": "BO112W", "V4": "BP007E"}
+SHIPPER = {"O1": "가람정밀(주)", "O2": "다온물산(주)", "O3": "한결산업(주)", "O4": "누리화학(주)", "O5": "새벽식품(주)"}
+PLATE = {"T1": "부산 90바 1201", "T2": "부산 90바 1207", "T3": "부산 91사 3315", "T4": "경남 87아 2044", "T5": "부산 92바 5520", "T6": "경남 88자 7136"}
+
+
+def iso6346(owner: str, serial: int) -> str:
+    """ISO 6346 확인 숫자를 붙인 컨테이너 번호(소유자 코드는 가상)."""
+    values = {c: v for c, v in zip("ABCDEFGHIJKLMNOPQRSTUVWXYZ", [10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38])}
+    code = owner + f"{serial:06d}"
+    total = sum((values[c] if c.isalpha() else int(c)) * (2 ** i) for i, c in enumerate(code))
+    return code + str(total % 11 % 10)
 # 변경 전 마감 기준으로 짠 원래 배차(준비 순·근거리 위주, V1 우선 고려 없음)
 BASELINE = {
     "T1": ["J01", "J09", "J14"],
@@ -135,17 +148,19 @@ def build():
         schema_version="0.1.0", scenario_id="S002", plan_id="P002", base_plan_version=1, data_mode="simulated", as_of=at(0),
         locations=[dict(location_id=i, name=n, kind=k, latitude=la, longitude=lo, evidence=ev()) for i, n, k, la, lo in LOCATIONS],
         vehicles=[dict(vehicle_id=v, start_location_id="D", available_at=at(AVAILABLE[v]), shift_end_at=at(SHIFT_END), capacity_kg=30000,
-                       equipment_types=eq, evidence=ev()) for v, a, eq in VEHICLES],
-        jobs=[dict(job_id=j, voyage_id=voy, origin_id=o, terminal_id="HJNC", return_location_id="D", ready_at=at(r),
+                       equipment_types=eq, evidence=ev(), plate_no=PLATE[v]) for v, a, eq in VEHICLES],
+        jobs=[dict(job_id=j, voyage_id=VOYAGE_CODE[voy], origin_id=o, terminal_id="HJNC", return_location_id="D", ready_at=at(r),
                    gross_weight_kg=w, equipment_type=e, service_minutes=SERVICE, state=st, frozen=st == "departed",
-                   freeze_reason="ALREADY_DEPARTED" if st == "departed" else None, evidence=ev()) for j, voy, o, r, w, e, st in JOBS],
-        windows=[dict(window_id=f"W-{voy}", voyage_id=voy, terminal_id="HJNC", opens_at=at(o), closes_at=at(c), verification="confirmed",
+                   freeze_reason="ALREADY_DEPARTED" if st == "departed" else None, evidence=ev(),
+                   container_no=iso6346("BNJU", 100200 + int(j[1:])), booking_no=f"BKG{VOYAGE_CODE[voy]}{int(j[1:]):03d}",
+                   cargo_owner=SHIPPER[o]) for j, voy, o, r, w, e, st in JOBS],
+        windows=[dict(window_id=f"W-{VOYAGE_CODE[voy]}", voyage_id=VOYAGE_CODE[voy], terminal_id="HJNC", opens_at=at(o), closes_at=at(c), verification="confirmed",
                       confirmed_by="demo-dispatcher", confirmed_at=at(-5), evidence=ev()) for voy, (o, c) in WINDOWS.items()],
         travel_times=[dict(from_location_id=a, to_location_id=b, minutes=travel(a, b), evidence=ev("assumed", "fixture:demo_02_travel"))
                       for a, *_ in LOCATIONS for b, *_ in LOCATIONS],
         baseline_assignments=assignments,
-        change=dict(change_id="C002", voyage_id="V1", terminal_id="HJNC", previous_opens_at=at(WINDOWS["V1"][0]),
-                    previous_closes_at=at(V1_PREVIOUS_CLOSE), new_window_id="W-V1", verification="confirmed",
+        change=dict(change_id="C002", voyage_id=VOYAGE_CODE["V1"], terminal_id="HJNC", previous_opens_at=at(WINDOWS["V1"][0]),
+                    previous_closes_at=at(V1_PREVIOUS_CLOSE), new_window_id=f"W-{VOYAGE_CODE['V1']}", verification="confirmed",
                     confirmed_by="demo-dispatcher", confirmed_at=at(-5), evidence=ev()),
         policy=dict(buffer_minutes=BUFFER, time_change_tolerance_minutes=5, input_valid_until=at(180),
                     allow_wait_before_open=False, external_actions_enabled=False),

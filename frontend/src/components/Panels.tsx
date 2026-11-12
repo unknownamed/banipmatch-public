@@ -2,6 +2,7 @@ import type { MethodResult, Run, Snapshot } from '../api/types'
 import { ISSUE_LABEL, PROOF_LABEL, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
 import { kstDateTime, kstTime } from '../lib/time'
+import { jobName } from '../lib/labels'
 
 const DATA_MODE: Record<Snapshot['data_mode'], string> = { simulated: '모의', observed: '관측', mixed: '혼합' }
 const VERIFY: Record<string, string> = { confirmed: '확정', unconfirmed: '미확정', conflict: '충돌' }
@@ -267,7 +268,7 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
       {unresolved.map((r) => (
         <details key={r.job.job_id} open className="issue">
           <summary>
-            <b>{r.job.job_id}</b> 미처리 — {r.candidateIssues.map((i) => ISSUE_LABEL[i.code] ?? i.code).join(', ') || '이유 미제공'}
+            <b>{jobName(r.job.job_id)}</b> 미처리 — {r.candidateIssues.map((i) => ISSUE_LABEL[i.code] ?? i.code).join(', ') || '이유 미제공'}
           </summary>
           {r.candidateIssues.length === 0 && <p className="warn">응답에 이유가 없습니다. 엔진 담당에게 확인이 필요합니다.</p>}
           {r.candidateIssues.map((i, k) => (
@@ -286,7 +287,7 @@ export function UnresolvedPanel({ rows, cand }: { rows: JobRow[]; cand: MethodRe
       {lockedRisk.map((r) => (
         <details key={`l-${r.job.job_id}`} open className="issue">
           <summary>
-            <b>{r.job.job_id}</b> 고정 작업 잔여 위험 (유지됨)
+            <b>{jobName(r.job.job_id)}</b> 고정 작업 잔여 위험 (유지됨)
           </summary>
           {r.candidateIssues.map((i, k) => (
             <p key={k}>{i.explanation}</p>

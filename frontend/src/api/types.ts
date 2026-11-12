@@ -28,6 +28,11 @@ export interface Job {
   frozen: boolean
   freeze_reason: string | null
   evidence: Evidence
+  /** ISO 6346 컨테이너 번호(운송사 TMS·선적지시서). 없으면 화면은 job_id를 쓴다. */
+  container_no?: string | null
+  booking_no?: string | null
+  /** 화주 상호 */
+  cargo_owner?: string | null
 }
 
 export interface TimeWindow {
@@ -93,6 +98,8 @@ export interface Vehicle {
   available_at: UtcString | null
   shift_end_at: UtcString | null
   evidence: Evidence
+  /** 차량 번호판. 없으면 화면은 vehicle_id를 쓴다. */
+  plate_no?: string | null
 }
 
 export type RunStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'

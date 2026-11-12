@@ -540,3 +540,6 @@ button.secondary:hover { background: var(--color-hover); }
 .dm-pin .truck .wheel { fill: #2b2b2b; stroke: #fff; stroke-width: .8; }
 .dm-far .dm-pin:not(.picked) span { display: none; }
 .dm-far .dm-pin:not(.picked) { padding: 3px 7px 3px 5px; font-size: 11px; }
+.lane { grid-template-columns: 104px minmax(0, 1fr); }
+.lane-name b { display: block; color: var(--color-text); font-size: var(--fs-body-sm); }
+.lane-name small { display: block; font-size: 10px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

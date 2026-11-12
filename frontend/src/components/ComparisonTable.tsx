@@ -2,6 +2,7 @@ import type { Assignment } from '../api/types'
 import { ISSUE_LABEL, lockedPreserved, type ChangeKind, type JobRow } from '../lib/compare'
 import { Icon } from './Icon'
 import { kstTimeWithDay } from '../lib/time'
+import { jobName } from '../lib/labels'
 
 const CHANGE_LABEL: Record<ChangeKind, string> = { vehicle: '차량', order: '순서', time: '시각' }
 
@@ -74,9 +75,9 @@ export function ComparisonTable({
                 aria-selected={onSelectJob ? selectedJob === r.job.job_id : undefined}
               >
                 <td className="job-cell">
-                  <b>{r.job.job_id}</b>
+                  <b>{jobName(r.job.job_id)}</b>
                   <div className="muted small">
-                    {r.job.voyage_id} · {r.job.terminal_id}
+                    {r.job.voyage_id} · {r.job.terminal_id}{r.job.cargo_owner ? ` · ${r.job.cargo_owner}` : ''}{jobName(r.job.job_id) !== r.job.job_id ? ` · ${r.job.job_id}` : ''}
                   </div>
                   {r.job.ready_at === null && <div className="warn small">준비시각 미확인</div>}
                   {r.locked && (

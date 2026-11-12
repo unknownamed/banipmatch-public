@@ -6,6 +6,7 @@ import {
   type DispatchPreview, type DispatchState, type Followup, type RecipientSummary,
 } from '../lib/dispatch'
 import { kstDateTime, kstTime } from '../lib/time'
+import { jobName, vehicleName, vehicleShort } from '../lib/labels'
 
 const enc = encodeURIComponent
 const errText = (e: unknown) =>
@@ -63,7 +64,7 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
         {p.vehicle_changes.map((v) => (
           <div key={v.vehicle_id} className="vehicle-change">
             <p>
-              <b>{v.vehicle_id}</b>{' '}
+              <b>{vehicleName(v.vehicle_id)}</b>{' '}
               <span className={`badge ${v.recipient_status === 'active' ? 'change' : 'unassigned'}`}>
                 {SUBSCRIPTION_LABEL[v.recipient_status as keyof typeof SUBSCRIPTION_LABEL] ?? v.recipient_status}
               </span>
@@ -71,9 +72,9 @@ export function DispatchPanel({ client, planId }: { client: V2Client; planId: st
             <ul className="small">
               {v.changes.map((c) => (
                 <li key={c.job_id}>
-                  {c.job_id} · {CHANGE_LABEL[c.kind] ?? c.kind}:{' '}
-                  {c.before ? `${c.before.vehicle_id} ${kstTime(c.before.pickup_departure_at)} 출발` : '배정 없음'} →{' '}
-                  {c.after ? `${c.after.vehicle_id} ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : '미처리'}
+                  {jobName(c.job_id)} · {CHANGE_LABEL[c.kind] ?? c.kind}:{' '}
+                  {c.before ? `${vehicleShort(c.before.vehicle_id)} ${kstTime(c.before.pickup_departure_at)} 출발` : '배정 없음'} →{' '}
+                  {c.after ? `${vehicleShort(c.after.vehicle_id)} ${kstTime(c.after.pickup_departure_at)} 출발 · 게이트 ${kstTime(c.after.gate_arrival_at)}` : '미처리'}
                 </li>
               ))}
             </ul>
@@ -106,7 +107,7 @@ function Followups({ items, title }: { items: Followup[]; title: string }) {
       <ul className="followups">
         {items.map((f, i) => (
           <li key={`${f.job_id}:${f.code}:${i}`}>
-            <b>{f.job_id ?? '전체'}</b> <code className="small">{f.code}</code>
+            <b>{f.job_id ? jobName(f.job_id) : '전체'}</b> <code className="small">{f.code}</code>
             {f.check_next && <p className="small">{f.check_next}</p>}
             {f.contact_role && <p className="small muted">확인 담당: {f.contact_role} · 해결을 보장하지 않습니다.</p>}
           </li>

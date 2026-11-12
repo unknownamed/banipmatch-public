@@ -2,6 +2,7 @@ import type { Assignment } from '../api/types'
 import type { JobRow } from '../lib/compare'
 import { Icon } from './Icon'
 import { kstTime } from '../lib/time'
+import { hasVehicleName, jobName, jobShort, vehicleName, vehicleShort } from '../lib/labels'
 
 const HOUR = 3_600_000
 
@@ -39,7 +40,7 @@ export function timelineModel(rows: JobRow[], hasCand: boolean): TimelineModel |
   const bars = (id: string, side: 'base' | 'cand'): Bar[] => rows.flatMap((r) => {
     const a = side === 'base' ? r.baseline : r.candidate
     if (!a || a.vehicle_id !== id) return []
-    const label = `${r.job.job_id} · 출발 ${kstTime(a.pickup_departure_at)} · 도착 ${kstTime(a.gate_arrival_at)} · 복귀 ${kstTime(a.return_at)}`
+    const label = `${jobName(r.job.job_id)} · 출발 ${kstTime(a.pickup_departure_at)} · 도착 ${kstTime(a.gate_arrival_at)} · 복귀 ${kstTime(a.return_at)}`
     if (![a.pickup_departure_at, a.gate_arrival_at, a.return_at].every((v) => Number.isFinite(t(v))) || t(a.return_at) <= t(a.pickup_departure_at)) {
       incomplete.push({ jobId: r.job.job_id, vehicleId: id, side, label })
       return []
@@ -56,7 +57,7 @@ export function timelineModel(rows: JobRow[], hasCand: boolean): TimelineModel |
       locked: r.locked,
       late: !!closes && t(a.gate_arrival_at) > t(closes),
       changed,
-      label: `${r.job.job_id} · 출발 ${kstTime(a.pickup_departure_at)} · 도착 ${kstTime(a.gate_arrival_at)} · 복귀 ${kstTime(a.return_at)}`,
+      label: `${jobName(r.job.job_id)} · 출발 ${kstTime(a.pickup_departure_at)} · 도착 ${kstTime(a.gate_arrival_at)} · 복귀 ${kstTime(a.return_at)}`,
     }
   }
   const ids = [...new Set(all.map((a) => a.vehicle_id))].sort()
@@ -85,7 +86,7 @@ export function timelineModel(rows: JobRow[], hasCand: boolean): TimelineModel |
 function Lane({ name, bars, model, incomplete }: { name: string; bars: Bar[]; model: TimelineModel; incomplete: boolean }) {
   return (
     <div className="lane">
-      <span className="lane-name">{name}</span>
+      <span className="lane-name" title={name}>{hasVehicleName(name) ? <><b>{vehicleShort(name)}</b><small>{vehicleName(name)}</small></> : name}</span>
       <div className="lane-track">
         {model.deadlines.map((d) => (
           <span key={d.label} className="deadline" style={{ left: `${d.pct}%` }} />
@@ -99,7 +100,7 @@ function Lane({ name, bars, model, incomplete }: { name: string; bars: Bar[]; mo
             title={b.label}
           >
             {b.locked && <Icon name="lock" size={11} />}
-            {b.jobId}
+            {jobShort(b.jobId)}
             <i className="arrival" style={{ left: `${((b.arrival - b.left) / b.width) * 100}%` }} aria-hidden="true" />
           </span>
         ))}

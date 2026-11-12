@@ -144,6 +144,19 @@
         },
         "evidence": {
           "$ref": "#/$defs/Evidence"
+        },
+        "plate_no": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20,
+              "description": "차량 번호판(예: 부산 90바 1201). 기사 개인정보는 넣지 않는다"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -232,6 +245,44 @@
         },
         "evidence": {
           "$ref": "#/$defs/Evidence"
+        },
+        "container_no": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Z]{3}[UJZ][0-9]{7}$",
+              "description": "ISO 6346 컨테이너 번호(소유자 3자+구분 1자+일련 6자리+확인 숫자). 운송사 TMS·선적지시서 값"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "booking_no": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 35,
+              "description": "선사 부킹 번호"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cargo_owner": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60,
+              "description": "화주(상호). 개인 이름을 넣지 않는다"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

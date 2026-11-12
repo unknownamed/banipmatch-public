@@ -8,7 +8,7 @@ import type { Snapshot } from '../api/types'
 export type ScenarioLink = { snapshot: Snapshot; reviewHref: string }
 type Cutoff = { min: number | null; prevMin: number | null; linked: boolean; confirmed: boolean }
 
-const MAX_MIN = 240
+const MAX_MIN = 480
 const STATUS_LABEL = { underway: '입항 중', anchored: '묘박 대기', berthed: '접안', stale: '위치 끊김' } as const
 
 const kst = (d: Date) => d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Seoul' })
@@ -111,6 +111,8 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
     const maps = window.kakao?.maps
     if (!mapState.ok || !maps) return
     const ll = (p: LatLon) => new maps.LatLng(p.lat, p.lon)
+    const shown = new Set(fleet.map(v => v.vessel.id))
+    for (const [id, mk] of marks.current) mk.overlay.setMap(shown.has(id) ? kmap.current : null)
     for (const v of fleet) {
       const mk = marks.current.get(v.vessel.id)
       if (!mk) continue

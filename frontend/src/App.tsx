@@ -11,6 +11,7 @@ import { hasAssumedCondition } from './lib/revision'
 import type { V2Client } from './api/v2'
 import { ConditionRevisionPanel, NextPlanPanel, RevisionComparison } from './components/RevisionPanels'
 import { DispatchPanel } from './components/DispatchPanel'
+import { registerLabels } from './lib/labels'
 
 function recommend(list: MethodResult[]): MethodResult | undefined {
   const ok = list.filter((r) => r.result_origin === 'computed' && r.validation_status !== 'failed')
@@ -27,6 +28,7 @@ export function App({ client, scenarioId, runId }: { client: ApiClient; scenario
   const approvalScope = `${scenarioId}:${runId}:${client.mode}`
 
   const snapshot = view.scenario.state === 'ready' ? view.scenario.data : null
+  registerLabels(snapshot)
   const run = view.run.state === 'ready' ? view.run.data : null
   const results = view.results.state === 'ready' ? view.results.data.results : null
   const base = results?.find((r) => r.method === 'B0')

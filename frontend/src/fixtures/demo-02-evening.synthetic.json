@@ -114,7 +114,8 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "plate_no": "부산 90바 1201"
     },
     {
       "vehicle_id": "T2",
@@ -131,7 +132,8 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "plate_no": "부산 90바 1207"
     },
     {
       "vehicle_id": "T3",
@@ -148,7 +150,8 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "plate_no": "부산 91사 3315"
     },
     {
       "vehicle_id": "T4",
@@ -164,7 +167,8 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "plate_no": "경남 87아 2044"
     },
     {
       "vehicle_id": "T5",
@@ -181,7 +185,8 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "plate_no": "부산 92바 5520"
     },
     {
       "vehicle_id": "T6",
@@ -198,13 +203,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "plate_no": "경남 88자 7136"
     }
   ],
   "jobs": [
     {
       "job_id": "J01",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -220,11 +226,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002015",
+      "booking_no": "BKGBH045E001",
+      "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J02",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O3",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -240,11 +249,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002020",
+      "booking_no": "BKGBH045E002",
+      "cargo_owner": "한결산업(주)"
     },
     {
       "job_id": "J03",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -260,11 +272,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002036",
+      "booking_no": "BKGBH045E003",
+      "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J04",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -280,11 +295,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002041",
+      "booking_no": "BKGBH045E004",
+      "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J05",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O3",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -300,11 +318,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002057",
+      "booking_no": "BKGBH045E005",
+      "cargo_owner": "한결산업(주)"
     },
     {
       "job_id": "J06",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O5",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -320,11 +341,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002062",
+      "booking_no": "BKGBH045E006",
+      "cargo_owner": "새벽식품(주)"
     },
     {
       "job_id": "J07",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -340,11 +364,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002078",
+      "booking_no": "BKGBH045E007",
+      "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J08",
-      "voyage_id": "V1",
+      "voyage_id": "BH045E",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -360,11 +387,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002083",
+      "booking_no": "BKGBH045E008",
+      "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J09",
-      "voyage_id": "V2",
+      "voyage_id": "BO112W",
       "origin_id": "O4",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -380,11 +410,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002099",
+      "booking_no": "BKGBO112W009",
+      "cargo_owner": "누리화학(주)"
     },
     {
       "job_id": "J10",
-      "voyage_id": "V2",
+      "voyage_id": "BO112W",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -400,11 +433,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002102",
+      "booking_no": "BKGBO112W010",
+      "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J11",
-      "voyage_id": "V2",
+      "voyage_id": "BO112W",
       "origin_id": "O5",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -420,11 +456,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002118",
+      "booking_no": "BKGBO112W011",
+      "cargo_owner": "새벽식품(주)"
     },
     {
       "job_id": "J12",
-      "voyage_id": "V2",
+      "voyage_id": "BO112W",
       "origin_id": "O1",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -440,11 +479,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002123",
+      "booking_no": "BKGBO112W012",
+      "cargo_owner": "가람정밀(주)"
     },
     {
       "job_id": "J13",
-      "voyage_id": "V2",
+      "voyage_id": "BO112W",
       "origin_id": "O3",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -460,11 +502,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002139",
+      "booking_no": "BKGBO112W013",
+      "cargo_owner": "한결산업(주)"
     },
     {
       "job_id": "J14",
-      "voyage_id": "V4",
+      "voyage_id": "BP007E",
       "origin_id": "O4",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -480,11 +525,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002144",
+      "booking_no": "BKGBP007E014",
+      "cargo_owner": "누리화학(주)"
     },
     {
       "job_id": "J15",
-      "voyage_id": "V4",
+      "voyage_id": "BP007E",
       "origin_id": "O2",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -500,11 +548,14 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002150",
+      "booking_no": "BKGBP007E015",
+      "cargo_owner": "다온물산(주)"
     },
     {
       "job_id": "J16",
-      "voyage_id": "V4",
+      "voyage_id": "BP007E",
       "origin_id": "O5",
       "terminal_id": "HJNC",
       "return_location_id": "D",
@@ -520,13 +571,16 @@
         "source_ref": "fixture:demo_02_evening",
         "observed_at": null,
         "received_at": "2026-11-07T10:00:00Z"
-      }
+      },
+      "container_no": "BNJU1002165",
+      "booking_no": "BKGBP007E016",
+      "cargo_owner": "새벽식품(주)"
     }
   ],
   "windows": [
     {
-      "window_id": "W-V1",
-      "voyage_id": "V1",
+      "window_id": "W-BH045E",
+      "voyage_id": "BH045E",
       "terminal_id": "HJNC",
       "opens_at": "2026-11-07T04:00:00Z",
       "closes_at": "2026-11-07T11:30:00Z",
@@ -541,8 +595,8 @@
       }
     },
     {
-      "window_id": "W-V2",
-      "voyage_id": "V2",
+      "window_id": "W-BO112W",
+      "voyage_id": "BO112W",
       "terminal_id": "HJNC",
       "opens_at": "2026-11-07T08:00:00Z",
       "closes_at": "2026-11-07T15:30:00Z",
@@ -557,8 +611,8 @@
       }
     },
     {
-      "window_id": "W-V4",
-      "voyage_id": "V4",
+      "window_id": "W-BP007E",
+      "voyage_id": "BP007E",
       "terminal_id": "HJNC",
       "opens_at": "2026-11-07T11:00:00Z",
       "closes_at": "2026-11-07T18:00:00Z",
@@ -1246,11 +1300,11 @@
   ],
   "change": {
     "change_id": "C002",
-    "voyage_id": "V1",
+    "voyage_id": "BH045E",
     "terminal_id": "HJNC",
     "previous_opens_at": "2026-11-07T04:00:00Z",
     "previous_closes_at": "2026-11-07T14:00:00Z",
-    "new_window_id": "W-V1",
+    "new_window_id": "W-BH045E",
     "verification": "confirmed",
     "confirmed_by": "demo-dispatcher",
     "confirmed_at": "2026-11-07T09:55:00Z",

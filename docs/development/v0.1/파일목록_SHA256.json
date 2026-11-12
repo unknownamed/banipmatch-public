@@ -64,8 +64,8 @@
     },
     {
       "path": "공통 규격/contracts.schema.json",
-      "bytes": 33616,
-      "sha256": "b589c9c889f3a5fc391ef24878c398a158f7b47a855d7654ae054d38f2ada5d7"
+      "bytes": 35046,
+      "sha256": "04f146f7ef1e0f685209622d1562bdf1be6aecffde5dba19d70a4f7542a664b7"
     },
     {
       "path": "공통 규격/data_pages.json",
@@ -94,13 +94,13 @@
     },
     {
       "path": "공통 규격/openapi.json",
-      "bytes": 58672,
-      "sha256": "985017c92b31c4821eb6c4b8b91a072041091882750972760ef4ba13cb643910"
+      "bytes": 60204,
+      "sha256": "978a798a8e637b4ad57254fa88886935f3a2dc33efdac2aeb11a8d68f7515b5a"
     },
     {
       "path": "공통 규격/openapi.yaml",
-      "bytes": 40214,
-      "sha256": "725416b7779aba384ef3f17baa99a0f007bd9c23fd9063c0bf9b7a55040b2082"
+      "bytes": 41516,
+      "sha256": "d53ed3e069873b8ab556a2456b1b56b6d2bb4fef8503d6a5b4b7fffd0dc0c928"
     },
     {
       "path": "공통 규격/schema.sql",
@@ -196,6 +196,13 @@
       "path": "참고 근거/근거_설명.txt",
       "bytes": 575,
       "sha256": "7238ee860ff37196aeb2ee1e7a26b5b65021003347da4c4aceaf8fee3af2651e"
+    }
+  ],
+  "amendments": [
+    {
+      "date": "2026-11-12",
+      "file": "공통 규격/contracts.schema.json, openapi.json, openapi.yaml",
+      "change": "Job.container_no/booking_no/cargo_owner, Vehicle.plate_no 선택 필드 추가(기존 입력 호환). 팀 동의(대겸 전달) 후 반영"
     }
   ]
 }
