@@ -146,8 +146,8 @@ deployment/    운영 서버 설정 예시(Caddy, systemd, 환경 변수)
 ## 시험
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest -q          # 서버와 엔진 668개
-cd frontend; npm test                            # 화면 183개
+.\.venv\Scripts\python.exe -m pytest -q          # 서버와 엔진 670개
+cd frontend; npm test                            # 화면 189개
 python tools/check_engine_robustness.py .        # 무작위 입력 24회를 별도 규칙으로 검사
 ```
 

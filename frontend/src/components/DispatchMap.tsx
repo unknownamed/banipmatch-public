@@ -354,7 +354,7 @@ export function DispatchMap({ snapshot, base, cand, selectedJob, onSelectJob, co
           </div>
           <div className="vm-play" role="group" aria-label="볼 시각">
             <button type="button" className="chip-toggle" aria-pressed={ahead === 0} onClick={() => setAhead(0)}>지금</button>
-            <input className="vm-range" type="range" min={0} max={maxAhead} step={1} value={Math.min(ahead, maxAhead)} aria-label="볼 시각" onChange={(e) => { setAhead(Number(e.target.value)) }} />
+            <input className="vm-range" type="range" min={0} max={maxAhead} step={1} value={Math.min(ahead, maxAhead)} aria-label="볼 시각" aria-valuetext={`${kstTime(new Date(now).toISOString())} ${ahead === 0 ? '현재' : '예상'}`} onChange={(e) => { setAhead(Number(e.target.value)) }} />
             {cutAhead !== null && cutAhead <= maxAhead && (
               <button type="button" className="chip-toggle" aria-pressed={ahead === cutAhead} onClick={() => { setAhead(cutAhead) }}>반입 마감 {kstTime(new Date(cutoffAt).toISOString())}</button>
             )}

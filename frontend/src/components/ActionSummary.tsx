@@ -3,6 +3,7 @@
 import type { MethodResult } from '../api/types'
 import { ISSUE_LABEL, type JobRow } from '../lib/compare'
 import { planName } from '../lib/labels'
+import { headline as makeHeadline, problemLabel, summarize } from '../lib/summary'
 import { BoxNo } from './Ids'
 
 const go = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -15,43 +16,33 @@ export function ActionSummary({ base, cand, rows, approved }: {
   approved: boolean
 }) {
   if (!base) return null
-  const late = base.issues.filter(i => i.job_id && (i.code === 'CUTOFF_EXCEEDED' || i.code === 'READY_TOO_LATE')).map(i => i.job_id!)
-  const lateSet = [...new Set(late)]
-  const risk = base.metrics.fixed_risk_count
-  if (lateSet.length === 0 && risk === 0)
+  const s = summarize(base, cand)
+  if (!s)
     return (
       <section className="card action-summary ok" aria-label="요약">
         <p className="as-head"><b>원래 배차로 모든 컨테이너가 마감 안에 들어갑니다.</b></p>
         <p className="small muted">바꿀 배차가 없습니다.</p>
       </section>
     )
-  const unresolved = cand ? cand.unassigned_job_ids : []
-  const fixed = cand ? lateSet.filter(id => !unresolved.includes(id)).length : 0
-  const changed = cand ? cand.metrics.changed_job_ids.length : 0
+  const { unresolved, fixed, changed } = s
   const reason = (id: string) => {
     const r = rows.find(x => x.job.job_id === id)
     const code = r?.candidateIssues[0]?.code
     return code ? ISSUE_LABEL[code] ?? code : '확인 필요'
   }
   const name = cand ? planName(cand.method) : ''
-  const headline = !cand
-    ? `원래 배차대로 가면 컨테이너 ${lateSet.length}건이 새 마감을 넘깁니다.`
-    : fixed === lateSet.length
-      ? fixed === 1
-        ? `${name}을 쓰면 늦는 컨테이너 1건을 마감 안에 넣을 수 있습니다.`
-        : `${name}을 쓰면 늦는 컨테이너 ${fixed}건을 모두 마감 안에 넣을 수 있습니다.`
-      : `${name}을 쓰면 늦는 컨테이너 ${lateSet.length}건 중 ${fixed}건을 마감 안에 넣을 수 있습니다.`
+  const headline = makeHeadline(s, cand ? name : null)
   return (
     <section className={`card action-summary${approved ? ' done' : ''}`} aria-label="요약">
       <div className="as-top">
         <div>
           <p className="as-kicker">{approved ? '확정 완료' : '판단 요약'}</p>
           <h2 className="as-headline">{headline}</h2>
-          {cand && <p className="as-sub">작업 {changed}건의 차량이나 시각이 바뀌고{unresolved.length ? `, ${unresolved.length}건은 담당자가 확인해야 합니다.` : ', 남는 문제는 없습니다.'}</p>}
+          {cand && <p className="as-sub">{changed ? `작업 ${changed}건의 차량이나 시각이 바뀌고` : '바뀌는 작업은 없고'}{unresolved.length ? `, ${unresolved.length}건은 담당자가 확인해야 합니다.` : ', 남는 문제는 없습니다.'}</p>}
         </div>
       </div>
       <dl className="stat-strip">
-        <div className="ss-bad"><dt>원래 배차로 마감 넘김</dt><dd><b>{lateSet.length}</b><span>건</span></dd></div>
+        <div className="ss-bad"><dt>{problemLabel(s)}</dt><dd><b>{s.total}</b><span>건</span></dd></div>
         {cand && <div className="ss-good"><dt>{name}으로 해결</dt><dd><b>{fixed}</b><span>건</span></dd></div>}
         {cand && <div><dt>바뀌는 작업</dt><dd><b>{changed}</b><span>건</span></dd></div>}
         {cand && <div className={unresolved.length ? 'ss-warn' : undefined}><dt>담당자 확인 필요</dt><dd><b>{unresolved.length}</b><span>건</span></dd></div>}

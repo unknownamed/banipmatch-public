@@ -246,7 +246,7 @@ export function VesselApproachMap({ link = null }: { link?: ScenarioLink | null 
           <div className="vm-play">
             <span className="vm-clock"><span className="vm-live" aria-hidden="true" /><b>{kst(at(base, t))}</b> <span className="muted">{ahead === 0 ? '현재' : '예상'}</span></span>
             <button type="button" className="chip-toggle" aria-pressed={ahead === 0} onClick={() => setAhead(0)}>지금</button>
-            <input className="vm-range" type="range" min={0} max={Math.max(0, Math.floor(MAX_MIN - rt))} step={10} value={ahead} aria-label="볼 시각" onChange={(e) => setAhead(Number(e.target.value))} />
+            <input className="vm-range" type="range" min={0} max={Math.max(0, Math.floor(MAX_MIN - rt))} step={10} value={ahead} aria-label="볼 시각" aria-valuetext={`${kst(at(base, t))} ${ahead === 0 ? '현재' : '예상'}`} onChange={(e) => setAhead(Number(e.target.value))} />
             {cutFromNow && (
               <button type="button" className="chip-toggle" aria-pressed={ahead > 0 && Math.abs(rt + ahead - cutFromNow.cutoffMin!) < 1}
                 onClick={() => setAhead(Math.max(0, Math.round(cutFromNow.cutoffMin! - rt)))}>
