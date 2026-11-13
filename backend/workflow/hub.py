@@ -69,6 +69,11 @@ class DomainDatabase(Database):
 # 발표장 30명 동시 계산 요청을 받는 대기열 상한(세션당 1건).
 QUEUE_LIMIT = 30
 
+# 동시에 쓰는 세션 상한과, 만료 후 보존 중인 기록까지 포함한 디스크 보호용 상한(세션당 수백 KB).
+ACTIVE_SESSION_LIMIT = 200
+STORED_SESSION_LIMIT = 5000
+
+
 class Hub:
     def __init__(self, settings, *, replay=None, sender=None, clock=None):
         self.settings = settings
@@ -201,7 +206,10 @@ class Hub:
             cookie = sid + "." + secrets.token_urlsafe(32)
             now, expires = self.now(), stamp(self.clock() + timedelta(hours=24))
             with self.registry.transaction() as conn:
-                if conn.execute("SELECT count(*) FROM sessions").fetchone()[0] >= 200:
+                # 상한은 지금 쓸 수 있는 세션만 센다. 만료 세션은 기록 보존을 위해 7일간 남지만 새 방문자를 막지 않는다.
+                active = conn.execute("SELECT count(*) FROM sessions WHERE revoked=0 AND expires_at>?", (now,)).fetchone()[0]
+                stored = conn.execute("SELECT count(*) FROM sessions").fetchone()[0]
+                if active >= ACTIVE_SESSION_LIMIT or stored >= STORED_SESSION_LIMIT:
                     raise ApiError(429, "SESSION_LIMIT", "서버 세션 보관 상한에 도달함")
                 conn.execute("INSERT INTO sessions(session_id,token_hash,created_at,expires_at) VALUES(?,?,?,?)",
                              (sid, hashed(cookie), now, expires))
