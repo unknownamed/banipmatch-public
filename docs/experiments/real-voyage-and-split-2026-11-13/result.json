@@ -1,0 +1,690 @@
+{
+  "hjnc_observation": {
+    "received_at": [
+      "2026-11-11T09:53:51Z",
+      "2026-11-12T15:26:41Z"
+    ],
+    "rows": [
+      31,
+      37
+    ],
+    "common": 25,
+    "close_changed": 19,
+    "earlier": 8,
+    "later": 11,
+    "earlier_minutes": [
+      -1320,
+      -720,
+      -240,
+      -120,
+      -60,
+      -60,
+      -60,
+      -60
+    ],
+    "later_minutes": [
+      60,
+      60,
+      60,
+      300,
+      480,
+      540,
+      660,
+      720,
+      900,
+      960,
+      2280
+    ],
+    "close_equals_etb_minus_10h": true,
+    "picked": {
+      "voyage": "OOET-2026-0003",
+      "before": {
+        "VOY_NO": "OOET-2026-0003",
+        "YARD_OPEN": "2026-11-14 00:00",
+        "YARD_CLOSE": "2026-11-16 23:00",
+        "ETB": "2026-11-17 09:00"
+      },
+      "after": {
+        "VOY_NO": "OOET-2026-0003",
+        "YARD_OPEN": "2026-11-14 00:00",
+        "YARD_CLOSE": "2026-11-16 21:00",
+        "ETB": "2026-11-17 07:00"
+      },
+      "close_shift_min": -120
+    },
+    "common_rows": [
+      {
+        "voyage": "BIGE-2026-0003",
+        "before": {
+          "VOY_NO": "BIGE-2026-0003",
+          "YARD_OPEN": "2026-11-09 00:00",
+          "YARD_CLOSE": "2026-11-12 00:00",
+          "ETB": "2026-11-12 10:00"
+        },
+        "after": {
+          "VOY_NO": "BIGE-2026-0003",
+          "YARD_OPEN": "2026-11-09 00:00",
+          "YARD_CLOSE": "2026-11-12 01:00",
+          "ETB": "2026-11-12 11:00"
+        }
+      },
+      {
+        "voyage": "EAGT-2026-0002",
+        "before": {
+          "VOY_NO": "EAGT-2026-0002",
+          "YARD_OPEN": "2026-11-14 00:00",
+          "YARD_CLOSE": "2026-11-17 10:00",
+          "ETB": "2026-11-17 20:00"
+        },
+        "after": {
+          "VOY_NO": "EAGT-2026-0002",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 12:00",
+          "ETB": "2026-11-16 22:00"
+        }
+      },
+      {
+        "voyage": "EMPK-2026-0002",
+        "before": {
+          "VOY_NO": "EMPK-2026-0002",
+          "YARD_OPEN": "2026-11-12 00:00",
+          "YARD_CLOSE": "2026-11-15 12:00",
+          "ETB": "2026-11-15 22:00"
+        },
+        "after": {
+          "VOY_NO": "EMPK-2026-0002",
+          "YARD_OPEN": "2026-11-14 00:00",
+          "YARD_CLOSE": "2026-11-17 02:00",
+          "ETB": "2026-11-17 12:00"
+        }
+      },
+      {
+        "voyage": "JIAD-2026-0033",
+        "before": {
+          "VOY_NO": "JIAD-2026-0033",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-15 23:00",
+          "ETB": "2026-11-16 09:00"
+        },
+        "after": {
+          "VOY_NO": "JIAD-2026-0033",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 10:00",
+          "ETB": "2026-11-16 20:00"
+        }
+      },
+      {
+        "voyage": "JRBM-2026-0003",
+        "before": {
+          "VOY_NO": "JRBM-2026-0003",
+          "YARD_OPEN": "2026-11-12 00:00",
+          "YARD_CLOSE": "2026-11-14 22:00",
+          "ETB": "2026-11-15 08:00"
+        },
+        "after": {
+          "VOY_NO": "JRBM-2026-0003",
+          "YARD_OPEN": "2026-11-12 00:00",
+          "YARD_CLOSE": "2026-11-15 13:00",
+          "ETB": "2026-11-15 23:00"
+        }
+      },
+      {
+        "voyage": "MGNA-2026-0076",
+        "before": {
+          "VOY_NO": "MGNA-2026-0076",
+          "YARD_OPEN": "2026-11-12 00:00",
+          "YARD_CLOSE": "2026-11-14 20:00",
+          "ETB": "2026-11-15 06:00"
+        },
+        "after": {
+          "VOY_NO": "MGNA-2026-0076",
+          "YARD_OPEN": "2026-11-12 00:00",
+          "YARD_CLOSE": "2026-11-14 16:00",
+          "ETB": "2026-11-15 02:00"
+        }
+      },
+      {
+        "voyage": "MGNA-2026-0077",
+        "before": {
+          "VOY_NO": "MGNA-2026-0077",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 04:00",
+          "ETB": "2026-11-18 14:00"
+        },
+        "after": {
+          "VOY_NO": "MGNA-2026-0077",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 04:00",
+          "ETB": "2026-11-18 14:00"
+        }
+      },
+      {
+        "voyage": "MJEP-2026-0026",
+        "before": {
+          "VOY_NO": "MJEP-2026-0026",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 06:00",
+          "ETB": "2026-11-18 16:00"
+        },
+        "after": {
+          "VOY_NO": "MJEP-2026-0026",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 06:00",
+          "ETB": "2026-11-18 16:00"
+        }
+      },
+      {
+        "voyage": "OARG-2026-0020",
+        "before": {
+          "VOY_NO": "OARG-2026-0020",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 01:00",
+          "ETB": "2026-11-16 11:00"
+        },
+        "after": {
+          "VOY_NO": "OARG-2026-0020",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 10:00",
+          "ETB": "2026-11-16 20:00"
+        }
+      },
+      {
+        "voyage": "OAXQ-2026-0020",
+        "before": {
+          "VOY_NO": "OAXQ-2026-0020",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-12 20:00",
+          "ETB": "2026-11-13 06:00"
+        },
+        "after": {
+          "VOY_NO": "OAXQ-2026-0020",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-12 20:00",
+          "ETB": "2026-11-13 06:00"
+        }
+      },
+      {
+        "voyage": "OEFU-2026-0025",
+        "before": {
+          "VOY_NO": "OEFU-2026-0025",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-15 22:00",
+          "ETB": "2026-11-16 08:00"
+        },
+        "after": {
+          "VOY_NO": "OEFU-2026-0025",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 10:00",
+          "ETB": "2026-11-16 20:00"
+        }
+      },
+      {
+        "voyage": "OHKG-2026-0001",
+        "before": {
+          "VOY_NO": "OHKG-2026-0001",
+          "YARD_OPEN": "2026-11-09 00:00",
+          "YARD_CLOSE": "2026-11-12 00:00",
+          "ETB": "2026-11-12 10:00"
+        },
+        "after": {
+          "VOY_NO": "OHKG-2026-0001",
+          "YARD_OPEN": "2026-11-09 00:00",
+          "YARD_CLOSE": "2026-11-12 01:00",
+          "ETB": "2026-11-12 11:00"
+        }
+      },
+      {
+        "voyage": "ONCF-2026-0002",
+        "before": {
+          "VOY_NO": "ONCF-2026-0002",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-17 21:00",
+          "ETB": "2026-11-18 07:00"
+        },
+        "after": {
+          "VOY_NO": "ONCF-2026-0002",
+          "YARD_OPEN": "2026-11-14 00:00",
+          "YARD_CLOSE": "2026-11-17 09:00",
+          "ETB": "2026-11-17 19:00"
+        }
+      },
+      {
+        "voyage": "OODD-2026-0001",
+        "before": {
+          "VOY_NO": "OODD-2026-0001",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-12 22:00",
+          "ETB": "2026-11-13 08:00"
+        },
+        "after": {
+          "VOY_NO": "OODD-2026-0001",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-12 21:00",
+          "ETB": "2026-11-13 07:00"
+        }
+      },
+      {
+        "voyage": "OOET-2026-0003",
+        "before": {
+          "VOY_NO": "OOET-2026-0003",
+          "YARD_OPEN": "2026-11-14 00:00",
+          "YARD_CLOSE": "2026-11-16 23:00",
+          "ETB": "2026-11-17 09:00"
+        },
+        "after": {
+          "VOY_NO": "OOET-2026-0003",
+          "YARD_OPEN": "2026-11-14 00:00",
+          "YARD_CLOSE": "2026-11-16 21:00",
+          "ETB": "2026-11-17 07:00"
+        }
+      },
+      {
+        "voyage": "OOWL-2026-0003",
+        "before": {
+          "VOY_NO": "OOWL-2026-0003",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-15 18:00",
+          "ETB": "2026-11-16 04:00"
+        },
+        "after": {
+          "VOY_NO": "OOWL-2026-0003",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 10:00",
+          "ETB": "2026-11-16 20:00"
+        }
+      },
+      {
+        "voyage": "OUSM-2026-0002",
+        "before": {
+          "VOY_NO": "OUSM-2026-0002",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-13 04:00",
+          "ETB": "2026-11-13 14:00"
+        },
+        "after": {
+          "VOY_NO": "OUSM-2026-0002",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-13 05:00",
+          "ETB": "2026-11-13 15:00"
+        }
+      },
+      {
+        "voyage": "OYPL-2026-0020",
+        "before": {
+          "VOY_NO": "OYPL-2026-0020",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-13 12:00",
+          "ETB": "2026-11-13 22:00"
+        },
+        "after": {
+          "VOY_NO": "OYPL-2026-0020",
+          "YARD_OPEN": "2026-11-10 00:00",
+          "YARD_CLOSE": "2026-11-13 11:00",
+          "ETB": "2026-11-13 21:00"
+        }
+      },
+      {
+        "voyage": "RTTD-2026-0031",
+        "before": {
+          "VOY_NO": "RTTD-2026-0031",
+          "YARD_OPEN": "2026-11-09 00:00",
+          "YARD_CLOSE": "2026-11-12 10:00",
+          "ETB": "2026-11-12 20:00"
+        },
+        "after": {
+          "VOY_NO": "RTTD-2026-0031",
+          "YARD_OPEN": "2026-11-09 00:00",
+          "YARD_CLOSE": "2026-11-12 09:00",
+          "ETB": "2026-11-12 19:00"
+        }
+      },
+      {
+        "voyage": "SCUL-2026-0016",
+        "before": {
+          "VOY_NO": "SCUL-2026-0016",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 02:00",
+          "ETB": "2026-11-18 12:00"
+        },
+        "after": {
+          "VOY_NO": "SCUL-2026-0016",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 02:00",
+          "ETB": "2026-11-18 12:00"
+        }
+      },
+      {
+        "voyage": "SMNB-2026-0012",
+        "before": {
+          "VOY_NO": "SMNB-2026-0012",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 02:00",
+          "ETB": "2026-11-16 12:00"
+        },
+        "after": {
+          "VOY_NO": "SMNB-2026-0012",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-16 10:00",
+          "ETB": "2026-11-16 20:00"
+        }
+      },
+      {
+        "voyage": "SMPL-2026-0015",
+        "before": {
+          "VOY_NO": "SMPL-2026-0015",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 10:00",
+          "ETB": "2026-11-18 20:00"
+        },
+        "after": {
+          "VOY_NO": "SMPL-2026-0015",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-18 10:00",
+          "ETB": "2026-11-18 20:00"
+        }
+      },
+      {
+        "voyage": "SMSH-2026-0014",
+        "before": {
+          "VOY_NO": "SMSH-2026-0014",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-17 22:00",
+          "ETB": "2026-11-18 08:00"
+        },
+        "after": {
+          "VOY_NO": "SMSH-2026-0014",
+          "YARD_OPEN": "2026-11-15 00:00",
+          "YARD_CLOSE": "2026-11-17 22:00",
+          "ETB": "2026-11-18 08:00"
+        }
+      },
+      {
+        "voyage": "SMTJ-2026-0015",
+        "before": {
+          "VOY_NO": "SMTJ-2026-0015",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-15 23:00",
+          "ETB": "2026-11-16 09:00"
+        },
+        "after": {
+          "VOY_NO": "SMTJ-2026-0015",
+          "YARD_OPEN": "2026-11-13 00:00",
+          "YARD_CLOSE": "2026-11-15 22:00",
+          "ETB": "2026-11-16 08:00"
+        }
+      },
+      {
+        "voyage": "YWTH-2026-0004",
+        "before": {
+          "VOY_NO": "YWTH-2026-0004",
+          "YARD_OPEN": "2026-11-11 00:00",
+          "YARD_CLOSE": "2026-11-14 07:00",
+          "ETB": "2026-11-14 17:00"
+        },
+        "after": {
+          "VOY_NO": "YWTH-2026-0004",
+          "YARD_OPEN": "2026-11-11 00:00",
+          "YARD_CLOSE": "2026-11-14 12:00",
+          "ETB": "2026-11-14 22:00"
+        }
+      }
+    ]
+  },
+  "real_voyage_case": {
+    "voyage": "OOET-2026-0003",
+    "as_of": "2026-11-16T10:00:00Z",
+    "as_of_kst": "11-16 19:00",
+    "previous_close_kst": "11-16 23:00",
+    "new_close_kst": "11-16 21:00",
+    "jobs_on_voyage": 8,
+    "jobs": 20,
+    "vehicles": 8,
+    "frozen": 2,
+    "input_ok": true,
+    "methods": {
+      "B0": {
+        "status": "BASELINE",
+        "proven": false,
+        "stages": [],
+        "unassigned": 0,
+        "late_or_unassigned": 2,
+        "changed": 0,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 0,
+        "rule_violations": []
+      },
+      "B1": {
+        "status": "HEURISTIC",
+        "proven": false,
+        "stages": [],
+        "unassigned": 1,
+        "late_or_unassigned": 1,
+        "changed": 15,
+        "travel_min": 1244,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 8,
+        "rule_violations": []
+      },
+      "B2": {
+        "status": "OPTIMAL",
+        "proven": true,
+        "stages": [
+          [
+            "unassigned",
+            "OPTIMAL"
+          ],
+          [
+            "travel",
+            "OPTIMAL"
+          ]
+        ],
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 14,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 7,
+        "rule_violations": []
+      },
+      "B3": {
+        "status": "OPTIMAL",
+        "proven": true,
+        "stages": [
+          [
+            "unassigned",
+            "OPTIMAL"
+          ],
+          [
+            "changed",
+            "OPTIMAL"
+          ],
+          [
+            "travel",
+            "OPTIMAL"
+          ]
+        ],
+        "unassigned": 0,
+        "late_or_unassigned": 0,
+        "changed": 4,
+        "travel_min": 1337,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 4,
+        "rule_violations": []
+      }
+    }
+  },
+  "split_50": {
+    "changed_voyage": "V1",
+    "jobs": 50,
+    "vehicles": 8,
+    "jobs_by_voyage": {
+      "V1": 25,
+      "V2": 25
+    },
+    "locked_jobs": 25,
+    "runs": {
+      "전체 10초 B2": {
+        "status": "FEASIBLE",
+        "proven": false,
+        "stages": [
+          [
+            "unassigned",
+            "FEASIBLE"
+          ],
+          [
+            "travel",
+            "NOT_RUN"
+          ]
+        ],
+        "unassigned": 9,
+        "late_or_unassigned": 9,
+        "changed": 41,
+        "travel_min": 1860,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 8,
+        "rule_violations": []
+      },
+      "전체 10초 B3": {
+        "status": "FEASIBLE",
+        "proven": false,
+        "stages": [
+          [
+            "unassigned",
+            "FEASIBLE"
+          ],
+          [
+            "changed",
+            "NOT_RUN"
+          ],
+          [
+            "travel",
+            "NOT_RUN"
+          ]
+        ],
+        "unassigned": 9,
+        "late_or_unassigned": 9,
+        "changed": 41,
+        "travel_min": 1860,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 8,
+        "rule_violations": []
+      },
+      "전체 60초 B2": {
+        "status": "FEASIBLE",
+        "proven": false,
+        "stages": [
+          [
+            "unassigned",
+            "FEASIBLE"
+          ],
+          [
+            "travel",
+            "NOT_RUN"
+          ]
+        ],
+        "unassigned": 9,
+        "late_or_unassigned": 9,
+        "changed": 41,
+        "travel_min": 1860,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 8,
+        "rule_violations": []
+      },
+      "전체 60초 B3": {
+        "status": "FEASIBLE",
+        "proven": false,
+        "stages": [
+          [
+            "unassigned",
+            "FEASIBLE"
+          ],
+          [
+            "changed",
+            "NOT_RUN"
+          ],
+          [
+            "travel",
+            "NOT_RUN"
+          ]
+        ],
+        "unassigned": 9,
+        "late_or_unassigned": 9,
+        "changed": 41,
+        "travel_min": 1860,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 8,
+        "rule_violations": []
+      },
+      "분할 10초 B2": {
+        "status": "FEASIBLE",
+        "proven": false,
+        "stages": [
+          [
+            "unassigned",
+            "FEASIBLE"
+          ],
+          [
+            "travel",
+            "NOT_RUN"
+          ]
+        ],
+        "unassigned": 15,
+        "late_or_unassigned": 15,
+        "changed": 10,
+        "travel_min": 402,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 4,
+        "rule_violations": []
+      },
+      "분할 10초 B3": {
+        "status": "FEASIBLE",
+        "proven": false,
+        "stages": [
+          [
+            "unassigned",
+            "FEASIBLE"
+          ],
+          [
+            "changed",
+            "NOT_RUN"
+          ],
+          [
+            "travel",
+            "NOT_RUN"
+          ]
+        ],
+        "unassigned": 15,
+        "late_or_unassigned": 15,
+        "changed": 10,
+        "travel_min": 402,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 4,
+        "rule_violations": []
+      },
+      "원래 배차 B0": {
+        "status": "BASELINE",
+        "proven": false,
+        "stages": [],
+        "unassigned": 0,
+        "late_or_unassigned": 18,
+        "changed": 0,
+        "travel_min": 2340,
+        "fixed_risk": 0,
+        "ms": null,
+        "drivers": 0,
+        "rule_violations": []
+      }
+    }
+  }
+}

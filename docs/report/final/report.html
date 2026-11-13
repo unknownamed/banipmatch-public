@@ -18,7 +18,11 @@
   .pb { break-before: page; }
   .chapter-head, .criteria { break-after: avoid; }
   h3, h4 { break-after: avoid; }
-  figure, .box { break-inside: avoid; }
+  figure { break-inside: avoid; }
+  p, li { orphans: 2; widows: 2; }
+  /* 표·상자는 통째로 넘기지 않고 행·문단 단위로 끊어 빈 공간을 줄인다 */
+  tr, .box > p, .box li, .callout > p { break-inside: avoid; }
+  tr:first-child { break-after: avoid; }
   .chapter-head { display: flex; align-items: baseline; gap: 10px; border-bottom: 1.5px solid var(--navy); padding-bottom: 5px; margin-bottom: 6px; }
   .chapter-head .no { font-size: 20pt; font-weight: 700; color: var(--navy); }
   .chapter-head h2 { font-size: 16pt; font-weight: 700; color: var(--navy); }
@@ -30,7 +34,7 @@
   p { margin: 0 0 7px; }
   ul, ol { margin: 2px 0 8px; padding-left: 18px; }
   li { margin: 1px 0; }
-  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 8.9pt; line-height: 1.5; break-inside: avoid; border-top: 1.2px solid var(--rule); border-bottom: 1.2px solid var(--rule); }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 8.9pt; line-height: 1.5; break-inside: auto; border-top: 1.2px solid var(--rule); border-bottom: 1.2px solid var(--rule); }
   th { background: none; color: var(--ink); font-weight: 700; text-align: left; padding: 5px 7px; border-bottom: 0.8px solid var(--rule); }
   td { border-bottom: 0.5px solid var(--line); padding: 5px 7px; vertical-align: top; }
   tr:last-child td { border-bottom: 0; }
@@ -45,10 +49,10 @@
   figcaption b { color: var(--ink2); }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .two-31 { display: grid; grid-template-columns: 2.1fr 1fr; gap: 14px; align-items: start; }
-  .box { border: 0.8px solid var(--line); padding: 9px 12px; break-inside: avoid; }
+  .box { border: 0.8px solid var(--line); padding: 9px 12px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
   .box.navy { border: 0; border-left: 2.5px solid var(--navy); padding: 2px 0 2px 14px; }
   .box.soft { background: var(--soft); border: 0; }
-  .callout { border-left: 2px solid var(--ink2); padding: 2px 0 2px 12px; margin: 10px 0 12px; break-inside: avoid; }
+  .callout { border-left: 2px solid var(--ink2); padding: 2px 0 2px 12px; margin: 10px 0 12px; }
   .callout.red { border-color: var(--ink2); }
   .note { font-size: 8.6pt; color: var(--mute); }
   .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 10px 0 14px; border-top: 1.2px solid var(--rule); border-bottom: 1.2px solid var(--rule); }
@@ -110,14 +114,14 @@
     <div class="box"><div class="v">24 / 24</div><div class="l">무작위로 바꾼 입력 24회 모두 업무 규칙 위반 0건<br>(엔진과 별개인 검사기로 확인)</div></div>
   </div>
   <h3>심사 항목별 확인 위치</h3>
-  <table class="toc">
-    <tr><th style="width:24%">평가 항목(배점)</th><th>이 보고서에서 답하는 내용</th><th style="width:9%">쪽</th></tr>
-    <tr><td><b>기획의 명확성</b> (20)</td><td>반입 마감 변경이 운송사 배차에 미치는 문제, 대상 사용자, KPI 4개와 목표값</td><td>3–4</td></tr>
-    <tr><td><b>데이터 활용 계획</b> (20)</td><td>실제 자료 5종의 합법적 이용 조건, 수집 → 처리 → 활용 흐름, 품질 규칙과 호출 한도</td><td>5–7</td></tr>
-    <tr><td><b>창의성 및 차별성</b> (25)</td><td>최소 변경 재배차 알고리즘(우선순위별 순차 최적화, CP-SAT), 조건 보완·확정·기사 응답으로 이어지는 운영 모델, 기존 서비스 비교</td><td>7–12</td></tr>
-    <tr><td><b>실현 가능성</b> (15)</td><td>기술 스택과 실제 운영 서버, 실기기 검증, 테스트 869개, 일정·자원, 리스크와 대응</td><td>13–15</td></tr>
-    <tr><td><b>기대효과</b> (20)</td><td>측정값과 추정값을 나눈 KPI 개선, 산출식과 가정, 확산 시나리오</td><td>15–17</td></tr>
-  </table>
+  <table class="toc"><thead>
+    <tr><th style="width:24%">평가 항목</th><th>이 보고서에서 답하는 내용</th><th style="width:9%">쪽</th></tr></thead><tbody>
+    <tr><td><b>기획의 명확성</b></td><td>반입 마감 변경이 운송사 배차에 미치는 문제, 대상 사용자, KPI 4개와 목표값</td><td>3–4</td></tr>
+    <tr><td><b>데이터 활용 계획</b></td><td>실제 자료 5종의 합법적 이용 조건, 수집 → 처리 → 활용 흐름, 품질 규칙과 호출 한도</td><td>5–7</td></tr>
+    <tr><td><b>창의성 및 차별성</b></td><td>최소 변경 재배차 알고리즘(우선순위별 순차 최적화, CP-SAT), 조건 보완·확정·기사 응답으로 이어지는 운영 모델, 기존 서비스 비교</td><td>7–11</td></tr>
+    <tr><td><b>실현 가능성</b></td><td>기술 스택과 실제 운영 서버, 실기기 검증, 테스트 869개, 일정·자원, 리스크와 대응</td><td>12–14</td></tr>
+    <tr><td><b>기대효과</b></td><td>측정값과 추정값을 나눈 KPI 개선, 산출식과 가정, 확산 시나리오</td><td>14–16</td></tr>
+  </tbody></table>
   <h3>한눈에 보는 처리 흐름 — 시연 BHMN(반입 마감 2시간 30분 앞당김)</h3>
   <div class="flow">
     <div class="step"><b>① 변경 수신</b>확정 공지는 계산하고, 예정 공지는 영향만 미리 보여 줌</div><div class="arrow">›</div>
@@ -130,15 +134,15 @@
   <h3>검증 범위</h3>
   <ul class="small">
     <li><span class="tag real">실제</span> 터미널 선석 일정(HJNC), 해상 기상·특보(기상청), 지도·실시간 교통(카카오), 도로 경로(OpenStreetMap), 웹 푸시와 휴대폰 위치는 <b>실제 연동</b>이다.</li>
-    <li><span class="tag sim">모의</span> 운송사 배차표·차량·기사는 실제 회사 자료를 확보하지 못해 <b>모의 자료</b>로 만들었다. 선박명·회사명은 가상이다.</li>
+    <li><span class="tag sim">모의</span> 운송사 배차표·차량·기사는 실제 회사 자료를 확보하지 못해 <b>모의 자료</b>로 만들었다. 시연의 선박명·회사명은 가상이다.</li>
     <li><span class="tag calc">계산</span> 효과 수치는 이 모의 입력에서 엔진이 실제로 계산한 결과이며, 현장 매출·비용 절감액으로 확정하지 않는다. 추정은 가정과 산출식을 함께 적었다.</li>
+    <li><span class="tag real">실제</span> HJNC 공개 일정을 약 30시간 간격으로 두 번 수집하니 공통 항차 25개 중 <b>19개의 반입 마감이 바뀌어</b> 있었다. 그중 2시간 앞당겨진 실제 항차 1건에 모의 배차표를 얹어 계산하자, 최소 변경안이 <b>4건만 바꿔 마감 초과 2건을 모두 해결</b>했다(1.1, 5.2).</li>
   </ul>
 </section>
 
 <!-- ───────────── 1. 문제 정의 ───────────── -->
 <section class="chapter">
-  <div class="chapter-head"><span class="no">1</span><h2>기획의 명확성 — 문제 정의</h2><span class="pts">배점 20</span></div>
-  <div class="criteria"><b>평가 기준</b> 물류 현장 문제·대상·KPI(리드타임/정확도/비용/탄소배출 등)와 해결 목표의 명확한 정도</div>
+  <div class="chapter-head"><span class="no">1</span><h2>기획의 명확성 — 문제 정의</h2></div>
 
   <h3>1.1 현장 문제: 반입 마감이 바뀌면 배차표가 깨진다</h3>
   <p>수출 컨테이너는 선박이 접안하기 전 터미널이 정한 <b>반입 허용 시간</b>(반입 시작 ~ 반입 마감, Cargo Closing Time) 안에 게이트를 통과해야 선적된다. HJNC는 반입 마감을 <b>접안 10시간 전</b>으로 안내하고, 2026년 8월 3일 접안 모선부터 수출 Dry 컨테이너의 <b>지연 반입에 별도 청구</b>를 적용한다고 공지했다. 지연 반입이 야드 재조작과 운영 차질을 부르기 때문이다[1]. 반입 시작 기준도 장치율에 따라 바뀐 사례가 있다[2].</p>
@@ -159,59 +163,58 @@
         <li>기사에게 <b>전화·문자·카카오톡으로 한 명씩 연락</b>하고, 응답은 여러 곳에 흩어져 기록이 남지 않는다[3]</li>
         <li>배차를 하나 바꿀 때마다 여러 기사의 일정이 함께 바뀌어 혼선이 커진다</li>
       </ul>
-      <p class="note" style="margin:6px 0 0">선박 일정 자체가 자주 흔들린다. 2026년 9월 전 세계 컨테이너선의 정시 도착률은 50.6%였고, 늦은 선박은 평균 6.65일 늦었다[8]. HJNC는 반입 마감을 접안 10시간 전으로 정하므로[1] 접안이 바뀌면 마감도 다시 정해진다. 다만 부산항의 마감 변경 빈도와 담당자 처리 시간을 다룬 공개 통계는 찾지 못해 5곳(교수 2명, 부산항만공사, HJNC, 운송 플랫폼사)에 자문을 요청했으나 아직 회신이 없다.</p></div>
+      <p class="note" style="margin:6px 0 0">선박 일정 자체가 자주 흔들린다. 2026년 9월 전 세계 컨테이너선의 정시 도착률은 50.6%였고, 늦은 선박은 평균 6.65일 늦었다[8]. HJNC는 반입 마감을 접안 10시간 전으로 정하므로[1] 접안이 바뀌면 마감도 다시 정해진다. 실제로 HJNC 공개 선석 배정을 약 30시간 간격으로 두 번 수집해 비교하니(11/11 18:53, 11/13 00:26), 두 번 모두 있던 항차 25개 중 <b>19개의 반입 마감이 바뀌어</b> 있었다(앞당김 8개 1~22시간, 늦춰짐 11개). 바뀐 마감은 모두 새 접안 예정보다 정확히 10시간 앞이었다. 두 시점만 비교했으므로 실제 공지 횟수와 시점은 알 수 없다. 담당자 처리 시간을 다룬 공개 통계는 찾지 못해 5곳(교수 2명, 부산항만공사, HJNC, 운송 플랫폼사)에 자문을 요청했으나 아직 회신이 없다.</p></div>
   </div>
 
   <h3>1.2 대상과 범위: 운송사 배차 담당자의 남은 배차만 다룬다</h3>
-  <table>
-    <tr><th style="width:20%">구분</th><th>내용</th></tr>
+  <table><thead>
+    <tr><th style="width:20%">구분</th><th>내용</th></tr></thead><tbody>
     <tr><td>주 사용자</td><td><b>운송사 배차 담당자</b>(부산항 신항 HJNC·PNIT 수출 Dry 컨테이너 운송)</td></tr>
     <tr><td>보조 사용자</td><td><b>화물차 기사</b> — 확정된 자기 차량의 변경만 받고 '수행 가능' 또는 '수행 곤란'으로 답한다</td></tr>
     <tr><td>입력 사건</td><td>터미널이 <b>확정한</b> 항차(선박의 한 번 운항)별 반입 시작·마감 변경. 선박 도착 예정 시각(ETA)이 바뀌어도 반입 마감 변경으로 자동 처리하지 않는다</td></tr>
     <tr><td>결정 범위</td><td>운송사 내부의 남은 작업 배차(차량·순서·출발 시각). 선석 배정·터미널 예약·차량 모집은 범위 밖</td></tr>
-  </table>
+  </tbody></table>
 </section>
 
 <section>
   <h3>1.3 KPI와 목표: 마감 초과 0건, 변경은 최소로, 최소 변경안은 10초 안에</h3>
-  <p>평가표가 제시한 네 축(정확도·리드타임·비용·탄소)에 맞춰 KPI를 정하고, 시제품에서 측정할 수 있는 목표값을 세웠다.</p>
-  <table>
-    <tr><th style="width:11%">축</th><th style="width:27%">KPI</th><th style="width:30%">해결 목표</th><th>측정 방법</th></tr>
+  <p>물류 KPI의 네 축(정확도·리드타임·비용·탄소)에 맞춰 KPI를 정하고, 시제품에서 측정할 수 있는 목표값을 세웠다.</p>
+  <table><thead>
+    <tr><th style="width:11%">축</th><th style="width:27%">KPI</th><th style="width:30%">해결 목표</th><th>측정 방법</th></tr></thead><tbody>
     <tr><td>정확도</td><td><b>마감 초과 반입 운행 수</b><br>(새 마감 이후 게이트 도착)</td><td>마감을 맞출 수 있는 컨테이너는 <b>모두 마감 안</b>으로, 맞출 수 없는 컨테이너는 <b>출발 전에 원인과 함께</b> 표시</td><td>원래 배차와 최소 변경안의 마감 초과·미배정 건수(엔진 계산과 별도 검사기)</td></tr>
     <tr><td>리드타임</td><td>변경을 받고 <b>최소 변경안이 나오기까지</b>,<br>확정 후 <b>기사가 답하기까지</b> 걸린 시간</td><td>최소 변경안 <b>10초 이내</b>, 기사 응답 <b>수 분 이내</b></td><td>계산 시간 제한·실측, 실제 휴대폰 알림 왕복 시각(서버 기록)</td></tr>
     <tr><td>비용·혼선</td><td><b>바뀌는 작업 수</b>와 <b>연락해야 할 기사 수</b></td><td>같은 수의 컨테이너를 마감 안에 넣는 안 가운데 <b>바뀌는 작업이 가장 적은 안</b></td><td>방법별(마감순·전체 재배치·최소 변경) 변경 작업·차량 수 비교</td></tr>
     <tr><td>탄소</td><td>마감 후 도착해 <b>헛걸음이 되는 운행</b>의 이동 시간</td><td>마감 후 도착 운행을 <b>0건</b>으로</td><td>마감을 넘긴 운행의 상차지·게이트·복귀 이동 시간 합</td></tr>
-  </table>
+  </tbody></table>
   <div class="callout"><b>핵심 설계: 마감이 먼저, 변경 최소화는 그다음.</b> 마감을 지키는 배차는 여러 가지가 가능하다. 그중 바뀌는 작업이 적을수록 연락할 기사가 줄고, 이미 준비한 기사의 동선도 덜 흔들린다. 그래서 <b>(1) 마감을 넘기는 컨테이너 수를 먼저 줄이고, (2) 그다음 바뀌는 작업 수를 줄이는</b> 순서로 목표를 정했다.</div>
 
   <h3>1.4 한 번의 마감 변경을 처리하는 과정 — 지금과 반입맞춤</h3>
   <p>시연 항차 BHMN(가상 항차, 작업 20건·차량 8대, 반입 마감 2시간 30분 앞당김)으로 담당자의 일을 비교했다. 지금 방식의 소요 시간은 5.3절의 가정값이다.</p>
-  <table>
-    <tr><th style="width:15%">단계</th><th style="width:42%">지금(수작업)</th><th>반입맞춤</th></tr>
+  <table><thead>
+    <tr><th style="width:15%">단계</th><th style="width:42%">지금(수작업)</th><th>반입맞춤</th></tr></thead><tbody>
     <tr><td>변경 인지</td><td>터미널·선사 공지를 직접 확인하고 항차와 내 컨테이너를 대조</td><td>받은 변경 목록에 '조치 필요'와 영향받는 컨테이너 수를 표시</td></tr>
     <tr><td>영향 파악</td><td>배차표 20건의 도착 시각을 하나씩 다시 계산(약 20분)</td><td>원래 배차대로 가면 <b>4건이 새 마감을 넘긴다</b>는 것을 바로 계산</td></tr>
     <tr><td>조정</td><td>경험으로 차량·순서를 바꾸고, 놓친 충돌은 기사 출발 후에 발견</td><td>10초 안에 최소 변경안 제시: <b>3건 해결, 바뀌는 작업 5건</b>. 맞출 수 없는 1건은 원인(준비 지연)과 할 일을 안내</td></tr>
     <tr><td>확정·통보</td><td>영향받을 수 있는 기사 8명 모두에게 전화·카카오톡(약 24분)</td><td>담당자가 남는 위험을 확인하고 확정하면 <b>바뀐 차량 4대에만</b> 안내문과 알림 전달</td></tr>
     <tr><td>응답 관리</td><td>통화·메시지에 흩어져 기록 없음</td><td>기사의 응답과 이유가 한 표에 모이고, '수행 곤란'은 즉시 알림 카드로 표시</td></tr>
-  </table>
-  <figure><img src="figures/01-home.jpg" style="max-height:66mm;object-fit:cover;object-position:top left"><figcaption><b>그림 1.</b> 받은 변경 화면. 공지를 조치 필요·확정 대기·입력 확인·영향 없음으로 나눠 보여 주고, 지금 배차표 기준 차량 위치를 위성 사진과 실시간 도로 혼잡 위에 표시한다.</figcaption></figure>
+  </tbody></table>
+  <figure><img src="figures/01-home.jpg" style="max-height:56mm;object-fit:cover;object-position:top left"><figcaption><b>그림 1.</b> 받은 변경 화면. 공지를 조치 필요·확정 대기·입력 확인·영향 없음으로 나눠 보여 주고, 지금 배차표 기준 차량 위치를 위성 사진과 실시간 도로 혼잡 위에 표시한다.</figcaption></figure>
 </section>
 
 <!-- ───────────── 2. 데이터 활용 계획 ───────────── -->
 <section class="chapter flow-on">
-  <div class="chapter-head"><span class="no">2</span><h2>데이터 활용 계획</h2><span class="pts">배점 20</span></div>
-  <div class="criteria"><b>평가 기준</b> 합법적 소스(API/공공·민간 데이터), 수집 → 처리 → 활용 흐름이 구체적인지</div>
+  <div class="chapter-head"><span class="no">2</span><h2>데이터 활용 계획</h2></div>
 
   <h3>2.1 데이터 소스와 이용 조건: 실제 자료는 공개·무료 한도 안에서만</h3>
-  <table>
-    <tr><th style="width:17%">자료</th><th style="width:19%">제공처·방식</th><th style="width:25%">사용하는 값</th><th>이용 조건·한도</th><th style="width:8%">구분</th></tr>
+  <table><thead>
+    <tr><th style="width:17%">자료</th><th style="width:19%">제공처·방식</th><th style="width:25%">사용하는 값</th><th>이용 조건·한도</th><th style="width:8%">구분</th></tr></thead><tbody>
     <tr><td>선석 배정 현황</td><td>HJNC 공개 웹 조회(JSON)</td><td>항차, 반입 시작·마감, 접안 예정</td><td>로그인 없이 보이는 공개 조회 화면의 자료. robots.txt가 이 경로를 허용함(2026-11-13 확인). 서버가 <b>1시간에 1번</b>만 수집(하루 24회)하고, 실패하면 직전 정상값을 유지</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>해상 관측·특보</td><td>기상청 API허브(개인 회원 인증키)</td><td>파고·풍속(거제도 관측), 부산앞바다 특보</td><td>일 20,000회 한도 중 <b>하루 96회</b>(30분 간격, 0.5%) 사용. 키는 서버에만 저장</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>지도·위성·실시간 교통</td><td>카카오 지도 JavaScript SDK</td><td>지도·위성 사진, 도로 혼잡도 겹쳐 보기</td><td>일 300,000회 무료 한도, 허용 도메인 등록</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>도로 경로</td><td>OpenStreetMap + OSRM</td><td>상차지와 게이트 사이 실제 도로 경로·거리</td><td>ODbL 출처 표기. 경로는 미리 받아 저장(실시간 호출 없음)</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>기사 알림·위치</td><td>웹 푸시(VAPID), 브라우저 위치 API</td><td>알림 전달·열람·응답, 기사가 켠 경우 위치</td><td>기사가 동의한 경우에만. 위치는 <b>최신 1건만</b> 보관하고, 끄면 즉시 삭제</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>배차표·차량·컨테이너</td><td>모의 자료(팀 제작)</td><td>작업 20건·차량 8대·준비 시각·이동 시간</td><td>실제 운송사 자료를 확보하지 못해 직접 만들었다. 거리·시간은 OSRM 실제 도로 경로로 맞췄다</td><td><span class="tag sim">모의</span></td></tr>
-  </table>
+  </tbody></table>
   <p class="note">추가 검토 후 채택하지 않은 자료: 한국도로공사 교통 API(부산 구간·단위·집계 품질 미확인), AISstream 선박 위치(부산 수신 시험 0건), openrouteservice(화물차 제약 미지원으로 표시 경로만 비교). 채택하지 않은 이유를 자료별로 기록했다(코드 ZIP <span class="src">docs/data/</span>).</p>
 
   <h3>2.2 수집 → 처리 → 활용 흐름</h3>
@@ -237,14 +240,14 @@
 
 <section>
   <h3>2.3 데이터 품질 규칙: 모르는 값은 채우지 않고 계산을 멈춘다</h3>
-  <table>
-    <tr><th style="width:30%">규칙</th><th>구현과 이유</th></tr>
+  <table><thead>
+    <tr><th style="width:30%">규칙</th><th>구현과 이유</th></tr></thead><tbody>
     <tr><td><b>선박 도착 예정과 반입 마감을 구분</b></td><td>터미널이 재조정을 <b>확정 공지</b>했을 때만 계산한다. 입항이 늦어진다고 마감이 바뀌는 것은 아니기 때문이다. 확정 전 공지는 '확정 대기'로 영향만 보여 준다.</td></tr>
     <tr><td><b>모르는 값은 모른다고 표시</b></td><td>상차 준비 시각이나 이동 시간이 비면 계산하지 않고 '입력 확인'으로 돌려 담당자가 채우게 한다. 0분이나 즉시 출발로 가정하면 실행할 수 없는 배차가 나오기 때문이다.</td></tr>
     <tr><td><b>출처와 시각을 함께 기록</b></td><td>모든 값에 제공처·수신 시각·확정 여부를 붙인다. 기상 관측은 HJNC 현장이 아닌 인근 지점(거제도)임을 표시한다.</td></tr>
     <tr><td><b>실제와 모의를 섞지 않음</b></td><td>외부 호출이 실패해도 모의값으로 바꿔 채우지 않는다. 화면에는 '기상청 응답 오류'와 '연결 실패'처럼 원인을 구분해 보여 준다.</td></tr>
     <tr><td><b>호출 한도 안에서 운영</b></td><td>외부 API는 서버 타이머만 호출하므로 사용자가 늘어도 호출 수는 그대로다. 화면은 서버에 저장된 사본을 5분마다 읽는다.</td></tr>
-  </table>
+  </tbody></table>
 
   <h3>2.4 모의 배차 데이터: 실제 도로 시간 위에 만든 하루치 배차</h3>
   <p>실제 운송사 배차표는 영업 정보라 확보하지 못했다. 대신 <b>현실의 거리·시간 구조를 지키는</b> 모의 자료를 만들었다. 녹산 차고지·녹산산단·사상·웅동·김해 안동·장유 6곳의 상차지와 HJNC·PNIT 게이트 사이 이동 시간은 OSRM 실제 도로 경로로 맞췄다(예: 녹산산단→PNIT 18분, 김해 안동→PNIT 47분). 시연 공지 5종(마감 앞당김 2건, 늦춰짐, 확정 전, 준비 시각 누락)은 같은 배차표에서 사건만 바꿔 만들었다. 시연 시각은 화면을 연 '지금'을 기준으로 옮긴다. 이때 마감은 10분 단위로, 반입 시작은 접안 3일 전 00:00으로 맞춰 실제 공지와 같은 형식을 유지한다.</p>
@@ -252,8 +255,8 @@
 
   <h3>2.5 계산 입력 구조: 입력 한 벌을 버전과 함께 저장한다</h3>
   <p>계산에 쓰는 입력은 그 시점의 값을 그대로 묶은 사본(스냅샷)으로 버전과 함께 저장한다. 같은 스냅샷으로는 언제 다시 계산해도 결과가 같다. 확정할 때는 그사이 입력이 바뀌지 않았는지 다시 검사한다.</p>
-  <table>
-    <tr><th style="width:17%">묶음</th><th style="width:43%">주요 필드</th><th>출처·검증</th></tr>
+  <table><thead>
+    <tr><th style="width:17%">묶음</th><th style="width:43%">주요 필드</th><th>출처·검증</th></tr></thead><tbody>
     <tr><td>작업</td><td>컨테이너 번호, 항차, 상차지·터미널·복귀지, 상차 준비 시각, 규격(20/40ft)·중량, 처리 시간, 출발 여부·고정</td><td>운송사 배차표(현재 모의). 준비 시각이 비면 계산 보류</td></tr>
     <tr><td>차량</td><td>번호판, 시작 위치, 가용 시작·근무 종료, 적재 가능 규격·최대 중량</td><td>운송사(모의). 가용 시작이 근무 종료보다 늦으면 입력을 거절</td></tr>
     <tr><td>반입 허용 시간</td><td>항차·터미널별 반입 시작·마감, 확정 여부, 확인자·확인 시각</td><td>HJNC 공개 일정과 담당자 확정</td></tr>
@@ -261,7 +264,7 @@
     <tr><td>이동 시간</td><td>지점 쌍별 방향 이동 시간(분)</td><td>OSRM 도로 경로 기반. 빠진 구간이 있으면 0분으로 채우지 않고 보류</td></tr>
     <tr><td>운영 기준</td><td>게이트 여유 10분, 출발 시각 허용 폭 5분, 입력 유효 시간 3시간</td><td>팀 설정(운송사별 조정 가능)</td></tr>
     <tr><td>원래 배차</td><td>작업별 차량·순서·상차지 출발·게이트 도착·복귀 시각</td><td>변경 전 확정 배차. '변경 수'의 기준</td></tr>
-  </table>
+  </tbody></table>
 
   <h3>2.6 실제 연동에서 확인한 값 (운영 서버, 2026-11-13)</h3>
   <ul class="small">
@@ -273,32 +276,31 @@
 
 <!-- ───────────── 3. 창의성 및 차별성 ───────────── -->
 <section class="chapter flow-on">
-  <div class="chapter-head"><span class="no">3</span><h2>창의성 및 차별성</h2><span class="pts">배점 25</span></div>
-  <div class="criteria"><b>평가 기준</b> 기존 대비 분명한 차별점의 존재 여부(새로운 알고리즘/운영모델/서비스)</div>
+  <div class="chapter-head"><span class="no">3</span><h2>창의성 및 차별성</h2></div>
 
   <h3>3.1 기존 서비스와 다른 점: 변경 사건에서 출발해 기존 배차를 지킨다</h3>
   <p>공개 자료로 국내 컨테이너 운송·항만 서비스 7곳을 비교했다. 배차·지도·운송 추적·기사 앱은 이미 있으며, 우리는 이를 새 기능이라고 주장하지 않는다. 차이는 개별 기능이 아니라 흐름에 있다. <b>확정된 반입 마감 변경을 출발점으로, 기존 배차를 최대한 유지하면서 다시 맞추는 전 과정</b>이 하나로 이어진다.</p>
-  <table>
-    <tr><th style="width:24%">비교 항목</th><th style="width:25%">일반 배차·TMS(공개 소개 기준)</th><th>반입맞춤</th></tr>
+  <table><thead>
+    <tr><th style="width:24%">비교 항목</th><th style="width:25%">일반 배차·TMS(공개 소개 기준)</th><th>반입맞춤</th></tr></thead><tbody>
     <tr><td>출발점</td><td>새 주문을 받아 배차</td><td><b>확정된 마감 변경을 받아 남은 배차의 영향을 점검</b></td></tr>
     <tr><td>재배차 기준</td><td>공개 자료에서 확인 안 됨</td><td>마감을 넘기는 컨테이너를 먼저 줄이고 <b>그다음 바뀌는 작업을 줄이는</b> 순차 최적화, 출발한 작업은 고정</td></tr>
     <tr><td>마감을 맞출 수 없는 컨테이너</td><td>공개 자료에서 확인 안 됨</td><td>원인(준비 지연·차량 부족·마감 초과)과 <b>담당자가 할 일</b>을 함께 제시</td></tr>
     <tr><td>판단 근거</td><td>—</td><td>원래 배차와 최소 변경안을 지표·시간표·지도로 나란히 비교하고, 다른 계산안도 볼 수 있음</td></tr>
     <tr><td>현장 조건 반영</td><td>—</td><td>준비 시각, 차량 추가, <b>오늘 운행 불가</b>를 입력하면 바로 다시 계산해 전후를 비교</td></tr>
     <tr><td>기사 전달</td><td>전화·문자 또는 자체 앱</td><td><b>바뀐 차량의 기사에게만</b> 안내문과 연결 링크를 보내고, 기사는 앱 설치 없이 알림을 받고 답한다</td></tr>
-  </table>
+  </tbody></table>
   <p class="note">비교 대상: TIGER FACE, CONTAINUS TMS, PortQM, PortWise 등 공식 소개·앱 배포 페이지(2026-11-07 확인). 로그인 후 기능은 시험하지 않았으므로 공개 소개에 없는 기능을 '미지원'으로 단정하지 않았다.</p>
 
   <h3>3.2 알고리즘 적용: 출발 작업을 지키는 최소 변경 재배차</h3>
   <p>바뀐 조건에서 기존 계획을 가장 적게 고치는 문제는 최소 변경(minimal perturbation) 재일정으로 연구돼 왔다[9]. 우리는 이 생각을 반입 마감 변경과 운송사 배차에 맞춰 적용했다. 출발한 작업을 고정하고, 마감을 먼저 지킨 뒤 변경을 줄이는 순차 최적화로 풀며, 그 결과를 확정과 기사 응답까지 이어지는 운영 흐름으로 만들었다.</p>
   <p>같은 입력·같은 계산 시간으로 네 가지 방법을 계산해 담당자가 비교하게 했다.</p>
-  <table>
-    <tr><th style="width:17%">방법</th><th style="width:21%">기법</th><th>목적(우선순위 순)</th></tr>
+  <table><thead>
+    <tr><th style="width:17%">방법</th><th style="width:21%">기법</th><th>목적(우선순위 순)</th></tr></thead><tbody>
     <tr><td>원래 배차</td><td>진단</td><td>바꾸지 않으면 늦는 컨테이너와 위험을 계산(기준선)</td></tr>
     <tr><td>마감순 재배치</td><td>마감 빠른 순 삽입 휴리스틱</td><td>현장에서 손으로 하는 방식을 흉내 낸 비교 기준</td></tr>
     <tr><td>전체 재배치</td><td>CP-SAT 순차 최적화</td><td>① 미배정(마감 안에 넣지 못한 컨테이너) 최소 ② <b>이동 시간</b> 최소</td></tr>
     <tr><td><b>최소 변경안</b></td><td>CP-SAT 순차 최적화</td><td>① 미배정 최소 ② <b>바뀌는 작업 수</b> 최소 ③ 이동 시간 최소. 모두 같으면 원래 출발 시각에 가장 가까운 안</td></tr>
-  </table>
+  </tbody></table>
 </section>
 
 <section>
@@ -321,7 +323,7 @@
     </div>
   </div>
   <div class="callout"><b>목표를 가중치로 합치지 않고 차례로 푼다(사전식 최적화).</b> 목표를 가중치로 합치면 가중치에 따라 '변경 1건을 아끼려고 컨테이너 1개를 포기'하는 답이 나올 수 있다. 차례로 풀면 <b>컨테이너를 마감 안에 넣는 것이 항상 먼저</b>이고, 같은 수를 넣는 답 가운데서만 변경을 줄인다. 그래서 담당자에게 "더 많이 넣을 방법은 없고, 그중 가장 적게 바꾼 안"이라고 설명할 수 있다.</div>
-  <figure><img src="figures/02-result-top.png" style="max-height:95mm;object-fit:cover;object-position:top"><figcaption><b>그림 3.</b> 점검 결과 첫 화면. 원래 배차로 마감을 넘기는 4건 중 3건을 최소 변경안이 해결하고, 바뀌는 작업은 5건, 담당자 확인이 필요한 것은 1건이다. 아래에 변경 근거(2시간 30분 앞당겨진 새 마감, 터미널 확정 시각, 근거 공지)를 함께 보여 준다. 시연 시각은 화면을 연 시각에 맞춰 바뀐다.</figcaption></figure>
+  <figure><img src="figures/02-result-top.png" style="max-height:84mm;object-fit:cover;object-position:top"><figcaption><b>그림 3.</b> 점검 결과 첫 화면. 원래 배차로 마감을 넘기는 4건 중 3건을 최소 변경안이 해결하고, 바뀌는 작업은 5건, 담당자 확인이 필요한 것은 1건이다. 아래에 변경 근거(2시간 30분 앞당겨진 새 마감, 터미널 확정 시각, 근거 공지)를 함께 보여 준다. 시연 시각은 화면을 연 시각에 맞춰 바뀐다.</figcaption></figure>
 </section>
 
 <section>
@@ -349,8 +351,8 @@
     <div class="box soft"><h4 style="margin-top:0">현장에서 확인한 조건을 계산에 반영</h4><p class="small" style="margin:0">화주가 상차 준비를 앞당기기로 했거나, 협력사 차량을 구했거나, 차량이 고장 났다면 담당자는 그 조건만 바꿔 같은 방법과 같은 계산 시간으로 다시 계산한다. 원래 입력과 이전 결과는 그대로 남고 전후 비교가 붙는다. 화주 확인이 끝나지 않았으면 '확인 전(미리 계산)'으로 결과만 보여 주고 확정은 막는다. 시연 BHMN에서는 준비를 40분 앞당기는 것만으로는 차량이 모자라 1건이 남고, 차량 1대를 더하면 4건 모두 마감 안에 들어간다.</p></div>
   </div>
   <div class="two-31" style="margin-top:10px">
-    <figure style="margin:0"><img src="figures/09b-dispatch-toast.png" style="max-height:125mm;object-fit:cover;object-position:top"><figcaption><b>그림 4.</b> 기사 전달 화면. 바뀐 차량별로 넘겨준 작업·넘겨받은 작업·출발 시각을 보여 준다. 기사가 답하면 오른쪽 아래에 알림 카드가 뜨고, '수행 곤란'은 빨간색으로 이유와 함께 표시된다.</figcaption></figure>
-    <figure style="margin:0"><img src="figures/10-recipient-response.png"><figcaption><b>그림 5.</b> 기사 휴대폰 화면. 앱 설치 없이 링크로 연결하고, 자기 차량의 변경만 보며 '수행 가능' 또는 '수행 곤란'으로 답한다.</figcaption></figure>
+    <figure style="margin:0"><img src="figures/09b-dispatch-toast.png" style="max-height:76mm;object-fit:cover;object-position:top"><figcaption><b>그림 4.</b> 기사 전달 화면. 바뀐 차량별로 넘겨준 작업·넘겨받은 작업·출발 시각을 보여 준다. 기사가 답하면 오른쪽 아래에 알림 카드가 뜨고, '수행 곤란'은 빨간색으로 이유와 함께 표시된다.</figcaption></figure>
+    <figure style="margin:0"><img src="figures/10-recipient-response.png" style="max-height:76mm;width:auto;max-width:100%;margin:0 auto"><figcaption><b>그림 5.</b> 기사 휴대폰 화면. 앱 설치 없이 링크로 연결하고, 자기 차량의 변경만 보며 '수행 가능' 또는 '수행 곤란'으로 답한다.</figcaption></figure>
   </div>
 </section>
 
@@ -359,14 +361,14 @@
   <p>담당자가 계산 결과를 믿고 확정할 수 있도록, 모든 제안에 시간표·지도·입력 근거를 붙였다. 아래는 시연 BHMN(반입 마감 2시간 30분 앞당김)의 원래 배차와 최소 변경안이다. 막대의 진한 부분은 상차지 출발부터 게이트 도착까지, 연한 부분은 복귀까지다. 진한 부분이 점선(그 작업의 반입 마감)을 넘으면 늦는다.</p>
   <figure><img src="figures/03-comparison-gantt.png"><figcaption><b>그림 6.</b> 원래 배차와 최소 변경안(차량별 시간 막대). 원래 배차에서는 부산 92바 5520과 경남 88자 7136의 작업 4건(빨강)이 마감을 넘긴다. 최소 변경안은 이 작업들을 다른 차량과 맞바꿔 3건을 마감 안에 넣고, 바뀐 작업은 5건(초록), 관련 차량은 4대다. 나머지 4대는 그대로다. 상차 준비가 늦은 100208 3은 어떤 차량으로도 맞출 수 없어 '미배정'과 원인을 표시한다. 자물쇠는 이미 출발한 작업이다.</figcaption></figure>
   <h4>담당자의 질문과 화면이 주는 근거</h4>
-  <table>
-    <tr><th style="width:27%">담당자의 질문</th><th>화면에서 보는 근거</th></tr>
+  <table><thead>
+    <tr><th style="width:27%">담당자의 질문</th><th>화면에서 보는 근거</th></tr></thead><tbody>
     <tr><td>정말 늦나, 왜 늦나</td><td>작업마다 새 마감과 게이트 도착 예정 시각, 늦는 원인(준비 지연, 차량 부족, 마감 초과), 근거 공지와 확정 시각</td></tr>
     <tr><td>왜 이 안인가</td><td>마감순 재배치·전체 재배치·최소 변경안을 같은 입력과 같은 계산 시간으로 계산해 미배정, 바뀌는 작업, 연락할 기사, 이동 시간을 나란히 비교</td></tr>
     <tr><td>무엇이 바뀌나</td><td>차량별 시간 막대(그림 6)와 작업별 표, 차량 지도(원래 배차·최소 변경안 전환)</td></tr>
     <tr><td>현장 사정이 다르면</td><td>조건 보완(그림 8)으로 그 값만 바꿔 다시 계산하고 이전 결과와 비교</td></tr>
     <tr><td>확정해도 되나</td><td>남는 위험(미배정, 출발한 차량의 위험)을 담당자가 하나씩 확인해야 확정 버튼이 열린다. 확정 직전에는 그사이 입력이 바뀌지 않았는지 다시 검사한다.</td></tr>
-  </table>
+  </tbody></table>
 </section>
 
 <section>
@@ -379,13 +381,12 @@
 
 <!-- ───────────── 4. 실현 가능성 ───────────── -->
 <section class="chapter flow-on">
-  <div class="chapter-head"><span class="no">4</span><h2>실현 가능성</h2><span class="pts">배점 15</span></div>
-  <div class="criteria"><b>평가 기준</b> 제시한 기술 스택, 데이터 가용성, 일정/자원 계획이 현실적으로 실현 가능한 정도(리스크·대응 제시)</div>
+  <div class="chapter-head"><span class="no">4</span><h2>실현 가능성</h2></div>
 
   <h3>4.1 운영 중인 서버: 지금 접속해 쓸 수 있다</h3>
   <p>시제품을 로컬 시연에 그치지 않고 <b>인터넷에 운영 서버로 배포</b>했다. 심사위원이 직접 <b><a href="https://banipmatch.duckdns.org">https://banipmatch.duckdns.org</a></b>에서 계산·확정·기사 알림까지 해 볼 수 있다.</p>
-  <table>
-    <tr><th style="width:19%">계층</th><th style="width:33%">기술</th><th>운영 방식</th></tr>
+  <table><thead>
+    <tr><th style="width:19%">계층</th><th style="width:33%">기술</th><th>운영 방식</th></tr></thead><tbody>
     <tr><td>서버</td><td>AWS Lightsail 서울 리전(메모리 2GB, 디스크 60GB)</td><td>systemd로 자동 시작·재시작, 스왑 1GB</td></tr>
     <tr><td>보안 통신</td><td>Caddy + Let's Encrypt HTTPS</td><td>인증서 자동 발급·갱신(웹 푸시와 위치 API는 HTTPS 필수)</td></tr>
     <tr><td>백엔드</td><td>Python 3.12, FastAPI, OR-Tools CP-SAT</td><td>계산 대기열(최대 30건), 사용자별 요청 제한(분당 180회, 쓰기 40회)</td></tr>
@@ -393,7 +394,7 @@
     <tr><td>프론트엔드</td><td>React + TypeScript + Vite</td><td>담당자 PC 화면, 기사용 휴대폰 화면(설치 없이 홈 화면에 추가 가능한 웹앱)</td></tr>
     <tr><td>알림</td><td>Web Push(VAPID) + Service Worker</td><td>알림 사용 코드를 입력한 작업공간만 실제로 발송</td></tr>
     <tr><td>자료 수집</td><td>systemd 타이머 2개</td><td>HJNC는 1시간, 기상청은 30분마다. 실패하면 직전 값 유지</td></tr>
-  </table>
+  </tbody></table>
 
   <div class="box soft" style="margin:4px 0 10px">
     <h4 style="margin-top:0">직접 해 보는 순서 (가입 없음, 약 5분)</h4>
@@ -419,44 +420,44 @@
   </div>
 
   <h3>4.2 실제 기기 검증: 알림 전달부터 기사 응답까지 1분 15초</h3>
-  <table>
-    <tr><th style="width:36%">확인 항목</th><th>결과(2026-11-13, 운영 서버)</th></tr>
+  <table><thead>
+    <tr><th style="width:36%">확인 항목</th><th>결과(2026-11-13, 운영 서버)</th></tr></thead><tbody>
     <tr><td>기사 연결, 알림 수신, 응답</td><td>안드로이드 휴대폰에서 연결 링크를 열어 연결한 뒤 알림을 받고, 열어 보고, 답했다. <b>전달 02:52:30, 열람 02:52:45, 응답 02:53:45</b>(서버 기록)</td></tr>
     <tr><td>담당자 화면 반영</td><td>기사의 응답과 메모가 5초 안에 표와 알림 카드에 반영됨</td></tr>
     <tr><td>기사 위치 공유</td><td>기사가 위치 공유를 켜자 담당자 지도에 실제 위치(창원)가 표시되고, 끄자 지워짐</td></tr>
     <tr><td>자동 시험</td><td>서버 680개, 화면 189개, <b>총 869개 통과</b>. GitHub에서 모든 변경(PR)마다 자동 실행</td></tr>
     <tr><td>계산 무작위 검사</td><td>입력을 무작위로 바꾼 24회 계산의 결과가 모두 달랐고, 별도 검사기에서 규칙 위반 0건(5.2절)</td></tr>
-  </table>
+  </tbody></table>
   <p class="note">아이폰(홈 화면 앱) 실기기 수신은 아직 확인하지 못해 팀원 시험으로 남겨 두었다.</p>
 </section>
 
 <section>
   <h3>4.3 일정과 자원: 개발 착수 1주 만에 운영 서버까지</h3>
   <div class="two">
-    <table>
-      <tr><th style="width:23%;white-space:nowrap">기간</th><th>수행</th></tr>
+    <table><thead>
+      <tr><th style="width:23%;white-space:nowrap">기간</th><th>수행</th></tr></thead><tbody>
       <tr><td>~11/06</td><td>현장 문제 조사·주제 선정, 자문 요청 5곳</td></tr>
       <tr><td>11/07–08</td><td>설계, 공통 규격, 배차 엔진 4가지 방법, 80회 평가</td></tr>
       <tr><td>11/09–10</td><td>실제 API 검증(HJNC·기상청·도로·AIS), 화면</td></tr>
       <tr><td>11/11</td><td>통합, HTTPS 시험 서버, 웹 푸시</td></tr>
       <tr><td>11/12–13</td><td>운영 서버 배포, 실기기 검증, 보고서</td></tr>
       <tr><td>11/14–20</td><td>팀원 실기기 시험(아이폰), 발표자료(11/20)</td></tr>
-    </table>
+    </tbody></table>
     <div>
-      <table>
-        <tr><th>역할</th><th>담당</th></tr>
+      <table><thead>
+        <tr><th>역할</th><th>담당</th></tr></thead><tbody>
         <tr><td>최적화·통합·배포</td><td>황대겸</td></tr>
         <tr><td>서버 API·DB·알림</td><td>안선효</td></tr>
         <tr><td>화면·사용성</td><td>최길웅</td></tr>
         <tr><td>데이터 검증·모의 자료</td><td>심민준</td></tr>
-      </table>
+      </tbody></table>
       <p class="small">GitHub 저장소에 커밋 300여 개, 병합된 변경 요청(PR) 70여 개. 모든 변경은 PR과 자동 시험을 거쳐 반영했다. 운영 비용은 소형 클라우드 서버 1대와 무료 한도 안의 API로, 별도 유료 계약이 없다.</p>
     </div>
   </div>
 
   <h3>4.4 리스크와 대응: 실패해도 틀린 배차를 내보내지 않는다</h3>
-  <table>
-    <tr><th style="width:27%">리스크</th><th>대응(구현됨)</th></tr>
+  <table><thead>
+    <tr><th style="width:27%">리스크</th><th>대응(구현됨)</th></tr></thead><tbody>
     <tr><td>외부 API 장애·한도 초과</td><td>서버 타이머만 호출해 한도의 0.5%만 쓴다. 실패하면 직전 값을 유지하고 원인을 표시한다</td></tr>
     <tr><td>계산이 시간 안에 안 끝남</td><td>10초 안에 찾은 최선의 안에 '최적 미증명'을 표시하고, 별도 검사를 통과해야만 확정한다</td></tr>
     <tr><td>잘못된 입력으로 엉뚱한 배차</td><td>빈 값, 확정 전 공지, 기준 시각 이후의 근거는 계산 전에 막는다. 조건을 고칠 때는 이유를 반드시 남기고 원본은 보존한다</td></tr>
@@ -464,7 +465,7 @@
     <tr><td>동시 사용·남용</td><td>방문자마다 작업공간을 분리하고 요청 수와 계산 대기열을 제한한다. 동시에 쓰는 작업공간은 200개까지 받고, 쓰지 않는 작업공간은 24시간 뒤 닫는다</td></tr>
     <tr><td>개인정보·보안</td><td>기사 이름·전화번호는 받지 않는다. 연결 링크는 30분 안에 휴대폰 1대에서 한 번만 쓸 수 있다. 위치는 동의한 경우 최신 1건만 두고, 인증 키는 서버의 비밀 파일에만 둔다</td></tr>
     <tr><td>현장 자료 부족</td><td>모의 자료와 실제 자료를 화면과 보고서에서 구분한다. 자문 회신이 오면 비식별 배차표로 다시 검증한다</td></tr>
-  </table>
+  </tbody></table>
 
   <h3>4.5 개발 방식: 검증할 수 있는 협업</h3>
   <div class="two">
@@ -483,19 +484,18 @@
 
 <!-- ───────────── 5. 기대효과 ───────────── -->
 <section class="chapter flow-on">
-  <div class="chapter-head"><span class="no">5</span><h2>기대효과 — 정량·파급</h2><span class="pts">배점 20</span></div>
-  <div class="criteria"><b>평가 기준</b> 물류 KPI 개선 효과를 정량적 또는 구체적으로 추정하고 산출 근거를 제시했는지</div>
+  <div class="chapter-head"><span class="no">5</span><h2>기대효과 — 정량·파급</h2></div>
 
   <h3>5.1 측정 결과: 시연 공지 5종 (작업 20건, 차량 8대, 출발 고정 2건)</h3>
   <p>같은 입력과 같은 10초 제한으로 네 방법을 계산했다(재현: <span class="src">tools/report_demo_scenarios.py</span>, 결과 <span class="src">docs/experiments/demo-scenarios-2026-11-13/</span>).</p>
-  <table>
-    <tr><th style="width:25%">공지</th><th class="num">원래 배차<br>마감 초과</th><th class="num">최소 변경안<br>마감 초과·미배정</th><th class="num">바뀌는 작업<br>마감순 / 전체 / <b>최소</b></th><th class="num">연락할 기사<br>마감순 / 전체 / <b>최소</b></th></tr>
+  <table><thead>
+    <tr><th style="width:25%">공지</th><th class="num">원래 배차<br>마감 초과</th><th class="num">최소 변경안<br>마감 초과·미배정</th><th class="num">바뀌는 작업<br>마감순 / 전체 / <b>최소</b></th><th class="num">연락할 기사<br>마감순 / 전체 / <b>최소</b></th></tr></thead><tbody>
     <tr><td>BHMN 마감 2시간 30분 앞당김</td><td class="num bad">4</td><td class="num">0 · 1<span class="note">(준비 지연)</span></td><td class="num">16 / 11 / <b class="good">5</b></td><td class="num">8 / 7 / <b class="good">4</b></td></tr>
     <tr><td>BE221E 마감 1시간 30분 앞당김</td><td class="num bad">1</td><td class="num good">0 · 0</td><td class="num">16 / 16 / <b class="good">2</b></td><td class="num">8 / 8 / <b class="good">2</b></td></tr>
     <tr><td>BPNR 마감 1시간 늦춰짐</td><td class="num">0</td><td class="num">0 · 0</td><td class="num">17 / 5 / <b class="good">0</b></td><td class="num">8 / 3 / <b class="good">0</b></td></tr>
     <tr><td>BORT 앞당김 예정(확정 전)</td><td colspan="4">계산하지 않음. 확정되더라도 이 항차 5건은 모두 기존 배차로 마감 안에 들어간다는 것을 미리 안내</td></tr>
     <tr><td>상차 준비 시각 미입력</td><td colspan="4">계산 보류. 담당자가 비어 있는 값을 채우면 바로 다시 계산(0분으로 가정하지 않음)</td></tr>
-  </table>
+  </tbody></table>
 
   <figure class="chart"><svg viewBox="0 0 680 221" width="100%" role="img" aria-label="시연 공지 3종에서 방법별 바뀌는 작업과 연락할 기사 수" xmlns="http://www.w3.org/2000/svg"><text x="136" y="16" font-size="10.5" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">바뀌는 작업(건)</text><text x="410" y="16" font-size="10.5" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">연락할 기사(명)</text><text x="0" y="47" font-size="9.8" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">BHMN</text><text x="0" y="60" font-size="8.6" fill="#6b6b70" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감 2시간 30분 앞당김</text><rect x="136" y="34" width="184.0" height="10" rx="2" fill="#C3C8D0"/><text x="324.0" y="42.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">16</text><rect x="410" y="34" width="210.0" height="10" rx="2" fill="#C3C8D0"/><text x="624.0" y="42.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="47" width="126.5" height="10" rx="2" fill="#8A929D"/><text x="266.5" y="55.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">11</text><rect x="410" y="47" width="183.8" height="10" rx="2" fill="#8A929D"/><text x="597.8" y="55.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">7</text><rect x="136" y="60" width="57.5" height="10" rx="2" fill="#16294D"/><text x="197.5" y="68.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">5</text><rect x="410" y="60" width="105.0" height="10" rx="2" fill="#16294D"/><text x="519.0" y="68.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">4</text><text x="0" y="102" font-size="9.8" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">BE221E</text><text x="0" y="115" font-size="8.6" fill="#6b6b70" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감 1시간 30분 앞당김</text><rect x="136" y="89" width="184.0" height="10" rx="2" fill="#C3C8D0"/><text x="324.0" y="97.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">16</text><rect x="410" y="89" width="210.0" height="10" rx="2" fill="#C3C8D0"/><text x="624.0" y="97.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="102" width="184.0" height="10" rx="2" fill="#8A929D"/><text x="324.0" y="110.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">16</text><rect x="410" y="102" width="210.0" height="10" rx="2" fill="#8A929D"/><text x="624.0" y="110.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="115" width="23.0" height="10" rx="2" fill="#16294D"/><text x="163.0" y="123.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">2</text><rect x="410" y="115" width="52.5" height="10" rx="2" fill="#16294D"/><text x="466.5" y="123.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">2</text><text x="0" y="157" font-size="9.8" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">BPNR</text><text x="0" y="170" font-size="8.6" fill="#6b6b70" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감 1시간 늦춰짐</text><rect x="136" y="144" width="195.5" height="10" rx="2" fill="#C3C8D0"/><text x="335.5" y="152.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">17</text><rect x="410" y="144" width="210.0" height="10" rx="2" fill="#C3C8D0"/><text x="624.0" y="152.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="157" width="57.5" height="10" rx="2" fill="#8A929D"/><text x="197.5" y="165.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">5</text><rect x="410" y="157" width="78.8" height="10" rx="2" fill="#8A929D"/><text x="492.8" y="165.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">3</text><text x="140.0" y="178.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><text x="414.0" y="178.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><line x1="136" y1="30" x2="136" y2="187" stroke="#1d1d1f" stroke-width="0.8"/><line x1="136" y1="187" x2="366.0" y2="187" stroke="#d4d4d8" stroke-width="0.6"/><text x="136.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><text x="193.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">5</text><text x="251.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">10</text><text x="308.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">15</text><text x="366.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">20</text><line x1="410" y1="30" x2="410" y2="187" stroke="#1d1d1f" stroke-width="0.8"/><line x1="410" y1="187" x2="620.0" y2="187" stroke="#d4d4d8" stroke-width="0.6"/><text x="410.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><text x="462.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">2</text><text x="515.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">4</text><text x="567.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">6</text><text x="620.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="207" width="10" height="9" rx="2" fill="#C3C8D0"/><text x="150" y="215" font-size="9" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감순 재배치</text><rect x="234.5" y="207" width="10" height="9" rx="2" fill="#8A929D"/><text x="248.5" y="215" font-size="9" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">전체 재배치</text><rect x="323.5" y="207" width="10" height="9" rx="2" fill="#16294D"/><text x="337.5" y="215" font-size="9" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">최소 변경안</text></svg><figcaption><b>그림 10.</b> 위 표의 바뀌는 작업과 연락할 기사를 방법별로 나란히 놓았다. 남색이 최소 변경안이다. 세 공지 모두 최소 변경안이 가장 적게 바꾸고, 마감이 늦춰진 BPNR에서는 아무것도 바꾸지 않는다.</figcaption></figure>
 
@@ -507,34 +507,35 @@
 
 <section>
   <h3>5.2 통제 실험과 견고성: 같은 조건에서 변경은 줄고 규칙 위반은 0건</h3>
-  <table>
-    <tr><th style="width:30%">실험</th><th>설계</th><th>결과</th></tr>
+  <table><thead>
+    <tr><th style="width:30%">실험</th><th>설계</th><th>결과</th></tr></thead><tbody>
     <tr><td>동결 평가 80회<br><span class="note">(2026-11-08, 엔진 0.2.3)</span></td><td>합성 입력 10개(8건 사례 8개, 20건·50건 각 1개) × 난수 시드 2 × 네 방법. 입력·시드·소스 해시를 계산 전에 고정</td><td>처리한 작업이 같은 작은 사례 12쌍에서 최소 변경안은 전체 재배치보다 <b>바뀌는 작업이 4~7건 적고</b>, 대신 이동이 12~82분 늘었다. 변경과 이동 사이의 절충을 확인했다. 50건 사례는 10초 안에 차이와 최적성을 확인하지 못했다</td></tr>
     <tr><td>무작위 견고성 24회<br><span class="note">(2026-11-13, 엔진 0.2.4)</span></td><td>시연 입력의 준비 시각·마감·운행 불가 차량을 무작위로 바꾼 12개 × 마감순 재배치·최소 변경안</td><td>24개 결과가 모두 달랐고(정해진 답을 내지 않음), 엔진과 별개인 검사기에서 <b>표시되지 않은 규칙 위반 0건</b>. 최소 변경안은 모두 최적 증명</td></tr>
     <tr><td>계산 시간</td><td>작업 20건·차량 8대</td><td>최소 변경안의 모든 목적 단계가 10초 안에 최적으로 증명됨(계산한 시연 3종 모두)</td></tr>
-  </table>
-  <table>
-    <tr><th style="width:30%">80회 평가 대표 사례(시드 0)</th><th class="num">미배정<br>전체 / 최소</th><th class="num">바뀌는 작업<br>전체 → 최소</th><th class="num">이동(분)<br>전체 → 최소</th><th>처리 작업</th></tr>
+    <tr><td>실제 HJNC 항차 1건<br><span class="note">(2026-11-13, 엔진 0.2.4)</span></td><td>1.1의 HJNC 수집에서 관측한 <b>OOET-2026-0003의 실제 마감 변경</b>(11/16 23:00 → 21:00, 2시간 앞당김)과 실제 반입 시작을 넣었다. 배차표(20건·8대, 이 항차 8건)는 시연 모의 자료를 시각만 옮겼고, 변경을 안 시점은 이전 마감 4시간 전으로 가정</td><td>원래 배차는 2건이 새 마감을 넘긴다. 최소 변경안은 <b>4건만 바꿔(기사 4명) 2건 모두 마감 안</b>에 넣었고 최적으로 증명됐다. 전체 재배치도 2건을 맞췄지만 14건(기사 7명)을 바꿨다. 별도 검사기의 규칙 위반 0건</td></tr>
+    <tr><td>50건 분할 계산<br><span class="note">(2026-11-13, 엔진 0.2.4)</span></td><td>80회 평가의 50건 입력(항차 2개 × 25건, 차량 8대, 한 항차 마감 7시간 30분 앞당김)을 ① 전체 10초 ② 전체 60초 ③ 마감이 바뀐 항차 25건만 다시 계산하고 다른 항차 25건은 원래 배차로 고정(10초)</td><td>전체 계산은 10초와 60초 모두 마감을 못 맞추는 컨테이너 9건, 바뀌는 작업 41건으로 같았고 최적을 증명하지 못했다. 나누어 계산하면 바뀌는 작업이 <b>10건</b>(기사 4명)으로 줄지만, 다른 항차의 차량을 빌려 쓸 수 없어 못 맞추는 컨테이너가 <b>15건</b>으로 늘었다. 단순 분할은 그대로 쓸 수 없다</td></tr>
+  </tbody></table>
+  <table><thead>
+    <tr><th style="width:30%">80회 평가 대표 사례(시드 0)</th><th class="num">미배정<br>전체 / 최소</th><th class="num">바뀌는 작업<br>전체 → 최소</th><th class="num">이동(분)<br>전체 → 최소</th><th>처리 작업</th></tr></thead><tbody>
     <tr><td>마감 단축 8건</td><td class="num">0 / 0</td><td class="num">8 → <b class="good">4</b></td><td class="num">342 → 376</td><td>동일</td></tr>
     <tr><td>시작 지연 8건</td><td class="num">0 / 0</td><td class="num">8 → <b class="good">3</b></td><td class="num">342 → 410</td><td>동일</td></tr>
     <tr><td>준비 지연 8건</td><td class="num">1 / 1</td><td class="num">7 → <b class="good">0</b></td><td class="num">287 → 369</td><td>동일</td></tr>
     <tr><td>고정 위험 8건</td><td class="num">1 / 1</td><td class="num">5 → 2</td><td class="num">239 → 254</td><td>다름</td></tr>
     <tr><td>마감 단축 20건</td><td class="num">4 / 4</td><td class="num">16 → 5</td><td class="num">761 → 809</td><td>다름</td></tr>
     <tr><td>마감 단축 50건</td><td class="num">9 / 9</td><td class="num">41 → 41</td><td class="num">1860 → 1860</td><td>동일</td></tr>
-  </table>
-  <p class="note">위 실험은 같은 팀이 만든 모의 입력이며 서로 다른 현장 표본이 아니다. 50건 규모의 최적성은 증명하지 못했으므로 대규모 운송사에는 시간 제한·분할 계산이 추가로 필요하다.</p>
+  </tbody></table>
+  <p class="note">위 실험은 같은 팀이 만든 모의 입력이며 서로 다른 현장 표본이 아니다. 50건 규모는 계산 시간을 60초로 늘리거나 항차 단위로 나눠도 최적을 증명하지 못했다. 나누면 변경은 줄지만 못 맞추는 컨테이너가 늘므로, 대규모 운송사에는 바뀐 항차를 먼저 계산하고 필요한 차량의 다른 작업만 풀어 주는 단계적 계산이 필요하다.</p>
 
-  <div style="break-inside: avoid">
   <h3>5.3 KPI 개선 추정과 산출 근거: 변경 1건당 판단 17분 단축, 연락 절반</h3>
   <p>아래는 5.1의 측정값에 <b>밝힌 가정</b>을 곱한 추정이다. 가정이 바뀌면 결과도 비례해 바뀐다.</p>
-  <table>
-    <tr><th style="width:17%">KPI</th><th style="width:35%">산출식(근거)</th><th style="width:26%">가정</th><th>추정(변경 1건당)</th></tr>
+  <table><thead>
+    <tr><th style="width:17%">KPI</th><th style="width:35%">산출식(근거)</th><th style="width:26%">가정</th><th>추정(변경 1건당)</th></tr></thead><tbody>
     <tr><td>리드타임: 재배차 판단</td><td>수작업 재검토 시간 − 서비스 사용 시간</td><td>수작업: 작업 20건 확인 1분/건 = 20분<br>서비스: 계산 10초 + 검토 3분</td><td>약 <b>17분 단축</b></td></tr>
     <tr><td>리드타임: 기사 전달·확인</td><td>연락할 기사 수 × 통화·확인 시간</td><td>통화·확인 3분/명, 마감순 재배치 8명과 최소 변경안 4명(BHMN)</td><td>통화 24분 대신 알림 1회와 응답(실측 75초), 연락 대상 <b>절반</b></td></tr>
     <tr><td>정확도: 마감 준수</td><td>원래 배차 마감 초과 − 최소 변경안 마감 초과</td><td>측정값(BHMN)</td><td>마감 초과 4건 중 <b>3건을 마감 안으로</b>. 맞출 수 없는 1건은 배정하지 않고 출발 전에 안내해 마감 후 도착 운행은 0건</td></tr>
-    <tr><td>탄소: 헛걸음 운행</td><td>마감을 넘긴 운행의 이동 시간(상차지·게이트·복귀) × 평균 속도 ÷ 연비 × 배출계수</td><td>이동 172분(측정), 40km/h, 대형 트랙터 3km/L, 경유 2.6kg CO₂/L</td><td>약 115km, <b>CO₂ 약 100kg</b> 회피(해당 운행이 반입을 거절당해 다시 운행할 경우)</td></tr>
-  </table>
-  </div>
+    <tr><td>탄소: 헛걸음 운행</td><td>마감을 넘긴 운행의 이동 시간(상차지·게이트·복귀) × 평균 속도 ÷ 연비 × 배출계수</td><td>이동 172분(측정), 40km/h, 대형 트랙터 3km/L, 경유 2.6kg CO₂/L</td><td>약 115km, <b>CO₂ 약 100kg</b> 회피(해당 운행이 지연 반입으로 처리돼 재운행·청구가 생길 경우)</td></tr>
+  </tbody></table>
+  <p class="small">비용으로 바꾸려면 지연 반입 청구 단가가 필요하다. HJNC는 2026년 8월 3일 접안 모선부터 마감 이후 반입한 수출 Dry 컨테이너에 지연 반입 청구를 화주에게 직접 적용하지만[1], 공지 본문에는 금액이 없다. 단가가 확인되면 BHMN에서 최소 변경안이 피한 지연 반입 3건 × 단가가 변경 1건당 직접 절감액이 된다.</p>
   <div class="callout red"><b>연간 금액으로는 환산하지 않았다.</b> 변경 발생 빈도, 실제 통화 시간, 지연 반입 청구 금액, 차종별 연비는 운송사마다 다르고 공개 통계가 없기 때문이다. 예를 들어 한 운송사가 <b>주 2회</b> 이런 변경을 겪는다면 위 리드타임 절감은 <b>연 약 29시간</b>(17분 × 104회)이 되지만, 이는 가정에 따른 예시다. 자문처 회신이 오면 실제 빈도로 다시 계산한다.</div>
 </section>
 
@@ -557,27 +558,27 @@
   </div>
 
   <h3>5.5 도입 시나리오: 운송사 1곳 시범에서 시작한다</h3>
-  <table>
-    <tr><th style="width:16%">단계</th><th style="width:40%">내용</th><th>필요한 것</th></tr>
+  <table><thead>
+    <tr><th style="width:16%">단계</th><th style="width:40%">내용</th><th>필요한 것</th></tr></thead><tbody>
     <tr><td>1. 시범</td><td>운송사 1곳의 담당자 1~2명이 HJNC 항차의 실제 변경 때 기존 방식과 함께 사용</td><td>비식별 배차표 내보내기(엑셀/CSV), 기사 동의</td></tr>
     <tr><td>2. 검증</td><td>실제 변경 사례로 KPI(마감 초과, 바뀌는 작업 수, 전달 시간)를 측정하고 가정값을 교체</td><td>4주간 변경 기록, 담당자 인터뷰</td></tr>
     <tr><td>3. 연동</td><td>TMS 배차표를 자동으로 받고, 신항 다른 터미널의 반입 일정을 연결</td><td>TMS·터미널 데이터 이용 허가</td></tr>
     <tr><td>4. 확산</td><td>운송사별 작업공간과 권한 관리, 차량 GPS 연동</td><td>운영 인증, 보안 점검, 위치정보사업 신고 검토</td></tr>
-  </table>
+  </tbody></table>
 </section>
 
 <!-- ───────────── 6. 한계와 다음 단계 ───────────── -->
 <section class="chapter flow-on">
   <div class="chapter-head"><span class="no">6</span><h2>한계와 다음 단계</h2></div>
-  <table>
-    <tr><th style="width:28%">한계</th><th>다음 단계</th></tr>
+  <table><thead>
+    <tr><th style="width:28%">한계</th><th>다음 단계</th></tr></thead><tbody>
     <tr><td>실제 운송사 배차·기사 자료 없음</td><td>자문처와 운송사에 비식별 배차표를 요청해 같은 엔진으로 실제 변경 사례를 다시 검증</td></tr>
     <tr><td>변경 빈도·업무 시간 통계 없음</td><td>담당자 인터뷰로 5.3절의 가정(재검토 1분/건, 통화 3분/명)을 실제 값으로 교체</td></tr>
-    <tr><td>50건 이상 규모의 최적성 미증명</td><td>항차·터미널 단위로 나눠 계산, 시간 제한 상향, 시작 해 개선</td></tr>
+    <tr><td>50건 이상 규모의 최적성 미증명(60초, 항차 단위 분할에서도 미증명)</td><td>바뀐 항차를 먼저 계산하고 필요한 차량의 다른 작업만 풀어 주는 단계적 계산, 시작 해 개선</td></tr>
     <tr><td>아이폰 알림 실기기 미확인</td><td>팀원 실기기 시험(11월 중), 홈 화면 추가 안내 개선</td></tr>
     <tr><td>휴대폰 위치는 화면이 열린 동안만</td><td>차량 GPS·운행기록계 연동(운송사 계약 필요)</td></tr>
     <tr><td>터미널 예약·선반입 등 외부 절차 미연동</td><td>지금은 담당자가 할 일로 안내한다. 터미널 예약 시스템 연동은 권한을 확보한 뒤 검토</td></tr>
-  </table>
+  </tbody></table>
 
   <h3>참고문헌</h3>
   <ol class="src" style="font-size:8.4pt">
@@ -594,18 +595,17 @@
 
   <h3>제출물 구성과 재현 방법</h3>
   <p class="small">ZIP을 풀면 맨 위의 <span class="src">README.md</span>에 서비스 설명, 운영 주소에서 바로 써 보는 순서(심사용 코드 포함), 묶음 구성, 데이터 위치, 확인·실행 방법이 정리돼 있다. 시연 영상은 별도 파일로 제출했다. 주요 내용의 위치는 다음과 같다.</p>
-  <p class="small">비용으로 바꾸려면 지연 반입 청구 단가가 필요하다. HJNC는 2026년 8월 3일 접안 모선부터 마감 이후 반입한 수출 Dry 컨테이너에 지연 반입 청구를 화주에게 직접 적용하지만[1], 공지 본문에는 금액이 없다. 단가가 확인되면 BHMN에서 최소 변경안이 피한 지연 반입 3건 × 단가가 변경 1건당 직접 절감액이 된다.</p>
-  <table>
-    <tr><th style="width:34%">ZIP 안 위치</th><th>내용</th><th style="width:12%">보고서</th></tr>
+  <table><thead>
+    <tr><th style="width:34%">ZIP 안 위치</th><th>내용</th><th style="width:12%">보고서</th></tr></thead><tbody>
     <tr><td><span class="src">backend/engine/</span></td><td>배차 엔진(네 가지 방법, CP-SAT)과 모형 설명 <span class="src">OPTIMIZATION.md</span></td><td>3.2–3.3</td></tr>
     <tr><td><span class="src">backend/workflow/</span>, <span class="src">frontend/</span></td><td>운영 API(작업공간·확정·기사 전달·응답)와 담당자·기사 화면</td><td>3.4–3.5, 4.1</td></tr>
     <tr><td><span class="src">tools/collect_live_reference.py</span></td><td>HJNC·기상청 실제 자료 수집(호출 한도, 실패 시 직전 자료 유지)</td><td>2.1–2.2</td></tr>
     <tr><td><span class="src">docs/data/</span></td><td>실제 응답 검증 기록(HJNC·기상청·도로공사·AIS·ORS), 채택하지 않은 이유</td><td>2.1, 2.6</td></tr>
     <tr><td><span class="src">frontend/src/fixtures/</span></td><td>시연 공지 5종 모의 배차 입력, 도로 경로(OSM·OSRM)</td><td>2.4, 5.1</td></tr>
-    <tr><td><span class="src">docs/experiments/</span></td><td>80회 평가·무작위 견고성·시연 사례의 입력과 결과 원자료</td><td>5.1–5.2</td></tr>
+    <tr><td><span class="src">docs/experiments/</span></td><td>80회 평가·무작위 견고성·시연 사례·실제 항차 사례·50건 분할 계산의 입력과 결과 원자료</td><td>5.1–5.2</td></tr>
     <tr><td><span class="src">deployment/</span>, <span class="src">docs/deployment/</span></td><td>운영 서버 설정 예시와 구성 설명(키·주소 제외)</td><td>4.1</td></tr>
     <tr><td><span class="src">submission-manifest.json</span></td><td>ZIP의 모든 파일 해시. <span class="src">python tools/check_submission.py --files-only</span>로 검사</td><td>—</td></tr>
-  </table>
+  </tbody></table>
   <p class="small">재현: Python 3.12·Node 24에서 <span class="src">pytest</span>(서버 시험 680개. ZIP에서는 Git 기록이 필요한 두 모듈을 빼고 실행), <span class="src">npm test</span>(화면 시험 189개), <span class="src">python tools/report_demo_scenarios.py</span>(5.1 표), <span class="src">python tools/check_engine_robustness.py</span>(5.2 견고성)를 실행하면 보고서 수치를 다시 얻을 수 있다. 자세한 순서는 <span class="src">docs/submission/README.md</span>. 운영 서비스는 <a href="https://banipmatch.duckdns.org">https://banipmatch.duckdns.org</a>에서 바로 확인할 수 있다.</p>
 </section>
 
