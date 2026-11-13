@@ -21,7 +21,7 @@ const MESSAGE: Record<string, string> = {
   DELIVERY_UNCERTAIN: '이미 전달됐을 수 있어 다시 보내지 않았습니다. 기사 응답을 먼저 확인하세요.',
   DELIVERY_NOT_RETRYABLE: '지금은 다시 보낼 수 없는 상태입니다.',
   NOTIFICATION_SUPERSEDED: '새 배차가 나와 이전 알림에는 응답할 수 없습니다.',
-  SUBSCRIPTION_INVALID: '알림 연결에 실패했습니다. 알림 허용을 다시 눌러 주세요.',
+  SUBSCRIPTION_INVALID: '이 브라우저의 알림은 연결할 수 없습니다. Chrome이나 Safari(아이폰은 홈 화면 앱)로 다시 열어 주세요.',
   SUBSCRIPTION_REQUIRED: '알림이 꺼져 있습니다. 알림 허용을 눌러 주세요.',
   SUBSCRIPTION_ALREADY_LINKED: '이 휴대폰은 다른 차량에 연결돼 있습니다. 그 연결을 해제한 뒤 다시 해 주세요.',
   PLAN_VERSION_CONFLICT: '그사이 배차가 바뀌었습니다. 새로고침 후 다시 확인해 주세요.',

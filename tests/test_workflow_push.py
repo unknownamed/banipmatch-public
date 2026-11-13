@@ -75,6 +75,33 @@ def test_untrusted_endpoints_fail_before_dns_or_network(endpoint):
         endpoint_host(endpoint)
 
 
+@pytest.mark.parametrize("endpoint", ["https://wns2-par02p.notify.windows.com/x?token=AAA",
+    "https://wns2-par02p.notify.windows.com/w/?token=AAA&x=1", "https://wns2-par02p.notify.windows.com/w/?other=AAA",
+    "https://wns2-par02p.notify.windows.com/w/?token=", "https://notify.windows.com.evil.test/w/?token=AAA",
+    "https://fcm.googleapis.com/w/?token=AAA", "http://wns2-par02p.notify.windows.com/w/?token=AAA"])
+def test_wns_query_is_only_the_edge_token_form(endpoint):
+    with pytest.raises(ApiError):
+        endpoint_host(endpoint)
+
+
+def test_edge_wns_endpoint_is_accepted_and_sent_with_its_token_query(encrypted_input):
+    data, _, _ = encrypted_input
+    data["subscription"]["endpoint"] = "https://wns2-par02p.notify.windows.com/w/?token=SYNTHETIC%2BONLY"
+    assert endpoint_host(data["subscription"]["endpoint"]) == "wns2-par02p.notify.windows.com"
+    calls = []
+    class Connection:
+        def __init__(self, host, address):
+            calls.append(host)
+        def request(self, method, path, body, headers):
+            calls.append(path)
+        def getresponse(self):
+            return type("R", (), {"status": 201, "getheader": lambda self, n: None})()
+        def close(self):
+            pass
+    assert send_once(data, connection_factory=Connection, resolver=resolver)["status"] == "accepted"
+    assert calls == ["wns2-par02p.notify.windows.com", "/w/?token=SYNTHETIC%2BONLY"]
+
+
 @pytest.mark.parametrize("addresses", [["127.0.0.1"],["10.0.0.1"],["169.254.169.254"],["::1"],
                                      ["8.8.8.8","192.168.0.1"]])
 def test_private_or_mixed_dns_answers_are_rejected(addresses):

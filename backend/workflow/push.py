@@ -96,7 +96,9 @@ def send_once(data: dict, *, connection_factory=PinnedConnection, resolver=None)
         connection = connection_factory(host, address)
         try:
             sent = True
-            connection.request("POST", urlsplit(subscription["endpoint"]).path, body, headers)
+            target = urlsplit(subscription["endpoint"])
+            # WNS(Edge)는 token 쿼리가 주소의 일부다. 다른 중계망은 endpoint_host가 쿼리를 이미 거절한다.
+            connection.request("POST", target.path + ("?" + target.query if target.query else ""), body, headers)
             response = connection.getresponse()
             # No redirect-following or response body reads, especially errors.
             status = response.status

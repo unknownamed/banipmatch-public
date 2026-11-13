@@ -101,11 +101,15 @@ def endpoint_host(endpoint: str) -> str:
             raise ValueError
         parsed = urlsplit(endpoint)
         host = parsed.hostname or ""
+        # Windows Edge는 WNS(…notify.windows.com/w/?token=…)를 쓴다. 쿼리는 WNS의 token 하나만 허용.
+        wns = bool(re.fullmatch(r"[a-z0-9-]+\.notify\.windows\.com", host))
         allowed = (host in {"fcm.googleapis.com", "updates.push.services.mozilla.com"}
-                   or bool(re.fullmatch(r"[a-z0-9-]+\.push\.apple\.com", host)))
+                   or bool(re.fullmatch(r"[a-z0-9-]+\.push\.apple\.com", host)) or wns)
+        query_ok = (not parsed.query if not wns
+                    else parsed.path == "/w/" and bool(re.fullmatch(r"token=[A-Za-z0-9%._~-]+", parsed.query)))
         if (parsed.scheme != "https" or not allowed or parsed.port not in (None, 443)
                 or parsed.username is not None or parsed.password is not None
-                or parsed.fragment or parsed.query or not parsed.path or parsed.path == "/"
+                or parsed.fragment or not query_ok or not parsed.path or parsed.path == "/"
                 or any(ord(c) < 33 or ord(c) > 126 for c in endpoint) or "\\" in endpoint):
             raise ValueError
         return host

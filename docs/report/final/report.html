@@ -104,7 +104,7 @@
     <p style="margin:0;font-size:10.8pt;line-height:1.7">터미널이 반입 마감(CCT)을 바꾸면 운송사 배차 담당자(이하 담당자)는 남은 배차표를 손으로 다시 짜고, 기사에게 전화와 카카오톡으로 한 명씩 알린다. <b>반입맞춤</b>은 터미널이 확정한 변경을 받으면 곧바로 <b>새 마감을 넘기는 컨테이너를 찾는다</b>. 그리고 <b>이미 출발한 작업은 그대로 둔 채 배차를 가장 적게 바꾸는 최소 변경안</b>을 근거와 함께 보여 준다. 담당자가 확정하면 <b>배차가 바뀐 차량의 기사에게만</b> 알림이 가고, 기사는 '수행 가능' 또는 '수행 곤란'으로 답한다.</p>
   </div>
   <div class="kpi">
-    <div class="box"><div class="v">4 → 0<span style="font-size:10pt">건</span></div><div class="l">새 마감을 넘겨 도착하는 운행<br>(시연 BHMN. 3건은 마감 안으로 옮기고, 준비가 늦은 1건은 출발 전에 원인 안내)</div></div>
+    <div class="box"><div class="v">4건 중 3건</div><div class="l">새 마감을 넘기던 컨테이너를 마감 안으로<br>(시연 BHMN. 맞출 수 없는 1건은 출발 전에 원인 안내)</div></div>
     <div class="box"><div class="v">16 → 2<span style="font-size:10pt">건</span></div><div class="l">같은 문제를 풀 때 바뀌는 작업<br>(시연 BE221E. 마감순 재배치 대비 최소 변경안)</div></div>
     <div class="box"><div class="v">약 1분 15초</div><div class="l">알림 전달부터 기사 응답까지<br>(실제 휴대폰 측정, 2026-11-13)</div></div>
     <div class="box"><div class="v">24 / 24</div><div class="l">무작위로 바꾼 입력 24회 모두 업무 규칙 위반 0건<br>(엔진과 별개인 검사기로 확인)</div></div>
@@ -115,7 +115,7 @@
     <tr><td><b>기획의 명확성</b> (20)</td><td>반입 마감 변경이 운송사 배차에 미치는 문제, 대상 사용자, KPI 4개와 목표값</td><td>3–4</td></tr>
     <tr><td><b>데이터 활용 계획</b> (20)</td><td>실제 자료 5종의 합법적 이용 조건, 수집 → 처리 → 활용 흐름, 품질 규칙과 호출 한도</td><td>5–7</td></tr>
     <tr><td><b>창의성 및 차별성</b> (25)</td><td>최소 변경 재배차 알고리즘(우선순위별 순차 최적화, CP-SAT), 조건 보완·확정·기사 응답으로 이어지는 운영 모델, 기존 서비스 비교</td><td>7–12</td></tr>
-    <tr><td><b>실현 가능성</b> (15)</td><td>기술 스택과 실제 운영 서버, 실기기 검증, 테스트 861개, 일정·자원, 리스크와 대응</td><td>13–15</td></tr>
+    <tr><td><b>실현 가능성</b> (15)</td><td>기술 스택과 실제 운영 서버, 실기기 검증, 테스트 869개, 일정·자원, 리스크와 대응</td><td>13–15</td></tr>
     <tr><td><b>기대효과</b> (20)</td><td>측정값과 추정값을 나눈 KPI 개선, 산출식과 가정, 확산 시나리오</td><td>15–17</td></tr>
   </table>
   <h3>한눈에 보는 처리 흐름 — 시연 BHMN(반입 마감 2시간 30분 앞당김)</h3>
@@ -159,7 +159,7 @@
         <li>기사에게 <b>전화·문자·카카오톡으로 한 명씩 연락</b>하고, 응답은 여러 곳에 흩어져 기록이 남지 않는다[3]</li>
         <li>배차를 하나 바꿀 때마다 여러 기사의 일정이 함께 바뀌어 혼선이 커진다</li>
       </ul>
-      <p class="note" style="margin:6px 0 0">변경 빈도와 처리 시간을 다룬 공개 통계는 찾지 못해 5곳(교수 2명, 부산항만공사, HJNC, 운송 플랫폼사)에 자문을 요청했으나 아직 회신이 없다.</p></div>
+      <p class="note" style="margin:6px 0 0">선박 일정 자체가 자주 흔들린다. 2026년 9월 전 세계 컨테이너선의 정시 도착률은 50.6%였고, 늦은 선박은 평균 6.65일 늦었다[8]. HJNC는 반입 마감을 접안 10시간 전으로 정하므로[1] 접안이 바뀌면 마감도 다시 정해진다. 다만 부산항의 마감 변경 빈도와 담당자 처리 시간을 다룬 공개 통계는 찾지 못해 5곳(교수 2명, 부산항만공사, HJNC, 운송 플랫폼사)에 자문을 요청했으나 아직 회신이 없다.</p></div>
   </div>
 
   <h3>1.2 대상과 범위: 운송사 배차 담당자의 남은 배차만 다룬다</h3>
@@ -205,7 +205,7 @@
   <h3>2.1 데이터 소스와 이용 조건: 실제 자료는 공개·무료 한도 안에서만</h3>
   <table>
     <tr><th style="width:17%">자료</th><th style="width:19%">제공처·방식</th><th style="width:25%">사용하는 값</th><th>이용 조건·한도</th><th style="width:8%">구분</th></tr>
-    <tr><td>선석 배정 현황</td><td>HJNC 공개 웹 조회(JSON)</td><td>항차, 반입 시작·마감, 접안 예정</td><td>공개 조회. 서버가 <b>1시간에 1번</b>만 수집(하루 24회)하고, 실패하면 직전 정상값을 유지</td><td><span class="tag real">실제</span></td></tr>
+    <tr><td>선석 배정 현황</td><td>HJNC 공개 웹 조회(JSON)</td><td>항차, 반입 시작·마감, 접안 예정</td><td>로그인 없이 보이는 공개 조회 화면의 자료. robots.txt가 이 경로를 허용함(2026-11-13 확인). 서버가 <b>1시간에 1번</b>만 수집(하루 24회)하고, 실패하면 직전 정상값을 유지</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>해상 관측·특보</td><td>기상청 API허브(개인 회원 인증키)</td><td>파고·풍속(거제도 관측), 부산앞바다 특보</td><td>일 20,000회 한도 중 <b>하루 96회</b>(30분 간격, 0.5%) 사용. 키는 서버에만 저장</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>지도·위성·실시간 교통</td><td>카카오 지도 JavaScript SDK</td><td>지도·위성 사진, 도로 혼잡도 겹쳐 보기</td><td>일 300,000회 무료 한도, 허용 도메인 등록</td><td><span class="tag real">실제</span></td></tr>
     <tr><td>도로 경로</td><td>OpenStreetMap + OSRM</td><td>상차지와 게이트 사이 실제 도로 경로·거리</td><td>ODbL 출처 표기. 경로는 미리 받아 저장(실시간 호출 없음)</td><td><span class="tag real">실제</span></td></tr>
@@ -289,7 +289,8 @@
   </table>
   <p class="note">비교 대상: TIGER FACE, CONTAINUS TMS, PortQM, PortWise 등 공식 소개·앱 배포 페이지(2026-11-07 확인). 로그인 후 기능은 시험하지 않았으므로 공개 소개에 없는 기능을 '미지원'으로 단정하지 않았다.</p>
 
-  <h3>3.2 새로운 알고리즘: 출발 작업을 지키는 최소 변경 재배차</h3>
+  <h3>3.2 알고리즘 적용: 출발 작업을 지키는 최소 변경 재배차</h3>
+  <p>바뀐 조건에서 기존 계획을 가장 적게 고치는 문제는 최소 변경(minimal perturbation) 재일정으로 연구돼 왔다[9]. 우리는 이 생각을 반입 마감 변경과 운송사 배차에 맞춰 적용했다. 출발한 작업을 고정하고, 마감을 먼저 지킨 뒤 변경을 줄이는 순차 최적화로 풀며, 그 결과를 확정과 기사 응답까지 이어지는 운영 흐름으로 만들었다.</p>
   <p>같은 입력·같은 계산 시간으로 네 가지 방법을 계산해 담당자가 비교하게 했다.</p>
   <table>
     <tr><th style="width:17%">방법</th><th style="width:21%">기법</th><th>목적(우선순위 순)</th></tr>
@@ -400,7 +401,7 @@
       <li><a href="https://banipmatch.duckdns.org">banipmatch.duckdns.org</a>에 접속한다. 방문자마다 별도 작업공간이 열리고 24시간 동안 쓸 수 있다.</li>
       <li><b>받은 변경</b>에서 'HJNC BHMN … 반입 마감 2시간 30분 앞당김'을 고르고 <b>영향 확인하고 조정안 보기</b>를 누른다(계산 약 10초).</li>
       <li><b>점검 결과</b>에서 요약, 조정안 비교(시간 막대와 다른 계산안), 차량 지도 탭을 차례로 본다.</li>
-      <li><b>조건 보완</b>에서 확인이 필요한 컨테이너(BNJU 100208 3)의 상차 준비 시각을 40분 앞당기고, 녹산 차고지 차량 1대를 추가해 <b>다시 계산</b>한다. 남아 있던 1건까지 마감 안에 들어가고 전후 비교가 나온다.</li>
+      <li><b>조건 보완</b>에서 확인이 필요한 컨테이너(BNJU 100208 3)의 상차 준비 시각을 40분 앞당기고, 외부 차량 1대(시작 위치 녹산 차고지, 20ft·40ft, 운행 시작은 앞당긴 준비 시각, 근무 종료는 그 4시간 뒤)를 추가해 <b>다시 계산</b>한다. 남아 있던 1건까지 마감 안에 들어가고 전후 비교가 나온다.</li>
       <li>남는 위험을 확인하고 <b>확인하고 확정하기</b>를 누르면 <b>기사 전달</b> 탭에 차량별 변경 내용과 기사 안내문이 나온다.</li>
       <li><b>기사 전달</b> 탭에서 알림 사용 코드에 심사용 코드(제출한 보고서 PDF 4.1절)를 넣고 <b>알림 기능 켜기</b>를 누른다(남용을 막기 위한 코드로, 대회 기간에만 쓴다).</li>
       <li>차량 하나의 <b>안내문·연결 링크 복사</b>로 받은 링크를 휴대폰에서 열어 <b>연결하고 알림 받기</b>를 누른다. 카카오톡 안에서 열렸다면 다른 브라우저로 연다. 아이폰은 공유 버튼에서 '홈 화면에 추가'한 뒤 연다.</li>
@@ -423,7 +424,7 @@
     <tr><td>기사 연결, 알림 수신, 응답</td><td>안드로이드 휴대폰에서 연결 링크를 열어 연결한 뒤 알림을 받고, 열어 보고, 답했다. <b>전달 02:52:30, 열람 02:52:45, 응답 02:53:45</b>(서버 기록)</td></tr>
     <tr><td>담당자 화면 반영</td><td>기사의 응답과 메모가 5초 안에 표와 알림 카드에 반영됨</td></tr>
     <tr><td>기사 위치 공유</td><td>기사가 위치 공유를 켜자 담당자 지도에 실제 위치(창원)가 표시되고, 끄자 지워짐</td></tr>
-    <tr><td>자동 시험</td><td>서버 672개, 화면 189개, <b>총 861개 통과</b>. GitHub에서 모든 변경(PR)마다 자동 실행</td></tr>
+    <tr><td>자동 시험</td><td>서버 680개, 화면 189개, <b>총 869개 통과</b>. GitHub에서 모든 변경(PR)마다 자동 실행</td></tr>
     <tr><td>계산 무작위 검사</td><td>입력을 무작위로 바꾼 24회 계산의 결과가 모두 달랐고, 별도 검사기에서 규칙 위반 0건(5.2절)</td></tr>
   </table>
   <p class="note">아이폰(홈 화면 앱) 실기기 수신은 아직 확인하지 못해 팀원 시험으로 남겨 두었다.</p>
@@ -499,7 +500,7 @@
   <figure class="chart"><svg viewBox="0 0 680 221" width="100%" role="img" aria-label="시연 공지 3종에서 방법별 바뀌는 작업과 연락할 기사 수" xmlns="http://www.w3.org/2000/svg"><text x="136" y="16" font-size="10.5" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">바뀌는 작업(건)</text><text x="410" y="16" font-size="10.5" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">연락할 기사(명)</text><text x="0" y="47" font-size="9.8" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">BHMN</text><text x="0" y="60" font-size="8.6" fill="#6b6b70" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감 2시간 30분 앞당김</text><rect x="136" y="34" width="184.0" height="10" rx="2" fill="#C3C8D0"/><text x="324.0" y="42.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">16</text><rect x="410" y="34" width="210.0" height="10" rx="2" fill="#C3C8D0"/><text x="624.0" y="42.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="47" width="126.5" height="10" rx="2" fill="#8A929D"/><text x="266.5" y="55.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">11</text><rect x="410" y="47" width="183.8" height="10" rx="2" fill="#8A929D"/><text x="597.8" y="55.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">7</text><rect x="136" y="60" width="57.5" height="10" rx="2" fill="#16294D"/><text x="197.5" y="68.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">5</text><rect x="410" y="60" width="105.0" height="10" rx="2" fill="#16294D"/><text x="519.0" y="68.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">4</text><text x="0" y="102" font-size="9.8" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">BE221E</text><text x="0" y="115" font-size="8.6" fill="#6b6b70" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감 1시간 30분 앞당김</text><rect x="136" y="89" width="184.0" height="10" rx="2" fill="#C3C8D0"/><text x="324.0" y="97.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">16</text><rect x="410" y="89" width="210.0" height="10" rx="2" fill="#C3C8D0"/><text x="624.0" y="97.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="102" width="184.0" height="10" rx="2" fill="#8A929D"/><text x="324.0" y="110.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">16</text><rect x="410" y="102" width="210.0" height="10" rx="2" fill="#8A929D"/><text x="624.0" y="110.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="115" width="23.0" height="10" rx="2" fill="#16294D"/><text x="163.0" y="123.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">2</text><rect x="410" y="115" width="52.5" height="10" rx="2" fill="#16294D"/><text x="466.5" y="123.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">2</text><text x="0" y="157" font-size="9.8" font-weight="700" fill="#1d1d1f" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">BPNR</text><text x="0" y="170" font-size="8.6" fill="#6b6b70" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감 1시간 늦춰짐</text><rect x="136" y="144" width="195.5" height="10" rx="2" fill="#C3C8D0"/><text x="335.5" y="152.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">17</text><rect x="410" y="144" width="210.0" height="10" rx="2" fill="#C3C8D0"/><text x="624.0" y="152.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="157" width="57.5" height="10" rx="2" fill="#8A929D"/><text x="197.5" y="165.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">5</text><rect x="410" y="157" width="78.8" height="10" rx="2" fill="#8A929D"/><text x="492.8" y="165.6" font-size="8.8" font-weight="400" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">3</text><text x="140.0" y="178.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><text x="414.0" y="178.6" font-size="8.8" font-weight="700" fill="#16294D" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><line x1="136" y1="30" x2="136" y2="187" stroke="#1d1d1f" stroke-width="0.8"/><line x1="136" y1="187" x2="366.0" y2="187" stroke="#d4d4d8" stroke-width="0.6"/><text x="136.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><text x="193.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">5</text><text x="251.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">10</text><text x="308.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">15</text><text x="366.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">20</text><line x1="410" y1="30" x2="410" y2="187" stroke="#1d1d1f" stroke-width="0.8"/><line x1="410" y1="187" x2="620.0" y2="187" stroke="#d4d4d8" stroke-width="0.6"/><text x="410.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">0</text><text x="462.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">2</text><text x="515.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">4</text><text x="567.5" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">6</text><text x="620.0" y="198" font-size="8" fill="#8e8e93" text-anchor="middle" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">8</text><rect x="136" y="207" width="10" height="9" rx="2" fill="#C3C8D0"/><text x="150" y="215" font-size="9" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">마감순 재배치</text><rect x="234.5" y="207" width="10" height="9" rx="2" fill="#8A929D"/><text x="248.5" y="215" font-size="9" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">전체 재배치</text><rect x="323.5" y="207" width="10" height="9" rx="2" fill="#16294D"/><text x="337.5" y="215" font-size="9" fill="#3a3a3c" font-family="'Noto Sans KR','Malgun Gothic',sans-serif">최소 변경안</text></svg><figcaption><b>그림 10.</b> 위 표의 바뀌는 작업과 연락할 기사를 방법별로 나란히 놓았다. 남색이 최소 변경안이다. 세 공지 모두 최소 변경안이 가장 적게 바꾸고, 마감이 늦춰진 BPNR에서는 아무것도 바꾸지 않는다.</figcaption></figure>
 
   <div class="two">
-    <div class="box"><h4 style="margin-top:0">정확도(마감 준수)</h4><p class="small" style="margin:0">마감 후 도착하는 운행이 <b>4건에서 0건</b>으로 줄었다. BHMN에서 원래 배차는 4건이 새 마감 이후 게이트에 도착한다. 최소 변경안은 3건을 마감 안으로 옮기고, 준비가 늦어 <b>어떤 차량으로도 맞출 수 없는 1건</b>은 출발 전에 원인과 함께 알린다. 이 컨테이너는 준비가 끝나자마자 출발해도 운송 40분과 여유 10분을 더하면 새 마감보다 20분 늦다. 조건 보완으로 준비를 40분 앞당기면 이번에는 차량이 모자라 남고, 차량 1대를 더하면 <b>4건 모두</b> 마감 안에 들어간다(바뀌는 작업 7건).</p></div>
+    <div class="box"><h4 style="margin-top:0">정확도(마감 준수)</h4><p class="small" style="margin:0">BHMN에서 원래 배차는 4건이 새 마감 이후 게이트에 도착한다. 최소 변경안은 이 가운데 <b>3건을 마감 안으로</b> 옮기고, 준비가 늦어 <b>어떤 차량으로도 맞출 수 없는 1건</b>은 출발 전에 원인과 함께 알린다. 이 컨테이너는 준비가 끝나자마자 출발해도 운송 40분과 여유 10분을 더하면 새 마감보다 20분 늦다. 조건 보완으로 준비를 40분 앞당기면 이번에는 차량이 모자라 남고, 차량 1대를 더하면 <b>4건 모두</b> 마감 안에 들어간다(바뀌는 작업 7건).</p></div>
     <div class="box"><h4 style="margin-top:0">비용·혼선(변경 최소화)</h4><p class="small" style="margin:0">최소 변경안은 바뀌는 작업이 가장 적다. 마감 안에 넣는 컨테이너 수는 세 방법이 같지만, 마감순 재배치가 16건을 바꿀 때 최소 변경안은 <b>BHMN 5건, BE221E 2건</b>만 바꾼다. 연락할 기사는 <b>8명에서 2~4명</b>으로 준다. 마감이 늦춰진 BPNR에서는 바꿀 필요가 없다는 것까지 계산해 <b>0건</b>이다(마감순 재배치는 17건을 바꾼다).</p></div>
   </div>
 </section>
@@ -530,7 +531,7 @@
     <tr><th style="width:17%">KPI</th><th style="width:35%">산출식(근거)</th><th style="width:26%">가정</th><th>추정(변경 1건당)</th></tr>
     <tr><td>리드타임: 재배차 판단</td><td>수작업 재검토 시간 − 서비스 사용 시간</td><td>수작업: 작업 20건 확인 1분/건 = 20분<br>서비스: 계산 10초 + 검토 3분</td><td>약 <b>17분 단축</b></td></tr>
     <tr><td>리드타임: 기사 전달·확인</td><td>연락할 기사 수 × 통화·확인 시간</td><td>통화·확인 3분/명, 마감순 재배치 8명과 최소 변경안 4명(BHMN)</td><td>통화 24분 대신 알림 1회와 응답(실측 75초), 연락 대상 <b>절반</b></td></tr>
-    <tr><td>정확도: 마감 준수</td><td>원래 배차 마감 초과 − 최소 변경안 마감 초과</td><td>측정값(BHMN)</td><td>지연 반입 <b>4건에서 0건</b>, 맞출 수 없는 1건은 출발 전에 안내</td></tr>
+    <tr><td>정확도: 마감 준수</td><td>원래 배차 마감 초과 − 최소 변경안 마감 초과</td><td>측정값(BHMN)</td><td>마감 초과 4건 중 <b>3건을 마감 안으로</b>. 맞출 수 없는 1건은 배정하지 않고 출발 전에 안내해 마감 후 도착 운행은 0건</td></tr>
     <tr><td>탄소: 헛걸음 운행</td><td>마감을 넘긴 운행의 이동 시간(상차지·게이트·복귀) × 평균 속도 ÷ 연비 × 배출계수</td><td>이동 172분(측정), 40km/h, 대형 트랙터 3km/L, 경유 2.6kg CO₂/L</td><td>약 115km, <b>CO₂ 약 100kg</b> 회피(해당 운행이 반입을 거절당해 다시 운행할 경우)</td></tr>
   </table>
   </div>
@@ -587,10 +588,13 @@
     <li>Google OR-Tools CP-SAT 9.15 파라미터 정의. <a href="https://github.com/google/or-tools/blob/v9.15/ortools/sat/sat_parameters.proto">https://github.com/google/or-tools/blob/v9.15/ortools/sat/sat_parameters.proto</a></li>
     <li><a href="https://apihub.kma.go.kr">기상청 API허브</a>(해양관측·특보), <a href="https://apis.map.kakao.com/web/">카카오 지도 JavaScript API</a>, <a href="https://www.openstreetmap.org/copyright">OpenStreetMap(ODbL)</a>·<a href="https://project-osrm.org">OSRM</a>, <a href="https://www.w3.org/TR/push-api/">W3C Push API</a>·<a href="https://www.w3.org/TR/geolocation/">Geolocation API</a>, <a href="https://www.hjnc.co.kr">HJNC 선석 배정 현황</a></li>
     <li>경쟁 서비스 공개 소개(TIGER FACE, CONTAINUS TMS, PortQM, PortWise 등), 2026-11-07 확인 — 코드 ZIP <span>docs/team/service-comparison.md</span></li>
+    <li>Sea-Intelligence, 「Global Schedule Reliability Records a Marginal Gain in September」, 2026-10-28. <a href="https://www.sea-intelligence.com/press-room/415-global-schedule-reliability-records-a-marginal-gain-in-september">https://www.sea-intelligence.com/press-room/415-global-schedule-reliability-records-a-marginal-gain-in-september</a></li>
+    <li>H. El Sakkout, M. Wallace, 「Probe Backtrack Search for Minimal Perturbation in Dynamic Scheduling」, Constraints 5(4), 2000, pp. 359–388.</li>
   </ol>
 
   <h3>제출물 구성과 재현 방법</h3>
   <p class="small">ZIP을 풀면 맨 위의 <span class="src">README.md</span>에 서비스 설명, 운영 주소에서 바로 써 보는 순서(심사용 코드 포함), 묶음 구성, 데이터 위치, 확인·실행 방법이 정리돼 있다. 시연 영상은 별도 파일로 제출했다. 주요 내용의 위치는 다음과 같다.</p>
+  <p class="small">비용으로 바꾸려면 지연 반입 청구 단가가 필요하다. HJNC는 2026년 8월 3일 접안 모선부터 마감 이후 반입한 수출 Dry 컨테이너에 지연 반입 청구를 화주에게 직접 적용하지만[1], 공지 본문에는 금액이 없다. 단가가 확인되면 BHMN에서 최소 변경안이 피한 지연 반입 3건 × 단가가 변경 1건당 직접 절감액이 된다.</p>
   <table>
     <tr><th style="width:34%">ZIP 안 위치</th><th>내용</th><th style="width:12%">보고서</th></tr>
     <tr><td><span class="src">backend/engine/</span></td><td>배차 엔진(네 가지 방법, CP-SAT)과 모형 설명 <span class="src">OPTIMIZATION.md</span></td><td>3.2–3.3</td></tr>
@@ -602,7 +606,7 @@
     <tr><td><span class="src">deployment/</span>, <span class="src">docs/deployment/</span></td><td>운영 서버 설정 예시와 구성 설명(키·주소 제외)</td><td>4.1</td></tr>
     <tr><td><span class="src">submission-manifest.json</span></td><td>ZIP의 모든 파일 해시. <span class="src">python tools/check_submission.py --files-only</span>로 검사</td><td>—</td></tr>
   </table>
-  <p class="small">재현: Python 3.12·Node 24에서 <span class="src">pytest</span>(서버 시험 672개. ZIP에서는 Git 기록이 필요한 두 모듈을 빼고 실행), <span class="src">npm test</span>(화면 시험 189개), <span class="src">python tools/report_demo_scenarios.py</span>(5.1 표), <span class="src">python tools/check_engine_robustness.py</span>(5.2 견고성)를 실행하면 보고서 수치를 다시 얻을 수 있다. 자세한 순서는 <span class="src">docs/submission/README.md</span>. 운영 서비스는 <a href="https://banipmatch.duckdns.org">https://banipmatch.duckdns.org</a>에서 바로 확인할 수 있다.</p>
+  <p class="small">재현: Python 3.12·Node 24에서 <span class="src">pytest</span>(서버 시험 680개. ZIP에서는 Git 기록이 필요한 두 모듈을 빼고 실행), <span class="src">npm test</span>(화면 시험 189개), <span class="src">python tools/report_demo_scenarios.py</span>(5.1 표), <span class="src">python tools/check_engine_robustness.py</span>(5.2 견고성)를 실행하면 보고서 수치를 다시 얻을 수 있다. 자세한 순서는 <span class="src">docs/submission/README.md</span>. 운영 서비스는 <a href="https://banipmatch.duckdns.org">https://banipmatch.duckdns.org</a>에서 바로 확인할 수 있다.</p>
 </section>
 
 </body>

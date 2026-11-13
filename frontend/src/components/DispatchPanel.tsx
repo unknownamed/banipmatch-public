@@ -196,7 +196,8 @@ function Invitations({ client, planId, vehicles, authorized, recipients, onChang
               {r ? (
                 <>
                   <span className={`st ${r.subscription_status === 'active' ? 'ok' : 'warn'}`}>{SUBSCRIPTION_LABEL[r.subscription_status]}</span>
-                  <button type="button" className="btn-line subtle" onClick={() => revoke(r.recipient_id)}>연결 해제</button>
+                  <button type="button" className="btn-line subtle" onClick={() => { if (window.confirm(`${vehicleName(v)} 기사 휴대폰 연결을 해제할까요?
+해제하면 이 휴대폰으로는 알림을 받지 못하고, 다시 연결하려면 새 링크를 보내야 합니다.`)) void revoke(r.recipient_id) }}>연결 해제</button>
                 </>
               ) : (
                 <>
